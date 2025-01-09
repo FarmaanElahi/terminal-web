@@ -1,16 +1,29 @@
 import type { TradingView } from "@/components/chart/charting";
 import type { TradingViewWidgetOptions } from "@/components/chart/types";
-import { Feed } from "@/components/chart/feed";
+import { Datafeed } from "@/components/chart/datafeed";
 import { getTradingView } from "@/components/chart/loader";
+import { AxiosInstance } from "axios";
+import { ChartStorage } from "@/components/chart/chart_storage";
+import { LogoProvider } from "@/components/chart/logo_provider";
 
 export class ChartManager {
   private readonly widgets = new Map<string, TradingView.widget>();
+  private readonly datafeed: Datafeed;
+  private readonly chartStorage: ChartStorage;
+  private readonly logoProvider: LogoProvider;
+
+  constructor(axios: AxiosInstance, logoBaseUrl: string) {
+    this.logoProvider = new LogoProvider(logoBaseUrl);
+    this.datafeed = new Datafeed(axios, this.logoProvider);
+    this.chartStorage = new ChartStorage(axios);
+  }
 
   async create(id: string, container: HTMLElement) {
     if (this.widgets.has(id)) {
       return this.widgets.get(id)!;
     }
     const TradingView = await getTradingView();
+    // const TradingView = window.TradingView
     const c = this.getConfig();
     const tvWidget = new TradingView.widget({ container, ...c });
     this.widgets.set(id, tvWidget);
@@ -38,12 +51,11 @@ export class ChartManager {
     // const userSettingAdapter = new UserSetting();
     // await userSettingAdapter.load();
     const timezone = "Asia/Kolkata";
-    const datafeed = new Feed("http://localhost:8000");
     return {
       symbol: "NSE:JINDRILL",
-      datafeed,
+      datafeed: this.datafeed,
       autosize: true,
-      library_path: "/charting_library/",
+      library_path: "/external/charting_library/",
       debug: false,
       fullscreen: true,
       timezone,
@@ -55,15 +67,14 @@ export class ChartManager {
         "show_symbol_logos",
         "show_symbol_logo_for_compare_studies",
         "show_symbol_logo_in_legend",
-        // "study_templates",
+        "study_templates",
         "saveload_separate_drawings_storage",
-        // "chart_template_storage",
+        "chart_template_storage",
         // "pricescale_currency",
         "pre_post_market_sessions",
         "studies_extend_time_scale",
       ],
-      load_last_chart: true,
-      // save_load_adapter: new ChartStorage(),
+      save_load_adapter: this.chartStorage,
     };
   }
 

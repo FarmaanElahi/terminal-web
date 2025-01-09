@@ -24,6 +24,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      {/*<head>*/}
+      {/*  <script*/}
+      {/*    type="text/javascript"*/}
+      {/*    src="/external/charting_library/charting_library.standalone.js"*/}
+      {/*    async*/}
+      {/*  ></script>*/}
+      {/*</head>*/}
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

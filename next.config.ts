@@ -5,9 +5,9 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/external/charting_library/:path*", // Proxy all requests under /charting_library/
+        source: "/external/charting_library/:path*",
         destination:
-          "https://charting-library.tradingview-widget.com/charting_library/:path*",
+          "https://trading-terminal.tradingview-widget.com/charting_library/:path*",
       },
     ];
   },

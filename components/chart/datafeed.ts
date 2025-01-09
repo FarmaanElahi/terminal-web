@@ -12,9 +12,14 @@ import {
   SearchSymbolsCallback,
   StreamingDataFeed,
 } from "@/components/chart/types";
+import { AxiosInstance } from "axios";
+import { LogoProvider } from "@/components/chart/logo_provider";
 
-export class Feed implements StreamingDataFeed {
-  constructor(private readonly baseUrl: string) {}
+export class Datafeed implements StreamingDataFeed {
+  constructor(
+    private readonly axios: AxiosInstance,
+    private readonly logoProvider: LogoProvider,
+  ) {}
 
   onReady(callback: OnReadyCallback) {
     const config = {
@@ -42,26 +47,28 @@ export class Feed implements StreamingDataFeed {
     symbolType: string,
     onResult: SearchSymbolsCallback,
   ) {
-    const url = new URL(`${this.baseUrl}/api/v1/symbols/search`);
-    url.searchParams.set("q", userInput);
-    url.searchParams.set("exchange", exchange);
-    url.searchParams.set("symbol_type", symbolType);
-    const response = await fetch(url);
-    if (!response.ok) {
+    const path = "/api/v1/symbols/search";
+    const response = await this.axios.get<Array<Record<string, unknown>>>(
+      path,
+      {
+        params: { q: userInput, exchange, symbol_type: symbolType },
+      },
+    );
+    if (response.status >= 400) {
       onResult([]);
       return;
     }
-    const data: Array<Record<string, unknown>> = await response.json();
-    const result = data.map(
+
+    const result = response.data.map(
       (d) =>
         ({
           symbol: d.name,
           ticker: d.ticker,
           description: d.description,
           type: d.type,
-          logo_urls: d.logo ? [d.logo] : d.logo,
+          logo_urls: this.logoProvider.forLogo(d.logo, []),
           exchange: d.exchange,
-          exchange_logo: d.exchange_logo ? [d.exchange_logo] : d.exchange_logo,
+          exchange_logo: this.logoProvider.forLogo(d.exchange_logo),
         }) as SearchSymbolResultItem,
     );
     onResult(result);
@@ -72,13 +79,14 @@ export class Feed implements StreamingDataFeed {
     onResolve: ResolveCallback,
     onError: DatafeedErrorCallback,
   ) {
-    const url = new URL(`${this.baseUrl}/api/v1/symbols/${symbolName}/resolve`);
-    const response = await fetch(url);
-    if (!response.ok) {
+    const path = `/api/v1/symbols/${symbolName}/resolve`;
+    const response = await this.axios.get<Record<string, unknown>>(path);
+
+    if (response.status >= 400) {
       onError("Unable to resolve symbol");
       return;
     }
-    const data: Record<string, unknown> = await response.json();
+    const data = response.data;
     if (!data) {
       onError("Unable to resolve symbol");
       return;
@@ -89,7 +97,7 @@ export class Feed implements StreamingDataFeed {
       ticker: data.ticker,
       description: data.description,
       type: data.type,
-      logo_urls: data.logo ? [`${data.logo}`] : [],
+      logo_urls: this.logoProvider.forLogo(data.logo, []),
       exchange: data.exchange,
       exchange_logo: data.exchange_logo,
       timezone: data.timezone,
@@ -118,16 +126,13 @@ export class Feed implements StreamingDataFeed {
     onResult: HistoryCallback,
     onError: DatafeedErrorCallback,
   ) {
-    const url = new URL(
-      `${this.baseUrl}/api/v1/symbols/${symbolInfo.ticker}/candles/${resolution}/${periodParams.to}`,
-    );
-
-    const response = await fetch(url);
-    if (!response.ok) {
+    const path = `/api/v1/symbols/${symbolInfo.ticker}/candles/${resolution}/${periodParams.to}`;
+    const response = await this.axios.get<Record<string, unknown>>(path);
+    if (response.status >= 400) {
       onError("Unable to resolve symbol");
       return;
     }
-    const data: Record<string, unknown> = await response.json();
+    const data = response.data;
     if (!data) {
       onError("Unable to resolve symbol");
       return;
