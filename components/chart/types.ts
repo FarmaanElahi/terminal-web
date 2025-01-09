@@ -678,7 +678,7 @@ export interface IDatafeedChartApi {
   /**
    * Subscribe to real-time updates for a specific symbol.
    */
-  subscribeBars(
+  subscribeBars?(
     symbolInfo: LibrarySymbolInfo,
     resolution: ResolutionString,
     onTick: SubscribeBarsCallback,
@@ -694,7 +694,7 @@ export interface IDatafeedChartApi {
   /**
    * Unsubscribe from real-time bar updates.
    */
-  unsubscribeBars(listenerGuid: string): void;
+  unsubscribeBars?(listenerGuid: string): void;
 
   /**
    * Unsubscribe from Depth of Market (DOM) updates.
@@ -964,8 +964,7 @@ export interface QuoteData {
   v: Record<string, unknown>;
 }
 
-export type StreamingDataFeed = (IDatafeedChartApi & IExternalDatafeed) &
-  IDatafeedQuotesApi;
+export type StreamingDataFeed = IDatafeedChartApi & IExternalDatafeed;
 
 /**
  * ===============================================================

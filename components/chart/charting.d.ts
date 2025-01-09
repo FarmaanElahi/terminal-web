@@ -72,7 +72,7 @@ type EditObjectDialogEventParams = {
   type: string;
   [key: string]: unknown;
 };
-type MouseEventParams = { x: number; y: number; [key: string]: any };
+type MouseEventParams = { x: number; y: number; [key: string]: unknown };
 type PlusClickParams = { x: number; y: number; price: number; symbol: string };
 type RangeOptions = { from: number; to: number; resolution: string };
 type UndoRedoState = { canUndo: boolean; canRedo: boolean };
