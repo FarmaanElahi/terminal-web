@@ -13,7 +13,7 @@ export function getTradingView() {
     // Library is not loaded, create a promise to load it
     tradingViewPromise = new Promise((resolve, reject) => {
       const script = document.createElement("script");
-      script.src = "/charting_library/charting_library.standalone.js"; // Adjust to your proxied path
+      script.src = "/external/charting_library/charting_library.standalone.js"; // Adjust to your proxied path
       script.async = true;
 
       script.onload = () => {

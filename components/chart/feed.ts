@@ -42,7 +42,7 @@ export class Feed implements StreamingDataFeed {
     symbolType: string,
     onResult: SearchSymbolsCallback,
   ) {
-    const url = new URL("${this.baseUrl}/api/v1/symbols/search");
+    const url = new URL(`${this.baseUrl}/api/v1/symbols/search`);
     url.searchParams.set("q", userInput);
     url.searchParams.set("exchange", exchange);
     url.searchParams.set("symbol_type", symbolType);
@@ -89,7 +89,7 @@ export class Feed implements StreamingDataFeed {
       ticker: data.ticker,
       description: data.description,
       type: data.type,
-      logo_urls: data.logo ? [data.logo] : [],
+      logo_urls: data.logo ? [`${data.logo}`] : [],
       exchange: data.exchange,
       exchange_logo: data.exchange_logo,
       timezone: data.timezone,

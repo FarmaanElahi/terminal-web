@@ -38,9 +38,7 @@ export class ChartManager {
     // const userSettingAdapter = new UserSetting();
     // await userSettingAdapter.load();
     const timezone = "Asia/Kolkata";
-    const datafeed = new Feed(
-      "https://jones-par-highlighted-harassment.trycloudflare.com",
-    );
+    const datafeed = new Feed("http://localhost:8000");
     return {
       symbol: "NSE:JINDRILL",
       datafeed,
@@ -54,9 +52,9 @@ export class ChartManager {
       auto_save_delay: 3,
       disabled_features: ["order_panel", "trading_account_manager"],
       enabled_features: [
-        // "show_symbol_logos",
-        // "show_symbol_logo_for_compare_studies",
-        // "show_symbol_logo_in_legend",
+        "show_symbol_logos",
+        "show_symbol_logo_for_compare_studies",
+        "show_symbol_logo_in_legend",
         // "study_templates",
         "saveload_separate_drawings_storage",
         // "chart_template_storage",
