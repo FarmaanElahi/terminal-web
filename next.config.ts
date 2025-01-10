@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
         destination:
           "https://trading-terminal.tradingview-widget.com/charting_library/:path*",
       },
+      {
+        source: "/external/logos/:path*",
+        destination: "https://s3-symbol-logo.tradingview.com/:path*",
+      },
     ];
   },
 };
