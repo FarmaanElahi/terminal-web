@@ -62,8 +62,23 @@ export class ChartManager {
       interval: "1D",
       locale: "en",
       auto_save_delay: 3,
-      disabled_features: ["order_panel", "trading_account_manager"],
+      disabled_features: [
+        "order_panel",
+        "trading_account_manager",
+        "symbol_search_hot_key",
+        "header_symbol_search",
+        "allow_arbitrary_symbol_search_input",
+        "object_tree_legend_mode",
+        "show_symbol_logo_in_legend",
+        "symbol_info",
+        "header_quick_search",
+        "countdown",
+      ],
+
       enabled_features: [
+        "border_around_the_chart",
+        "create_volume_indicator_by_default",
+        "items_favoriting",
         "show_symbol_logos",
         "show_symbol_logo_for_compare_studies",
         "show_symbol_logo_in_legend",
@@ -73,6 +88,7 @@ export class ChartManager {
         // "pricescale_currency",
         "pre_post_market_sessions",
         "studies_extend_time_scale",
+        "hide_image_invalid_symbol",
       ],
       save_load_adapter: this.chartStorage,
     };

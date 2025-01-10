@@ -21,14 +21,10 @@ export function Chart(props: { chartId: string }) {
   }, [props.chartId]);
 
   return (
-    <div
-      id="tradingview-widget-container"
-      style={{ position: "relative", width: "100%", height: "100%" }}
-    >
+    <div id="tradingview-widget-container">
       <div
         id={`tradingview-widget-container__widget`}
         ref={chartContainerRef}
-        style={{ width: "100%", height: "100%" }}
       />
     </div>
   );
