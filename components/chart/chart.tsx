@@ -1,3 +1,4 @@
+"use client";
 import { RefObject, useEffect, useRef } from "react";
 import { ChartManager } from "@/components/chart/chart_manager";
 import axios from "axios";
