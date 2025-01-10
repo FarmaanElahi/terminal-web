@@ -3,6 +3,12 @@
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Chart } from "@/components/chart/chart";
+import React from "react";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 export default function Page() {
   return (
@@ -12,7 +18,19 @@ export default function Page() {
           <Tag placeholder={"Search Symbol"} name={"JINDRILL"} />
         </div>
         <div className="flex-grow">
-          <Chart chartId={"12rwe"} />
+          <ResizablePanelGroup direction="horizontal">
+            <ResizablePanel>
+              <Chart chartId={"dsf"} />
+            </ResizablePanel>
+            <ResizableHandle />
+            <ResizablePanel>
+              <Chart chartId={"fsd"} />
+            </ResizablePanel>
+            <ResizableHandle />
+            <ResizablePanel>
+              <Chart chartId={"fs"} />
+            </ResizablePanel>
+          </ResizablePanelGroup>
         </div>
       </div>
     </div>
