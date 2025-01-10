@@ -15,6 +15,15 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/app",
+        destination: "/app/dashboard",
+        permanent: true, // Set to true if this redirect is permanent
+      },
+    ];
+  },
 };
 
 export default nextConfig;
