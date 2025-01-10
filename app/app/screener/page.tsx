@@ -2,37 +2,30 @@
 
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Chart } from "@/components/chart/chart";
 import React from "react";
+import { Screener } from "@/components/screener/screener";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { Chart } from "@/components/chart/chart";
 
 export default function Page() {
   return (
-    <div className="h-full p-1 bg-gradient-to-r from-sidebar-primary to-[#E7DCFA]/50">
-      <div className="flex flex-col h-full rounded overflow-hidden">
-        <div className="px-2 py-2 bg-gradient-to-r from-secondary to-[#E7DCFA]">
-          <Tag placeholder={"Search Symbol"} name={"JINDRILL"} />
-        </div>
-        <div className="flex-grow">
-          <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel>
-              <Chart chartId={"dsf"} />
-            </ResizablePanel>
-            <ResizableHandle />
-            <ResizablePanel>
-              <Chart chartId={"fsd"} />
-            </ResizablePanel>
-            <ResizableHandle />
-            <ResizablePanel>
-              <Chart chartId={"fs"} />
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </div>
+    <div className="flex flex-col h-full">
+      <div className="px-2 py-2 bg-gradient-to-r from-secondary to-[#E7DCFA]">
+        <Tag placeholder={"Search Symbol"} name={"JINDRILL"} />
       </div>
+      <ResizablePanelGroup direction="horizontal">
+        <ResizablePanel defaultSize={30}>
+          <Screener />
+        </ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel defaultSize={70}>
+          <Chart chartId={"daff"} />
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }

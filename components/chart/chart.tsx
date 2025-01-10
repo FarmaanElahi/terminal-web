@@ -24,7 +24,7 @@ export function Chart(props: { chartId: string }) {
     <div
       id={`tradingview-widget-container__widget`}
       ref={chartContainerRef}
-      className={"h-full"}
+      className={"h-full overflow-auto"}
     />
   );
 }
