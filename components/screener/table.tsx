@@ -16,6 +16,7 @@ import { useScreenerTable } from "@/components/screener/use_screener_table";
 type ScreenerProps = HTMLAttributes<HTMLDivElement>;
 
 interface ScreenerTableProps extends HTMLAttributes<HTMLDivElement> {
+  id: string;
   data: Symbol[];
   columns?: string[];
 }
@@ -26,6 +27,7 @@ export function Screener({ className, ...props }: ScreenerProps) {
   if (error) return `Error: ${error}`;
   return (
     <ScreenerTable
+      id={"main"}
       data={data ?? []}
       columns={["day_close"]}
       className={className}
@@ -35,14 +37,26 @@ export function Screener({ className, ...props }: ScreenerProps) {
 }
 
 function ScreenerTable({
+  id,
   data,
   columns,
   className,
   ...props
 }: ScreenerTableProps) {
-  const { table, getCommonPinningStyles } = useScreenerTable(data, columns);
+  const { table, tableProps, rowProps, handleKeyDown } = useScreenerTable(
+    id,
+    data,
+    columns,
+  );
+
   return (
-    <div className={cn("h-full overflow-auto", className)} {...props}>
+    <div
+      className={cn("max-h-full overflow-auto", className)}
+      {...props}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      {...tableProps()}
+    >
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -51,7 +65,7 @@ function ScreenerTable({
                 return (
                   <TableHead
                     key={header.id}
-                    style={{ ...getCommonPinningStyles(header.column) }}
+                    // style={{ ...getCommonPinningStyles(header.column) }}
                   >
                     {header.isPlaceholder
                       ? null
@@ -70,12 +84,14 @@ function ScreenerTable({
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
+                {...rowProps(row)}
                 data-state={row.getIsSelected() && "selected"}
+                onClick={() => row.toggleSelected()}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
-                    style={{ ...getCommonPinningStyles(cell.column) }}
+                    // style={{ ...getCommonPinningStyles(cell.column) }}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
