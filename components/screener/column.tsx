@@ -1914,7 +1914,7 @@ export let columns: ColumnDef<Symbol>[] = [
     accessorKey: "price_volume",
     header: "Dollar Volume",
     meta: {
-      format: "numeric",
+      format: "price",
       category: "Price & Volume",
     },
   },

@@ -1,7 +1,9 @@
 import { useScreener } from "@/lib/api";
-import React, { HTMLAttributes } from "react";
+import React, { HTMLAttributes, useState } from "react";
 import { columns } from "@/components/screener/column";
 import {
+  Column,
+  ColumnPinningState,
   flexRender,
   getCoreRowModel,
   useReactTable,
@@ -30,11 +32,38 @@ export function Screener({ className, ...props }: ScreenerProps) {
   return <ScreenerTable data={data ?? []} className={className} {...props} />;
 }
 
+//These are the important styles to make sticky column pinning work!
+//Apply styles like this using your CSS strategy of choice with this kind of logic to head cells, data cells, footer cells, etc.
+//View the index.css file for more needed styles such as border-collapse: separate
+const getCommonPinningStyles = (column: Column<Symbol>): CSSProperties => {
+  const isPinned = column.getIsPinned();
+  const isLastLeftPinnedColumn =
+    isPinned === "left" && column.getIsLastColumn("left");
+  const isFirstRightPinnedColumn =
+    isPinned === "right" && column.getIsFirstColumn("right");
+
+  return {
+    left: isPinned === "left" ? `${column.getStart("left")}px` : undefined,
+    right: isPinned === "right" ? `${column.getAfter("right")}px` : undefined,
+    position: isPinned ? "sticky" : "relative",
+    width: column.getSize(),
+    zIndex: isPinned ? 1 : 0,
+    backgroundColor: isLastLeftPinnedColumn ? "#fff" : "transparent",
+  };
+};
+
 function ScreenerTable({ data, className, ...props }: ScreenerTableProps) {
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
+    left: ["name"],
+    right: [],
+  });
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    state: { columnPinning },
+    onColumnPinningChange: setColumnPinning,
   });
 
   return (
@@ -45,7 +74,10 @@ function ScreenerTable({ data, className, ...props }: ScreenerTableProps) {
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={header.id}
+                    style={{ ...getCommonPinningStyles(header.column) }}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -66,7 +98,7 @@ function ScreenerTable({ data, className, ...props }: ScreenerTableProps) {
                 data-state={row.getIsSelected() && "selected"}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} style={{ ...getCommonPinningStyles(cell.column) }}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
