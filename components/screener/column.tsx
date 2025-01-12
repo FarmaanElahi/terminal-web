@@ -6,15 +6,54 @@ import Image from "next/image";
 import { DateTime } from "luxon";
 import { cn } from "@/lib/utils";
 import { Flag } from "lucide-react";
+import { Candlestick } from "@/components/charting/candlestick";
+import { ReactNode } from "react";
+import { X, Check } from "lucide-react";
 
-const CURRENCY_SYMBOL = {
-  INR: "\u20B9",
-  USD: "\u0024",
-} as Record<string, string>;
+function BooleanCell(props: { cell: CellContext<Symbol, unknown> }) {
+  const value = props.cell.getValue();
 
-const DEFAULT_NUMBER_FORMATTER = new Intl.NumberFormat("en-IN", {
-  maximumFractionDigits: 2,
-});
+  return value ? <Check className="size-4" /> : <X className="size-4" />;
+}
+
+function CandleStickCell(props: { cell: CellContext<Symbol, unknown> }) {
+  const [open_col, high_col, low_col, close_col] = (
+    props.cell.column.columnDef.meta as Record<string, string>
+  ).cols;
+  let candlestick: ReactNode;
+  if (open_col && high_col && low_col && close_col) {
+    const open = (props.cell.row.original as Record<string, number>)[open_col];
+    const high = (props.cell.row.original as Record<string, number>)[high_col];
+    const low = (props.cell.row.original as Record<string, number>)[low_col];
+    const close = (props.cell.row.original as Record<string, number>)[
+      close_col
+    ];
+    if (open && high_col && low_col && close_col) {
+      candlestick = (
+        <Candlestick open={open} high={high} low={low} close={close} />
+      );
+    }
+  }
+
+  const rangeValue = (props.cell.getValue() as number);
+
+  const value = new Intl.NumberFormat("en-IN", {
+    maximumFractionDigits: 0,
+    style: "percent",
+  }).format(rangeValue);
+
+
+
+  if (candlestick) {
+    return (
+      <div className="inline-flex gap-4">
+        {candlestick}
+        {value}
+      </div>
+    );
+  }
+  return <span>{value}</span>;
+}
 
 function SymbolCell(props: { cell: CellContext<Symbol, unknown> }) {
   const { cell } = props;
@@ -95,18 +134,22 @@ function NumericCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
   }
 
   const meta = (cell.column.columnDef.meta ?? {}) as Record<string, unknown>;
-  const { sign, maximumFractionDigits, colorize } = meta;
+  const { sign, maximumFractionDigits, colorize, bold } = meta;
   const numberFormater = new Intl.NumberFormat("en-IN", {
     maximumFractionDigits: (maximumFractionDigits as number) ?? 2,
   });
   const result = [numberFormater.format(value), sign].filter((s) => s).join("");
-  const colorClassName = colorize
-    ? {
-        "text-pink-500 font-bold": value > 0,
-        "text-blue-500 font-bold": value < 0,
-      }
-    : {};
-  return <span className={cn(colorClassName)}>{result}</span>;
+  return (
+    <span
+      className={cn({
+        "text-bullish": colorize && value > 0,
+        "text-bearish": colorize && value < 0,
+        "font-bold": bold,
+      })}
+    >
+      {result}
+    </span>
+  );
 }
 
 function CurrencyCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
@@ -116,22 +159,18 @@ function CurrencyCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
   }
 
   const currencyCode = cell.row.original.currency as string;
-  const currentSymbol = currencyCode
-    ? CURRENCY_SYMBOL[currencyCode]
-    : undefined;
+  const formatter = new Intl.NumberFormat("en-IN", {
+    maximumFractionDigits: 0,
+    currencyDisplay: "symbol",
+    currency: currencyCode,
+    style: "currency",
+  });
 
   const toCR = value > 100000;
 
-  const amount = toCR
-    ? DEFAULT_NUMBER_FORMATTER.format(value / 10000000) + "Cr"
-    : value;
+  const amount = toCR ? formatter.format(value / 10000000) + "Cr" : value;
 
-  return (
-    <span>
-      {currentSymbol}
-      {amount}
-    </span>
-  );
+  return <span>{amount}</span>;
 }
 
 function PriceCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
@@ -140,7 +179,15 @@ function PriceCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
     return <span>-</span>;
   }
 
-  const num = DEFAULT_NUMBER_FORMATTER.format(value);
+  const currencyCode = cell.row.original.currency as string;
+  const formatter = new Intl.NumberFormat("en-IN", {
+    maximumFractionDigits: 2,
+    currencyDisplay: "symbol",
+    currency: currencyCode,
+    style: "currency",
+  });
+
+  const num = formatter.format(value);
   return <span>{num}</span>;
 }
 
@@ -171,6 +218,12 @@ function FormattedCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
   }
   if (format === "price") {
     return <PriceCell cell={cell} />;
+  }
+  if (format === "candlestick") {
+    return <CandleStickCell cell={cell} />;
+  }
+  if (format === "boolean") {
+    return <BooleanCell cell={cell} />;
   }
   return <span>{String(value)}</span>;
 }
@@ -773,7 +826,7 @@ export let columns: ColumnDef<Symbol>[] = [
 
   {
     accessorKey: "price_earnings_growth_ttm",
-    header: "Price  Growth",
+    header: "Price Earning Growth",
     meta: { format: "numeric", category: "Fundamentals" },
   },
   {
@@ -814,27 +867,27 @@ export let columns: ColumnDef<Symbol>[] = [
   // ######################  Price and Volume  #######################
   {
     accessorKey: "price_change_today_abs",
-    header: "$ Change Today",
+    header: "Price Change Today",
     meta: { format: "price", category: "Price & Volume" },
   },
   {
     accessorKey: "price_change_from_open_abs",
-    header: "$ Change from Open",
+    header: "Price Change from Open",
     meta: { format: "price", category: "Price & Volume" },
   },
   {
     accessorKey: "price_change_from_high_abs",
-    header: "$ Change from High",
+    header: "Price Change from High",
     meta: { format: "price", category: "Price & Volume" },
   },
   {
     accessorKey: "price_change_from_low_abs",
-    header: "$ Change from Low",
+    header: "Price Change from Low",
     meta: { format: "price", category: "Price & Volume" },
   },
   {
     accessorKey: "price_change_today_pct",
-    header: "% Change Today",
+    header: "Price % Change Today",
     meta: {
       format: "numeric",
       sign: "%",
@@ -844,7 +897,7 @@ export let columns: ColumnDef<Symbol>[] = [
   },
   {
     accessorKey: "price_change_from_open_pct",
-    header: "% Change from Open",
+    header: "Price % Change from Open",
     meta: {
       format: "numeric",
       sign: "%",
@@ -854,7 +907,7 @@ export let columns: ColumnDef<Symbol>[] = [
   },
   {
     accessorKey: "price_change_from_high_pct",
-    header: "% Change from High",
+    header: "Price % Change from High",
     meta: {
       format: "numeric",
       sign: "%",
@@ -865,7 +918,7 @@ export let columns: ColumnDef<Symbol>[] = [
   // TODO: Missing field
   {
     accessorKey: "price_change_from_low_pct",
-    header: "% Change from Low",
+    header: "Price % Change from Low",
     meta: {
       format: "numeric",
       sign: "%",
@@ -876,17 +929,138 @@ export let columns: ColumnDef<Symbol>[] = [
   {
     accessorKey: "dcr",
     header: "DCR",
-    meta: { format: "numeric", sign: "%", category: "Price & Volume" },
+    meta: {
+      format: "candlestick",
+      category: "Price & Volume",
+      cols: ["day_open", "day_high", "day_low", "day_close"],
+    },
   },
   {
     accessorKey: "wcr",
     header: "WCR",
-    meta: { format: "numeric", sign: "%", category: "Price & Volume" },
+    meta: {
+      format: "candlestick",
+      category: "Price & Volume",
+      cols: ["week_open", "week_high", "week_low", "week_close"],
+    },
   },
   {
     accessorKey: "mcr",
     header: "MCR",
-    meta: { format: "numeric", sign: "%", category: "Price & Volume" },
+    meta: {
+      format: "candlestick",
+      category: "Price & Volume",
+      cols: ["month_open", "month_high", "month_low", "month_close"],
+    },
+  },
+  {
+    accessorKey: "away_from_daily_vwap_pct",
+    header: "Away From Daily VWAP",
+    meta: {
+      format: "numeric",
+      sign: "%",
+      category: "Price & Volume",
+      colorize: true,
+      bold: true,
+    },
+  },
+  {
+    accessorKey: "away_from_weekly_vwap_pct",
+    header: "Away From Weekly VWAP",
+    meta: {
+      format: "numeric",
+      sign: "%",
+      category: "Price & Volume",
+      colorize: true,
+      bold: true,
+    },
+  },
+  {
+    accessorKey: "away_from_monthly_vwap_pct",
+    header: "Away From Monthly VWAP",
+    meta: {
+      format: "numeric",
+      sign: "%",
+      category: "Price & Volume",
+      colorize: true,
+      bold: true,
+    },
+  },
+  {
+    accessorKey: "away_from_yearly_vwap_pct",
+    header: "Away From YTD VWAP",
+    meta: {
+      format: "numeric",
+      sign: "%",
+      category: "Price & Volume",
+      colorize: true,
+      bold: true,
+    },
+  },
+  {
+    accessorKey: "price_above_daily_vwap",
+    header: "Price Above Daily VWAP",
+    meta: {
+      format: "boolean",
+      category: "Price & Volume",
+    },
+  },
+  {
+    accessorKey: "price_above_weekly_vwap",
+    header: "Price Above Weekly VWAP",
+    meta: {
+      format: "boolean",
+      category: "Price & Volume",
+    },
+  },
+  {
+    accessorKey: "price_above_monthly_vwap",
+    header: "Price Above Monthly VWAP",
+    meta: {
+      format: "boolean",
+      category: "Price & Volume",
+    },
+  },
+  {
+    accessorKey: "price_above_yearly_vwap",
+    header: "Price Above Yearly VWAP",
+    meta: {
+      format: "boolean",
+      category: "Price & Volume",
+    },
+  },
+
+  {
+    accessorKey: "daily_vwap",
+    header: "Daily VWAP",
+    meta: {
+      format: "price",
+      category: "Price & Volume",
+    },
+  },
+  {
+    accessorKey: "weekly_vwap",
+    header: "Weekly VWAP",
+    meta: {
+      format: "price",
+      category: "Price & Volume",
+    },
+  },
+  {
+    accessorKey: "monthly_vwap",
+    header: "Monthly VWAP",
+    meta: {
+      format: "price",
+      category: "Price & Volume",
+    },
+  },
+  {
+    accessorKey: "yearly_vwap",
+    header: "YTD VWAP",
+    meta: {
+      format: "price",
+      category: "Price & Volume",
+    },
   },
   // ######################  Price and Volume  #######################
 
@@ -907,7 +1081,6 @@ export let columns: ColumnDef<Symbol>[] = [
     header: "Beta 5Y",
     meta: { format: "numeric", category: "Technicals" },
   },
-
   // ##########################  Technical  ##########################
 ];
 
@@ -919,5 +1092,8 @@ columns = columns.map((col) => {
 });
 
 columns = columns.filter(
-  (c) => c.meta?.category === "Fundamentals" || c.header === "Symbol",
+  (c) =>
+    c.meta?.category === "Price & Volume" ||
+    c.header === "Symbol" ||
+    c.header === "Last",
 );

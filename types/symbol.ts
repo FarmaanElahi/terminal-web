@@ -586,12 +586,16 @@ export interface Symbol {
   prev_year_volume?: number;
   daily_vwap?: number;
   away_from_daily_vwap_pct?: number;
+  price_above_daily_vwap?: boolean;
   weekly_vwap?: number;
   away_from_weekly_vwap_pct?: number;
+  price_above_weekly_vwap?: boolean;
   monthly_vwap?: number;
   away_from_monthly_vwap_pct?: number;
+  price_above_monthly_vwap?: boolean;
   yearly_vwap?: number;
   away_from_yearly_vwap_pct?: number;
+  price_above_yearly_vwap?: boolean;
   price_change_pct_1D?: number;
   price_change_pct_2D?: number;
   price_change_pct_3D?: number;
