@@ -712,6 +712,14 @@ export interface Symbol {
   relative_vol_50D?: number;
   relative_vol_100D?: number;
   relative_vol_200D?: number;
+  run_rate_vol_5D?: number;
+  run_rate_vol_10D?: number;
+  run_rate_vol_20D?: number;
+  run_rate_vol_30D?: number;
+  run_rate_vol_40D?: number;
+  run_rate_vol_50D?: number;
+  run_rate_vol_100D?: number;
+  run_rate_vol_200D?: number;
   vol_sma_10W?: number;
   vol_sma_20W?: number;
   vol_sma_30W?: number;

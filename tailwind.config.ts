@@ -52,6 +52,7 @@ export default {
         },
         bullish: "hsl(var(--bullish))",
         bearish: "hsl(var(--bearish))",
+        "volume-activity": "hsl(var(--volume-activity))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
