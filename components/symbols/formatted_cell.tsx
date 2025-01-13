@@ -37,7 +37,7 @@ function CandleStickCell(props: { cell: CellContext<Symbol, unknown> }) {
   const value = new Intl.NumberFormat("en-IN", {
     maximumFractionDigits: 0,
     style: "percent",
-  }).format(rangeValue);
+  }).format(rangeValue/100);
 
   if (candlestick) {
     return (

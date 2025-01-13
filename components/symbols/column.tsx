@@ -61,7 +61,7 @@ function forwardCols(
   return cols;
 }
 
-export const screenerColumns: ColumnDef<Symbol>[] = [
+export const defaultSymbolColumns: ColumnDef<Symbol>[] = [
   // #############################  Generals  ################################
 
   { accessorKey: "isin", header: "ISIN", meta: { category: "General" } },

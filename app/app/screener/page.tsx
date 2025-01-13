@@ -3,7 +3,7 @@
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import React from "react";
-import { Screener } from "@/components/screener/table";
+import { Screener } from "@/components/screener/screener";
 import {
   ResizableHandle,
   ResizablePanel,

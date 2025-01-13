@@ -1,7 +1,6 @@
 import type { TradingView } from "@/components/chart/charting";
 import type { TradingViewWidgetOptions } from "@/components/chart/types";
 import { Datafeed } from "@/components/chart/datafeed";
-import { getTradingView } from "@/components/chart/loader";
 import { AxiosInstance } from "axios";
 import { ChartStorage } from "@/components/chart/chart_storage";
 import { LogoProvider } from "@/components/chart/logo_provider";
@@ -18,12 +17,11 @@ export class ChartManager {
     this.chartStorage = new ChartStorage(axios);
   }
 
-  async create(id: string, container: HTMLElement) {
+  create(id: string, container: HTMLElement) {
     if (this.widgets.has(id)) {
       return this.widgets.get(id)!;
     }
-    const TradingView = await getTradingView();
-    // const TradingView = window.TradingView
+    const TradingView = window.TradingView;
     const c = this.getConfig();
     const tvWidget = new TradingView.widget({ container, ...c });
     this.widgets.set(id, tvWidget);

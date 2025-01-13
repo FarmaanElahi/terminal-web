@@ -16,8 +16,8 @@ import {
   useMemo,
   useState,
 } from "react";
-import { screenerColumns } from "@/components/screener/column";
-import { FormattedCell } from "@/components/screener/formatted_cell";
+import { FormattedCell } from "@/components/symbols/formatted_cell";
+import { defaultSymbolColumns } from "@/components/symbols/column";
 
 const getCommonPinningStyles = (column: Column<Symbol>): CSSProperties => {
   const isPinned = column.getIsPinned();
@@ -69,18 +69,18 @@ function useColumnPinning(columns: ColumnDef<Symbol, unknown>[]) {
   return { columnPinning, setColumnPinning, getCommonPinningStyles };
 }
 
-export function useDefaultColumn() {
-  return screenerColumns;
-}
-
-function useScreenerColumn(columnKeys?: string[]) {
-  const columns = useDefaultColumn();
+function useSymbolColumns(columnKeys?: string[]) {
+  const columns = defaultSymbolColumns.map((c) => {
+    // eslint-disable-next-line
+    // @ts-ignore
+    return { ...c, id: c.accessorKey } as ColumnDef<Symbol>;
+  });
 
   return useMemo(() => {
     const f = ["name", ...(columnKeys ?? [])];
     // eslint-disable-next-line
     // @ts-ignore
-    const filtered = columns.filter((c) => f?.includes(c.accessorKey));
+    const filtered = columns.filter((c) => f?.includes(c.id));
 
     return filtered.map((col) => {
       return {
@@ -91,13 +91,13 @@ function useScreenerColumn(columnKeys?: string[]) {
   }, [columns, columnKeys]);
 }
 
-export function useScreenerTable(
+export function useSymbolTable(
   id: string,
   data: Symbol[],
   columnKey?: string[],
 ) {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const columns = useScreenerColumn(columnKey);
+  const columns = useSymbolColumns(columnKey);
   const { columnPinning, setColumnPinning } = useColumnPinning(columns);
   const table = useReactTable({
     data,
@@ -120,7 +120,6 @@ export function useScreenerTable(
     const selectedIndex = selected?.index;
     // When the key is down or space,navigate to the next symbol
     if (e.key === "ArrowDown" || e.key === " ") {
-      console.log("Space", selectedIndex);
       e.preventDefault();
       const nextIndex =
         selectedIndex === undefined || selectedIndex + 1 >= total
@@ -147,12 +146,11 @@ export function useScreenerTable(
   // Scroll the selected row into view
   useEffect(() => {
     const scrollableContainer = document.querySelector(`#screener-${id}`);
-    console.log("EE", scrollableContainer);
     const selectedRows = table.getSelectedRowModel().rows;
     if (selectedRows.length > 0 && scrollableContainer) {
       const selectedRowId = selectedRows[0].id; // Handle first selected row
       const selectedRow = document.querySelector(
-        `#screener-${id} tr[data-ticker="${selectedRowId}"]`,
+        `#screener-${id} [data-ticker="${selectedRowId}"]`,
       );
       if (selectedRow) {
         const rowRect = selectedRow.getBoundingClientRect();
@@ -163,7 +161,6 @@ export function useScreenerTable(
           rowRect.top < containerRect.top ||
           rowRect.bottom > containerRect.bottom
         ) {
-          console.log("Out", selectedRow);
           selectedRow.scrollIntoView({
             behavior: "smooth",
             block: "nearest",

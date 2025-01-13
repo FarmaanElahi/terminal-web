@@ -1,4 +1,3 @@
-import { useScreenerAPI } from "@/lib/api";
 import React, { HTMLAttributes } from "react";
 import { flexRender } from "@tanstack/react-table";
 import {
@@ -11,39 +10,18 @@ import {
 } from "@/components/ui/table";
 import type { Symbol } from "@/types/symbol";
 import { cn } from "@/lib/utils";
-import { useScreenerTable } from "@/components/screener/use_screener_table";
+import { useSymbolTable } from "@/components/symbols/use_screener_table";
 
-type ScreenerProps = HTMLAttributes<HTMLDivElement>;
-
-interface ScreenerTableProps extends HTMLAttributes<HTMLDivElement> {
+interface SymbolTableProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
   data: Symbol[];
   columns?: string[];
 }
 
-export function Screener({ className, ...props }: ScreenerProps) {
-  const { isLoading, error, data } = useScreenerAPI();
-  if (isLoading) return "Loading...";
-  if (error) return `Error: ${error}`;
-  return (
-    <ScreenerTable
-      id={"main"}
-      data={data ?? []}
-      columns={["day_close"]}
-      className={className}
-      {...props}
-    />
-  );
-}
+export function SymbolTable(props: SymbolTableProps) {
+  const { id, data, columns, className } = props;
 
-function ScreenerTable({
-  id,
-  data,
-  columns,
-  className,
-  ...props
-}: ScreenerTableProps) {
-  const { table, tableProps, rowProps, handleKeyDown } = useScreenerTable(
+  const { table, tableProps, rowProps, handleKeyDown } = useSymbolTable(
     id,
     data,
     columns,
