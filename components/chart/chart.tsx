@@ -1,32 +1,46 @@
 "use client";
-import { RefObject, useEffect, useRef, useState } from "react";
-import { getTradingView } from "@/components/chart/loader";
-import { useChartManager } from "@/components/chart/chart_context";
+import { HTMLAttributes, RefObject, useEffect, useRef } from "react";
+import type { TradingView } from "@/components/chart/charting";
+import { useChartManager } from "@/lib/state/charts";
+import { useGroupSymbol } from "@/lib/state/grouper";
 
-export function Chart(props: { chartId: string }) {
-  const [isLoaded, setIsLoaded] = useState(false);
-  useEffect(() => {
-    getTradingView().then((r) => setIsLoaded(!!r));
-  }, []);
-
-  if (!isLoaded) {
-    return <></>;
-  }
-  return <ChartInternal {...props} />;
+interface ChartProps extends HTMLAttributes<HTMLDivElement> {
+  id: string;
 }
 
-export function ChartInternal(props: { chartId: string }) {
+export function Chart(props: ChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(
     null,
   ) as RefObject<HTMLDivElement>;
+  const widgetRef = useRef<TradingView.widget>(null);
+
   const manager = useChartManager();
+  const symbol = useGroupSymbol();
 
   useEffect(() => {
-    void manager.create(props.chartId, chartContainerRef.current!);
-    return () => {
-      manager.close(props.chartId);
-    };
-  }, [manager, props.chartId]);
+    if (chartContainerRef.current && !widgetRef.current) {
+      widgetRef.current = manager.create(chartContainerRef.current, symbol);
+    } else if (widgetRef.current) {
+      const resolution = widgetRef.current.activeChart().resolution();
+      widgetRef.current?.setSymbol(symbol, resolution);
+    }
+  }, [manager, symbol, widgetRef, chartContainerRef]);
 
-  return <div ref={chartContainerRef} className={"h-full overflow-auto"} />;
+  // Cleanup when the component unmounts
+  useEffect(() => {
+    return () => {
+      if (widgetRef.current) {
+        widgetRef.current.remove(); // Ensure proper cleanup
+        widgetRef.current = null;
+      }
+    };
+  }, []);
+
+  return (
+    <div
+      ref={chartContainerRef}
+      className={"h-full overflow-auto"}
+      {...props}
+    />
+  );
 }

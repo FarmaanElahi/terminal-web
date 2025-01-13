@@ -29,11 +29,11 @@ export function SymbolTable(props: SymbolTableProps) {
 
   return (
     <div
-      className={cn("max-h-full overflow-auto", className)}
       {...props}
       onKeyDown={handleKeyDown}
       tabIndex={0}
       {...tableProps()}
+      className={cn("max-h-full overflow-auto select-none", className)}
     >
       <Table>
         <TableHeader>

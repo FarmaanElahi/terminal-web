@@ -17,15 +17,15 @@ export class ChartManager {
     this.chartStorage = new ChartStorage(axios);
   }
 
-  async create(id: string, container: HTMLElement) {
-    if (this.widgets.has(id)) {
-      return this.widgets.get(id)!;
-    }
+  create(container: HTMLElement, symbol: string) {
     const TradingView = window.TradingView;
     const c = this.getConfig();
-    const tvWidget = new TradingView.widget({ container, ...c });
-    this.widgets.set(id, tvWidget);
-    tvWidget.onChartReady(() => this.onChartReady(id));
+    const tvWidget = new TradingView.widget({
+      ...c,
+      container,
+      symbol: symbol ?? "NSE:NIFTY",
+    });
+    tvWidget.onChartReady(() => this.onChartReady(tvWidget));
     return tvWidget;
   }
 
@@ -36,21 +36,17 @@ export class ChartManager {
     throw new Error("Unable to get chart");
   }
 
-  private onChartReady = (id: string) => {
-    console.log("Chart ready");
-    this.getChart(id).subscribe("onAutoSaveNeeded", () =>
-      this.getChart(id).saveChartToServer(() =>
-        console.log("Chart saved to server"),
-      ),
+  private onChartReady = (chart: TradingView.widget) => {
+    chart.subscribe("onAutoSaveNeeded", () =>
+      chart.saveChartToServer(() => console.log("Chart saved to server")),
     );
   };
 
-  private getConfig(): Omit<TradingViewWidgetOptions, "container"> {
+  private getConfig(): Omit<TradingViewWidgetOptions, "container" | "symbol"> {
     // const userSettingAdapter = new UserSetting();
     // await userSettingAdapter.load();
     const timezone = "Asia/Kolkata";
     return {
-      symbol: "NSE:JINDRILL",
       datafeed: this.datafeed,
       autosize: true,
       library_path: "/external/charting_library/",
@@ -89,10 +85,5 @@ export class ChartManager {
       ],
       save_load_adapter: this.chartStorage,
     };
-  }
-
-  close(id: string) {
-    this.widgets.get(id)?.remove();
-    this.widgets.delete(id);
   }
 }

@@ -1,13 +1,16 @@
 import { ReactNode } from "react";
 import { ReactQueryProvider } from "@/lib/client";
-import { ChartManagerContextProvider } from "@/components/chart/chart_context";
+import { ChartContextProvider } from "@/lib/state/charts";
+import { ChartLoader } from "@/components/chart/chart_loader";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <ReactQueryProvider>
-      <ChartManagerContextProvider>
-        <div className="h-full">{children}</div>
-      </ChartManagerContextProvider>
+      <ChartLoader>
+        <ChartContextProvider>
+          <div className="h-full">{children}</div>
+        </ChartContextProvider>
+      </ChartLoader>
       {/*<SidebarProvider>*/}
       {/*<AppSidebar />*/}
       {/*</SidebarProvider>*/}

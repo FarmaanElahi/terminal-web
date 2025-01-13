@@ -1,3 +1,4 @@
+"use client";
 import {
   Column,
   ColumnDef,
@@ -18,6 +19,7 @@ import {
 } from "react";
 import { FormattedCell } from "@/components/symbols/formatted_cell";
 import { defaultSymbolColumns } from "@/components/symbols/column";
+import { useGroupSymbolSwitcher } from "@/lib/state/grouper";
 
 const getCommonPinningStyles = (column: Column<Symbol>): CSSProperties => {
   const isPinned = column.getIsPinned();
@@ -96,6 +98,7 @@ export function useSymbolTable(
   data: Symbol[],
   columnKey?: string[],
 ) {
+  const symbolSwitcher = useGroupSymbolSwitcher();
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const columns = useSymbolColumns(columnKey);
   const { columnPinning, setColumnPinning } = useColumnPinning(columns);
@@ -109,6 +112,13 @@ export function useSymbolTable(
     enableMultiRowSelection: false,
     getRowId: (row) => [row.exchange, row.name].join(":"),
   });
+
+  // Switch Symbol in the Group
+  useEffect(() => {
+    const symbol = Object.keys(rowSelection).filter((s) => rowSelection[s])[0];
+    if (!symbol) return;
+    symbolSwitcher(symbol);
+  }, [rowSelection, symbolSwitcher]);
 
   // Keyboard navigation
   const handleKeyDown: KeyboardEventHandler = (e) => {
@@ -128,6 +138,7 @@ export function useSymbolTable(
       const nextRow = rows[nextIndex];
       if (!nextRow) return;
       nextRow.toggleSelected();
+      console.log("Selec");
     }
 
     // When the key is down or space,navigate to the previous symbol
@@ -145,22 +156,26 @@ export function useSymbolTable(
 
   // Scroll the selected row into view
   useEffect(() => {
-    const scrollableContainer = document.querySelector(`#screener-${id}`);
+    console.log("Scrolll");
+    const scrollableContainer = document.querySelector(`#symbol-table-${id}`);
     const selectedRows = table.getSelectedRowModel().rows;
     if (selectedRows.length > 0 && scrollableContainer) {
       const selectedRowId = selectedRows[0].id; // Handle first selected row
       const selectedRow = document.querySelector(
-        `#screener-${id} [data-ticker="${selectedRowId}"]`,
+        `#symbol-table-${id} [data-ticker="${selectedRowId}"]`,
       );
+      console.log("Selected row", selectedRow);
       if (selectedRow) {
         const rowRect = selectedRow.getBoundingClientRect();
         const containerRect = scrollableContainer.getBoundingClientRect();
+        console.log("Selected row", rowRect, containerRect);
 
         // Check if the row is outside the viewport
         if (
           rowRect.top < containerRect.top ||
           rowRect.bottom > containerRect.bottom
         ) {
+          console.log("Outside row");
           selectedRow.scrollIntoView({
             behavior: "smooth",
             block: "nearest",
@@ -170,7 +185,7 @@ export function useSymbolTable(
     }
   }, [rowSelection, table, id]);
 
-  const tableProps = useCallback(() => ({ id: `screener-${id}` }), [id]);
+  const tableProps = useCallback(() => ({ id: `symbol-table-${id}` }), [id]);
   const rowProps = useCallback(
     (row: Row<Symbol>) => ({ "data-ticker": row.id }),
     [],

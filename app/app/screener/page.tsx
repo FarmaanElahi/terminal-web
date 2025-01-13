@@ -10,23 +10,28 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { Chart } from "@/components/chart/chart";
+import { GrouperProvider, GroupSymbolProvider } from "@/lib/state/grouper";
 
 export default function Page() {
   return (
-    <div className="flex flex-col h-full">
-      <div className="px-2 py-2 bg-gradient-to-r from-secondary to-[#E7DCFA]">
-        <Tag placeholder={"Search Symbol"} name={"JINDRILL"} />
-      </div>
-      <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel defaultSize={30}>
-          <Screener />
-        </ResizablePanel>
-        <ResizableHandle />
-        <ResizablePanel defaultSize={70}>
-          <Chart chartId={"daff"} />
-        </ResizablePanel>
-      </ResizablePanelGroup>
-    </div>
+    <GroupSymbolProvider>
+      <GrouperProvider group={1}>
+        <div className="flex flex-col h-full">
+          <div className="px-2 py-2 bg-gradient-to-r from-secondary to-[#E7DCFA]">
+            <Tag placeholder={"Search Symbol"} name={"JINDRILL"} />
+          </div>
+          <ResizablePanelGroup direction="horizontal">
+            <ResizablePanel defaultSize={30}>
+              <Screener id={"main"} />
+            </ResizablePanel>
+            <ResizableHandle />
+            <ResizablePanel defaultSize={70}>
+              <Chart id={"main"} />
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </div>
+      </GrouperProvider>
+    </GroupSymbolProvider>
   );
 }
 

@@ -78,6 +78,10 @@ type RangeOptions = { from: number; to: number; resolution: string };
 type UndoRedoState = { canUndo: boolean; canRedo: boolean };
 
 declare namespace TradingView {
+  interface IChartWidgetApi {
+    resolution: () => string;
+  }
+
   class widget {
     constructor(options: TradingViewWidgetOptions);
 
@@ -85,7 +89,7 @@ declare namespace TradingView {
     headerReady: () => Promise<void>;
     chart: (index?: number) => unknown;
     chartsCount: () => number;
-    activeChart: () => unknown;
+    activeChart: () => IChartWidgetApi;
     activeChartIndex: () => number;
     subscribe: <T = keyof SubscribeEventsMap>(
       scope: T,
@@ -94,7 +98,7 @@ declare namespace TradingView {
     onShortcut: (shortcut: string, cb: () => void) => void;
     applyOverrides: (overrides: Record<string, unknown>) => void;
     applyStudiesOverrides: (overrides: Record<string, unknown>) => void;
-    setSymbol: (symbol: string, tf: string) => void;
+    setSymbol: (symbol: string, tf?: string) => void;
     changeTheme: (theme: string) => void;
     createButton: () => HTMLButtonElement;
     takeClientScreenshot: () => void;
