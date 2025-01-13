@@ -17,7 +17,7 @@ export class ChartManager {
     this.chartStorage = new ChartStorage(axios);
   }
 
-  create(id: string, container: HTMLElement) {
+  async create(id: string, container: HTMLElement) {
     if (this.widgets.has(id)) {
       return this.widgets.get(id)!;
     }

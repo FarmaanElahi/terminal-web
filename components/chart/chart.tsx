@@ -1,13 +1,7 @@
 "use client";
 import { RefObject, useEffect, useRef, useState } from "react";
-import { ChartManager } from "@/components/chart/chart_manager";
-import axios from "axios";
 import { getTradingView } from "@/components/chart/loader";
-
-const manager = new ChartManager(
-  axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL }),
-  process.env.NEXT_PUBLIC_LOGO_BASE_URL as string,
-);
+import { useChartManager } from "@/components/chart/chart_context";
 
 export function Chart(props: { chartId: string }) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -25,13 +19,14 @@ export function ChartInternal(props: { chartId: string }) {
   const chartContainerRef = useRef<HTMLDivElement>(
     null,
   ) as RefObject<HTMLDivElement>;
+  const manager = useChartManager();
 
   useEffect(() => {
     void manager.create(props.chartId, chartContainerRef.current!);
     return () => {
       manager.close(props.chartId);
     };
-  }, [props.chartId]);
+  }, [manager, props.chartId]);
 
   return <div ref={chartContainerRef} className={"h-full overflow-auto"} />;
 }

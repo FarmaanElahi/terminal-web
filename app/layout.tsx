@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
+import { ChartManagerContextProvider } from "@/components/chart/chart_context";
 
 const quicksand = Quicksand({
   variable: "--font-quicksand-sans",
@@ -16,7 +17,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${quicksand.className} font-medium antialiased h-screen w-screen`}>{children}</body>
+      <body
+        className={`${quicksand.className} font-medium antialiased h-screen w-screen`}
+      >
+        {children}
+      </body>
     </html>
   );
 }
