@@ -1,22 +1,31 @@
 import { useQuery } from "react-query";
 import type { Symbol } from "@/types/symbol";
-import { screenerScanAPI } from "@/lib/api";
-import { useMemo } from "react";
-import { defaultSymbolColumns } from "@/components/symbols/column";
-import { ColumnDef } from "@tanstack/react-table";
+import axios from "axios";
 
-export function useScreener() {
-  return useQuery<Symbol[]>("default-screener", screenerScanAPI);
-}
+const webClient = axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL });
 
-export function useScreenerColumnGroup() {
-  return useMemo(() => {
-    const columnGroups = {} as Record<string, ColumnDef<Symbol>>;
-    defaultSymbolColumns.forEach((value) => {
-      const category =
-        (value.meta as Record<string, string>)?.category ?? "Others";
-      columnGroups[category] = value;
-    });
-    return columnGroups;
-  }, []);
+export function useScreener(payload: {
+  columns: string[];
+  sort: { field: string; asc: boolean }[];
+}) {
+  return useQuery<Symbol[]>("default-screener", async () => {
+    const mandatoryColumns = [
+      "name",
+      "exchange",
+      "logo",
+      "earnings_release_next_date",
+      "country_code",
+      "currency",
+      "day_open",
+      "day_high",
+      "day_low",
+      "day_close",
+    ];
+    const columns = new Set<string>(payload.columns ?? []);
+    const missingCols = mandatoryColumns.filter((c) => !columns.has(c));
+
+    const data = { ...payload, columns: [...missingCols, ...columns] };
+    const result = await webClient.post("/api/v1/screener/scan", data);
+    return result.data;
+  });
 }

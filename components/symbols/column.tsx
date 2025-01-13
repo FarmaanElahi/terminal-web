@@ -73,17 +73,17 @@ export const defaultSymbolColumns: ColumnDef<Symbol>[] = [
   {
     accessorKey: "day_open",
     header: "Open",
-    meta: { format: "price", category: "General" },
+    meta: { format: "numeric", category: "General" },
   },
   {
     accessorKey: "day_high",
     header: "High",
-    meta: { format: "price", category: "General" },
+    meta: { format: "numeric", category: "General" },
   },
   {
     accessorKey: "day_low",
     header: "Low",
-    meta: { format: "price", category: "General" },
+    meta: { format: "numeric", category: "General" },
   },
   {
     accessorKey: "day_close",
@@ -98,22 +98,22 @@ export const defaultSymbolColumns: ColumnDef<Symbol>[] = [
   {
     accessorKey: "week_open",
     header: "Week Open",
-    meta: { format: "price", category: "General" },
+    meta: { format: "numeric", category: "General" },
   },
   {
     accessorKey: "week_high",
     header: "Week High",
-    meta: { format: "price", category: "General" },
+    meta: { format: "numeric", category: "General" },
   },
   {
     accessorKey: "week_low",
     header: "Week Low",
-    meta: { format: "price", category: "General" },
+    meta: { format: "numeric", category: "General" },
   },
   {
     accessorKey: "week_close",
     header: "Week Close",
-    meta: { format: "price", category: "General" },
+    meta: { format: "numeric", category: "General" },
   },
   {
     accessorKey: "week_volume",
@@ -123,22 +123,22 @@ export const defaultSymbolColumns: ColumnDef<Symbol>[] = [
   {
     accessorKey: "month_open",
     header: "Month Open",
-    meta: { format: "price", category: "General" },
+    meta: { format: "numeric", category: "General" },
   },
   {
     accessorKey: "month_high",
     header: "Month High",
-    meta: { format: "price", category: "General" },
+    meta: { format: "numeric", category: "General" },
   },
   {
     accessorKey: "month_low",
     header: "Month Low",
-    meta: { format: "price", category: "General" },
+    meta: { format: "numeric", category: "General" },
   },
   {
     accessorKey: "month_close",
     header: "Month Close",
-    meta: { format: "price", category: "General" },
+    meta: { format: "numeric", category: "General" },
   },
   {
     accessorKey: "month_volume",

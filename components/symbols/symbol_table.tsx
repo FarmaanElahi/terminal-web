@@ -33,7 +33,7 @@ export function SymbolTable(props: SymbolTableProps) {
       onKeyDown={handleKeyDown}
       tabIndex={0}
       {...tableProps()}
-      className={cn("max-h-full overflow-auto select-none", className)}
+      className={cn("max-h-full overflow-auto", className)}
     >
       <Table>
         <TableHeader>

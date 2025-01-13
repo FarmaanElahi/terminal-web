@@ -43,46 +43,36 @@ const getCommonPinningStyles = (column: Column<Symbol>): CSSProperties => {
   };
 };
 
-function useColumnPinning(columns: ColumnDef<Symbol, unknown>[]) {
-  const leftCols = useMemo(
-    () =>
-      columns
-        .filter((c) => (c.meta as Record<string, boolean>).pinLeft)
-        // eslint-disable-next-line
-        // @ts-ignore
-        .map((c) => (c.accessorKey ?? c.id) as string),
-    [columns],
-  );
+function useColumnPinning(columns: ColumnDef<Symbol>[]) {
+  const [left, right] = useMemo(() => {
+    const leftCols = columns
+      .filter((c) => (c.meta as Record<string, boolean>).pinLeft)
+      .map((c) => c.id as string);
 
-  const rightCols = useMemo(
-    () =>
-      columns
-        .filter((c) => (c.meta as Record<string, boolean>).pinRight)
-        // eslint-disable-next-line
-        // @ts-ignore
-        .map((c) => (c.accessorKey ?? c.id) as string),
-    [columns],
-  );
+    const rightCols = columns
+      .filter((c) => (c.meta as Record<string, boolean>).pinRight)
+      .map((c) => c.id as string);
+
+    return [leftCols, rightCols];
+  }, [columns]);
   const [columnPinning, setColumnPinning] = useState<ColumnPinningState>({
-    left: leftCols,
-    right: rightCols,
+    left,
+    right,
   });
 
   return { columnPinning, setColumnPinning, getCommonPinningStyles };
 }
 
 function useSymbolColumns(columnKeys?: string[]) {
-  const columns = defaultSymbolColumns.map((c) => {
-    // eslint-disable-next-line
-    // @ts-ignore
-    return { ...c, id: c.accessorKey } as ColumnDef<Symbol>;
-  });
-
   return useMemo(() => {
+    const columns = defaultSymbolColumns.map((c) => {
+      // eslint-disable-next-line
+      // @ts-ignore
+      return { ...c, id: c.accessorKey } as ColumnDef<Symbol>;
+    });
+
     const f = ["name", ...(columnKeys ?? [])];
-    // eslint-disable-next-line
-    // @ts-ignore
-    const filtered = columns.filter((c) => f?.includes(c.id));
+    const filtered = columns.filter((c) => f?.includes(c.id as string));
 
     return filtered.map((col) => {
       return {
@@ -90,7 +80,7 @@ function useSymbolColumns(columnKeys?: string[]) {
         cell: (props) => <FormattedCell cell={props} />,
       } as ColumnDef<Symbol>;
     });
-  }, [columns, columnKeys]);
+  }, [columnKeys]);
 }
 
 export function useSymbolTable(
@@ -98,10 +88,13 @@ export function useSymbolTable(
   data: Symbol[],
   columnKey?: string[],
 ) {
+  // Defaults
+  const columns = useSymbolColumns(columnKey);
   const symbolSwitcher = useGroupSymbolSwitcher();
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const columns = useSymbolColumns(columnKey);
   const { columnPinning, setColumnPinning } = useColumnPinning(columns);
+
+  // Table
   const table = useReactTable({
     data,
     columns,
@@ -113,14 +106,14 @@ export function useSymbolTable(
     getRowId: (row) => [row.exchange, row.name].join(":"),
   });
 
-  // Switch Symbol in the Group
+  // Switch Group Symbol
   useEffect(() => {
     const symbol = Object.keys(rowSelection).filter((s) => rowSelection[s])[0];
     if (!symbol) return;
     symbolSwitcher(symbol);
   }, [rowSelection, symbolSwitcher]);
 
-  // Keyboard navigation
+  // Handle Keyboard Navigation to change selection
   const handleKeyDown: KeyboardEventHandler = (e) => {
     const rows = table.getRowModel().rows;
     const total = rows.length;
@@ -156,7 +149,6 @@ export function useSymbolTable(
 
   // Scroll the selected row into view
   useEffect(() => {
-    console.log("Scrolll");
     const scrollableContainer = document.querySelector(`#symbol-table-${id}`);
     const selectedRows = table.getSelectedRowModel().rows;
     if (selectedRows.length > 0 && scrollableContainer) {
@@ -185,11 +177,14 @@ export function useSymbolTable(
     }
   }, [rowSelection, table, id]);
 
+  // Custom Table and Row Props
   const tableProps = useCallback(() => ({ id: `symbol-table-${id}` }), [id]);
   const rowProps = useCallback(
     (row: Row<Symbol>) => ({ "data-ticker": row.id }),
     [],
   );
+
+
   return {
     id,
     table,
