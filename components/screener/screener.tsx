@@ -6,7 +6,7 @@ interface ScreenerProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export function Screener({ className, ...props }: ScreenerProps) {
-  const columns = useMemo(() => ["day_close", "dcr", "wcr"], []);
+  const columns = useMemo(() => ["name", "day_close", "dcr", "wcr"], []);
   const sort = useMemo(() => [{ field: "mcap", asc: false }], []);
   return (
     <SymbolTable

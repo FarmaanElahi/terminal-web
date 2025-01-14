@@ -1,7 +1,6 @@
-import React, { HTMLAttributes, RefObject, useEffect, useMemo } from "react";
+import React, { HTMLAttributes, RefObject, useEffect } from "react";
 import { flexRender, Row, Table as TTable } from "@tanstack/react-table";
 import { useSymbolTable } from "@/components/symbols/use_screener_table";
-import { useScreener } from "@/lib/state/screener";
 import type { Symbol } from "@/types/symbol";
 import { useVirtualizer, Virtualizer } from "@tanstack/react-virtual";
 import {
@@ -11,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 interface SymbolTableProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
@@ -19,37 +19,9 @@ interface SymbolTableProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export function SymbolTable(props: SymbolTableProps) {
-  const { id, columns, sort, className } = props;
-  const { data, isFetching, fetchNextPage, isLoading } = useScreener({
-    columns,
-    sort,
-  });
-  const allData = useMemo(
-    () => data?.pages?.flatMap((p) => p.data) ?? ([] as Symbol[]),
-    [data],
-  );
-
-  const { table } = useSymbolTable(id, allData, columns);
-
-  const totalDBRowCount = data?.pages?.[0]?.meta?.total ?? 0;
-  const totalFetched = allData.length;
-
-  //called on scroll and possibly on mount to fetch more data as the user scrolls and reaches bottom of table
-  const loadMore = React.useCallback(
-    (containerRefElement?: HTMLDivElement | null) => {
-      if (containerRefElement) {
-        const { scrollHeight, scrollTop, clientHeight } = containerRefElement;
-        //once the user has scrolled within 500px of the bottom of the table, fetch more data if we can
-        if (
-          scrollHeight - scrollTop - clientHeight < 500 &&
-          !isFetching &&
-          totalFetched < totalDBRowCount
-        ) {
-          void fetchNextPage();
-        }
-      }
-    },
-    [fetchNextPage, isFetching, totalFetched, totalDBRowCount],
+  const { columns } = props;
+  const { table, loadMore, isLoading, switchSymbol } = useSymbolTable(
+    columns ?? [],
   );
 
   //we need a reference to the scrolling element for logic down below
@@ -80,6 +52,7 @@ export function SymbolTable(props: SymbolTableProps) {
       loadMore={loadMore}
       isLoading={isLoading}
       rowVirtualizer={rowVirtualizer}
+      switchSymbol={switchSymbol}
     />
   );
 }
@@ -91,6 +64,7 @@ function SymbolTableUI({
   containerRef,
   rowVirtualizer,
   loadMore,
+  switchSymbol,
 }: {
   rows: Row<Symbol>[];
   isLoading: boolean;
@@ -98,6 +72,7 @@ function SymbolTableUI({
   containerRef: RefObject<HTMLDivElement | null>;
   rowVirtualizer: Virtualizer<HTMLDivElement, Element>;
   loadMore: (el: HTMLDivElement | null) => void;
+  switchSymbol: (symbol: string) => void;
 }) {
   if (isLoading) {
     return <>Loading...</>;
@@ -110,36 +85,23 @@ function SymbolTableUI({
       ref={containerRef}
     >
       {/* Even though we're still using sematic table tags, we must use CSS grid and flexbox for dynamic row heights */}
-      <Table style={{ display: "grid" }}>
-        <TableHeader
-          style={{
-            display: "grid",
-            position: "sticky",
-            top: 0,
-            zIndex: 1,
-          }}
-        >
+      <Table className="grid">
+        <TableHeader className="grid sticky top-0 z-10">
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow
-              key={headerGroup.id}
-              style={{ display: "flex", width: "100%" }}
-            >
+            <TableRow key={headerGroup.id} className="flex w-full">
               {headerGroup.headers.map((header) => {
                 return (
                   <TableHead
                     key={header.id}
-                    style={{
-                      display: "flex",
-                      width: header.getSize(),
-                    }}
+                    className="flex"
+                    style={{ width: header.getSize() }}
                   >
                     <div
-                      {...{
-                        className: header.column.getCanSort()
-                          ? "cursor-pointer select-none"
-                          : "",
-                        onClick: header.column.getToggleSortingHandler(),
-                      }}
+                      className={cn({
+                        "cursor-pointer select-none":
+                          header.column.getCanSort(),
+                      })}
+                      onClick={header.column.getToggleSortingHandler}
                     >
                       {flexRender(
                         header.column.columnDef.header,
@@ -157,11 +119,9 @@ function SymbolTableUI({
           ))}
         </TableHeader>
         <TableBody
-          style={{
-            display: "grid",
-            height: `${rowVirtualizer.getTotalSize()}px`, //tells scrollbar how big the table is
-            position: "relative", //needed for absolute positioning of rows
-          }}
+          className="grid relative"
+          //tells scrollbar how big the table is
+          style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
         >
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
             const row = rows[virtualRow.index] as Row<Symbol>;
@@ -170,21 +130,17 @@ function SymbolTableUI({
                 data-index={virtualRow.index} //needed for dynamic row height measurement
                 ref={(node) => rowVirtualizer.measureElement(node)} //measure dynamic row height
                 key={row.id}
-                style={{
-                  display: "flex",
-                  position: "absolute",
-                  transform: `translateY(${virtualRow.start}px)`, //this should always be a `style` as it changes on scroll
-                  width: "100%",
-                }}
+                className="flex absolute w-full"
+                //this should always be a `style` as it changes on scroll
+                style={{ transform: `translateY(${virtualRow.start}px)` }}
+                onClick={() => switchSymbol(row.id)}
               >
                 {row.getVisibleCells().map((cell) => {
                   return (
                     <td
                       key={cell.id}
-                      style={{
-                        display: "flex",
-                        width: cell.column.getSize(),
-                      }}
+                      className="flex"
+                      style={{ width: cell.column.getSize() }}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

@@ -2,6 +2,8 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import type { Symbol } from "@/types/symbol";
+import { FormattedCell } from "@/components/symbols/formatted_cell";
+import React from "react";
 
 function agoCols(
   meta: Record<string, unknown>,
@@ -2975,4 +2977,12 @@ export const defaultSymbolColumns: ColumnDef<Symbol>[] = [
   },
 
   // ##########################  Technical  ##########################
-];
+].map((c) => {
+  return {
+    ...c,
+    cell: (props) => <FormattedCell cell={props} />,
+    // eslint-disable-next-line
+    // @ts-ignore
+    id: c.accessorKey,
+  } as ColumnDef<Symbol>;
+});
