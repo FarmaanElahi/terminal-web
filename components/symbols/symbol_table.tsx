@@ -1,8 +1,8 @@
 import React, { HTMLAttributes, RefObject, useEffect } from "react";
 import { flexRender, Row, Table as TTable } from "@tanstack/react-table";
-import { useSymbolTable } from "@/components/symbols/use_screener_table";
+import { useSymbolTable } from "@/components/symbols/use_symbol_table";
 import type { Symbol } from "@/types/symbol";
-import { useVirtualizer, Virtualizer } from "@tanstack/react-virtual";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   Table,
   TableBody,
@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { useGroupSymbolSwitcher } from "@/lib/state/grouper";
 
 interface SymbolTableProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
@@ -20,9 +21,8 @@ interface SymbolTableProps extends HTMLAttributes<HTMLDivElement> {
 
 export function SymbolTable(props: SymbolTableProps) {
   const { columns } = props;
-  const { table, loadMore, isLoading, switchSymbol } = useSymbolTable(
-    columns ?? [],
-  );
+  const { table, loadMore } = useSymbolTable(columns ?? []);
+  const switchSymbol = useGroupSymbolSwitcher();
 
   //we need a reference to the scrolling element for logic down below
   const tableContainerRef = React.useRef<HTMLDivElement>(null);
@@ -30,53 +30,44 @@ export function SymbolTable(props: SymbolTableProps) {
     loadMore(tableContainerRef.current);
   }, [loadMore]);
 
-  const { rows } = table.getRowModel();
-  const rowVirtualizer = useVirtualizer({
-    count: rows.length,
-    estimateSize: () => 33, //estimate row height for accurate scrollbar dragging
-    getScrollElement: () => tableContainerRef.current,
-    //measure dynamic row height, except in firefox because it measures table border height incorrectly
-    measureElement:
-      typeof window !== "undefined" &&
-      navigator.userAgent.indexOf("Firefox") === -1
-        ? (element) => element?.getBoundingClientRect().height
-        : undefined,
-    overscan: 5,
-  });
-
   return (
     <SymbolTableUI
       containerRef={tableContainerRef}
       table={table}
-      rows={rows}
       loadMore={loadMore}
-      isLoading={isLoading}
-      rowVirtualizer={rowVirtualizer}
       switchSymbol={switchSymbol}
     />
   );
 }
 
+function fixMeasureElement() {
+  //measure dynamic row height, except in firefox because it measures table border height incorrectly
+  return typeof window !== "undefined" &&
+    navigator.userAgent.indexOf("Firefox") === -1
+    ? (element: Element) => element?.getBoundingClientRect().height
+    : undefined;
+}
+
 function SymbolTableUI({
-  rows,
-  isLoading,
   table,
   containerRef,
-  rowVirtualizer,
   loadMore,
   switchSymbol,
 }: {
-  rows: Row<Symbol>[];
-  isLoading: boolean;
   table: TTable<Symbol>;
   containerRef: RefObject<HTMLDivElement | null>;
-  rowVirtualizer: Virtualizer<HTMLDivElement, Element>;
   loadMore: (el: HTMLDivElement | null) => void;
   switchSymbol: (symbol: string) => void;
 }) {
-  if (isLoading) {
-    return <>Loading...</>;
-  }
+  const { rows } = table.getRowModel();
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    //estimate row height for accurate scrollbar dragging
+    estimateSize: () => 40,
+    getScrollElement: () => containerRef.current,
+    measureElement: fixMeasureElement(),
+    overscan: 5,
+  });
 
   return (
     <div

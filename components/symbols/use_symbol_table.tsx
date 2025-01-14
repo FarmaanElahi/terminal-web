@@ -8,11 +8,9 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import type { Symbol } from "@/types/symbol";
-import React, { CSSProperties, useCallback, useMemo, useState } from "react";
-import { FormattedCell } from "@/components/symbols/formatted_cell";
+import { CSSProperties, useCallback, useMemo, useState } from "react";
 import { defaultSymbolColumns } from "@/components/symbols/column";
 import { useScreener } from "@/lib/state/screener";
-import { useGroupSymbolSwitcher } from "@/lib/state/grouper";
 
 const getCommonPinningStyles = (column: Column<Symbol>): CSSProperties => {
   const isPinned = column.getIsPinned();
@@ -82,7 +80,6 @@ export function useSymbolTable(defaultColumns: string[]) {
     useSymbolColumns(defaultColumns);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const { columnPinning, setColumnPinning } = useColumnPinning(columns);
-  const switchSymbol = useGroupSymbolSwitcher();
 
   // API
   const result = useScreener({
@@ -108,13 +105,6 @@ export function useSymbolTable(defaultColumns: string[]) {
     getRowId: (row) => [row.exchange, row.name].join(":"),
   });
 
-  // Switch Group Symbol
-  // useEffect(() => {
-  //   const symbol = Object.keys(rowSelection).filter((s) => rowSelection[s])[0];
-  //   if (!symbol) return;
-  //   symbolSwitcher(symbol);
-  // }, [rowSelection, symbolSwitcher]);
-
   const totalCount = result?.data?.pages?.[0]?.meta?.total ?? 0;
   const totalLoaded = data.length;
   //called on scroll and possibly on mount to fetch more data as the user scrolls and reaches bottom of table
@@ -135,8 +125,7 @@ export function useSymbolTable(defaultColumns: string[]) {
     },
     [fetchNextPage, isFetching, totalLoaded, totalCount],
   );
-
-  return { table, loadMore, isLoading, switchSymbol };
+  return { table, loadMore, isLoading };
 }
 
 //  Switch Group Symbol
