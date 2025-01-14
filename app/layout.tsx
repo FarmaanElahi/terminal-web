@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
-import { ChartManagerContextProvider } from "@/components/chart/chart_context";
 
 const quicksand = Quicksand({
   variable: "--font-quicksand-sans",

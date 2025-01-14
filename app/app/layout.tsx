@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
-import { ReactQueryProvider } from "@/lib/client";
 import { ChartContextProvider } from "@/lib/state/charts";
 import { ChartLoader } from "@/components/chart/chart_loader";
+import { ReactQueryProvider } from "@/lib/client";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
@@ -11,9 +11,6 @@ export default function Layout({ children }: { children: ReactNode }) {
           <div className="h-full">{children}</div>
         </ChartContextProvider>
       </ChartLoader>
-      {/*<SidebarProvider>*/}
-      {/*<AppSidebar />*/}
-      {/*</SidebarProvider>*/}
     </ReactQueryProvider>
   );
 }
