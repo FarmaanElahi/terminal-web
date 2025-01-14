@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { useGroupSymbolSwitcher } from "@/lib/state/grouper";
+import { ColumnSort } from "@tanstack/table-core/src/features/RowSorting";
 
 interface SymbolTableProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
@@ -71,6 +72,12 @@ function SymbolTableUI({
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="flex w-full">
               {headerGroup.headers.map((header) => {
+                const sortingOrder = header.column.getIsSorted()
+                  ? table
+                      .getState()
+                      .sorting.findIndex((s) => s.id === header.column.id)
+                  : -1;
+
                 return (
                   <TableHead
                     key={header.id}
@@ -92,6 +99,7 @@ function SymbolTableUI({
                         asc: " 🔼",
                         desc: " 🔽",
                       }[header.column.getIsSorted() as string] ?? null}
+                      {sortingOrder >= 0 ? sortingOrder + 1 : undefined}
                     </div>
                   </TableHead>
                 );
