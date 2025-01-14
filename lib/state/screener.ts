@@ -1,15 +1,20 @@
 import type { Symbol } from "@/types/symbol";
 import axios from "axios";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
 
 const webClient = axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL });
 
-export function useScreener(payload: {
-  columns: string[];
-  sort: { field: string; asc: boolean }[];
+type ScreenerResponse = {
+  data: Symbol[];
+  meta: { total: number };
+  nextOffset: number;
+};
+
+export function useScreener(payload?: {
+  columns?: string[];
+  sort?: { field: string; asc: boolean }[];
 }) {
-  const result = useInfiniteQuery<{ rows: Symbol[]; nextOffset: number }>({
+  return useInfiniteQuery<ScreenerResponse>({
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextOffset,
     queryKey: ["default-screener"],
@@ -28,28 +33,27 @@ export function useScreener(payload: {
         "day_low",
         "day_close",
       ];
-      const columns = new Set<string>(payload.columns ?? []);
+      const columns = new Set<string>(payload?.columns ?? []);
       const missingCols = mandatoryColumns.filter((c) => !columns.has(c));
 
+      // Sort in case field is missing
+      const sort =
+        payload?.sort && payload.sort.length > 0
+          ? payload.sort
+          : [{ field: "mcap", asc: false }];
+
       const data = {
-        ...payload,
+        sort,
         columns: [...missingCols, ...columns],
         limit,
         offset,
       };
 
-      const result = await webClient.post("/api/v1/screener/scan", data);
-      return {
-        rows: result.data as Symbol[],
-        nextOffset: offset + 1,
-      };
+      const result = await webClient.post<{
+        meta: { total: number };
+        data: Symbol[];
+      }>("/api/v1/screener/scan", data);
+      return { ...result.data, nextOffset: offset + 1 };
     },
   });
-
-  const data = useMemo(
-    () => result?.data?.pages?.flatMap((p) => p.rows) ?? ([] as Symbol[]),
-    [result],
-  );
-
-  return { ...result, data };
 }
