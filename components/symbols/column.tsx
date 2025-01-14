@@ -65,11 +65,10 @@ function forwardCols(
 
 export const defaultSymbolColumns: ColumnDef<Symbol>[] = [
   // #############################  Generals  ################################
-
-  { accessorKey: "isin", header: "ISIN", meta: { category: "General" } },
   {
     accessorKey: "name",
     header: "Symbol",
+    enableHiding: false,
     meta: {
       format: "symbol",
       category: "General",
@@ -77,6 +76,7 @@ export const defaultSymbolColumns: ColumnDef<Symbol>[] = [
       cols: ["logo", "earnings_release_next_date"],
     },
   },
+  { accessorKey: "isin", header: "ISIN", meta: { category: "General" } },
   {
     accessorKey: "day_open",
     header: "Open",

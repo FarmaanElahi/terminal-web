@@ -162,10 +162,9 @@ export function useSymbolTable(
   );
 
   // Set Up Virtualizer
-  const { hasNextPage } = result;
   const { rows } = table.getRowModel();
   const rowVirtualizer = useVirtualizer({
-    count: hasNextPage ? rows.length + 1 : rows.length,
+    count: rows.length,
     //estimate row height for accurate scrollbar dragging
     estimateSize: () => 40,
     getScrollElement: () => containerRef.current,
