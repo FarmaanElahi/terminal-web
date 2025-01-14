@@ -21,7 +21,7 @@ interface SymbolTableProps extends HTMLAttributes<HTMLDivElement> {
 
 export function SymbolTable(props: SymbolTableProps) {
   const { columns } = props;
-  const { table, loadMore } = useSymbolTable(columns ?? []);
+  const { table, loadMore } = useSymbolTable(columns);
   const switchSymbol = useGroupSymbolSwitcher();
 
   //we need a reference to the scrolling element for logic down below

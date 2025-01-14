@@ -67,23 +67,40 @@ function useSymbolColumns(visibleColumns?: string[]) {
     return visibility;
   });
 
+  // API
+  const queryColumn = useMemo(() => {
+    const columnByKey = defaultSymbolColumns.reduce(
+      (acc, column) => {
+        return { ...acc, [column.id!]: column };
+      },
+      {} as Record<string, ColumnDef<Symbol>>,
+    );
+    return (
+      Object.keys(columnVisibility)
+        .filter((c) => columnVisibility[c])
+        // eslint-disable-next-line
+        // @ts-ignore
+        .flatMap((c) => [c, ...(columnByKey[c]?.meta?.cols ?? [])] as string[])
+    );
+  }, [columnVisibility]);
+
   return {
     columns: defaultSymbolColumns,
+    queryColumn,
     columnVisibility,
     setColumnVisibility,
   };
 }
 
-export function useSymbolTable(defaultColumns: string[]) {
+export function useSymbolTable(defaultColumns?: string[]) {
   // Defaults
-  const { columns, columnVisibility, setColumnVisibility } =
+  const { columns, queryColumn, columnVisibility, setColumnVisibility } =
     useSymbolColumns(defaultColumns);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const { columnPinning, setColumnPinning } = useColumnPinning(columns);
 
-  // API
   const result = useScreener({
-    columns: Object.keys(columnVisibility).filter((c) => columnVisibility[c]),
+    columns: queryColumn,
   });
 
   // Data
