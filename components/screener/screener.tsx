@@ -9,6 +9,7 @@ export function Screener({ className, ...props }: ScreenerProps) {
   const columns = useMemo(
     () => [
       "name",
+      "mcap",
       "day_close",
       "dcr",
       "wcr",

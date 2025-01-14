@@ -2,7 +2,7 @@ import React, { HTMLAttributes, RefObject, useEffect } from "react";
 import { flexRender, Row, Table as TTable } from "@tanstack/react-table";
 import { useSymbolTable } from "@/components/symbols/use_symbol_table";
 import type { Symbol } from "@/types/symbol";
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { Virtualizer } from "@tanstack/react-virtual";
 import {
   Table,
   TableBody,
@@ -21,31 +21,27 @@ interface SymbolTableProps extends HTMLAttributes<HTMLDivElement> {
 
 export function SymbolTable(props: SymbolTableProps) {
   const { columns } = props;
-  const { table, loadMore } = useSymbolTable(columns);
+  //we need a reference to the scrolling element for logic down below
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const { table, loadMore, rowVirtualizer } = useSymbolTable(
+    containerRef,
+    columns,
+  );
   const switchSymbol = useGroupSymbolSwitcher();
 
-  //we need a reference to the scrolling element for logic down below
-  const tableContainerRef = React.useRef<HTMLDivElement>(null);
   useEffect(() => {
-    loadMore(tableContainerRef.current);
+    loadMore(containerRef.current);
   }, [loadMore]);
 
   return (
     <SymbolTableUI
-      containerRef={tableContainerRef}
+      containerRef={containerRef}
       table={table}
       loadMore={loadMore}
       switchSymbol={switchSymbol}
+      rowVirtualizer={rowVirtualizer}
     />
   );
-}
-
-function fixMeasureElement() {
-  //measure dynamic row height, except in firefox because it measures table border height incorrectly
-  return typeof window !== "undefined" &&
-    navigator.userAgent.indexOf("Firefox") === -1
-    ? (element: Element) => element?.getBoundingClientRect().height
-    : undefined;
 }
 
 function SymbolTableUI({
@@ -53,21 +49,15 @@ function SymbolTableUI({
   containerRef,
   loadMore,
   switchSymbol,
+  rowVirtualizer,
 }: {
   table: TTable<Symbol>;
   containerRef: RefObject<HTMLDivElement | null>;
   loadMore: (el: HTMLDivElement | null) => void;
   switchSymbol: (symbol: string) => void;
+  rowVirtualizer: Virtualizer<HTMLDivElement, Element>;
 }) {
   const { rows } = table.getRowModel();
-  const rowVirtualizer = useVirtualizer({
-    count: rows.length,
-    //estimate row height for accurate scrollbar dragging
-    estimateSize: () => 40,
-    getScrollElement: () => containerRef.current,
-    measureElement: fixMeasureElement(),
-    overscan: 5,
-  });
 
   return (
     <div
@@ -92,7 +82,7 @@ function SymbolTableUI({
                         "cursor-pointer select-none":
                           header.column.getCanSort(),
                       })}
-                      onClick={header.column.getToggleSortingHandler}
+                      onClick={header.column.getToggleSortingHandler()}
                     >
                       {flexRender(
                         header.column.columnDef.header,

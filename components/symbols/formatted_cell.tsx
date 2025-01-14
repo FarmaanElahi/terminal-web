@@ -37,7 +37,7 @@ function CandleStickCell(props: { cell: CellContext<Symbol, unknown> }) {
   const value = new Intl.NumberFormat("en-IN", {
     maximumFractionDigits: 0,
     style: "percent",
-  }).format(rangeValue/100);
+  }).format(rangeValue / 100);
 
   if (candlestick) {
     return (
@@ -190,10 +190,10 @@ function CurrencyCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
     currencyDisplay: "symbol",
     currency: currencyCode,
     style: "currency",
+    notation: value > 1_00_00_000 ? "compact" : "standard",
   });
 
-  const toCR = value > 100000;
-  const amount = toCR ? formatter.format(value / 10000000) + "Cr" : value;
+  const amount = formatter.format(value);
 
   return <span>{amount}</span>;
 }
@@ -232,7 +232,11 @@ function PriceCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
   );
 }
 
-export function FormattedCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
+export function FormattedCell({
+  cell,
+}: {
+  cell: CellContext<Symbol, unknown>;
+}) {
   const meta = (cell.column.columnDef.meta ?? {}) as Record<string, string>;
   const { defaultValue, format } = meta;
   const value = cell.getValue() || (defaultValue as string) || "-";

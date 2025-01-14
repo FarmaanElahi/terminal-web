@@ -4,13 +4,23 @@ import {
   ColumnDef,
   ColumnPinningState,
   getCoreRowModel,
+  getSortedRowModel,
+  OnChangeFn,
   RowSelectionState,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import type { Symbol } from "@/types/symbol";
-import { CSSProperties, useCallback, useMemo, useState } from "react";
+import {
+  CSSProperties,
+  RefObject,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import { defaultSymbolColumns } from "@/components/symbols/column";
 import { useScreener } from "@/lib/state/screener";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 const getCommonPinningStyles = (column: Column<Symbol>): CSSProperties => {
   const isPinned = column.getIsPinned();
@@ -92,15 +102,20 @@ function useSymbolColumns(visibleColumns?: string[]) {
   };
 }
 
-export function useSymbolTable(defaultColumns?: string[]) {
+export function useSymbolTable(
+  containerRef: RefObject<HTMLDivElement | null>,
+  defaultColumns?: string[],
+) {
   // Defaults
   const { columns, queryColumn, columnVisibility, setColumnVisibility } =
     useSymbolColumns(defaultColumns);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [sorting, setSorting] = useState<SortingState>([]);
   const { columnPinning, setColumnPinning } = useColumnPinning(columns);
 
   const result = useScreener({
     columns: queryColumn,
+    sort: sorting.map((s) => ({ field: s.id, asc: !s.desc })),
   });
 
   // Data
@@ -114,14 +129,17 @@ export function useSymbolTable(defaultColumns?: string[]) {
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    state: { columnPinning, rowSelection, columnVisibility },
+    getSortedRowModel: getSortedRowModel(),
+    state: { columnPinning, rowSelection, columnVisibility, sorting },
     onColumnPinningChange: setColumnPinning,
     onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: setColumnVisibility,
     enableMultiRowSelection: false,
+    manualSorting: true,
     getRowId: (row) => [row.exchange, row.name].join(":"),
   });
 
+  // Infinite Loading
   const totalCount = result?.data?.pages?.[0]?.meta?.total ?? 0;
   const totalLoaded = data.length;
   //called on scroll and possibly on mount to fetch more data as the user scrolls and reaches bottom of table
@@ -142,7 +160,41 @@ export function useSymbolTable(defaultColumns?: string[]) {
     },
     [fetchNextPage, isFetching, totalLoaded, totalCount],
   );
-  return { table, loadMore, isLoading };
+
+  // Set Up Virtualizer
+  const { hasNextPage } = result;
+  const { rows } = table.getRowModel();
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    //estimate row height for accurate scrollbar dragging
+    estimateSize: () => 40,
+    getScrollElement: () => containerRef.current,
+    measureElement: fixMeasureElement(),
+    overscan: 5,
+  });
+
+  //Scroll to top of table when sorting changes
+  const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
+    setSorting(updater);
+    if (!!table.getRowModel().rows.length) {
+      rowVirtualizer.scrollToIndex?.(0);
+    }
+  };
+  //since this table option is derived from table row model state, we're using the table.setOptions utility
+  table.setOptions((prev) => ({
+    ...prev,
+    onSortingChange: handleSortingChange,
+  }));
+
+  return { table, loadMore, isLoading, rowVirtualizer };
+}
+
+function fixMeasureElement() {
+  //measure dynamic row height, except in firefox because it measures table border height incorrectly
+  return typeof window !== "undefined" &&
+    navigator.userAgent.indexOf("Firefox") === -1
+    ? (element: Element) => element?.getBoundingClientRect().height
+    : undefined;
 }
 
 //  Switch Group Symbol
