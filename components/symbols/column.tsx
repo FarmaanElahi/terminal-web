@@ -70,7 +70,12 @@ export const defaultSymbolColumns: ColumnDef<Symbol>[] = [
   {
     accessorKey: "name",
     header: "Symbol",
-    meta: { format: "symbol", category: "General", pinLeft: true },
+    meta: {
+      format: "symbol",
+      category: "General",
+      pinLeft: true,
+      cols: ["logo", "earnings_release_next_date"],
+    },
   },
   {
     accessorKey: "day_open",

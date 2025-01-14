@@ -188,9 +188,13 @@ function CurrencyCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
   const formatter = new Intl.NumberFormat("en-IN", {
     maximumFractionDigits: 0,
     currencyDisplay: "symbol",
-    currency: currencyCode,
-    style: "currency",
     notation: value > 1_00_00_000 ? "compact" : "standard",
+    ...(currencyCode
+      ? {
+          currency: currencyCode,
+          style: "currency",
+        }
+      : {}),
   });
 
   const amount = formatter.format(value);
