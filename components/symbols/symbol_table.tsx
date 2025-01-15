@@ -27,7 +27,6 @@ import {
   Sheet,
   SheetClose,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -39,7 +38,24 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronsUpDown, Settings, X } from "lucide-react";
+import { ChevronsUpDown, Settings } from "lucide-react";
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
+import type { DragEndEvent } from "@dnd-kit/core/dist/types";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 interface SymbolTableProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
@@ -51,7 +67,7 @@ export function SymbolTable(props: SymbolTableProps) {
   const { columns } = props;
   //we need a reference to the scrolling element for logic down below
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const { table, loadMore, rowVirtualizer, isLoading } = useSymbolTable(
+  const { table, loadMore, rowVirtualizer } = useSymbolTable(
     containerRef,
     columns,
   );
@@ -259,9 +275,70 @@ function SymbolColumnSheet({ table }: { table: TTable<Symbol> }) {
             <SheetTitle>Columns</SheetTitle>
             <SheetClose />
           </SheetHeader>
-          {colsUI}
+          <div className="flex">
+            {colsUI}
+            <SymbolColumnOrder table={table} />
+          </div>
         </SheetContent>
       </Sheet>
+    </div>
+  );
+}
+
+function SymbolColumnOrder({ table }: { table: TTable<Symbol> }) {
+  const columns = table.getState().columnOrder ?? [];
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (active && over && active.id !== over.id) {
+      table.setColumnOrder((columnOrder) => {
+        const oldIndex = columnOrder.indexOf(active.id as string);
+        const newIndex = columnOrder.indexOf(over.id as string);
+        return arrayMove(columnOrder, oldIndex, newIndex); //this is just a splice util
+      });
+    }
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  return (
+    <div className="w-48 flex flex-col">
+      <DndContext
+        onDragEnd={handleDragEnd}
+        sensors={sensors}
+        collisionDetection={closestCenter}
+      >
+        <SortableContext items={columns} strategy={verticalListSortingStrategy}>
+          {columns.map((c) => (
+            <ColumnDraggable key={c} column={table.getColumn(c)!} id={c} />
+          ))}
+        </SortableContext>
+      </DndContext>
+    </div>
+  );
+}
+
+function ColumnDraggable({
+  column,
+  id,
+}: {
+  id: string;
+  column: Column<Symbol>;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+  return (
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
+      {column.columnDef.header as string}
     </div>
   );
 }

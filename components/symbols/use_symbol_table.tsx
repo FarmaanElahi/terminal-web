@@ -94,11 +94,17 @@ function useSymbolColumns(visibleColumns?: string[]) {
     );
   }, [columnVisibility]);
 
+  const [columnOrder, setColumnOrder] = useState<string[]>(
+    Object.keys(columnVisibility).filter((c) => columnVisibility[c]),
+  );
+
   return {
     columns: defaultSymbolColumns,
     queryColumn,
     columnVisibility,
     setColumnVisibility,
+    columnOrder,
+    setColumnOrder,
   };
 }
 
@@ -107,8 +113,14 @@ export function useSymbolTable(
   defaultColumns?: string[],
 ) {
   // Defaults
-  const { columns, queryColumn, columnVisibility, setColumnVisibility } =
-    useSymbolColumns(defaultColumns);
+  const {
+    columns,
+    queryColumn,
+    columnVisibility,
+    setColumnVisibility,
+    columnOrder,
+    setColumnOrder,
+  } = useSymbolColumns(defaultColumns);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [sorting, setSorting] = useState<SortingState>([]);
   const { columnPinning, setColumnPinning } = useColumnPinning(columns);
@@ -130,10 +142,17 @@ export function useSymbolTable(
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    state: { columnPinning, rowSelection, columnVisibility, sorting },
+    state: {
+      columnPinning,
+      rowSelection,
+      columnVisibility,
+      sorting,
+      columnOrder,
+    },
     onColumnPinningChange: setColumnPinning,
     onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: setColumnVisibility,
+    onColumnOrderChange: setColumnOrder,
     enableMultiRowSelection: false,
     manualSorting: true,
     getRowId: (row) => [row.exchange, row.name].join(":"),
