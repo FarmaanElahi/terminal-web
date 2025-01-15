@@ -65,7 +65,9 @@ function useColumnPinning(columns: ColumnDef<Symbol>[]) {
   return { columnPinning, setColumnPinning, getCommonPinningStyles };
 }
 
-function useSymbolColumns(visibleColumns?: string[]) {
+function useSymbolColumns(visibleColumns: string[]) {
+  const columns = defaultSymbolColumns;
+
   const [columnVisibility, setColumnVisibility] = useState<
     Record<string, boolean>
   >(() => {
@@ -79,7 +81,7 @@ function useSymbolColumns(visibleColumns?: string[]) {
 
   // API
   const queryColumn = useMemo(() => {
-    const columnByKey = defaultSymbolColumns.reduce(
+    const columnByKey = columns.reduce(
       (acc, column) => {
         return { ...acc, [column.id!]: column };
       },
@@ -92,14 +94,14 @@ function useSymbolColumns(visibleColumns?: string[]) {
         // @ts-ignore
         .flatMap((c) => [c, ...(columnByKey[c]?.meta?.cols ?? [])] as string[])
     );
-  }, [columnVisibility]);
+  }, [columns, columnVisibility]);
 
   const [columnOrder, setColumnOrder] = useState<string[]>(
-    Object.keys(columnVisibility).filter((c) => columnVisibility[c]),
+    columns.map((c) => c.id!),
   );
 
   return {
-    columns: defaultSymbolColumns,
+    columns,
     queryColumn,
     columnVisibility,
     setColumnVisibility,
@@ -110,7 +112,7 @@ function useSymbolColumns(visibleColumns?: string[]) {
 
 export function useSymbolTable(
   containerRef: RefObject<HTMLDivElement | null>,
-  defaultColumns?: string[],
+  defaultColumns: string[],
 ) {
   // Defaults
   const {

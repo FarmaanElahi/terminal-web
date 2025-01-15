@@ -59,7 +59,7 @@ import {
 
 interface SymbolTableProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
-  columns?: string[];
+  columns: string[];
   sort?: { field: string; asc: boolean }[];
 }
 
@@ -196,7 +196,7 @@ function SymbolTableUI({
 function SymbolColumnSheet({ table }: { table: TTable<Symbol> }) {
   const [open, setOpen] = useState(false);
 
-  const groupsColumn = useMemo(() => {
+  const columnByCategory = useMemo(() => {
     const columns = table.getAllColumns();
     return columns.reduce(
       (acc, column) => {
@@ -215,38 +215,52 @@ function SymbolColumnSheet({ table }: { table: TTable<Symbol> }) {
 
   const colsUI = (
     <div className="h-full overflow-auto space-y-2">
-      {Object.keys(groupsColumn).map((c) => {
+      {Object.keys(columnByCategory).map((category) => {
+        const groupColumns = columnByCategory[category];
+        const groupColumnCount = groupColumns.length;
+        const visibleGroupColumns = groupColumns.filter((c) =>
+          c.getIsVisible(),
+        );
+        const visibleGroupColumnsCount = visibleGroupColumns.length;
+
         const g = (
           <div className="flex flex-col gap-2">
-            {groupsColumn[c].map((c) => (
-              <div key={c.id} className="flex gap-2">
+            {groupColumns.map((column) => (
+              <div key={column.id} className="flex gap-2">
                 <Checkbox
-                  checked={c.getIsVisible()}
-                  disabled={!c.getCanHide()}
-                  onCheckedChange={(checked) =>
-                    typeof checked === "boolean"
-                      ? c.toggleVisibility(checked)
-                      : undefined
-                  }
+                  checked={column.getIsVisible()}
+                  disabled={!column.getCanHide()}
+                  onCheckedChange={(checked) => {
+                    if (typeof checked === "boolean") {
+                      column.toggleVisibility(checked);
+                      console.log(
+                        "New Column order",
+                        table.getVisibleFlatColumns(),
+                      );
+                    }
+                  }}
                 />
                 <label
-                  htmlFor={c.id}
+                  htmlFor={column.id}
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                  {c.columnDef.header as string}
+                  {column.columnDef.header as string}
                 </label>
               </div>
             ))}
           </div>
         );
+
         return (
-          <Collapsible key={c} className="border space-y-2 rounded">
+          <Collapsible key={category} className="border space-y-2 rounded">
             <CollapsibleTrigger asChild>
               <Button
                 variant="ghost"
                 className="w-full inline-flex justify-between rounded"
               >
-                {c}
+                {category}
+                <span className="flex-1"></span>
+                {`${visibleGroupColumnsCount}/${groupColumnCount}`}
                 <ChevronsUpDown className="h-4 w-4" />
               </Button>
             </CollapsibleTrigger>
@@ -286,7 +300,13 @@ function SymbolColumnSheet({ table }: { table: TTable<Symbol> }) {
 }
 
 function SymbolColumnOrder({ table }: { table: TTable<Symbol> }) {
-  const columns = table.getState().columnOrder ?? [];
+  const columnOrder = table.getState().columnOrder;
+  const columns = columnOrder
+      .map((c) => table.getColumn(c)!)
+      .filter((c) => c.getIsVisible())
+
+  console.log("Visble Columns", columns, table.getState().columnOrder);
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
@@ -314,7 +334,7 @@ function SymbolColumnOrder({ table }: { table: TTable<Symbol> }) {
       >
         <SortableContext items={columns} strategy={verticalListSortingStrategy}>
           {columns.map((c) => (
-            <ColumnDraggable key={c} column={table.getColumn(c)!} id={c} />
+            <ColumnDraggable key={c.id} column={c} />
           ))}
         </SortableContext>
       </DndContext>
@@ -322,15 +342,9 @@ function SymbolColumnOrder({ table }: { table: TTable<Symbol> }) {
   );
 }
 
-function ColumnDraggable({
-  column,
-  id,
-}: {
-  id: string;
-  column: Column<Symbol>;
-}) {
+function ColumnDraggable({ column }: { column: Column<Symbol> }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
+    useSortable({ id: column.id, disabled: !!column.getIsPinned() });
 
   const style = {
     transform: CSS.Transform.toString(transform),
