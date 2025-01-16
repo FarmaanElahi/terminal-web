@@ -38,7 +38,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronsUpDown, Settings, ArrowUp, ArrowDown } from "lucide-react";
+import {
+  ChevronsUpDown,
+  Settings,
+  ArrowUp,
+  ArrowDown,
+  Paintbrush,
+} from "lucide-react";
 import {
   closestCenter,
   DndContext,
@@ -78,13 +84,16 @@ export function SymbolTable(props: SymbolTableProps) {
   }, [loadMore]);
 
   return (
-    <SymbolTableUI
-      containerRef={containerRef}
-      table={table}
-      loadMore={loadMore}
-      switchSymbol={switchSymbol}
-      rowVirtualizer={rowVirtualizer}
-    />
+    <div className="h-full relative">
+      <SymbolTableControl table={table} />
+      <SymbolTableUI
+        containerRef={containerRef}
+        table={table}
+        loadMore={loadMore}
+        switchSymbol={switchSymbol}
+        rowVirtualizer={rowVirtualizer}
+      />
+    </div>
   );
 }
 
@@ -121,7 +130,7 @@ function SymbolTableUI({
                 const sortingOrder = header.column.getIsSorted()
                   ? table
                       .getState()
-                      .sorting.findIndex((s) => s.id === header.column.id)+1
+                      .sorting.findIndex((s) => s.id === header.column.id) + 1
                   : -1;
                 const sorting = header.column.getIsSorted();
                 return (
@@ -137,10 +146,10 @@ function SymbolTableUI({
                       header.column.columnDef.header,
                       header.getContext(),
                     )}
-                    <div className="flex-1"/>
+                    <div className="flex-1" />
                     {sorting === "asc" && <ArrowUp className="size-4" />}
                     {sorting === "desc" && <ArrowDown className="size-4" />}
-                    <span>{sortingOrder >=0 ? sortingOrder : undefined}</span>
+                    <span>{sortingOrder >= 0 ? sortingOrder : undefined}</span>
                   </TableHead>
                 );
               })}
@@ -183,6 +192,23 @@ function SymbolTableUI({
           })}
         </TableBody>
       </Table>
+    </div>
+  );
+}
+
+function SymbolTableControl({ table }: { table: TTable<Symbol> }) {
+  return (
+    <div className="absolute end-0 z-40 bg-muted flex border-t">
+      {table.getState().sorting?.length > 0 ? (
+        <Button
+          className="rounded-none h-10 text-red-500 hover:text-red-500 bg-transparent hover:bg-transparent"
+          variant="ghost"
+          onClick={() => table.setSorting([])}
+        >
+          <Paintbrush className="size-4" />
+        </Button>
+      ) : undefined}
+      <SymbolColumnSheet table={table} />
     </div>
   );
 }
@@ -268,11 +294,11 @@ function SymbolColumnSheet({ table }: { table: TTable<Symbol> }) {
   );
 
   return (
-    <div className="absolute end-0 z-40">
+    <div>
       <Sheet open={open} onOpenChange={setOpen} modal={false}>
         <SheetTrigger asChild>
           <Button
-            className="hover:bg-white/40 bg-white/40 rounded-none"
+            className="rounded-none h-10  bg-transparent hover:bg-transparent"
             variant="ghost"
           >
             <Settings className="size-4" />
@@ -301,7 +327,7 @@ function SymbolColumnOrder({ table }: { table: TTable<Symbol> }) {
 
   console.log("Visble Columns", columns, table.getState().columnOrder);
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragOver = (event: DragEndEvent) => {
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
       table.setColumnOrder((columnOrder) => {
@@ -322,7 +348,7 @@ function SymbolColumnOrder({ table }: { table: TTable<Symbol> }) {
   return (
     <div className="w-48 flex flex-col">
       <DndContext
-        onDragEnd={handleDragEnd}
+        onDragOver={handleDragOver}
         sensors={sensors}
         collisionDetection={closestCenter}
       >
