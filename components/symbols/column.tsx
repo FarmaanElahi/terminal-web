@@ -2988,6 +2988,6 @@ export const defaultSymbolColumns: ColumnDef<Symbol>[] = [
     cell: (props) => <FormattedCell cell={props} />,
     // eslint-disable-next-line
     // @ts-ignore
-    id: c.accessorKey,
+    id: c.id ?? c.accessorKey,
   } as ColumnDef<Symbol>;
 });

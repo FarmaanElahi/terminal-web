@@ -1,7 +1,6 @@
 "use client";
 
 import { X } from "lucide-react";
-import { cn } from "@/lib/utils";
 import React from "react";
 import { Screener } from "@/components/screener/screener";
 import {
@@ -11,46 +10,43 @@ import {
 } from "@/components/ui/resizable";
 import { Chart } from "@/components/chart/chart";
 import { GrouperProvider, GroupSymbolProvider } from "@/lib/state/grouper";
+import { Button } from "@/components/ui/button";
 
 export default function Page() {
   return (
-    <GroupSymbolProvider>
-      <GrouperProvider group={1}>
-        <div className="flex flex-col h-full">
-          <div className="px-2 py-2 bg-gradient-to-r from-secondary to-[#E7DCFA]">
+    <>
+      <header className="flex h-16 shrink-0 items-center gap-2">
+        <div className="flex items-center gap-2 px-4">
+          <div>
             <Tag placeholder={"Search Symbol"} name={"JINDRILL"} />
           </div>
-          <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel defaultSize={30}>
-              <Screener id={"main"} />
-            </ResizablePanel>
-            <ResizableHandle />
-            <ResizablePanel defaultSize={70}>
-              <Chart id={"main"} />
-            </ResizablePanel>
-          </ResizablePanelGroup>
         </div>
-      </GrouperProvider>
-    </GroupSymbolProvider>
+      </header>
+      <div className="flex-1  overflow-auto">
+        <GroupSymbolProvider>
+          <GrouperProvider group={1}>
+            <ResizablePanelGroup direction="horizontal">
+              <ResizablePanel defaultSize={30} className={"h-full"}>
+                <Screener id={"main"} />
+              </ResizablePanel>
+              <ResizableHandle />
+              <ResizablePanel defaultSize={70}>
+                <Chart id={"main"} />
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </GrouperProvider>
+        </GroupSymbolProvider>
+      </div>
+    </>
   );
 }
 
 function Tag({ name, placeholder }: { name?: string; placeholder: string }) {
   const value = name || placeholder;
   return (
-    <div
-      className={cn(
-        "inline-flex items-center bg-[#E7E9FB] justify-between text-primary gap-4 rounded px-2 py-1 font-bold text-sm w-32",
-        {
-          "justify-center": placeholder,
-          "justify-between": name,
-        },
-      )}
-    >
-      <span>{value}</span>
-      {name && (
-        <X className="size-4 cursor-pointer hover:rounded" onClick={() => {}} />
-      )}
-    </div>
+    <Button variant="outline" className="font-bold justify-between">
+      {value}
+      <X className="size-4" />
+    </Button>
   );
 }
