@@ -277,5 +277,5 @@ export function FormattedCell({
   if (format === "volume") {
     return <VolumeCell cell={cell} />;
   }
-  return <span>{String(value)}</span>;
+  return <span className="truncate">{String(value)}</span>;
 }

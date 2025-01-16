@@ -121,7 +121,7 @@ function SymbolTableUI({
                 const sortingOrder = header.column.getIsSorted()
                   ? table
                       .getState()
-                      .sorting.findIndex((s) => s.id === header.column.id)
+                      .sorting.findIndex((s) => s.id === header.column.id)+1
                   : -1;
                 const sorting = header.column.getIsSorted();
                 return (
@@ -137,10 +137,10 @@ function SymbolTableUI({
                       header.column.columnDef.header,
                       header.getContext(),
                     )}
-                    <div className="flex-1"></div>
+                    <div className="flex-1"/>
                     {sorting === "asc" && <ArrowUp className="size-4" />}
                     {sorting === "desc" && <ArrowDown className="size-4" />}
-                    {sortingOrder >= 0 ? sortingOrder + 1 : undefined}
+                    <span>{sortingOrder >=0 ? sortingOrder : undefined}</span>
                   </TableHead>
                 );
               })}
@@ -148,7 +148,7 @@ function SymbolTableUI({
           ))}
         </TableHeader>
         <TableBody
-          className="grid relative"
+          className="grid relative cursor-default"
           //tells scrollbar how big the table is
           style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
         >
@@ -159,7 +159,7 @@ function SymbolTableUI({
                 data-index={virtualRow.index} //needed for dynamic row height measurement
                 ref={(node) => rowVirtualizer.measureElement(node)} //measure dynamic row height
                 key={row.id}
-                className="flex absolute w-full"
+                className="flex absolute w-full h-10 px-2"
                 //this should always be a `style` as it changes on scroll
                 style={{ transform: `translateY(${virtualRow.start}px)` }}
                 onClick={() => switchSymbol(row.id)}
@@ -168,7 +168,7 @@ function SymbolTableUI({
                   return (
                     <td
                       key={cell.id}
-                      className="flex"
+                      className="flex justify-start align-middle items-center"
                       style={{ width: cell.column.getSize() }}
                     >
                       {flexRender(
