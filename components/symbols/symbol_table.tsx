@@ -88,107 +88,106 @@ export function SymbolTable(props: SymbolTableProps) {
   );
 }
 
+interface SymbolTableUIProps extends HTMLAttributes<HTMLDivElement> {
+  table: TTable<Symbol>;
+  containerRef: RefObject<HTMLDivElement | null>;
+  loadMore: (el: HTMLDivElement | null) => void;
+  switchSymbol: (symbol: string) => void;
+  rowVirtualizer: Virtualizer<HTMLDivElement, Element>;
+}
+
 function SymbolTableUI({
   table,
   containerRef,
   loadMore,
   switchSymbol,
   rowVirtualizer,
-}: {
-  table: TTable<Symbol>;
-  containerRef: RefObject<HTMLDivElement | null>;
-  loadMore: (el: HTMLDivElement | null) => void;
-  switchSymbol: (symbol: string) => void;
-  rowVirtualizer: Virtualizer<HTMLDivElement, Element>;
-}) {
+}: SymbolTableUIProps) {
   const { rows } = table.getRowModel();
 
   return (
-    <div className="relative h-full">
-      <SymbolColumnSheet table={table} />
-      <div
-        className="overflow-auto relative h-full border"
-        onScroll={(e) => loadMore(e.currentTarget)}
-        ref={containerRef}
-      >
-        {/* Even though we're still using sematic table tags, we must use CSS grid and flexbox for dynamic row heights */}
-        <Table className="grid">
-          <TableHeader className="grid sticky top-0 z-10 bg-muted">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="flex w-full">
-                {headerGroup.headers.map((header) => {
-                  const sortingOrder = header.column.getIsSorted()
-                    ? table
-                        .getState()
-                        .sorting.findIndex((s) => s.id === header.column.id)
-                    : -1;
+    <div
+      className="overflow-auto relative h-full border"
+      onScroll={(e) => loadMore(e.currentTarget)}
+      ref={containerRef}
+    >
+      {/* Even though we're still using sematic table tags, we must use CSS grid and flexbox for dynamic row heights */}
+      <Table className="grid">
+        <TableHeader className="grid sticky top-0 z-10 bg-muted">
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id} className="flex w-full">
+              {headerGroup.headers.map((header) => {
+                const sortingOrder = header.column.getIsSorted()
+                  ? table
+                      .getState()
+                      .sorting.findIndex((s) => s.id === header.column.id)
+                  : -1;
 
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className="flex"
-                      style={{ width: header.getSize() }}
+                return (
+                  <TableHead
+                    key={header.id}
+                    className="flex"
+                    style={{ width: header.getSize() }}
+                  >
+                    <div
+                      className={cn({
+                        "cursor-pointer select-none":
+                          header.column.getCanSort(),
+                      })}
+                      onClick={header.column.getToggleSortingHandler()}
                     >
-                      <div
-                        className={cn({
-                          "cursor-pointer select-none":
-                            header.column.getCanSort(),
-                        })}
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                        {{
-                          asc: " 🔼",
-                          desc: " 🔽",
-                        }[header.column.getIsSorted() as string] ?? null}
-                        {sortingOrder >= 0 ? sortingOrder + 1 : undefined}
-                      </div>
-                    </TableHead>
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                      {{
+                        asc: " 🔼",
+                        desc: " 🔽",
+                      }[header.column.getIsSorted() as string] ?? null}
+                      {sortingOrder >= 0 ? sortingOrder + 1 : undefined}
+                    </div>
+                  </TableHead>
+                );
+              })}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody
+          className="grid relative"
+          //tells scrollbar how big the table is
+          style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
+        >
+          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+            const row = rows[virtualRow.index] as Row<Symbol>;
+            return (
+              <TableRow
+                data-index={virtualRow.index} //needed for dynamic row height measurement
+                ref={(node) => rowVirtualizer.measureElement(node)} //measure dynamic row height
+                key={row.id}
+                className="flex absolute w-full"
+                //this should always be a `style` as it changes on scroll
+                style={{ transform: `translateY(${virtualRow.start}px)` }}
+                onClick={() => switchSymbol(row.id)}
+              >
+                {row.getVisibleCells().map((cell) => {
+                  return (
+                    <td
+                      key={cell.id}
+                      className="flex"
+                      style={{ width: cell.column.getSize() }}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </td>
                   );
                 })}
               </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody
-            className="grid relative"
-            //tells scrollbar how big the table is
-            style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
-          >
-            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-              const row = rows[virtualRow.index] as Row<Symbol>;
-              return (
-                <TableRow
-                  data-index={virtualRow.index} //needed for dynamic row height measurement
-                  ref={(node) => rowVirtualizer.measureElement(node)} //measure dynamic row height
-                  key={row.id}
-                  className="flex absolute w-full"
-                  //this should always be a `style` as it changes on scroll
-                  style={{ transform: `translateY(${virtualRow.start}px)` }}
-                  onClick={() => switchSymbol(row.id)}
-                >
-                  {row.getVisibleCells().map((cell) => {
-                    return (
-                      <td
-                        key={cell.id}
-                        className="flex"
-                        style={{ width: cell.column.getSize() }}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </td>
-                    );
-                  })}
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </div>
+            );
+          })}
+        </TableBody>
+      </Table>
     </div>
   );
 }
@@ -302,8 +301,8 @@ function SymbolColumnSheet({ table }: { table: TTable<Symbol> }) {
 function SymbolColumnOrder({ table }: { table: TTable<Symbol> }) {
   const columnOrder = table.getState().columnOrder;
   const columns = columnOrder
-      .map((c) => table.getColumn(c)!)
-      .filter((c) => c.getIsVisible())
+    .map((c) => table.getColumn(c)!)
+    .filter((c) => c.getIsVisible());
 
   console.log("Visble Columns", columns, table.getState().columnOrder);
 

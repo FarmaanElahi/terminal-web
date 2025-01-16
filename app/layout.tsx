@@ -21,7 +21,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         className={`${quicksand.className} font-medium antialiased h-screen w-screen`}
       >
         <ThemeProvider
-          defaultTheme="light"
+          defaultTheme="system"
           attribute="class"
           enableSystem
           disableTransitionOnChange
