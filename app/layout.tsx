@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const quicksand = Quicksand({
   variable: "--font-quicksand-sans",
@@ -15,11 +16,18 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${quicksand.className} font-medium antialiased h-screen w-screen`}
       >
-        {children}
+        <ThemeProvider
+          defaultTheme="light"
+          attribute="class"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
