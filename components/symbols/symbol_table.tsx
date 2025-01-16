@@ -38,7 +38,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronsUpDown, Settings } from "lucide-react";
+import { ChevronsUpDown, Settings, ArrowUp, ArrowDown } from "lucide-react";
 import {
   closestCenter,
   DndContext,
@@ -117,35 +117,30 @@ function SymbolTableUI({
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="flex w-full">
               {headerGroup.headers.map((header) => {
+                const canSort = header.column.getCanSort();
                 const sortingOrder = header.column.getIsSorted()
                   ? table
                       .getState()
                       .sorting.findIndex((s) => s.id === header.column.id)
                   : -1;
-
+                const sorting = header.column.getIsSorted();
                 return (
                   <TableHead
                     key={header.id}
-                    className="flex"
+                    className={cn("flex justify-start items-center", {
+                      "cursor-pointer select-none": canSort,
+                    })}
                     style={{ width: header.getSize() }}
+                    onClick={header.column.getToggleSortingHandler()}
                   >
-                    <div
-                      className={cn({
-                        "cursor-pointer select-none":
-                          header.column.getCanSort(),
-                      })}
-                      onClick={header.column.getToggleSortingHandler()}
-                    >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                      {{
-                        asc: " 🔼",
-                        desc: " 🔽",
-                      }[header.column.getIsSorted() as string] ?? null}
-                      {sortingOrder >= 0 ? sortingOrder + 1 : undefined}
-                    </div>
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext(),
+                    )}
+                    <div className="flex-1"></div>
+                    {sorting === "asc" && <ArrowUp className="size-4" />}
+                    {sorting === "desc" && <ArrowDown className="size-4" />}
+                    {sortingOrder >= 0 ? sortingOrder + 1 : undefined}
                   </TableHead>
                 );
               })}
