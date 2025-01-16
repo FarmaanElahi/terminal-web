@@ -55,6 +55,8 @@ export class ChartManager {
       interval: "1D",
       locale: "en",
       auto_save_delay: 3,
+      theme: "dark",
+      custom_css_url: "/css/charts/styles.css",
       disabled_features: [
         "order_panel",
         "trading_account_manager",

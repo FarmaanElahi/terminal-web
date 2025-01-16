@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
       {
         source: "/external/charting_library/:path*",
         destination:
-          "https://trading-terminal.tradingview-widget.com/charting_library/:path*",
+          "https://charting-library.tradingview-widget.com/charting_library/:path*",
       },
       {
         source: "/external/logos/:path*",

@@ -3,15 +3,15 @@
 import * as React from "react";
 import {
   Activity,
-  BookOpen,
-  Bot,
-  Frame, LayoutDashboard,
+  Frame,
+  LayoutDashboard,
   LifeBuoy,
-  Map, Megaphone,
-  PieChart, Radar,
+  Map,
+  Megaphone,
+  PieChart,
+  Radar,
   Send,
-  Settings2,
-  SquareTerminal, Star,
+  Star,
 } from "lucide-react";
 
 import {

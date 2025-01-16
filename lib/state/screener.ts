@@ -36,11 +36,11 @@ export function useScreener({ columns, sort }: ScreenerRequest) {
 }
 
 type SymbolSearchResult = {
-  data: Pick<
-    Symbol,
-    "name" | "description" | "type" | "logo" | "exchange" | "exchange_logo"
+  data:(Pick<
+      Symbol,
+      "name" | "description" | "type" | "logo" | "exchange" | "exchange_logo"
   > &
-    { ticker: string }[];
+      { ticker: string })[];
   meta: { total: number };
 };
 

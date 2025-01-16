@@ -48,7 +48,7 @@ export class Datafeed implements StreamingDataFeed {
     onResult: SearchSymbolsCallback,
   ) {
     const path = "/api/v1/symbols/search";
-    const response = await this.axios.get<Array<Record<string, unknown>>>(
+    const response = await this.axios.get<{ data: Record<string, unknown>[] }>(
       path,
       {
         params: { q: userInput, exchange, symbol_type: symbolType },
@@ -59,7 +59,7 @@ export class Datafeed implements StreamingDataFeed {
       return;
     }
 
-    const result = response.data.map(
+    const result = response.data.data.map(
       (d) =>
         ({
           symbol: d.name,
