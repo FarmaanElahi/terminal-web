@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import { ChartContextProvider } from "@/lib/state/charts";
 import { ChartLoader } from "@/components/chart/chart_loader";
-import { ReactQueryProvider } from "@/lib/client";
+import { ReactQueryProvider } from "@/components/query-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 

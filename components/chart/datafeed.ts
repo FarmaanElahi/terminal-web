@@ -14,6 +14,7 @@ import {
 } from "@/components/chart/types";
 import { AxiosInstance } from "axios";
 import { LogoProvider } from "@/components/chart/logo_provider";
+import { symbolResolveAPI } from "@/lib/query";
 
 export class Datafeed implements StreamingDataFeed {
   constructor(
@@ -79,14 +80,7 @@ export class Datafeed implements StreamingDataFeed {
     onResolve: ResolveCallback,
     onError: DatafeedErrorCallback,
   ) {
-    const path = `/api/v1/symbols/${symbolName}/resolve`;
-    const response = await this.axios.get<Record<string, unknown>>(path);
-
-    if (response.status >= 400) {
-      onError("Unable to resolve symbol");
-      return;
-    }
-    const data = response.data;
+    const data = await symbolResolveAPI(symbolName).catch(() => null);
     if (!data) {
       onError("Unable to resolve symbol");
       return;

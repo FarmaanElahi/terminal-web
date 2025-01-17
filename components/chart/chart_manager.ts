@@ -68,9 +68,11 @@ export class ChartManager {
         "symbol_info",
         "header_quick_search",
         "countdown",
+        "timeframes_toolbar",
       ],
 
       enabled_features: [
+        "hide_left_toolbar_by_default",
         "border_around_the_chart",
         "create_volume_indicator_by_default",
         "items_favoriting",
@@ -80,7 +82,7 @@ export class ChartManager {
         "study_templates",
         "saveload_separate_drawings_storage",
         "chart_template_storage",
-        // "pricescale_currency",
+        "pricescale_currency",
         "pre_post_market_sessions",
         "studies_extend_time_scale",
         "hide_image_invalid_symbol",
