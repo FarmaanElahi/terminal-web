@@ -1,4 +1,5 @@
 export interface Symbol {
+  ticker?: string;
   isin?: string;
   name?: string;
   is_primary_listing?: boolean;
@@ -12,6 +13,16 @@ export interface Symbol {
   currency_logo?: string;
   fundamental_currency?: string;
   subsessions?: Subsession[];
+
+  subsession_id?: string;
+  corrections?: string;
+  minmov?: number;
+  pricescale?: number;
+  currency_code?: string;
+  session?: string;
+  has_intraday?: boolean;
+  session_display?: string;
+
   session_holidays?: string;
   fiscal_period_fy?: string;
   fiscal_period_end_fy?: number;

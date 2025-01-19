@@ -3,7 +3,7 @@
  * DataFeed
  * ===============================================================
  */
-import type { CustomIndicator, PineJS } from "@/components/chart/pinejs";
+import { CustomIndicator, PineJS } from "@/components/chart/indicators/pinejs";
 
 export interface LibrarySymbolInfo {
   /**

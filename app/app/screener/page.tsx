@@ -71,7 +71,7 @@ export default function Page() {
               <Screener id={"main"} />
             </ResizablePanel>
             <ResizableHandle />
-            <ResizablePanel id={"screener-center"} defaultSize={60} minSize={10}>
+            <ResizablePanel id={"screener-center"} defaultSize={60}>
               <ResizablePanelGroup direction="vertical">
                 <ResizablePanel id={"screener-chart"} order={1}>
                   <Chart id={"main"} />

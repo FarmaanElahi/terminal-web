@@ -1,7 +1,4 @@
-import type {
-  LibrarySymbolInfo,
-  ResolutionString,
-} from "@/components/chart/types";
+import { LibrarySymbolInfo, ResolutionString } from "@/components/chart/types";
 
 export interface CustomIndicator<Field = Record<string, unknown>> {
   name: string;
@@ -1513,6 +1510,7 @@ interface StudyMetaInfo {
   // Can't be changed from UI, Any additional value that can be changed will be in defaults
   styles?: Record<string, StudyStylesInfo>;
   symbolSource?: SymbolInputSymbolSource;
+  behind_chart?: boolean;
 }
 
 interface StudyMetaInfoDefaults {
@@ -1535,25 +1533,20 @@ type StudyInputInfo = (
   | StudyTimeInputInfo
   | StudyBarTimeInputInfo
   | StudyTextareaInputInfo
-) & { group?: string; inline?: string };
+) & {
+  group?: string;
+  inline?: string;
+  display?: number;
+  isFake?: boolean;
+  migrate?: boolean;
+};
 
 /**
  * Enumeration representing various input types for a study or plot.
  */
 export enum StudyInputType {
-  BarTime = "bar_time",
-  Bool = "bool",
   Color = "color",
-  Float = "float",
-  Integer = "integer",
-  Price = "price",
-  Resolution = "resolution",
-  Session = "session",
   Source = "source",
-  Symbol = "symbol",
-  Text = "text",
-  Textarea = "text_area",
-  Time = "time",
 }
 
 interface StudyBooleanInputInfo {
@@ -1591,7 +1584,7 @@ interface StudyBooleanInputInfo {
   /**
    * The input type, which is Boolean in this case.
    */
-  readonly type: StudyInputType.Bool;
+  readonly type: "bool";
 
   /**
    * Determines if the input is visible.
@@ -1644,7 +1637,7 @@ interface StudyTextInputInfo {
   /**
    * The input type, which is Text in this case.
    */
-  readonly type: StudyInputType.Text;
+  readonly type: "text";
 
   /**
    * Determines if the input is visible.
@@ -1692,7 +1685,7 @@ interface StudySymbolInputInfo {
   /**
    * The input type, which is Symbol in this case.
    */
-  readonly type: StudyInputType.Symbol;
+  readonly type: "symbol";
 
   /**
    * Determines if the input is visible.
@@ -1750,7 +1743,7 @@ interface StudyResolutionInputInfo {
   /**
    * The input type, which is Resolution in this case.
    */
-  readonly type: StudyInputType.Resolution;
+  readonly type: "resolution";
 
   /**
    * Determines if the input is visible.
@@ -1803,7 +1796,7 @@ interface StudySessionInputInfo {
   /**
    * The input type, which is "Session" in this case.
    */
-  readonly type: StudyInputType.Session;
+  readonly type: "session";
 
   /**
    * Determines if the input is visible.
@@ -1856,7 +1849,7 @@ interface StudySourceInputInfo {
   /**
    * The input type, which is "Source" in this case.
    */
-  readonly type: StudyInputType.Source;
+  readonly type: "source";
 
   /**
    * Determines if the input is visible.
@@ -1914,10 +1907,7 @@ interface StudyNumericInputInfo {
   /**
    * Type of the numeric input, which can be "Integer", "Float", or "Price".
    */
-  readonly type:
-    | StudyInputType.Integer
-    | StudyInputType.Float
-    | StudyInputType.Price;
+  readonly type: "integer" | "float" | "price";
 
   /**
    * Determines if the input is visible.
@@ -1975,7 +1965,7 @@ interface StudyPriceInputInfo {
   /**
    * Type of the price input. It is always "Price".
    */
-  readonly type: StudyInputType.Price;
+  readonly type: "price";
 
   /**
    * Determines if the input is visible.
@@ -2018,7 +2008,7 @@ interface StudyColorInputInfo {
   /**
    * Specifies the type of input as "Color".
    */
-  readonly type: StudyInputType.Color;
+  readonly type: "color";
 
   /**
    * Determines if the input is visible.
@@ -2071,7 +2061,7 @@ interface StudyTimeInputInfo {
   /**
    * Specifies the type of input as "Time".
    */
-  readonly type: StudyInputType.Time;
+  readonly type: "time";
 
   /**
    * Determines if the input is visible.
@@ -2124,7 +2114,7 @@ interface StudyBarTimeInputInfo {
   /**
    * Specifies the type of input as "BarTime".
    */
-  readonly type: StudyInputType.BarTime;
+  readonly type: "bar_time";
 
   /**
    * Determines if the input is visible.
@@ -2167,7 +2157,7 @@ interface StudyTextareaInputInfo {
   /**
    * Specifies the type of input as "Textarea".
    */
-  readonly type: StudyInputType.Textarea;
+  readonly type: "text_area";
 
   /**
    * Determines if the input is visible.
@@ -2554,31 +2544,6 @@ type StudyPlotInformation =
   | StudyDownColorerPlotInfo;
 
 /**
- * Enumeration for study plot types.
- */
-export enum StudyPlotType {
-  Arrows = "arrows",
-  BarColorer = "bar_colorer",
-  BgColorer = "bg_colorer",
-  CandleBorderColorer = "border_colorer",
-  Chars = "chars",
-  Colorer = "colorer",
-  Data = "data",
-  DataOffset = "dataoffset",
-  DownColorer = "down_colorer",
-  Line = "line",
-  OhlcClose = "ohlc_close",
-  OhlcColorer = "ohlc_colorer",
-  OhlcHigh = "ohlc_high",
-  OhlcLow = "ohlc_low",
-  OhlcOpen = "ohlc_open",
-  Shapes = "shapes",
-  TextColorer = "text_colorer",
-  UpColorer = "up_colorer",
-  CandleWickColorer = "wick_colorer",
-}
-
-/**
  * Interface for describing a study characters plot.
  */
 interface StudyCharsPlotInfo {
@@ -2592,7 +2557,7 @@ interface StudyCharsPlotInfo {
    * Plot type.
    * Specifies that this plot uses characters.
    */
-  readonly type: StudyPlotType.Chars;
+  readonly type: "chars";
 }
 
 /**
@@ -2609,7 +2574,7 @@ interface StudyArrowsPlotInfo {
    * Plot type.
    * Specifies that this plot uses arrows.
    */
-  readonly type: StudyPlotType.Arrows; // Overrides StudyPlotBaseInfo.type
+  readonly type: "arrows"; // Overrides StudyPlotBaseInfo.type
 }
 
 /**
@@ -2649,7 +2614,7 @@ interface StudyColorerPlotInfo {
    * Plot type.
    * Specifies that this is a colorer plot.
    */
-  readonly type: StudyPlotType.Colorer; // Overrides StudyTargetedPlotInfo.type
+  readonly type: "colorer"; // Overrides StudyTargetedPlotInfo.type
 }
 
 /**
@@ -2683,7 +2648,7 @@ interface StudyRgbaColorerPlotInfo {
    * Plot type.
    * Specifies that this is a colorer plot.
    */
-  readonly type: StudyPlotType.Colorer; // Overrides StudyTargetedPlotInfo.type
+  readonly type: "colorer"; // Overrides StudyTargetedPlotInfo.type
 }
 
 /**
@@ -2717,7 +2682,7 @@ interface StudyDataPlotInfo {
    * Plot type.
    * Specifies that this is a data plot.
    */
-  readonly type: StudyPlotType.Data; // Overrides StudyTargetedPlotInfo.type
+  readonly type: "data"; // Overrides StudyTargetedPlotInfo.type
 }
 
 /**
@@ -2751,7 +2716,7 @@ interface StudyDataOffsetPlotInfo {
    * Plot type.
    * Specifies that this is a data offset plot.
    */
-  readonly type: StudyPlotType.DataOffset; // Overrides StudyTargetedPlotInfo.type
+  readonly type: "dataoffset"; // Overrides StudyTargetedPlotInfo.type
 }
 
 /**
@@ -2768,7 +2733,7 @@ interface StudyLinePlotInfo {
    * Plot type.
    * Indicates that this plot is a Line type.
    */
-  readonly type: StudyPlotType.Line;
+  readonly type: "line";
 }
 
 /**
@@ -2803,11 +2768,7 @@ interface StudyOhlcPlotInfo {
    * Indicates the specific OHLC type.
    * Possible values: "OhlcOpen", "OhlcHigh", "OhlcLow", "OhlcClose".
    */
-  readonly type:
-    | StudyPlotType.OhlcOpen
-    | StudyPlotType.OhlcHigh
-    | StudyPlotType.OhlcLow
-    | StudyPlotType.OhlcClose;
+  readonly type: "ohlc_open" | "ohlc_high" | "ohlc_low" | "ohlc_close";
 }
 
 /**
@@ -2824,7 +2785,7 @@ interface StudyShapesPlotInfo {
    * Plot type.
    * Specifies the plot type as "Shapes".
    */
-  readonly type: StudyPlotType.Shapes;
+  readonly type: "shapes";
 }
 
 /**
@@ -2847,7 +2808,7 @@ interface StudyBarColorerPlotInfo {
    * Plot type.
    * Specifies the plot type as "BarColorer".
    */
-  readonly type: StudyPlotType.BarColorer;
+  readonly type: "bar_colorer";
 }
 
 /**
@@ -2870,7 +2831,7 @@ interface StudyBgColorerPlotInfo {
    * Plot type.
    * Specifies the plot type as "BgColorer".
    */
-  readonly type: StudyPlotType.BgColorer;
+  readonly type: "bg_colorer";
 }
 
 /**
@@ -2909,7 +2870,7 @@ interface StudyTextColorerPlotInfo {
    * Plot type.
    * Specifies the plot type as "TextColorer".
    */
-  readonly type: StudyPlotType.TextColorer;
+  readonly type: "text_colorer";
 }
 
 /**
@@ -2948,7 +2909,7 @@ interface StudyOhlcColorerPlotInfo {
    * Plot type.
    * Specifies the plot type as "OhlcColorer".
    */
-  readonly type: StudyPlotType.OhlcColorer;
+  readonly type: "ohlc_colorer";
 }
 
 /**
@@ -2982,7 +2943,7 @@ interface StudyCandleWickColorerPlotInfo {
   /**
    * Specifies the plot type as a candle wick colorer.
    */
-  readonly type: StudyPlotType.CandleWickColorer;
+  readonly type: "wick_colorer";
 }
 
 /**
@@ -3016,7 +2977,7 @@ interface StudyCandleBorderColorerPlotInfo {
   /**
    * Specifies the plot type as a candle border colorer.
    */
-  readonly type: StudyPlotType.CandleBorderColorer;
+  readonly type: "border_colorer";
 }
 
 /**
@@ -3050,7 +3011,7 @@ interface StudyUpColorerPlotInfo {
   /**
    * Specifies the plot type as an up colorer.
    */
-  readonly type: StudyPlotType.UpColorer;
+  readonly type: "up_colorer";
 }
 
 /**
@@ -3084,7 +3045,7 @@ interface StudyDownColorerPlotInfo {
   /**
    * Specifies the plot type as a down colorer.
    */
-  readonly type: StudyPlotType.DownColorer;
+  readonly type: "down_colorer";
 }
 
 /**

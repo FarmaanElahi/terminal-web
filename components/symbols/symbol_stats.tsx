@@ -87,8 +87,6 @@ export const StatsTable = ({ freq }: { freq: "fq" | "fy" }) => {
     const salesAcceleration = findContinuousTrends(salesGrowth);
     const earningAcceleration = findContinuousTrends(earningsGrowth);
 
-    console.log(salesAcceleration, earningAcceleration);
-
     const tableData = earnings.map((e, index) => ({
       period: e.FiscalPeriod,
       salesActual: sales[index]?.Actual,
@@ -389,23 +387,11 @@ function findContinuousTrends(values: number[], loopback = 1) {
   const accelerationRanges = findTrueRanges(accelerationTruthy);
   accelerationRanges.forEach((value) => {
     ranges.fill(1, value.start, value.end + 1);
-    console.log("Filled ACC range", ranges);
   });
   const decelerationRanges = findTrueRanges(decelerationTruthy);
   decelerationRanges.forEach((value) => {
     ranges.fill(-1, value.start, value.end + 1);
-    console.log("Filled DE range", ranges);
   });
-
-  console.log(
-    accelerationTruthy,
-    "AC Range",
-    accelerationRanges,
-    "DERANGE",
-    decelerationRanges,
-    "Valeus",
-    ranges,
-  );
   return ranges;
 }
 

@@ -4,6 +4,7 @@ import { Datafeed } from "@/components/chart/datafeed";
 import { AxiosInstance } from "axios";
 import { ChartStorage } from "@/components/chart/chart_storage";
 import { LogoProvider } from "@/components/chart/logo_provider";
+import { getIndicators } from "@/components/chart/indicators";
 
 export class ChartManager {
   private readonly widgets = new Map<string, TradingView.widget>();
@@ -60,6 +61,7 @@ export class ChartManager {
       locale: "en",
       auto_save_delay: 3,
       custom_css_url: "/css/charts/styles.css",
+      custom_indicators_getter: getIndicators,
       // custom_themes: {
       //   // The new palette for the light theme
       //   light: {
