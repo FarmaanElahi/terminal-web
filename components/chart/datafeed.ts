@@ -14,7 +14,7 @@ import {
 } from "@/components/chart/types";
 import { AxiosInstance } from "axios";
 import { LogoProvider } from "@/components/chart/logo_provider";
-import { symbolResolve } from "@/lib/query";
+import { symbolResolve } from "@/lib/state/symbol";
 
 export class Datafeed implements StreamingDataFeed {
   constructor(

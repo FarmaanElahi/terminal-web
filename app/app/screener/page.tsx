@@ -25,7 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useSymbolQuote } from "@/lib/query";
+import { useSymbolQuote } from "@/lib/state/symbol";
 import { cn } from "@/lib/utils";
 import {
   HoverCard,

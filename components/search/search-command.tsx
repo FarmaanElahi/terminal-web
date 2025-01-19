@@ -6,7 +6,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { useSymbolSearch } from "@/lib/state/screener";
+import { useSymbolSearch } from "@/lib/state/symbol";
 import Image from "next/image";
 import { useGroupSymbolSwitcher } from "@/lib/state/grouper";
 
