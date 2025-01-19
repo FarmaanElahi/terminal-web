@@ -39,8 +39,8 @@ export interface Symbol {
   shares_float?: number;
   total_shares_outstanding?: number;
   price_revenue_ttm?: number;
-  revenue_action_fq_h?: RevenueActionFqH[];
-  revenue_action_fy_h?: RevenueActionFyH[];
+  revenue_action_fq_h?: ActionH[];
+  revenue_action_fy_h?: ActionH[];
   revenue_surprise_fq_0?: number;
   revenue_surprise_fq_1?: number;
   revenue_surprise_fq_2?: number;
@@ -146,8 +146,8 @@ export interface Symbol {
   earnings_release_next_trading_date_fq?: number;
   earnings_release_next_trading_date_fy?: number;
   earnings_release_next_trading_date?: number;
-  earning_action_fq_h?: EarningActionFqH[];
-  earning_action_fy_h?: EarningActionFyH[];
+  earning_action_fq_h?: ActionH[];
+  earning_action_fy_h?: ActionH[];
   earnings_per_share_ttm?: number;
   earning_surprise_fq_0?: number;
   earning_surprise_fq_1?: number;
@@ -902,37 +902,10 @@ export interface Subsession {
   "session-display"?: string;
 }
 
-export interface RevenueActionFqH {
+export interface ActionH {
   Actual?: number;
   Estimate?: number;
   FiscalPeriod: string;
-  IsReported?: boolean;
-  Surprise?: number;
-  Type?: number;
-}
-
-export interface RevenueActionFyH {
-  Actual?: number;
-  Estimate?: number;
-  FiscalPeriod?: string;
-  IsReported?: boolean;
-  Surprise?: number;
-  Type?: number;
-}
-
-export interface EarningActionFqH {
-  Actual?: number;
-  Estimate?: number;
-  FiscalPeriod?: string;
-  IsReported?: boolean;
-  Surprise?: number;
-  Type?: number;
-}
-
-export interface EarningActionFyH {
-  Actual?: number;
-  Estimate?: number;
-  FiscalPeriod?: string;
   IsReported?: boolean;
   Surprise?: number;
   Type?: number;

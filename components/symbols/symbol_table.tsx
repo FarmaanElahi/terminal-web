@@ -6,12 +6,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import {
-  Column,
-  flexRender,
-  Row,
-  Table as TTable,
-} from "@tanstack/react-table";
+import { Column, flexRender, Table as TTable } from "@tanstack/react-table";
 import { useSymbolTable } from "@/components/symbols/use_symbol_table";
 import type { Symbol } from "@/types/symbol";
 import { Virtualizer } from "@tanstack/react-virtual";
@@ -40,11 +35,11 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
-  ChevronsUpDown,
-  Settings,
-  ArrowUp,
   ArrowDown,
+  ArrowUp,
+  ChevronsUpDown,
   Paintbrush,
+  Settings,
 } from "lucide-react";
 import {
   closestCenter,
@@ -362,8 +357,6 @@ function SymbolColumnOrder({ table }: { table: TTable<Symbol> }) {
   const columns = columnOrder
     .map((c) => table.getColumn(c)!)
     .filter((c) => c.getIsVisible());
-
-  console.log("Visble Columns", columns, table.getState().columnOrder);
 
   const handleDragOver = (event: DragEndEvent) => {
     const { active, over } = event;

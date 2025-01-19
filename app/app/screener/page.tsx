@@ -17,7 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { SymbolSearch } from "@/components/search/search-command";
-import { StatsTable } from "@/components/symbols/symbol_stats";
+import { Stats, StatsTable } from "@/components/symbols/symbol_stats";
 
 export default function Page() {
   const [showStats, setShowStats] = useState(true);
@@ -71,7 +71,7 @@ export default function Page() {
               <Screener id={"main"} />
             </ResizablePanel>
             <ResizableHandle />
-            <ResizablePanel id={"screener-center"} defaultSize={60}>
+            <ResizablePanel id={"screener-center"} defaultSize={60} minSize={10}>
               <ResizablePanelGroup direction="vertical">
                 <ResizablePanel id={"screener-chart"} order={1}>
                   <Chart id={"main"} />
@@ -82,7 +82,7 @@ export default function Page() {
                     defaultSize={20}
                     order={2}
                   >
-                    <StatsTable />
+                    <Stats />
                   </ResizablePanel>
                 )}
               </ResizablePanelGroup>

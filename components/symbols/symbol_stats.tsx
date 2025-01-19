@@ -15,9 +15,27 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
-export const StatsTable = () => {
-  const [freq] = useState<"fq" | "fy">("fq");
+export function Stats() {
+  const [freq, setFreq] = useState<"fq" | "fy">("fq");
+  return (
+    <div className="relative w-full h-full">
+      <StatsTable freq={freq} />
+      <StatsColumn freq={freq} setFreq={setFreq} />
+    </div>
+  );
+}
+
+export const StatsTable = ({ freq }: { freq: "fq" | "fy" }) => {
   const symbol = useGroupSymbol();
   const { data: quote } = useSymbolQuote(symbol);
   const moneyFormatter = useMemo(() => {
@@ -46,9 +64,30 @@ export const StatsTable = () => {
     const sales =
       (freq === "fq" ? quote.revenue_action_fq_h : quote.revenue_action_fy_h) ??
       [];
+
+    const salesGrowth = sales.map((a, index) => {
+      const current = a?.Actual ?? a.Estimate;
+      const previous = sales[index - 1]?.Actual ?? sales[index - 1]?.Estimate;
+      if (!current || !previous) return 0;
+
+      return ((current - previous) / previous) * 100;
+    });
+
     const earnings =
       (freq === "fq" ? quote.earning_action_fq_h : quote.earning_action_fy_h) ??
       [];
+
+    const earningsGrowth = earnings.map((a, index) => {
+      const current = a?.Actual ?? a.Estimate;
+      const previous = earnings[index - 1]?.Actual;
+      if (!current || !previous) return 0;
+      return ((current - previous) / previous) * 100;
+    });
+
+    const salesAcceleration = findContinuousTrends(salesGrowth);
+    const earningAcceleration = findContinuousTrends(earningsGrowth);
+
+    console.log(salesAcceleration, earningAcceleration);
 
     const tableData = earnings.map((e, index) => ({
       period: e.FiscalPeriod,
@@ -56,10 +95,14 @@ export const StatsTable = () => {
       salesEstimate: sales[index]?.Estimate,
       salesSurprise: sales[index]?.Surprise,
       salesReported: sales[index]?.IsReported,
+      salesGrowth: salesGrowth[index],
+      salesAcceleration: salesAcceleration[index],
       earningActual: e.Actual,
       earningEstimate: e.Estimate,
       earningSurprise: e.Surprise,
       earningReported: e.IsReported,
+      earningGrowth: earningsGrowth[index],
+      earningAcceleration: earningAcceleration[index],
     }));
     const firstEstimateIndex = tableData.findIndex((r) => !r.salesReported);
 
@@ -78,7 +121,7 @@ export const StatsTable = () => {
 
   const { tableData, firstEstimateIndex } = data;
   return (
-    <div className="w-full overflow-auto h-full transition-colors cursor-default border ms-2 ">
+    <div className="w-full overflow-auto h-full transition-colors cursor-default border ms-2  relative">
       <Table ref={tableRef} className="w-full table-auto h-full">
         <TableHeader className="bg-muted">
           <TableRow>
@@ -110,9 +153,9 @@ export const StatsTable = () => {
               Sales
             </TableCell>
             {tableData.map((c, index) => {
-              const value =
-                firstEstimateIndex >= index ? c.salesEstimate : c.salesActual;
+              const value = c.salesReported ? c.salesActual : c.salesEstimate;
               const formattedValue = value ? moneyFormatter.format(value) : "-";
+              const salesAcceleration = c.salesAcceleration;
               const formattedActual = c.salesActual
                 ? moneyFormatter.format(c.salesActual)
                 : "-";
@@ -123,7 +166,11 @@ export const StatsTable = () => {
                 c.salesActual && c.salesEstimate
                   ? moneyFormatter.format(c.salesActual - c.salesEstimate)
                   : "-";
-              const formattedSurprise = c.salesSurprise
+              const formattedGrowth = c.salesGrowth
+                ? percentFormatter.format(c.salesGrowth / 100)
+                : "-";
+
+              const formattedSurrpise = c.salesSurprise
                 ? percentFormatter.format(c.salesSurprise / 100)
                 : "-";
 
@@ -132,11 +179,11 @@ export const StatsTable = () => {
                   <div>{formattedValue}</div>
                   <div
                     className={cn({
-                      "text-bullish": c.salesSurprise && c.salesSurprise > 0,
-                      "text-bearish": c.salesSurprise && c.salesSurprise < 0,
+                      "text-bullish": c.salesGrowth > 0,
+                      "text-bearish": c.salesGrowth < 0,
                     })}
                   >
-                    {formattedSurprise}
+                    {formattedGrowth}
                   </div>
                 </>
               );
@@ -150,6 +197,10 @@ export const StatsTable = () => {
                       <span>{formattedActual}</span>
                     </div>
                     <div className="space-x-2">
+                      <span className="font-bold">Growth%:</span>
+                      <span className="font-bold">{formattedGrowth}</span>
+                    </div>
+                    <div className="space-x-2">
                       <span className="font-bold">Estimate:</span>
                       <span>{formattedEstimate}</span>
                     </div>
@@ -157,9 +208,10 @@ export const StatsTable = () => {
                       <span className="font-bold">Surprise:</span>
                       <span className="font-bold">{formattedSurpriseAbs}</span>
                     </div>
+
                     <div className="space-x-2">
                       <span className="font-bold">Surprise%:</span>
-                      <span className="font-bold">{formattedSurprise}</span>
+                      <span className="font-bold">{formattedSurrpise}</span>
                     </div>
                   </div>
                 </div>
@@ -169,7 +221,10 @@ export const StatsTable = () => {
                 <TableCell
                   key={index}
                   className={cn("text-left px-6 text-nowrap", {
-                    "border-l-2 border-muted": firstEstimateIndex === index,
+                    "border-l-2 border-l-muted": firstEstimateIndex === index,
+                    "border-b-bullish": salesAcceleration === 1,
+                    "border-b-bearish": salesAcceleration === -1,
+                    "border-b": salesAcceleration,
                   })}
                 >
                   <HoverCard openDelay={50} closeDelay={50}>
@@ -190,11 +245,11 @@ export const StatsTable = () => {
               Earning
             </TableCell>
             {tableData.map((c, index) => {
-              const value =
-                firstEstimateIndex >= index
-                  ? c.earningEstimate
-                  : c.earningActual;
+              const value = c.earningReported
+                ? c.earningActual
+                : c.earningEstimate;
               const formattedValue = value ? moneyFormatter.format(value) : "-";
+              const earningAcceleration = c.earningAcceleration;
               const formattedActual = c.earningActual
                 ? moneyFormatter.format(c.earningActual)
                 : "-";
@@ -205,6 +260,11 @@ export const StatsTable = () => {
                 c.earningActual && c.earningEstimate
                   ? moneyFormatter.format(c.earningActual - c.earningEstimate)
                   : "-";
+
+              const formattedGrowth = c.earningGrowth
+                ? percentFormatter.format(c.earningGrowth / 100)
+                : "-";
+
               const formattedSurprise = c.earningSurprise
                 ? percentFormatter.format(c.earningSurprise / 100)
                 : "-";
@@ -214,13 +274,11 @@ export const StatsTable = () => {
                   <div>{formattedValue}</div>
                   <div
                     className={cn({
-                      "text-bullish":
-                        c.earningSurprise && c.earningSurprise > 0,
-                      "text-bearish":
-                        c.earningSurprise && c.earningSurprise < 0,
+                      "text-bullish": c.earningGrowth > 0,
+                      "text-bearish": c.earningGrowth < 0,
                     })}
                   >
-                    {formattedSurprise}
+                    {formattedGrowth}
                   </div>
                 </>
               );
@@ -228,11 +286,18 @@ export const StatsTable = () => {
               const detail = (
                 <div>
                   <div className="bg-muted p-2">Earning</div>
+
                   <div className="p-2 space-y-2">
                     <div className="space-x-2">
                       <span className="font-bold">Actual:</span>
                       <span>{formattedActual}</span>
                     </div>
+
+                    <div className="space-x-2">
+                      <span className="font-bold">Growth%:</span>
+                      <span className="font-bold">{formattedGrowth}</span>
+                    </div>
+
                     <div className="space-x-2">
                       <span className="font-bold">Estimate:</span>
                       <span>{formattedEstimate}</span>
@@ -252,8 +317,11 @@ export const StatsTable = () => {
               return (
                 <TableCell
                   key={index}
-                  className={cn("text-left px-6 text-nowrap", {
-                    "border-l-2 border-muted": firstEstimateIndex === index,
+                  className={cn("text-left px-6 text-nowrap border-l-muted", {
+                    "border-l-2 border-l-muted": firstEstimateIndex === index,
+                    "border-b-bullish": earningAcceleration === 1,
+                    "border-b-bearish": earningAcceleration === -1,
+                    "border-b": earningAcceleration,
                   })}
                 >
                   <HoverCard openDelay={50} closeDelay={50}>
@@ -271,3 +339,103 @@ export const StatsTable = () => {
     </div>
   );
 };
+
+function StatsColumn({
+  freq,
+  setFreq,
+}: {
+  freq: "fq" | "fy";
+  setFreq: (freq: "fq" | "fy") => void;
+}) {
+  return (
+    <div className="absolute top-0 end-0 z-40 bg-muted flex border-t">
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            className="rounded-none h-10  bg-transparent hover:bg-transparent"
+            variant="ghost"
+          >
+            <Settings className="size-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent>
+          <div className="flex items-center space-x-2">
+            <Label htmlFor="stats-frequency">Yearly</Label>
+            <Switch
+              id={"stats-frequency"}
+              checked={freq === "fy"}
+              onCheckedChange={() =>
+                setFreq(freq === "fq" ? "fy" : freq === "fy" ? "fq" : "fq")
+              }
+            />
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
+
+function findContinuousTrends(values: number[], loopback = 1) {
+  const ranges = Array(values.length).fill(0);
+  if (values.length < 3) return ranges;
+
+  const accelerationTruthy = values.map((value, i) =>
+    value && values[i - loopback] ? value > values[i - loopback] : false,
+  );
+  const decelerationTruthy = values.map((value, i) =>
+    value && values[i - loopback] ? value < values[i - loopback] : false,
+  );
+
+  const accelerationRanges = findTrueRanges(accelerationTruthy);
+  accelerationRanges.forEach((value) => {
+    ranges.fill(1, value.start, value.end + 1);
+    console.log("Filled ACC range", ranges);
+  });
+  const decelerationRanges = findTrueRanges(decelerationTruthy);
+  decelerationRanges.forEach((value) => {
+    ranges.fill(-1, value.start, value.end + 1);
+    console.log("Filled DE range", ranges);
+  });
+
+  console.log(
+    accelerationTruthy,
+    "AC Range",
+    accelerationRanges,
+    "DERANGE",
+    decelerationRanges,
+    "Valeus",
+    ranges,
+  );
+  return ranges;
+}
+
+interface BooleanRange {
+  start: number;
+  end: number;
+}
+
+function findTrueRanges(values: boolean[]): BooleanRange[] {
+  const ranges: BooleanRange[] = [];
+  let start: number | null = null;
+
+  for (let i = 0; i < values.length; i++) {
+    if (values[i]) {
+      // Mark the start of a new range if not already marked
+      if (start === null) {
+        start = i;
+      }
+    } else {
+      // End of a range
+      if (start !== null) {
+        ranges.push({ start, end: i - 1 });
+        start = null; // Reset start
+      }
+    }
+  }
+
+  // Handle the case where the array ends with a contiguous range of `true`
+  if (start !== null) {
+    ranges.push({ start, end: values.length - 1 });
+  }
+  return ranges.filter((r) => r.end - r.start >= 2);
+}
