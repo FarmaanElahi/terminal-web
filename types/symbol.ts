@@ -905,7 +905,7 @@ export interface Subsession {
 export interface RevenueActionFqH {
   Actual?: number;
   Estimate?: number;
-  FiscalPeriod?: string;
+  FiscalPeriod: string;
   IsReported?: boolean;
   Surprise?: number;
   Type?: number;

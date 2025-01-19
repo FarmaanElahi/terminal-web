@@ -1,7 +1,7 @@
 "use client";
 
 import { ChartSpline, Grid3X3, List, Waypoints, X } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Screener } from "@/components/screener/screener";
 import {
   ResizableHandle,
@@ -25,6 +25,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useSymbolQuote } from "@/lib/query";
+import { cn } from "@/lib/utils";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { usePercentFormatter } from "@/hooks/use-formatter";
 
 export default function Page() {
   const [showStats, setShowStats] = useState(true);
@@ -122,79 +130,257 @@ function Tag({ name, placeholder }: { name?: string; placeholder: string }) {
 }
 
 const StatsTable = () => {
-  const period = [
-    "2023 Q2",
-    "2023 Q3",
-    "2023 Q4",
-    "2024 Q1",
-    "2024 Q2",
-    "2024 Q3",
-    "2024 Q4",
-    "2025 Q1",
-    "2025 Q2",
-    "2025 Q3",
-  ];
-  const earning = [
-    "$0.08 (+121.05%)",
-    "$0.06 (+113.04%)",
-    "$0.26 (+174.29%)",
-    "$0.57 (+1050.00%)",
-    "$0.51 (+537.50%)",
-    "$0.35 (+486.68%)",
-    "$0.44 (+69.76%)",
-    "$0.53 (+537.50%)",
-    "$0.36 (+486.68%)",
-    "$0.40 (+69.76%)",
-  ];
-  const sales = [
-    "$126.84M (+43.50%)",
-    "$137.62M (+43.25%)",
-    "$150.99M (+45.43%)",
-    "$167.55M (+44.86%)",
-    "$178.33M (+40.59%)",
-    "$189.19M (+37.48%)",
-    "$201.27M (+33.30%)",
-    "$178.31M (+40.59%)",
-    "$189.20M (+37.48%)",
-    "$201.28M (+33.30%)",
-  ];
+  const [freq] = useState<"fq" | "fy">("fq");
+  const symbol = useGroupSymbol();
+  const { data: quote } = useSymbolQuote(symbol);
+  const moneyFormatter = useMemo(() => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      notation: "compact",
+      compactDisplay: "short",
+      currencyDisplay: "symbol",
+      maximumFractionDigits: 2,
+    });
+  }, []);
 
+  const percentFormatter = useMemo(() => {
+    return new Intl.NumberFormat("en-IN", {
+      notation: "compact",
+      compactDisplay: "short",
+      style: "percent",
+      maximumFractionDigits: 2,
+    });
+  }, []);
+
+  const data = useMemo(() => {
+    if (!quote) return { noData: true } as const;
+
+    const sales =
+      (freq === "fq" ? quote.revenue_action_fq_h : quote.revenue_action_fy_h) ??
+      [];
+    const earnings =
+      (freq === "fq" ? quote.earning_action_fq_h : quote.earning_action_fy_h) ??
+      [];
+
+    const tableData = earnings.map((e, index) => ({
+      period: e.FiscalPeriod,
+      salesActual: sales[index]?.Actual,
+      salesEstimate: sales[index]?.Estimate,
+      salesSurprise: sales[index]?.Surprise,
+      salesReported: sales[index]?.IsReported,
+      earningActual: e.Actual,
+      earningEstimate: e.Estimate,
+      earningSurprise: e.Surprise,
+      earningReported: e.IsReported,
+    }));
+    const firstEstimateIndex = tableData.findIndex((r) => !r.salesReported);
+
+    return {
+      noData: false,
+      tableData,
+      firstEstimateIndex,
+    } as const;
+  }, [quote, freq]);
+
+  const tableRef = useRef<HTMLTableElement>(null);
+
+  if (data.noData) {
+    return null;
+  }
+
+  const { tableData, firstEstimateIndex } = data;
   return (
-    <div className="overflow-auto h-full w-full">
-      <div>
-        <Table>
-          {/* Table Header */}
-          <TableHeader>
-            <TableRow>
-              <TableHead key={"Period"} className="sticky left-0 bg-background">
-                Period
-              </TableHead>
-              {period.map((p) => (
-                  <TableHead key={p} className="w-48">
-                    {p}
-                  </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
+    <div className="w-full overflow-auto h-full transition-colors cursor-default border ms-2 ">
+      <Table ref={tableRef} className="w-full table-auto h-full">
+        <TableHeader className="bg-muted">
+          <TableRow>
+            <TableHead
+              key={"Period"}
+              className="text-left px-6 text-nowrap sticky left-0 bg-background z-10"
+            >
+              Period
+            </TableHead>
 
-          {/* Table Body */}
-          <TableBody>
-            <TableRow>
-              <TableCell
-                  key={"Earning"}
-                  className="sticky left-0  z-10 bg-background"
+            {tableData.map((c, index) => (
+              <TableHead
+                key={c.period}
+                className={cn("text-left px-6 text-nowrap", {
+                  "border-l-2 border-muted": firstEstimateIndex === index,
+                })}
               >
-                Earning
-              </TableCell>
-              {earning.map((e) => (
-                  <TableCell key={e} className="w-48">
-                    {e}
-                  </TableCell>
-              ))}
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div>
+                {c.period}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell
+              key={"Sales"}
+              className="text-left px-6 text-nowrap sticky left-0 bg-background z-10 border-r"
+            >
+              Sales
+            </TableCell>
+            {tableData.map((c, index) => {
+              const value =
+                firstEstimateIndex >= index ? c.salesEstimate : c.salesActual;
+              const formattedValue = value ? moneyFormatter.format(value) : "-";
+              const formattedActual = c.salesActual
+                ? moneyFormatter.format(c.salesActual)
+                : "-";
+              const formattedEstimate = c.salesEstimate
+                ? moneyFormatter.format(c.salesEstimate)
+                : "-";
+              const formattedSurpriseAbs =
+                c.salesActual && c.salesEstimate
+                  ? moneyFormatter.format(c.salesActual - c.salesEstimate)
+                  : "-";
+              const formattedSurprise = c.salesSurprise
+                ? percentFormatter.format(c.salesSurprise / 100)
+                : "-";
+
+              const overview = (
+                <>
+                  <div>{formattedValue}</div>
+                  <div
+                    className={cn({
+                      "text-bullish": c.salesSurprise && c.salesSurprise > 0,
+                      "text-bearish": c.salesSurprise && c.salesSurprise < 0,
+                    })}
+                  >
+                    {formattedSurprise}
+                  </div>
+                </>
+              );
+
+              const detail = (
+                <div>
+                  <div className="bg-muted p-2">Sales</div>
+                  <div className="p-2 space-y-2">
+                    <div className="space-x-2">
+                      <span className="font-bold">Actual:</span>
+                      <span>{formattedActual}</span>
+                    </div>
+                    <div className="space-x-2">
+                      <span className="font-bold">Estimate:</span>
+                      <span>{formattedEstimate}</span>
+                    </div>
+                    <div className="space-x-2">
+                      <span className="font-bold">Surprise:</span>
+                      <span className="font-bold">{formattedSurpriseAbs}</span>
+                    </div>
+                    <div className="space-x-2">
+                      <span className="font-bold">Surprise%:</span>
+                      <span className="font-bold">{formattedSurprise}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+
+              return (
+                <TableCell
+                  key={index}
+                  className={cn("text-left px-6 text-nowrap", {
+                    "border-l-2 border-muted": firstEstimateIndex === index,
+                  })}
+                >
+                  <HoverCard openDelay={50} closeDelay={50}>
+                    <HoverCardTrigger>{overview}</HoverCardTrigger>
+                    <HoverCardContent className="p-0">
+                      {detail}
+                    </HoverCardContent>
+                  </HoverCard>
+                </TableCell>
+              );
+            })}
+          </TableRow>
+          <TableRow>
+            <TableCell
+              key={"Earning"}
+              className="text-left px-6 text-nowrap sticky left-0 bg-background z-10 border-r"
+            >
+              Earning
+            </TableCell>
+            {tableData.map((c, index) => {
+              const value =
+                firstEstimateIndex >= index
+                  ? c.earningEstimate
+                  : c.earningActual;
+              const formattedValue = value ? moneyFormatter.format(value) : "-";
+              const formattedActual = c.earningActual
+                ? moneyFormatter.format(c.earningActual)
+                : "-";
+              const formattedEstimate = c.earningEstimate
+                ? moneyFormatter.format(c.earningEstimate)
+                : "-";
+              const formattedSurpriseAbs =
+                c.earningActual && c.earningEstimate
+                  ? moneyFormatter.format(c.earningActual - c.earningEstimate)
+                  : "-";
+              const formattedSurprise = c.earningSurprise
+                ? percentFormatter.format(c.earningSurprise / 100)
+                : "-";
+
+              const overview = (
+                <>
+                  <div>{formattedValue}</div>
+                  <div
+                    className={cn({
+                      "text-bullish":
+                        c.earningSurprise && c.earningSurprise > 0,
+                      "text-bearish":
+                        c.earningSurprise && c.earningSurprise < 0,
+                    })}
+                  >
+                    {formattedSurprise}
+                  </div>
+                </>
+              );
+
+              const detail = (
+                <div>
+                  <div className="bg-muted p-2">Earning</div>
+                  <div className="p-2 space-y-2">
+                    <div className="space-x-2">
+                      <span className="font-bold">Actual:</span>
+                      <span>{formattedActual}</span>
+                    </div>
+                    <div className="space-x-2">
+                      <span className="font-bold">Estimate:</span>
+                      <span>{formattedEstimate}</span>
+                    </div>
+                    <div className="space-x-2">
+                      <span className="font-bold">Surprise:</span>
+                      <span className="font-bold">{formattedSurpriseAbs}</span>
+                    </div>
+                    <div className="space-x-2">
+                      <span className="font-bold">Surprise%:</span>
+                      <span className="font-bold">{formattedSurprise}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+
+              return (
+                <TableCell
+                  key={index}
+                  className={cn("text-left px-6 text-nowrap", {
+                    "border-l-2 border-muted": firstEstimateIndex === index,
+                  })}
+                >
+                  <HoverCard openDelay={50} closeDelay={50}>
+                    <HoverCardTrigger>{overview}</HoverCardTrigger>
+                    <HoverCardContent className="p-0">
+                      {detail}
+                    </HoverCardContent>
+                  </HoverCard>
+                </TableCell>
+              );
+            })}
+          </TableRow>
+        </TableBody>
+      </Table>
     </div>
   );
 };
