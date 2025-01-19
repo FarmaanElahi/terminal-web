@@ -2,8 +2,8 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import type { Symbol } from "@/types/symbol";
-import { FormattedCell } from "@/components/symbols/formatted_cell";
 import React from "react";
+import { FormattedCell } from "@/components/symbols/symbol_column_formatted";
 
 function agoCols(
   meta: Record<string, unknown>,
@@ -270,14 +270,14 @@ export const defaultSymbolColumns: ColumnDef<Symbol>[] = (
     ...agoCols(
       { format: "numeric", category: "Earnings" },
       "eps",
-      "Quarterly EPS",
+      "EPS",
       "fq",
       9,
     ),
     ...agoCols(
       { format: "numeric", category: "Earnings" },
       "eps",
-      "Annual EPS",
+      "EPS",
       "fy",
       3,
     ),
@@ -285,42 +285,42 @@ export const defaultSymbolColumns: ColumnDef<Symbol>[] = (
     ...agoCols(
       { format: "numeric", sign: "%", category: "Earnings" },
       "earning_surprise",
-      "Quarterly EPS Surprise",
+      "EPS Surprise",
       "fq",
       9,
     ),
     ...agoCols(
       { format: "numeric", sign: "%", category: "Earnings" },
       "earning_surprise",
-      "Annual EPS Surprise",
+      "EPS Surprise",
       "fy",
       3,
     ),
     ...forwardCols(
       { format: "numeric", category: "Earnings" },
       "eps_estimated",
-      "Quarterly EPS Estimate",
+      "EPS Estimate",
       "fq",
       3,
     ),
     ...forwardCols(
       { format: "numeric", category: "Earnings" },
       "eps_estimated",
-      "Annual EPS Estimate",
+      "EPS Estimate",
       "fy",
       2,
     ),
     ...agoCols(
       { format: "numeric", sign: "%", category: "Earnings" },
       "eps_growth",
-      "Quarterly EPS Growth",
+      "EPS Growth",
       "fq",
       9,
     ),
     ...agoCols(
       { format: "numeric", sign: "%", category: "Earnings" },
       "eps_growth",
-      "Annual EPS Growth",
+      "EPS Growth",
       "fy",
       3,
     ),
@@ -400,28 +400,28 @@ export const defaultSymbolColumns: ColumnDef<Symbol>[] = (
     ...agoCols(
       { format: "currency", category: "Sales" },
       "revenue",
-      "Quarterly Sales",
+      "Sales",
       "fq",
       9,
     ),
     ...agoCols(
       { format: "currency", category: "Sales" },
       "revenue",
-      "Annual Sales",
+      "Sales",
       "fy",
       3,
     ),
     ...forwardCols(
       { format: "currency", category: "Sales" },
       "revenue_forecast",
-      "Quarterly Sales Estimate",
+      "Sales Estimate",
       "fq",
       3,
     ),
     ...forwardCols(
       { format: "currency", category: "Sales" },
       "revenue_forecast",
-      "Annual Sales Estimate ",
+      "Sales Estimate ",
       "fy",
       2,
     ),
@@ -430,14 +430,14 @@ export const defaultSymbolColumns: ColumnDef<Symbol>[] = (
     ...agoCols(
       { format: "numeric", sign: "%", category: "Sales" },
       "revenue_growth",
-      "Quarterly Sales Growth",
+      "Sales Growth",
       "fq",
       9,
     ),
     ...agoCols(
       { format: "numeric", sign: "%", category: "Sales" },
       "revenue_growth",
-      "Annual Sales Growth",
+      "Sales Growth",
       "fy",
       3,
     ),
@@ -465,7 +465,7 @@ export const defaultSymbolColumns: ColumnDef<Symbol>[] = (
     ...agoCols(
       { format: "numeric", sign: "%", category: "Sales" },
       "revenue_growth_yoy",
-      "Quarter Over Quarter Sales Growth",
+      "QoQ Sales Growth",
       "fq",
       9,
     ),
@@ -473,14 +473,14 @@ export const defaultSymbolColumns: ColumnDef<Symbol>[] = (
     ...forwardCols(
       { format: "number", sign: "%", category: "Sales" },
       "revenue_forecast_growth",
-      "Quarterly Estimated Sales Growth",
+      "Sales Growth Estimated",
       "fq",
       3,
     ),
     ...forwardCols(
       { format: "number", sign: "%", category: "Sales" },
       "revenue_forecast_growth",
-      "Annual Estimated Sales Growth",
+      "Sales Growth Estimated",
       "fy",
       2,
     ),
@@ -509,14 +509,14 @@ export const defaultSymbolColumns: ColumnDef<Symbol>[] = (
     ...agoCols(
       { format: "numeric", sign: "%", category: "Sales" },
       "revenue_surprise",
-      "Quarterly Sales Surprise",
+      "Sales Surprise",
       "fq",
       9,
     ),
     ...agoCols(
       { format: "numeric", sign: "%", category: "Sales" },
       "revenue_surprise",
-      "Annual Sales Surprise",
+      "Sales Surprise",
       "fy",
       3,
     ),

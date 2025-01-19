@@ -186,7 +186,8 @@ function CurrencyCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
 
   const currencyCode = cell.row.original.currency as string;
   const formatter = new Intl.NumberFormat("en-IN", {
-    maximumFractionDigits: 0,
+    maximumFractionDigits: value > 1_00_00_000 ? 2 : 0,
+    minimumFractionDigits: 0,
     currencyDisplay: "symbol",
     notation: value > 1_00_00_000 ? "compact" : "standard",
     ...(currencyCode
