@@ -1,7 +1,7 @@
 "use client";
 
 import { ChartSpline, Grid3X3, List, Waypoints, X } from "lucide-react";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { Screener } from "@/components/screener/screener";
 import {
   ResizableHandle,
@@ -32,7 +32,6 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import { usePercentFormatter } from "@/hooks/use-formatter";
 
 export default function Page() {
   const [showStats, setShowStats] = useState(true);

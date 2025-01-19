@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
 import "./globals.css";
 import { ReactNode } from "react";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 
 const quicksand = Quicksand({
   variable: "--font-quicksand-sans",

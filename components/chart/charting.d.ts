@@ -99,7 +99,7 @@ declare namespace TradingView {
     applyOverrides: (overrides: Record<string, unknown>) => void;
     applyStudiesOverrides: (overrides: Record<string, unknown>) => void;
     setSymbol: (symbol: string, tf?: string) => void;
-    changeTheme: (theme: string) => void;
+    changeTheme: (theme: "dark" | "light") => void;
     createButton: () => HTMLButtonElement;
     takeClientScreenshot: () => void;
     widgetbar: () => Promise<WidgetbarOptions>;
