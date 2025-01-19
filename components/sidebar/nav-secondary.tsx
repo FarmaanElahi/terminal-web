@@ -1,5 +1,5 @@
 import * as React from "react";
-import { type LucideIcon } from "lucide-react";
+import { type LucideIcon, Moon, Sun } from "lucide-react";
 
 import {
   SidebarGroup,
@@ -9,6 +9,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { ModeToggle } from "@/components/theme/theme-switcher";
+import { Button } from "@/components/ui/button";
 
 export function NavSecondary({
   items,

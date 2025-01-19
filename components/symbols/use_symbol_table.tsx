@@ -189,7 +189,6 @@ export function useSymbolTable(
     //estimate row height for accurate scrollbar dragging
     estimateSize: () => 40,
     getScrollElement: () => containerRef.current,
-    measureElement: fixMeasureElement(),
     overscan: 5,
   });
 

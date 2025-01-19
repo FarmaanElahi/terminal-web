@@ -1,5 +1,6 @@
 import React, {
   HTMLAttributes,
+  KeyboardEventHandler,
   RefObject,
   useEffect,
   useMemo,
@@ -113,6 +114,36 @@ function SymbolTableUI({
   rowVirtualizer,
 }: SymbolTableUIProps) {
   const { rows } = table.getRowModel();
+  const onKeyDown: KeyboardEventHandler = (event) => {
+    if (event.currentTarget !== document.activeElement?.parentElement) return;
+
+    if (event.key === "ArrowDown" || event.key === " ") {
+      event.preventDefault();
+      const indexStr = document.activeElement.getAttribute("data-index");
+      const index = indexStr ? +indexStr + 1 : 0;
+      const nextIndexStr = "" + index;
+      rowVirtualizer.scrollToIndex(index, { align: "end", behavior: "smooth" });
+      console.log("Key down pressed");
+      const el = Array.from(event.currentTarget?.children).find(
+        (el) => el.getAttribute("data-index") === nextIndexStr,
+      ) as HTMLElement | undefined;
+      el?.focus();
+    }
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      const indexStr = document.activeElement.getAttribute("data-index");
+      const index = indexStr ? +indexStr - 1 : 0;
+      const nextIndexStr = "" + index;
+      rowVirtualizer.scrollToIndex(index, {
+        align: "start",
+        behavior: "smooth",
+      });
+      const el = Array.from(event.currentTarget?.children).find(
+        (el) => el.getAttribute("data-index") === nextIndexStr,
+      ) as HTMLElement | undefined;
+      el?.focus();
+    }
+  };
 
   return (
     <div
@@ -160,18 +191,25 @@ function SymbolTableUI({
           className="grid relative cursor-default"
           //tells scrollbar how big the table is
           style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
+          onKeyDown={onKeyDown}
         >
           {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-            const row = rows[virtualRow.index] as Row<Symbol>;
+            const row = rows[virtualRow.index];
             return (
               <TableRow
                 data-index={virtualRow.index} //needed for dynamic row height measurement
                 ref={(node) => rowVirtualizer.measureElement(node)} //measure dynamic row height
                 key={row.id}
-                className="flex absolute w-full h-10 px-2"
+                className="flex absolute w-full h-10 px-2 focus:bg-muted focus:outline-none"
                 //this should always be a `style` as it changes on scroll
-                style={{ transform: `translateY(${virtualRow.start}px)` }}
-                onClick={() => switchSymbol(row.id)}
+                style={{
+                  transform: `translateY(${virtualRow.start}px)`,
+                  height: `${virtualRow.size}px`,
+                  top: 0,
+                  left: 0,
+                }}
+                onFocusCapture={() => switchSymbol(row.id)}
+                tabIndex={0}
               >
                 {row.getVisibleCells().map((cell) => {
                   return (
