@@ -4,105 +4,23 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Added rs indicator">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/git_toolbox_blame.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/git_toolbox_prj.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/prettier.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/terminal-web.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.prettierrc" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/app/alerts/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/app/dashboard/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/app/layout.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/app/screener/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/app/watchlist/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/favicon.ico" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/globals.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/layout.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/page.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/chart.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/chart_loader.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/chart_manager.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/chart_storage.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/charting.d.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/datafeed.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/indicators/base.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/indicators/index.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/indicators/pinejs.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/indicators/relative_strength.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/loader.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/logo_provider.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/types.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/charting/candlestick.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/grouper/grouper.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/query-provider.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/screener/screener.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/search/search-command.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/sidebar/app-sidebar.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/sidebar/nav-main.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/sidebar/nav-secondary.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/sidebar/nav-user.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/symbols/symbol_column.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/symbols/symbol_column_formatted.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/symbols/symbol_stats.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/symbols/symbol_table.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/symbols/use_symbol_table.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/theme/theme-provider.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/theme/theme-switcher.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/accordion.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/avatar.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/badge.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/breadcrumb.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/button.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/checkbox.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/collapsible.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/command.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/dialog.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/dropdown-menu.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/hover-card.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/input.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/label.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/popover.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/resizable.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/scroll-area.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/separator.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/sheet.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/sidebar.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/skeleton.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/switch.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/table.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/toggle.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/ui/tooltip.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/eslint.config.mjs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/hooks/use-formatter.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/hooks/use-mobile.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/state/charts.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/state/client.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/state/grouper.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/state/screener.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/state/symbol.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/utils.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pnpm-lock.yaml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/postcss.config.mjs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/css/charts/styles.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/file.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/globe.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/next.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/profile.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/vercel.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/public/window.svg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tailwind.config.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tsconfig.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/symbol.ts" beforeDir="false" />
+    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Resumed">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app/alerts/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/client/alerts/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app/dashboard/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/client/dashboard/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/client/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app/screener/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/client/screener/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app/watchlist/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/client/watchlist/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/chart_manager.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/chart_manager.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/chart_storage.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/chart_storage.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/loader.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/loader.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/types.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/query-provider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/query-provider.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/sidebar/app-sidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/sidebar/app-sidebar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnpm-lock.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/supbase/client.ts" beforeDir="false" afterPath="$PROJECT_DIR$/utils/supabase/client.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -172,11 +90,11 @@
       <recent name="$PROJECT_DIR$/public" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/data" />
       <recent name="$PROJECT_DIR$/components/theme" />
       <recent name="$PROJECT_DIR$/components" />
       <recent name="$PROJECT_DIR$/public/cc" />
       <recent name="$PROJECT_DIR$/components/sidebar" />
-      <recent name="$PROJECT_DIR$/hooks" />
     </key>
   </component>
   <component name="RunManager">
@@ -214,14 +132,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1736430941500</updated>
-    </task>
-    <task id="LOCAL-00042" summary="Chart Manager">
-      <option name="closed" value="true" />
-      <created>1736772428584</created>
-      <option name="number" value="00042" />
-      <option name="presentableId" value="LOCAL-00042" />
-      <option name="project" value="LOCAL" />
-      <updated>1736772428584</updated>
     </task>
     <task id="LOCAL-00043" summary="Refactor">
       <option name="closed" value="true" />
@@ -607,7 +517,15 @@
       <option name="project" value="LOCAL" />
       <updated>1737325211089</updated>
     </task>
-    <option name="localTasksCounter" value="91" />
+    <task id="LOCAL-00091" summary="Resumed">
+      <option name="closed" value="true" />
+      <created>1737722996905</created>
+      <option name="number" value="00091" />
+      <option name="presentableId" value="LOCAL-00091" />
+      <option name="project" value="LOCAL" />
+      <updated>1737722996905</updated>
+    </task>
+    <option name="localTasksCounter" value="92" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -625,7 +543,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Refactored table" />
     <MESSAGE value="Added keyboard scrolling" />
     <MESSAGE value="Chart Manager" />
     <MESSAGE value="Added sorting and column selection" />
@@ -650,7 +567,8 @@
     <MESSAGE value="Refactor" />
     <MESSAGE value="Added acceleration" />
     <MESSAGE value="Added rs indicator" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added rs indicator" />
+    <MESSAGE value="Resumed" />
+    <option name="LAST_COMMIT_MESSAGE" value="Resumed" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

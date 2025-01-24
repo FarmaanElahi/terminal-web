@@ -8,7 +8,6 @@ export function ReactQueryProvider({
 }: {
   children: React.ReactNode;
 }) {
-  console.log("Query client init");
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );

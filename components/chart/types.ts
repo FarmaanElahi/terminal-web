@@ -1287,8 +1287,13 @@ export interface LineToolsGroupState {
  * Placeholder for `LineToolState`.
  */
 export interface LineToolState {
-  // Add relevant properties for tool state as needed.
-  [key: string]: unknown; // Placeholder for flexibility.
+  currencyId?: string;
+  groupId?: string;
+  id: string;
+  ownerSource: string;
+  state: unknown;
+  symbol?: string;
+  unitId?: string;
 }
 
 /**

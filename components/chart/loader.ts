@@ -18,7 +18,6 @@ export function getTradingView() {
 
       script.onload = () => {
         tradingViewLoaded = true;
-        console.log("TradingView library loaded");
         resolve(window.TradingView);
       };
 

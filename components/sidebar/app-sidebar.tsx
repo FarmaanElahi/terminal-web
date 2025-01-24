@@ -43,17 +43,17 @@ const data = {
     },
     {
       title: "Screener",
-      url: "/app/screener",
+      url: "/client/screener",
       icon: Radar,
     },
     {
       title: "Watchlist",
-      url: "/app/watchlist",
+      url: "/client/watchlist",
       icon: Star,
     },
     {
       title: "Alert",
-      url: "/app/alerts",
+      url: "/client/alerts",
       icon: Megaphone,
     },
   ],

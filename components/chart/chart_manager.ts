@@ -5,17 +5,18 @@ import { AxiosInstance } from "axios";
 import { ChartStorage } from "@/components/chart/chart_storage";
 import { LogoProvider } from "@/components/chart/logo_provider";
 import { getIndicators } from "@/components/chart/indicators";
+import { createClient } from "@/utils/supabase/client";
 
 export class ChartManager {
-  private readonly widgets = new Map<string, TradingView.widget>();
   private readonly datafeed: Datafeed;
   private readonly chartStorage: ChartStorage;
   private readonly logoProvider: LogoProvider;
+  private readonly client = createClient();
 
   constructor(axios: AxiosInstance, logoBaseUrl: string) {
     this.logoProvider = new LogoProvider(logoBaseUrl);
     this.datafeed = new Datafeed(axios, this.logoProvider);
-    this.chartStorage = new ChartStorage(axios);
+    this.chartStorage = new ChartStorage(this.client);
   }
 
   create(container: HTMLElement, symbol: string, theme: "dark" | "light") {
@@ -29,13 +30,6 @@ export class ChartManager {
     });
     tvWidget.onChartReady(() => this.onChartReady(tvWidget));
     return tvWidget;
-  }
-
-  private getChart(id: string) {
-    if (this.widgets.has(id)) {
-      return this.widgets.get(id)!;
-    }
-    throw new Error("Unable to get chart");
   }
 
   private onChartReady = (chart: TradingView.widget) => {
@@ -62,6 +56,7 @@ export class ChartManager {
       auto_save_delay: 3,
       custom_css_url: "/css/charts/styles.css",
       custom_indicators_getter: getIndicators,
+      load_last_chart: true,
       // custom_themes: {
       //   // The new palette for the light theme
       //   light: {
