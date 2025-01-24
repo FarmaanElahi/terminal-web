@@ -16,18 +16,34 @@ export function symbolResolve(symbolName: string) {
   });
 }
 
+export function useSymbolResolve(symbolName: string) {
+  return useQuery({
+    queryKey: ["symbol", symbolName],
+    queryFn: async () => symbolResolveQueryFn(symbolName),
+  });
+}
+
 //##################### SYMBOL RESOLVE #####################
 
 //##################### SYMBOL QUOTE #####################
-export function useSymbolQuote(symbolName: string) {
+async function symbolQuoteQueryFn(symbol: string) {
+  const path = `/api/v1/symbols/${symbol}/quote`;
+  const response = await webClient.get<Symbol>(path);
+  return response.data;
+}
+
+export function symbolQuote(symbol: string) {
+  return queryClient.fetchQuery({
+    queryKey: ["symbol_quote", symbol],
+    queryFn: async () => symbolQuoteQueryFn(symbol),
+  });
+}
+
+export function useSymbolQuote(symbolName?: string) {
   return useQuery({
     enabled: !!symbolName,
     queryKey: ["symbol_quote", symbolName],
-    queryFn: async () => {
-      const path = `/api/v1/symbols/${symbolName}/quote`;
-      const response = await webClient.get<Symbol>(path);
-      return response.data;
-    },
+    queryFn: async () => symbolQuoteQueryFn(symbolName!),
   });
 }
 

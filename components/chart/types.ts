@@ -564,7 +564,7 @@ export interface TimescaleMark {
   /**
    * Tooltip content as an array of strings.
    */
-  tooltip: string[];
+  tooltip?: string[];
 }
 
 export type ResolveCallback = (symbolInfo: LibrarySymbolInfo) => void;

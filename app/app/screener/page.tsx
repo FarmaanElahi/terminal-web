@@ -17,10 +17,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { SymbolSearch } from "@/components/search/search-command";
-import { Stats, StatsTable } from "@/components/symbols/symbol_stats";
+import { Stats } from "@/components/symbols/symbol_stats";
 
 export default function Page() {
-  const [showStats, setShowStats] = useState(true);
+  const [showStats, setShowStats] = useState(false);
   const [showDataPanel, setShowDataPanel] = useState(false);
   return (
     <GroupSymbolProvider>
@@ -65,13 +65,13 @@ export default function Page() {
           <ResizablePanelGroup direction="horizontal">
             <ResizablePanel
               id={"screener-list"}
-              defaultSize={20}
+              defaultSize={10}
               className={"h-full"}
             >
               <Screener id={"main"} />
             </ResizablePanel>
             <ResizableHandle />
-            <ResizablePanel id={"screener-center"} defaultSize={60}>
+            <ResizablePanel id={"screener-center"} defaultSize={90}>
               <ResizablePanelGroup direction="vertical">
                 <ResizablePanel id={"screener-chart"} order={1}>
                   <Chart id={"main"} />

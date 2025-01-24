@@ -2,6 +2,7 @@ import {
   Bar,
   DatafeedConfiguration,
   DatafeedErrorCallback,
+  GetMarksCallback,
   HistoryCallback,
   LibrarySymbolInfo,
   OnReadyCallback,
@@ -11,10 +12,16 @@ import {
   SearchSymbolResultItem,
   SearchSymbolsCallback,
   StreamingDataFeed,
+  TimescaleMark,
 } from "@/components/chart/types";
 import { AxiosInstance } from "axios";
 import { LogoProvider } from "@/components/chart/logo_provider";
-import { symbolResolve } from "@/lib/state/symbol";
+import { symbolQuote, symbolResolve } from "@/lib/state/symbol";
+import type { Symbol } from "@/types/symbol";
+
+interface LibrarySymbolInfoExtended extends LibrarySymbolInfo {
+  quote: Symbol;
+}
 
 export class Datafeed implements StreamingDataFeed {
   constructor(
@@ -38,6 +45,8 @@ export class Datafeed implements StreamingDataFeed {
         { name: "Fund", value: "fund" },
       ],
       currency_codes: ["INR", "USD"],
+      supports_timescale_marks: true,
+      supports_marks: true,
     } satisfies DatafeedConfiguration;
     setTimeout(() => callback(config));
   }
@@ -80,7 +89,10 @@ export class Datafeed implements StreamingDataFeed {
     onResolve: ResolveCallback,
     onError: DatafeedErrorCallback,
   ) {
-    const data = await symbolResolve(symbolName).catch(() => null);
+    const [data, quote] = await Promise.all([
+      symbolResolve(symbolName).catch(() => null),
+      symbolQuote(symbolName).catch(() => null),
+    ]);
     if (!data) {
       onError("Unable to resolve symbol");
       return;
@@ -109,7 +121,8 @@ export class Datafeed implements StreamingDataFeed {
       data_status: "endofday",
       has_daily: true,
       session_holidays: data.session_holidays,
-    } as LibrarySymbolInfo;
+      quote,
+    } as LibrarySymbolInfoExtended;
     onResolve(symbol);
   }
 
@@ -120,8 +133,10 @@ export class Datafeed implements StreamingDataFeed {
     onResult: HistoryCallback,
     onError: DatafeedErrorCallback,
   ) {
-    const path = `/api/v1/symbols/${symbolInfo.ticker}/candles/${resolution}/${periodParams.to}/${periodParams.countBack}`;
-    const response = await this.axios.get<Record<string, unknown>>(path);
+    const path = `/api/v1/symbols/upstox/${symbolInfo.ticker}/candles/${resolution}/${periodParams.to}/${periodParams.countBack}`;
+    const response = await this.axios.get<Record<string, unknown>>(path, {
+      params: { first_request: periodParams.firstDataRequest },
+    });
     if (response.status >= 400) {
       onError("Unable to resolve symbol");
       return;
@@ -153,4 +168,42 @@ export class Datafeed implements StreamingDataFeed {
   subscribeBars(): void {}
 
   unsubscribeBars(): void {}
+
+  getTimescaleMarks(
+    symbolInfo: LibrarySymbolInfoExtended,
+    from: number,
+    to: number,
+    onDataCallback: GetMarksCallback<TimescaleMark>,
+  ) {
+    const { earnings_release_date_fq_h, earnings_release_next_date } =
+      symbolInfo.quote ?? {};
+    const marks = [] as TimescaleMark[];
+    let currIndex = 0;
+
+    // Earning Marks
+    const earnings = earnings_release_date_fq_h ?? [];
+    earnings.forEach((time, index) => {
+      marks.push({
+        id: `${currIndex + index}`,
+        time: time,
+        color: "black",
+        shape: "earning",
+        label: "E",
+      });
+    });
+    currIndex = earnings.length;
+    if (earnings_release_next_date) {
+      const time =
+        new Date(earnings_release_next_date).setUTCHours(0, 0, 0, 0) / 1000;
+      marks.push({
+        id: `${currIndex + 1}`,
+        time,
+        color: "blue",
+        shape: "earning",
+        label: "E",
+      });
+      currIndex += 1;
+    }
+    onDataCallback(marks);
+  }
 }

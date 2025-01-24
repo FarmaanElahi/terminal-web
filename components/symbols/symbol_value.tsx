@@ -1,4 +1,3 @@
-import { CellContext } from "@tanstack/react-table";
 import type { Symbol } from "@/types/symbol";
 import { Check, Flag, X } from "lucide-react";
 import { ReactNode } from "react";
@@ -7,24 +6,62 @@ import { DateTime } from "luxon";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-function BooleanCell(props: { cell: CellContext<Symbol, unknown> }) {
-  const value = props.cell.getValue();
+interface FormattedValueProps {
+  id: string;
+  value?: unknown;
+  meta?: Record<string, unknown>;
+  symbol: Symbol;
+}
+
+export function FormattedValue(props: FormattedValueProps) {
+  const { defaultValue, format } = props.meta ?? {};
+  const value = (props.value as string) || (defaultValue as string) || "-";
+  if (format === "symbol") {
+    return <SymbolCell {...props} />;
+  }
+  if (format === "date") {
+    return <DateCell {...props} />;
+  }
+  if (format === "textlogo") {
+    return <LogoTextCell {...props} />;
+  }
+  if (format === "currency") {
+    return <CurrencyCell {...props} />;
+  }
+  if (format === "numeric") {
+    return <NumericCell {...props} />;
+  }
+  if (format === "price") {
+    return <PriceCell {...props} />;
+  }
+  if (format === "candlestick") {
+    return <CandleStickCell {...props} />;
+  }
+  if (format === "boolean") {
+    return <BooleanCell {...props} />;
+  }
+  if (format === "volume") {
+    return <VolumeCell {...props} />;
+  }
+  return <span className="truncate">{String(value)}</span>;
+}
+
+function BooleanCell(props: FormattedValueProps) {
+  const { value } = props;
 
   return value ? <Check className="size-4" /> : <X className="size-4" />;
 }
 
-function CandleStickCell(props: { cell: CellContext<Symbol, unknown> }) {
-  const [open_col, high_col, low_col, close_col] = (
-    props.cell.column.columnDef.meta as Record<string, string>
-  ).cols;
+function CandleStickCell(props: FormattedValueProps) {
+  const { meta = {}, symbol, value: cellValue } = props;
+  const [open_col, high_col, low_col, close_col] = meta.cols as string[];
   let candlestick: ReactNode;
   if (open_col && high_col && low_col && close_col) {
-    const open = (props.cell.row.original as Record<string, number>)[open_col];
-    const high = (props.cell.row.original as Record<string, number>)[high_col];
-    const low = (props.cell.row.original as Record<string, number>)[low_col];
-    const close = (props.cell.row.original as Record<string, number>)[
-      close_col
-    ];
+    const open = symbol[open_col as keyof Symbol] as number;
+    const high = symbol[high_col as keyof Symbol] as number;
+    const low = symbol[low_col as keyof Symbol] as number;
+    const close = symbol[close_col as keyof Symbol] as number;
+
     if (open && high_col && low_col && close_col) {
       candlestick = (
         <Candlestick open={open} high={high} low={low} close={close} />
@@ -32,8 +69,7 @@ function CandleStickCell(props: { cell: CellContext<Symbol, unknown> }) {
     }
   }
 
-  const rangeValue = props.cell.getValue() as number;
-
+  const rangeValue = cellValue as number;
   const value = new Intl.NumberFormat("en-IN", {
     maximumFractionDigits: 0,
     style: "percent",
@@ -50,11 +86,10 @@ function CandleStickCell(props: { cell: CellContext<Symbol, unknown> }) {
   return <span>{value}</span>;
 }
 
-function SymbolCell(props: { cell: CellContext<Symbol, unknown> }) {
-  const { cell } = props;
-  const text = cell.getValue() as string;
-  const logo = cell.row.original.logo;
-  const symbol = cell.row.original;
+function SymbolCell(props: FormattedValueProps) {
+  const { symbol, value } = props;
+  const text = value;
+  const logo = symbol.logo;
 
   const days = symbol.earnings_release_next_date
     ? DateTime.fromMillis(symbol.earnings_release_next_date).diffNow("day").days
@@ -88,14 +123,11 @@ function SymbolCell(props: { cell: CellContext<Symbol, unknown> }) {
   );
 }
 
-function LogoTextCell(props: {
-  cell: CellContext<Symbol, unknown>;
-  logoCol?: keyof Symbol;
-  logoPrefix?: string;
-}) {
-  const { cell, logoCol, logoPrefix } = props;
-  const text = cell.getValue() as string;
-  let logo = logoCol ? cell.row.original[logoCol] : undefined;
+function LogoTextCell(props: FormattedValueProps) {
+  const { value, meta = {}, symbol } = props;
+  const { logoCol, logoPrefix } = meta;
+  const text = value as string;
+  let logo = logoCol ? (symbol[logoCol as keyof Symbol] as string) : undefined;
   logo = logoPrefix ? [logoPrefix, logo].join("/") : logo;
 
   return (
@@ -112,8 +144,8 @@ function LogoTextCell(props: {
   );
 }
 
-function DateCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
-  const value = cell.getValue();
+function DateCell(props: FormattedValueProps) {
+  const { value } = props;
 
   if (!value || typeof value !== "number") {
     return <span>-</span>;
@@ -122,13 +154,12 @@ function DateCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
   return <span>{str}</span>;
 }
 
-function NumericCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
-  const value = cell.getValue();
+function NumericCell(props: FormattedValueProps) {
+  const { value, meta = {} } = props;
   if (!value || typeof value !== "number") {
     return <span>-</span>;
   }
 
-  const meta = (cell.column.columnDef.meta ?? {}) as Record<string, unknown>;
   const {
     sign,
     maximumFractionDigits,
@@ -153,18 +184,15 @@ function NumericCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
   );
 }
 
-function VolumeCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
-  const value = cell.getValue();
-  const { activityLevel } = cell.column.columnDef.meta as Record<
-    string,
-    number
-  >;
+function VolumeCell(props: FormattedValueProps) {
+  const { value, meta = {} } = props;
+  const { activityLevel } = meta;
 
   const showIndicator =
     activityLevel !== undefined &&
     activityLevel !== null &&
     typeof value === "number" &&
-    value >= activityLevel;
+    value >= (activityLevel as number);
 
   return (
     <div className="inline-flex gap-1">
@@ -173,18 +201,18 @@ function VolumeCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
       >
         •
       </span>
-      <NumericCell cell={cell} />
+      <NumericCell {...props} />
     </div>
   );
 }
 
-function CurrencyCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
-  const value = cell.getValue();
+function CurrencyCell(props: FormattedValueProps) {
+  const { value, symbol } = props;
   if (!value || typeof value !== "number") {
     return <span>-</span>;
   }
 
-  const currencyCode = cell.row.original.currency as string;
+  const currencyCode = symbol.currency as string;
   const formatter = new Intl.NumberFormat("en-IN", {
     maximumFractionDigits: value > 1_00_00_000 ? 2 : 0,
     minimumFractionDigits: 0,
@@ -203,18 +231,14 @@ function CurrencyCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
   return <span>{amount}</span>;
 }
 
-function PriceCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
-  const value = cell.getValue();
+function PriceCell(props: FormattedValueProps) {
+  const { value, meta = {}, symbol } = props;
   if (!value || typeof value !== "number") {
     return <span>-</span>;
   }
 
-  const {
-    colorize,
-    bold,
-    colorizeLevel = 0,
-  } = cell.column.columnDef.meta as Record<string, unknown>;
-  const currencyCode = cell.row.original.currency as string;
+  const { colorize, bold, colorizeLevel = 0 } = meta;
+  const currencyCode = symbol.currency as string;
   const formatter = new Intl.NumberFormat("en-IN", {
     maximumFractionDigits: 2,
     minimumFractionDigits: 0,
@@ -235,48 +259,4 @@ function PriceCell({ cell }: { cell: CellContext<Symbol, unknown> }) {
       {num}
     </span>
   );
-}
-
-export function FormattedCell({
-  cell,
-}: {
-  cell: CellContext<Symbol, unknown>;
-}) {
-  const meta = (cell.column.columnDef.meta ?? {}) as Record<string, string>;
-  const { defaultValue, format } = meta;
-  const value = cell.getValue() || (defaultValue as string) || "-";
-  if (format === "symbol") {
-    return <SymbolCell cell={cell} />;
-  }
-  if (format === "date") {
-    return <DateCell cell={cell} />;
-  }
-  if (format === "textlogo") {
-    return (
-      <LogoTextCell
-        cell={cell}
-        logoCol={meta.logoCol as keyof Symbol}
-        logoPrefix={meta.logoPrefix as string}
-      />
-    );
-  }
-  if (format === "currency") {
-    return <CurrencyCell cell={cell} />;
-  }
-  if (format === "numeric") {
-    return <NumericCell cell={cell} />;
-  }
-  if (format === "price") {
-    return <PriceCell cell={cell} />;
-  }
-  if (format === "candlestick") {
-    return <CandleStickCell cell={cell} />;
-  }
-  if (format === "boolean") {
-    return <BooleanCell cell={cell} />;
-  }
-  if (format === "volume") {
-    return <VolumeCell cell={cell} />;
-  }
-  return <span className="truncate">{String(value)}</span>;
 }

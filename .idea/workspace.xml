@@ -1,0 +1,691 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Added rs indicator">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/git_toolbox_blame.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/git_toolbox_prj.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/prettier.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/terminal-web.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.prettierrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app/alerts/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app/dashboard/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app/layout.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app/screener/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app/watchlist/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/favicon.ico" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/globals.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/layout.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/chart.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/chart_loader.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/chart_manager.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/chart_storage.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/charting.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/datafeed.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/indicators/base.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/indicators/index.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/indicators/pinejs.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/indicators/relative_strength.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/loader.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/logo_provider.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/types.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/charting/candlestick.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/grouper/grouper.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/query-provider.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/screener/screener.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/search/search-command.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/sidebar/app-sidebar.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/sidebar/nav-main.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/sidebar/nav-secondary.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/sidebar/nav-user.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/symbols/symbol_column.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/symbols/symbol_column_formatted.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/symbols/symbol_stats.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/symbols/symbol_table.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/symbols/use_symbol_table.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/theme/theme-provider.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/theme/theme-switcher.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/accordion.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/avatar.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/badge.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/breadcrumb.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/button.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/checkbox.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/collapsible.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/command.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/dialog.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/dropdown-menu.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/hover-card.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/input.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/label.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/popover.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/resizable.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/scroll-area.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/separator.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/sheet.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/sidebar.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/skeleton.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/switch.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/table.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/toggle.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/tooltip.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/eslint.config.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hooks/use-formatter.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/hooks/use-mobile.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/state/charts.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/state/client.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/state/grouper.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/state/screener.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/state/symbol.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/utils.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnpm-lock.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/postcss.config.mjs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/css/charts/styles.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/file.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/globe.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/next.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/profile.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/vercel.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/window.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tailwind.config.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tsconfig.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/symbol.ts" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="be14945df6c7b4f1a4977004c488c7880c4a94df" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitToolBoxStore">
+    <option name="recentBranches">
+      <RecentBranches>
+        <option name="branchesForRepo">
+          <list>
+            <RecentBranchesForRepo>
+              <option name="branches">
+                <list>
+                  <RecentBranch>
+                    <option name="branchName" value="main" />
+                    <option name="lastUsedInstant" value="1736865274" />
+                  </RecentBranch>
+                </list>
+              </option>
+              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$" />
+            </RecentBranchesForRepo>
+          </list>
+        </option>
+      </RecentBranches>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="2rOX9FCUHPJ446i3pABYQeuVUik" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/farmaan/Public/farmaan/Projects/terminal-web",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "npm.dev.executor": "Run",
+    "prettierjs.PrettierConfiguration.Package": "/Users/farmaan/Public/farmaan/Projects/terminal-web/node_modules/prettier",
+    "settings.editor.selected.configurable": "settings.javascript.prettier",
+    "ts.external.directory.path": "/Users/farmaan/Public/farmaan/Projects/terminal-web/node_modules/typescript/lib"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/components/chart" />
+      <recent name="$PROJECT_DIR$/app/dashboard" />
+      <recent name="$PROJECT_DIR$/components/screener" />
+      <recent name="$PROJECT_DIR$/public" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/components/theme" />
+      <recent name="$PROJECT_DIR$/components" />
+      <recent name="$PROJECT_DIR$/public/cc" />
+      <recent name="$PROJECT_DIR$/components/sidebar" />
+      <recent name="$PROJECT_DIR$/hooks" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="dev" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="npm.dev" />
+        <item itemvalue="npm.dev" />
+        <item itemvalue="npm.dev" />
+        <item itemvalue="npm.dev" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-822845ee3bb5-JavaScript-WS-243.23654.120" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="" />
+      <created>1736430941500</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1736430941500</updated>
+    </task>
+    <task id="LOCAL-00042" summary="Chart Manager">
+      <option name="closed" value="true" />
+      <created>1736772428584</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1736772428584</updated>
+    </task>
+    <task id="LOCAL-00043" summary="Refactor">
+      <option name="closed" value="true" />
+      <created>1736777917709</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1736777917709</updated>
+    </task>
+    <task id="LOCAL-00044" summary="Refactor">
+      <option name="closed" value="true" />
+      <created>1736778373668</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1736778373668</updated>
+    </task>
+    <task id="LOCAL-00045" summary="Refactor">
+      <option name="closed" value="true" />
+      <created>1736783748805</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1736783748805</updated>
+    </task>
+    <task id="LOCAL-00046" summary="Refactor">
+      <option name="closed" value="true" />
+      <created>1736788463149</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1736788463149</updated>
+    </task>
+    <task id="LOCAL-00047" summary="Refactor">
+      <option name="closed" value="true" />
+      <created>1736791271455</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1736791271455</updated>
+    </task>
+    <task id="LOCAL-00048" summary="Added sorting and column selection">
+      <option name="closed" value="true" />
+      <created>1736803023054</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1736803023054</updated>
+    </task>
+    <task id="LOCAL-00049" summary="Added sorting and column selection">
+      <option name="closed" value="true" />
+      <created>1736803128286</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1736803128286</updated>
+    </task>
+    <task id="LOCAL-00050" summary="Added infinite query">
+      <option name="closed" value="true" />
+      <created>1736842761037</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1736842761037</updated>
+    </task>
+    <task id="LOCAL-00051" summary="Added infinite query">
+      <option name="closed" value="true" />
+      <created>1736842843887</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1736842843887</updated>
+    </task>
+    <task id="LOCAL-00052" summary="Added infinite query">
+      <option name="closed" value="true" />
+      <created>1736860312493</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1736860312493</updated>
+    </task>
+    <task id="LOCAL-00053" summary="Refactored">
+      <option name="closed" value="true" />
+      <created>1736865225109</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1736865225109</updated>
+    </task>
+    <task id="LOCAL-00054" summary="Refactored">
+      <option name="closed" value="true" />
+      <created>1736866351923</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1736866351923</updated>
+    </task>
+    <task id="LOCAL-00055" summary="Auto fetching dependent column">
+      <option name="closed" value="true" />
+      <created>1736867088546</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1736867088546</updated>
+    </task>
+    <task id="LOCAL-00056" summary="Auto fetching dependent column">
+      <option name="closed" value="true" />
+      <created>1736876529118</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1736876529118</updated>
+    </task>
+    <task id="LOCAL-00057" summary="Auto fetching dependent column">
+      <option name="closed" value="true" />
+      <created>1736876577047</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1736876577047</updated>
+    </task>
+    <task id="LOCAL-00058" summary="Auto fetching dependent column">
+      <option name="closed" value="true" />
+      <created>1736880608511</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1736880608511</updated>
+    </task>
+    <task id="LOCAL-00059" summary="Auto fetching dependent column">
+      <option name="closed" value="true" />
+      <created>1736880866401</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1736880866401</updated>
+    </task>
+    <task id="LOCAL-00060" summary="Auto fetching dependent column">
+      <option name="closed" value="true" />
+      <created>1736892886505</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1736892886505</updated>
+    </task>
+    <task id="LOCAL-00061" summary="Auto fetching dependent column">
+      <option name="closed" value="true" />
+      <created>1736893045607</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1736893045607</updated>
+    </task>
+    <task id="LOCAL-00062" summary="Sorting order label">
+      <option name="closed" value="true" />
+      <created>1736893653053</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1736893653053</updated>
+    </task>
+    <task id="LOCAL-00063" summary="Added column filtering">
+      <option name="closed" value="true" />
+      <created>1736897404168</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1736897404168</updated>
+    </task>
+    <task id="LOCAL-00064" summary="Added column filtering">
+      <option name="closed" value="true" />
+      <created>1736933552810</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1736933552810</updated>
+    </task>
+    <task id="LOCAL-00065" summary="Added column sorting">
+      <option name="closed" value="true" />
+      <created>1736957649041</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1736957649041</updated>
+    </task>
+    <task id="LOCAL-00066" summary="Added column sorting">
+      <option name="closed" value="true" />
+      <created>1736960235894</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1736960235894</updated>
+    </task>
+    <task id="LOCAL-00067" summary="Added column sorting">
+      <option name="closed" value="true" />
+      <created>1736966813136</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1736966813136</updated>
+    </task>
+    <task id="LOCAL-00068" summary="Added theming">
+      <option name="closed" value="true" />
+      <created>1737021081685</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1737021081685</updated>
+    </task>
+    <task id="LOCAL-00069" summary="Added layout in dashboard">
+      <option name="closed" value="true" />
+      <created>1737037250905</created>
+      <option name="number" value="00069" />
+      <option name="presentableId" value="LOCAL-00069" />
+      <option name="project" value="LOCAL" />
+      <updated>1737037250905</updated>
+    </task>
+    <task id="LOCAL-00070" summary="Added back sidebar">
+      <option name="closed" value="true" />
+      <created>1737040212193</created>
+      <option name="number" value="00070" />
+      <option name="presentableId" value="LOCAL-00070" />
+      <option name="project" value="LOCAL" />
+      <updated>1737040212193</updated>
+    </task>
+    <task id="LOCAL-00071" summary="Added back sidebar">
+      <option name="closed" value="true" />
+      <created>1737040326128</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1737040326128</updated>
+    </task>
+    <task id="LOCAL-00072" summary="Added back sidebar">
+      <option name="closed" value="true" />
+      <created>1737041734202</created>
+      <option name="number" value="00072" />
+      <option name="presentableId" value="LOCAL-00072" />
+      <option name="project" value="LOCAL" />
+      <updated>1737041734202</updated>
+    </task>
+    <task id="LOCAL-00073" summary="Added sorting icon">
+      <option name="closed" value="true" />
+      <created>1737042799101</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1737042799101</updated>
+    </task>
+    <task id="LOCAL-00074" summary="Added sorting icon">
+      <option name="closed" value="true" />
+      <created>1737044332823</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1737044332823</updated>
+    </task>
+    <task id="LOCAL-00075" summary="Added sorting icon">
+      <option name="closed" value="true" />
+      <created>1737045409689</created>
+      <option name="number" value="00075" />
+      <option name="presentableId" value="LOCAL-00075" />
+      <option name="project" value="LOCAL" />
+      <updated>1737045409689</updated>
+    </task>
+    <task id="LOCAL-00076" summary="Added sorting icon">
+      <option name="closed" value="true" />
+      <created>1737045586771</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1737045586771</updated>
+    </task>
+    <task id="LOCAL-00077" summary="Added top nav">
+      <option name="closed" value="true" />
+      <created>1737053617591</created>
+      <option name="number" value="00077" />
+      <option name="presentableId" value="LOCAL-00077" />
+      <option name="project" value="LOCAL" />
+      <updated>1737053617591</updated>
+    </task>
+    <task id="LOCAL-00078" summary="Added ability ot perform global search for symbol and navigate">
+      <option name="closed" value="true" />
+      <created>1737064066836</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1737064066836</updated>
+    </task>
+    <task id="LOCAL-00079" summary="Add styling">
+      <option name="closed" value="true" />
+      <created>1737067103854</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1737067103854</updated>
+    </task>
+    <task id="LOCAL-00080" summary="Add styling">
+      <option name="closed" value="true" />
+      <created>1737067115450</created>
+      <option name="number" value="00080" />
+      <option name="presentableId" value="LOCAL-00080" />
+      <option name="project" value="LOCAL" />
+      <updated>1737067115450</updated>
+    </task>
+    <task id="LOCAL-00081" summary="Add styling">
+      <option name="closed" value="true" />
+      <created>1737068063793</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1737068063793</updated>
+    </task>
+    <task id="LOCAL-00082" summary="Refactored query provider to be used outside of react">
+      <option name="closed" value="true" />
+      <created>1737156650204</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1737156650204</updated>
+    </task>
+    <task id="LOCAL-00083" summary="Added earning style and fixed loading">
+      <option name="closed" value="true" />
+      <created>1737279547214</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1737279547214</updated>
+    </task>
+    <task id="LOCAL-00084" summary="Added theme switcher">
+      <option name="closed" value="true" />
+      <created>1737286970605</created>
+      <option name="number" value="00084" />
+      <option name="presentableId" value="LOCAL-00084" />
+      <option name="project" value="LOCAL" />
+      <updated>1737286970605</updated>
+    </task>
+    <task id="LOCAL-00085" summary="Added keyboard navigation">
+      <option name="closed" value="true" />
+      <created>1737296599960</created>
+      <option name="number" value="00085" />
+      <option name="presentableId" value="LOCAL-00085" />
+      <option name="project" value="LOCAL" />
+      <updated>1737296599960</updated>
+    </task>
+    <task id="LOCAL-00086" summary="Refactor">
+      <option name="closed" value="true" />
+      <created>1737297179162</created>
+      <option name="number" value="00086" />
+      <option name="presentableId" value="LOCAL-00086" />
+      <option name="project" value="LOCAL" />
+      <updated>1737297179162</updated>
+    </task>
+    <task id="LOCAL-00087" summary="Refactor">
+      <option name="closed" value="true" />
+      <created>1737301649993</created>
+      <option name="number" value="00087" />
+      <option name="presentableId" value="LOCAL-00087" />
+      <option name="project" value="LOCAL" />
+      <updated>1737301649993</updated>
+    </task>
+    <task id="LOCAL-00088" summary="Added acceleration">
+      <option name="closed" value="true" />
+      <created>1737312863090</created>
+      <option name="number" value="00088" />
+      <option name="presentableId" value="LOCAL-00088" />
+      <option name="project" value="LOCAL" />
+      <updated>1737312863090</updated>
+    </task>
+    <task id="LOCAL-00089" summary="Added acceleration">
+      <option name="closed" value="true" />
+      <created>1737312962351</created>
+      <option name="number" value="00089" />
+      <option name="presentableId" value="LOCAL-00089" />
+      <option name="project" value="LOCAL" />
+      <updated>1737312962351</updated>
+    </task>
+    <task id="LOCAL-00090" summary="Added rs indicator">
+      <option name="closed" value="true" />
+      <created>1737325211089</created>
+      <option name="number" value="00090" />
+      <option name="presentableId" value="LOCAL-00090" />
+      <option name="project" value="LOCAL" />
+      <updated>1737325211089</updated>
+    </task>
+    <option name="localTasksCounter" value="91" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Refactored table" />
+    <MESSAGE value="Added keyboard scrolling" />
+    <MESSAGE value="Chart Manager" />
+    <MESSAGE value="Added sorting and column selection" />
+    <MESSAGE value="Added infinite query" />
+    <MESSAGE value="Refactored" />
+    <MESSAGE value="Auto fetching dependent column" />
+    <MESSAGE value="Sorting order label" />
+    <MESSAGE value="Added column filtering" />
+    <MESSAGE value="Added column sorting" />
+    <MESSAGE value="Added theming" />
+    <MESSAGE value="Added layout in dashboard" />
+    <MESSAGE value="Added back sidebar" />
+    <MESSAGE value="Added sorting icon" />
+    <MESSAGE value="Added top nav" />
+    <MESSAGE value="Added ability ot perform global search for symbol and navigate" />
+    <MESSAGE value="Add styling for chart" />
+    <MESSAGE value="Add styling" />
+    <MESSAGE value="Refactored query provider to be used outside of react" />
+    <MESSAGE value="Added earning style and fixed loading" />
+    <MESSAGE value="Added theme switcher" />
+    <MESSAGE value="Added keyboard navigation" />
+    <MESSAGE value="Refactor" />
+    <MESSAGE value="Added acceleration" />
+    <MESSAGE value="Added rs indicator" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added rs indicator" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/types/symbol.ts</url>
+          <line>34</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/types/symbol.ts</url>
+          <line>783</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/components/symbols/symbol_column_formatted.tsx</url>
+          <line>243</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/components/symbols/symbol_table.tsx</url>
+          <line>105</line>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/components/navigation/prevent-navigation.tsx</url>
+          <line>27</line>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/components/chart/datafeed.ts</url>
+          <line>3</line>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

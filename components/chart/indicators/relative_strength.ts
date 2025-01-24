@@ -542,8 +542,6 @@ export function RelativeStrength(
           PineJS.Std.unitId(this._context),
           "regular",
         );
-
-        // Setup
         this._context.setMinimumAdditionalDepth(this.length);
       };
       this.main = function (ctx) {
@@ -551,34 +549,45 @@ export function RelativeStrength(
         //========= Start Setup ==========
         // Main Symbol
         this._context.select_sym(0);
-        const baseSourceDef = PineJS.Std[this.source](this._context);
-        const baseSymbol = this._context.new_unlimited_var(baseSourceDef);
+        const mainValue = PineJS.Std[this.source](this._context);
+        const main = this._context.new_var(mainValue);
+        const mainTime = this._context.new_var(
+          this._context.symbol.time,
+        );
 
         // Switch to comparative symbol
         this._context.select_sym(1);
-        const comSourceDef = PineJS.Std[this.source](this._context);
-        const compSymbol = this._context.new_var(comSourceDef);
-        // Switch back to main symbol
-        this._context.select_sym(0);
+        const compV = PineJS.Std[this.source](this._context);
+        const comp = this._context.new_var(compV);
+        const compTime = this._context.new_var(
+          this._context.symbol.time,
+        );
 
+        // Switch back to main symbol and align the series
+        this._context.select_sym(0);
+        const alignedV = comp.adopt(compTime, mainTime, 1);
+        const alignedComp = this._context.new_var(alignedV);
         //========= End Setup ==========
 
         //========= Start Calculation ==========
 
         // RS
-        const bs = baseSymbol.get();
-        // console.log("Running Relative Strength...",bs,this._context.symbol.bartime(),this._context.symbol.index);
-        const bsh = baseSymbol.get(this.length);
-        const cs = 10;
-        const csh = 20;
-        const res = ctx.new_var(bs / bsh / (cs / csh) - 1);
-        const resColor = this.toggleRSColor ? (res.get() > 0 ? 0 : 1) : 2;
+        const mCurr = main.get();
+        const mHist = main.get(this.length);
+        const cCurr = alignedComp.get();
+        const cHist = alignedComp.get(this.length);
+        const mainReturn = mCurr / mHist;
+        const compReturn = cCurr / cHist;
+        const rsValue = mainReturn / compReturn - 1;
+
+        const rs = ctx.new_var(rsValue);
+        const resColor = this.toggleRSColor ? (rs.get() > 0 ? 0 : 1) : 2;
 
         // Zeroline
         let zeroLine = NaN;
         let zeroLineColor = 1;
         if (this.showZeroLine) {
-          const y0 = res.get() - res.get(this.base);
+          const y0 = rs.get() - rs.get(this.base);
           const angle0 = PineJS.Std.atan(y0 / this.base);
           zeroLine = 0;
           zeroLineColor = this.showRSTrend ? (angle0 > 0 ? 0 : 1) : 1;
@@ -589,7 +598,7 @@ export function RelativeStrength(
         let maColor = 2;
         if (this.showMA) {
           const smaRes = this._context.new_var(
-            PineJS.Std.sma(res, this.lengthRSMA, this._context),
+            PineJS.Std.sma(rs, this.lengthRSMA, this._context),
           );
           ma = smaRes.get();
 
@@ -608,18 +617,16 @@ export function RelativeStrength(
         let divColor = NaN;
         if (this.showBubbles) {
           const smaSource = this._context.new_var(
-            PineJS.Std.sma(baseSymbol, this.lengthPriceSMA, this._context),
+            PineJS.Std.sma(main, this.lengthPriceSMA, this._context),
           );
           const posDiv =
-            PineJS.Std.rising(smaSource, 3) &&
-            baseSymbol.get() >= smaSource.get();
+            PineJS.Std.rising(smaSource, 3) && main.get() >= smaSource.get();
           const negDiv =
-            PineJS.Std.falling(smaSource, 3) &&
-            baseSymbol.get() < smaSource.get();
+            PineJS.Std.falling(smaSource, 3) && main.get() < smaSource.get();
           const divStarted = posDiv || negDiv;
           divColor = divStarted ? (posDiv ? 0 : negDiv ? 1 : NaN) : NaN;
           if (divStarted) {
-            priceConf = res.get();
+            priceConf = rs.get();
           }
         }
 
@@ -630,7 +637,7 @@ export function RelativeStrength(
           zeroLine,
           zeroLineColor,
           // RS
-          res.get(),
+          rs.get(),
           resColor,
           // MA
           ma,

@@ -20,21 +20,14 @@ import {
 } from "react";
 import { useScreener } from "@/lib/state/screener";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { defaultSymbolColumns } from "@/components/symbols/symbol_column";
+import { useColumns } from "@/components/symbols/symbol_column";
 
 const getCommonPinningStyles = (column: Column<Symbol>): CSSProperties => {
   const isPinned = column.getIsPinned();
   const isLastLeftPinnedColumn =
     isPinned === "left" && column.getIsLastColumn("left");
-  // const isFirstRightPinnedColumn =
-  //   isPinned === "right" && column.getIsFirstColumn("right");
 
   return {
-    // boxShadow: isLastLeftPinnedColumn
-    //   ? "-4px 0 4px -4px gray inset"
-    //   : isFirstRightPinnedColumn
-    //     ? "4px 0 4px -4px gray inset"
-    //     : undefined,
     left: isPinned === "left" ? `${column.getStart("left")}px` : undefined,
     right: isPinned === "right" ? `${column.getAfter("right")}px` : undefined,
     position: isPinned ? "sticky" : "relative",
@@ -66,16 +59,14 @@ function useColumnPinning(columns: ColumnDef<Symbol>[]) {
 }
 
 function useSymbolColumns(visibleColumns: string[]) {
-  const columns = defaultSymbolColumns;
+  const columns = useColumns();
 
   const [columnVisibility, setColumnVisibility] = useState<
     Record<string, boolean>
   >(() => {
     const visibility = { name: true } as Record<string, boolean>;
     const defCol = new Set(visibleColumns ?? []);
-    defaultSymbolColumns.forEach(
-      ({ id }) => (visibility[id!] = defCol.has(id!)),
-    );
+    columns.forEach(({ id }) => (visibility[id!] = defCol.has(id!)));
     return visibility;
   });
 
@@ -97,7 +88,9 @@ function useSymbolColumns(visibleColumns: string[]) {
   }, [columns, columnVisibility]);
 
   const [columnOrder, setColumnOrder] = useState<string[]>(
-    columns.map((c) => c.id!),
+    Object.entries(columnVisibility)
+      .filter(([, v]) => v)
+      .map(([k]) => k),
   );
 
   return {
@@ -144,6 +137,13 @@ export function useSymbolTable(
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    initialState: {
+      columnOrder,
+      rowSelection,
+      columnVisibility,
+      sorting,
+      columnPinning,
+    },
     state: {
       columnPinning,
       rowSelection,
@@ -206,12 +206,4 @@ export function useSymbolTable(
   }));
 
   return { table, loadMore, isLoading, rowVirtualizer };
-}
-
-function fixMeasureElement() {
-  //measure dynamic row height, except in firefox because it measures table border height incorrectly
-  return typeof window !== "undefined" &&
-    navigator.userAgent.indexOf("Firefox") === -1
-    ? (element: Element) => element?.getBoundingClientRect().height
-    : undefined;
 }

@@ -19,7 +19,6 @@ export function Chart(props: ChartProps) {
   const symbol = useGroupSymbol();
   const theme = useTheme();
   const chartTheme = useMemo(() => {
-    console.log("Theme changed", theme);
     if (theme.theme === "dark") {
       return "dark";
     }

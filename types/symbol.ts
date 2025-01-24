@@ -141,6 +141,10 @@ export interface Symbol {
   revenue_forecast_growth_avg_fq_3?: number;
   revenue_forecast_growth_avg_fy_2?: number;
   revenue_forecast_growth_avg_fy_3?: number;
+  earnings_release_date_fq_h: number[];
+  earnings_release_date_fy_h: number[];
+  earnings_fiscal_period_fq_h: string[];
+  earnings_fiscal_period_fy_h: string[];
   earnings_release_date?: number;
   earnings_release_time?: boolean;
   earnings_release_date_fq?: number;

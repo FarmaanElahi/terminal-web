@@ -200,7 +200,7 @@ interface IContext {
   setMinimumAdditionalDepth(value: number): void;
 }
 
-interface IPineSeries {
+export interface IPineSeries {
   /**
    * Map some values from one time scale to another.
    *
@@ -252,7 +252,7 @@ export interface LibraryPineStudyConstructor<TPineStudyResult> {
   main: (
     ctx: IContext,
     inputs: <T = unknown>(index: number) => T,
-  ) => TPineStudyResult;
+  ) => TPineStudyResult | number;
 }
 
 interface PineJSStd {

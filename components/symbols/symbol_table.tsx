@@ -6,7 +6,12 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { Column, flexRender, Table as TTable } from "@tanstack/react-table";
+import {
+  Column,
+  ColumnDef,
+  flexRender,
+  Table as TTable,
+} from "@tanstack/react-table";
 import { useSymbolTable } from "@/components/symbols/use_symbol_table";
 import type { Symbol } from "@/types/symbol";
 import { Virtualizer } from "@tanstack/react-virtual";
@@ -37,9 +42,13 @@ import {
 import {
   ArrowDown,
   ArrowUp,
+  ChevronDown,
   ChevronsUpDown,
+  ChevronUp,
+  GripVertical,
   Paintbrush,
   Settings,
+  XCircle,
 } from "lucide-react";
 import {
   closestCenter,
@@ -58,6 +67,7 @@ import {
   useSortable,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { Label } from "@/components/ui/label";
 
 interface SymbolTableProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
@@ -249,83 +259,6 @@ function SymbolTableControl({ table }: { table: TTable<Symbol> }) {
 function SymbolColumnSheet({ table }: { table: TTable<Symbol> }) {
   const [open, setOpen] = useState(false);
 
-  const columnByCategory = useMemo(() => {
-    const columns = table.getAllColumns();
-    return columns.reduce(
-      (acc, column) => {
-        // eslint-disable-next-line
-        // @ts-ignore
-        const category = column.columnDef?.meta?.category ?? "Unknown";
-        if (!acc[category]) {
-          acc[category] = [];
-        }
-        acc[category].push(column);
-        return acc;
-      },
-      {} as Record<string, Column<Symbol>[]>,
-    );
-  }, [table]);
-
-  const colsUI = (
-    <div className="h-full overflow-auto space-y-2">
-      {Object.keys(columnByCategory).map((category) => {
-        const groupColumns = columnByCategory[category];
-        const groupColumnCount = groupColumns.length;
-        const visibleGroupColumns = groupColumns.filter((c) =>
-          c.getIsVisible(),
-        );
-        const visibleGroupColumnsCount = visibleGroupColumns.length;
-
-        const g = (
-          <div className="flex flex-col gap-2">
-            {groupColumns.map((column) => (
-              <div key={column.id} className="flex gap-2">
-                <Checkbox
-                  checked={column.getIsVisible()}
-                  disabled={!column.getCanHide()}
-                  onCheckedChange={(checked) => {
-                    if (typeof checked === "boolean") {
-                      column.toggleVisibility(checked);
-                      console.log(
-                        "New Column order",
-                        table.getVisibleFlatColumns(),
-                      );
-                    }
-                  }}
-                />
-                <label
-                  htmlFor={column.id}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {column.columnDef.header as string}
-                </label>
-              </div>
-            ))}
-          </div>
-        );
-
-        return (
-          <Collapsible key={category} className="border space-y-2 rounded">
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="ghost"
-                className="w-full inline-flex justify-between rounded"
-              >
-                {category}
-                <span className="flex-1"></span>
-                {`${visibleGroupColumnsCount}/${groupColumnCount}`}
-                <ChevronsUpDown className="h-4 w-4" />
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className={"h-96 overflow-auto px-4 py-2"}>
-              {g}
-            </CollapsibleContent>
-          </Collapsible>
-        );
-      })}
-    </div>
-  );
-
   return (
     <div>
       <Sheet open={open} onOpenChange={setOpen} modal={false}>
@@ -337,13 +270,16 @@ function SymbolColumnSheet({ table }: { table: TTable<Symbol> }) {
             <Settings className="size-4" />
           </Button>
         </SheetTrigger>
-        <SheetContent className={"w-1/4 h-full border flex flex-col"}>
-          <SheetHeader>
-            <SheetTitle>Columns</SheetTitle>
+        <SheetContent
+          className={"h-full border flex flex-col"}
+          style={{ maxWidth: "25vw" }}
+        >
+          <SheetHeader className="flex align-middle justify-center">
+            <SheetTitle>Columns Settings</SheetTitle>
             <SheetClose />
           </SheetHeader>
-          <div className="flex">
-            {colsUI}
+          <div className="flex-1 flex justify-between">
+            <SymbolColumnFilter table={table} />
             <SymbolColumnOrder table={table} />
           </div>
         </SheetContent>
@@ -370,25 +306,52 @@ function SymbolColumnOrder({ table }: { table: TTable<Symbol> }) {
   };
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
   );
 
   return (
-    <div className="w-48 flex flex-col">
-      <DndContext
-        onDragOver={handleDragOver}
-        sensors={sensors}
-        collisionDetection={closestCenter}
-      >
-        <SortableContext items={columns} strategy={verticalListSortingStrategy}>
-          {columns.map((c) => (
-            <ColumnDraggable key={c.id} column={c} />
-          ))}
-        </SortableContext>
-      </DndContext>
+    <div className="w-64 relative">
+      <div className="flex flex-col bg-primary/10 rounded h-full border gap-2 w-full p-2">
+        <div className="text-sm font-semibold">
+          Column Selected
+          <span className="bg-background border rounded-full text-xs p-0.5 ml-2">
+            {table.getVisibleFlatColumns().length}
+          </span>
+        </div>
+
+        <DndContext
+          onDragOver={handleDragOver}
+          sensors={sensors}
+          collisionDetection={closestCenter}
+        >
+          <SortableContext
+            items={columns}
+            strategy={verticalListSortingStrategy}
+          >
+            {columns.map((c) => (
+              <ColumnDraggable key={c.id} column={c} />
+            ))}
+          </SortableContext>
+        </DndContext>
+      </div>
+
+      <div className="absolute bottom-0 w-full p-2">
+        <Button
+          variant="destructive"
+          className="w-full"
+          size="sm"
+          onClick={() => {
+            table.resetColumnFilters();
+            table.resetColumnOrder();
+          }}
+        >
+          <XCircle className="size-4" />
+          Reset Columns
+        </Button>
+      </div>
     </div>
   );
 }
@@ -402,8 +365,121 @@ function ColumnDraggable({ column }: { column: Column<Symbol> }) {
     transition,
   };
   return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      {column.columnDef.header as string}
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      className="text-xs min-h-6 flex justify-start gap-1 p-2 bg-background border rounded"
+    >
+      <GripVertical className="size-4 text-muted-foreground/40" />
+      <span onClick={() => console.log("dsdsds")}>
+        {column.columnDef.header as string}
+      </span>
+      <span className="flex-1"></span>
+      <button
+        className="size-4 disabled:text-foreground/20"
+        onClick={column.getToggleVisibilityHandler()}
+        disabled={!!column.getIsPinned()}
+      >
+        <XCircle className="size-4" />
+      </button>
     </div>
+  );
+}
+
+function SymbolColumnFilter({ table }: { table: TTable<Symbol> }) {
+  const columnByCategory = useMemo(() => {
+    const columns = table.getAllColumns();
+    return columns.reduce(
+      (acc, column) => {
+        // eslint-disable-next-line
+        // @ts-ignore
+        const category = column.columnDef?.meta?.category ?? "Unknown";
+        if (!acc[category]) {
+          acc[category] = [];
+        }
+        acc[category].push(column);
+        return acc;
+      },
+      {} as Record<string, Column<Symbol>[]>,
+    );
+  }, [table]);
+
+  return (
+    <div className="h-full overflow-auto space-y-2 w-64">
+      {Object.keys(columnByCategory).map((category) => (
+        <ColumnCategory
+          key={category}
+          category={category}
+          groupColumns={columnByCategory[category]}
+        />
+      ))}
+    </div>
+  );
+}
+
+function ColumnCategory({
+  category,
+  groupColumns,
+}: {
+  category: string;
+  groupColumns: Column<Symbol>[];
+}) {
+  const groupColumnCount = groupColumns.length;
+  const visibleGroupColumns = groupColumns.filter((c) => c.getIsVisible());
+  const visibleGroupColumnsCount = visibleGroupColumns.length;
+  const [open, setOpen] = useState(false);
+
+  const g = (
+    <div className="flex flex-col gap-2">
+      {groupColumns.map((column) => (
+        <div key={column.id} className="flex gap-2">
+          <Checkbox
+            checked={column.getIsVisible()}
+            disabled={!column.getCanHide()}
+            onCheckedChange={(checked) => {
+              if (typeof checked === "boolean") {
+                column.toggleVisibility(checked);
+              }
+            }}
+          />
+          <Label htmlFor={column.id} className="text-xs">
+            {column.columnDef.header as string}
+          </Label>
+        </div>
+      ))}
+    </div>
+  );
+
+  return (
+    <Collapsible
+      open={open}
+      onOpenChange={setOpen}
+      key={category}
+      className="border space-y-2 rounded w-48"
+    >
+      <CollapsibleTrigger asChild>
+        <Button
+          variant="ghost"
+          className="w-full inline-flex justify-between rounded-b-none data-[state='open']:bg-primary/15 h-8"
+          size="sm"
+        >
+          <span className="font-semibold">{category}</span>
+          <span className="inline-flex text-primary">
+            <span className="space-x-1">
+              <span className="font-bold">{visibleGroupColumnsCount}</span>
+              <span>|</span>
+              <span>{`${groupColumnCount}`}</span>
+            </span>
+            {open && <ChevronUp className="ml-2 h-4 w-4" />}
+            {!open && <ChevronDown className="ml-2 h-4 w-4" />}
+          </span>
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className={"h-96 overflow-auto px-4 py-2"}>
+        {g}
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
