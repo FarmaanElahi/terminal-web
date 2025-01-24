@@ -395,6 +395,7 @@ export class ChartManager {
         "header_quick_search",
         "countdown",
         "timeframes_toolbar",
+        "object_tree_legend_mode",
       ],
 
       enabled_features: [

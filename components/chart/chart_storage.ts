@@ -182,23 +182,27 @@ export class ChartStorage implements IExternalSaveLoadAdapter {
     _: unknown,
     requestContext: LineToolsAndGroupsLoadRequestContext,
   ): Promise<Partial<LineToolsAndGroupsState> | null> {
-    if (!layoutId || !chartId || !requestContext) return null;
+    if (!layoutId || !chartId || !requestContext) {
+      return null;
+    }
     const { symbol } = requestContext;
-    if (!symbol) return null;
+    if (!symbol) {
+      return null;
+    }
 
     const { data, error } = await this.client
       .from("chart_drawings")
       .select("state")
       .eq("layout_id", layoutId)
-      .eq("symbol", symbol);
+      .eq("symbol", symbol)
+      .maybeSingle();
 
     if (error || !data) return null;
 
     const sources = new Map<string, LineToolState>();
-    for (const entry of data as LineToolState[]) {
+    for (const entry of data.state as unknown as LineToolState[]) {
       sources.set(entry.id, entry);
     }
-
     return { sources };
   }
 

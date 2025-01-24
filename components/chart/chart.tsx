@@ -36,8 +36,11 @@ export function Chart(props: ChartProps) {
         chartTheme,
       );
     } else if (widgetRef.current) {
-      const resolution = widgetRef.current.activeChart().resolution();
-      widgetRef.current?.setSymbol(symbol, resolution);
+      for (let i = 0; i < widgetRef.current.chartsCount(); i++) {
+        const resolution = widgetRef.current.chart(i).resolution();
+        widgetRef.current.chart(i).setSymbol(symbol, resolution);
+      }
+
       widgetRef?.current?.changeTheme(chartTheme);
     }
   }, [chartTheme, manager, symbol, widgetRef, chartContainerRef]);

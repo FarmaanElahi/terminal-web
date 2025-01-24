@@ -80,6 +80,7 @@ type UndoRedoState = { canUndo: boolean; canRedo: boolean };
 declare namespace TradingView {
   interface IChartWidgetApi {
     resolution: () => string;
+    setSymbol: (symbol: string, tf: string) => void;
   }
 
   class widget {
@@ -87,7 +88,7 @@ declare namespace TradingView {
 
     onChartReady: (cb: () => void) => void;
     headerReady: () => Promise<void>;
-    chart: (index?: number) => unknown;
+    chart: (index?: number) => IChartWidgetApi;
     chartsCount: () => number;
     activeChart: () => IChartWidgetApi;
     activeChartIndex: () => number;
