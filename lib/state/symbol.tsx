@@ -245,10 +245,12 @@ export function useScreener({ columns, sort, type }: ScreenerRequest) {
     getNextPageParam: (lastPage) => lastPage.nextOffset,
     queryKey: ["symbols", columns, sort],
     queryFn: async (context) => {
+      const defCols = ["name", "exchange", "logo", "country_code", "currency"];
+
       const page = context.pageParam as number;
       const limit = 50;
       const offset = page * limit;
-      const colKeys = columns.join(",");
+      const colKeys = [...defCols, columns].join(",");
       let query = supabase
         .from("symbols")
         .select(colKeys)

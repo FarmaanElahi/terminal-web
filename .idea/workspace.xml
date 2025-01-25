@@ -4,10 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Fixed initial release build">
-      <change beforePath="$PROJECT_DIR$/components/chart/chart_manager.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/chart_manager.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/datafeed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/datafeed.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/state/charts.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lib/state/charts.tsx" afterDir="false" />
+    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Added refactoring">
+      <change afterPath="$PROJECT_DIR$/app/app/screener/page.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hooks/query.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app/app-sidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/app/app-sidebar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/ui/sidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/ui/sidebar.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,7 +57,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "Merging main",
     "js.last.introduce.type": "CONST",
     "last_opened_file_path": "/Users/farmaan/Public/farmaan/Projects/terminal-web",
     "node.js.detected.package.eslint": "true",
@@ -120,14 +122,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1736430941500</updated>
-    </task>
-    <task id="LOCAL-00055" summary="Auto fetching dependent column">
-      <option name="closed" value="true" />
-      <created>1736867088546</created>
-      <option name="number" value="00055" />
-      <option name="presentableId" value="LOCAL-00055" />
-      <option name="project" value="LOCAL" />
-      <updated>1736867088546</updated>
     </task>
     <task id="LOCAL-00056" summary="Auto fetching dependent column">
       <option name="closed" value="true" />
@@ -513,7 +507,15 @@
       <option name="project" value="LOCAL" />
       <updated>1737826392921</updated>
     </task>
-    <option name="localTasksCounter" value="104" />
+    <task id="LOCAL-00104" summary="Added refactoring">
+      <option name="closed" value="true" />
+      <created>1737827240000</created>
+      <option name="number" value="00104" />
+      <option name="presentableId" value="LOCAL-00104" />
+      <option name="project" value="LOCAL" />
+      <updated>1737827240000</updated>
+    </task>
+    <option name="localTasksCounter" value="105" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -531,7 +533,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added theming" />
     <MESSAGE value="Added layout in dashboard" />
     <MESSAGE value="Added back sidebar" />
     <MESSAGE value="Added sorting icon" />
@@ -556,7 +557,8 @@
     <MESSAGE value="Prevent parallel loading query" />
     <MESSAGE value="Replace screener to use supabase filter" />
     <MESSAGE value="Fixed initial release build" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed initial release build" />
+    <MESSAGE value="Added refactoring" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added refactoring" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
