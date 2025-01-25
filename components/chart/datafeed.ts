@@ -16,9 +16,9 @@ import {
 } from "@/components/chart/types";
 import { AxiosInstance } from "axios";
 import { LogoProvider } from "@/components/chart/logo_provider";
-import { symbolQuote, symbolResolve } from "@/lib/state/symbol";
+import { symbolQuote, symbolSearch } from "@/lib/state/symbol";
 import type { Symbol } from "@/types/symbol";
-import { Client } from "@/utils/supabase/client";
+import { Subsession } from "@/types/supabase";
 
 interface LibrarySymbolInfoExtended extends LibrarySymbolInfo {
   quote: Symbol;
@@ -26,7 +26,6 @@ interface LibrarySymbolInfoExtended extends LibrarySymbolInfo {
 
 export class Datafeed implements StreamingDataFeed {
   constructor(
-    private readonly client: Client,
     private readonly axios: AxiosInstance,
     private readonly logoProvider: LogoProvider,
   ) {}
@@ -59,32 +58,18 @@ export class Datafeed implements StreamingDataFeed {
     symbolType: string,
     onResult: SearchSymbolsCallback,
   ) {
-    let query = this.client
-      .from("symbols")
-      .select("ticker,name,description,type,logo,exchange,exchange_logo")
-      .ilike("name", `%${userInput}%`)
-      .limit(50);
-
-    if (exchange) query = query.eq("exchange", exchange);
-    if (symbolType) query = query.eq("type", symbolType);
-
-    const { data, error } = await query;
-    if (error || !data) {
-      return onResult([]);
-    }
-
-    const result = data.map(
-      (d) =>
-        ({
-          symbol: d.name,
-          ticker: d.ticker,
-          description: d.description,
-          type: d.type,
-          logo_urls: this.logoProvider.forLogo(d.logo, []),
-          exchange: d.exchange,
-          exchange_logo: this.logoProvider.forLogo(d.exchange_logo),
-        }) as SearchSymbolResultItem,
-    );
+    let data = await symbolSearch(userInput, { exchange, type: symbolType });
+    const result = data.map((d) => {
+      return {
+        symbol: d.name,
+        ticker: d.ticker,
+        description: d.description,
+        type: d.type,
+        logo_urls: this.logoProvider.forLogo(d.logo, []),
+        exchange: d.exchange,
+        exchange_logo: this.logoProvider.forLogo(d.exchange_logo),
+      } as SearchSymbolResultItem;
+    });
     onResult(result);
   }
 
@@ -93,14 +78,20 @@ export class Datafeed implements StreamingDataFeed {
     onResolve: ResolveCallback,
     onError: DatafeedErrorCallback,
   ) {
-    const [data, quote] = await Promise.all([
-      symbolResolve(symbolName).catch(() => null),
-      symbolQuote(symbolName).catch(() => null),
-    ]);
-    if (!data) {
-      onError("Unable to resolve symbol");
-      return;
-    }
+    const data = await symbolQuote(symbolName).catch(onError);
+    if (!data) return;
+
+    // Map it
+    const subsession_id = "regular";
+    const minmov = 5;
+    const pricescale = 100;
+    const sessionDetails = (data.subsessions as Subsession[]).find(
+      (s) => s.id === subsession_id,
+    );
+    const corrections = sessionDetails?.["session-correction"];
+    const session = sessionDetails?.session;
+    const session_display = sessionDetails?.["session-display"];
+    const listed_exchange = data.exchange;
 
     const symbol = {
       name: data.name,
@@ -109,23 +100,24 @@ export class Datafeed implements StreamingDataFeed {
       type: data.type,
       logo_urls: this.logoProvider.forLogo(data.logo, []),
       exchange: data.exchange,
+      listed_exchange: listed_exchange,
       exchange_logo: data.exchange_logo,
       timezone: data.timezone,
       subsessions: data.subsessions,
-      subsession_id: data.subsession_id,
-      corrections: data.corrections,
-      minmov: data.minmov,
-      pricescale: data.pricescale,
-      currency_code: data.currency_code,
-      session: data.session,
+      subsession_id: subsession_id,
+      corrections: corrections,
+      minmov: minmov,
+      pricescale: pricescale,
+      currency_code: data.currency,
+      session: session,
       industry: data.industry,
       sector: data.sector,
       has_intraday: false,
-      session_display: data.session_display,
+      session_display: session_display,
       data_status: "endofday",
       has_daily: true,
       session_holidays: data.session_holidays,
-      quote,
+      quote: data,
     } as LibrarySymbolInfoExtended;
     onResolve(symbol);
   }
@@ -185,7 +177,7 @@ export class Datafeed implements StreamingDataFeed {
     let currIndex = 0;
 
     // Earning Marks
-    const earnings = earnings_release_date_fq_h ?? [];
+    const earnings = (earnings_release_date_fq_h ?? []) as number[];
     earnings.forEach((time, index) => {
       marks.push({
         id: `${currIndex + index}`,

@@ -5,17 +5,20 @@ import { AxiosInstance } from "axios";
 import { ChartStorage } from "@/components/chart/chart_storage";
 import { LogoProvider } from "@/components/chart/logo_provider";
 import { getIndicators } from "@/components/chart/indicators";
-import { createClient } from "@/utils/supabase/client";
+import { Client } from "@/utils/supabase/client";
 
 export class ChartManager {
   private readonly datafeed: Datafeed;
   private readonly chartStorage: ChartStorage;
   private readonly logoProvider: LogoProvider;
-  private readonly client = createClient();
 
-  constructor(axios: AxiosInstance, logoBaseUrl: string) {
+  constructor(
+    private readonly client: Client,
+    axios: AxiosInstance,
+    logoBaseUrl: string,
+  ) {
     this.logoProvider = new LogoProvider(logoBaseUrl);
-    this.datafeed = new Datafeed(this.client,axios, this.logoProvider);
+    this.datafeed = new Datafeed(axios, this.logoProvider);
     this.chartStorage = new ChartStorage(this.client);
   }
 

@@ -1,35 +1,16 @@
-import type { Symbol } from "@/types/symbol";
 import { useQuery } from "@tanstack/react-query";
-import { queryClient, webClient } from "@/lib/state/client";
-
-//##################### SYMBOL RESOLVE #####################
-async function symbolResolveQueryFn(symbol: string) {
-  const path = `/api/v1/symbols/${symbol}/resolve`;
-  const response = await webClient.get<Symbol>(path);
-  return response.data;
-}
-
-export function symbolResolve(symbolName: string) {
-  return queryClient.fetchQuery({
-    queryKey: ["symbol", symbolName],
-    queryFn: async () => symbolResolveQueryFn(symbolName),
-  });
-}
-
-export function useSymbolResolve(symbolName: string) {
-  return useQuery({
-    queryKey: ["symbol", symbolName],
-    queryFn: async () => symbolResolveQueryFn(symbolName),
-  });
-}
-
-//##################### SYMBOL RESOLVE #####################
+import { client, queryClient } from "@/lib/state/client";
 
 //##################### SYMBOL QUOTE #####################
-async function symbolQuoteQueryFn(symbol: string) {
-  const path = `/api/v1/symbols/${symbol}/quote`;
-  const response = await webClient.get<Symbol>(path);
-  return response.data;
+async function symbolQuoteQueryFn(ticker: string) {
+  const { data, error } = await client
+    .from("symbols")
+    .select()
+    .eq("ticker", ticker)
+    .maybeSingle();
+
+  if (error || !data) throw new Error("Unable to resolve symbol");
+  return data;
 }
 
 export function symbolQuote(symbol: string) {
@@ -50,25 +31,50 @@ export function useSymbolQuote(symbolName?: string) {
 //##################### SYMBOL QUOTE #####################
 
 //##################### SYMBOL SEARCH #####################
-type SymbolSearchResult = {
-  data: (Pick<
-    Symbol,
-    "name" | "description" | "type" | "logo" | "exchange" | "exchange_logo"
-  > & { ticker: string })[];
-  meta: { total: number };
-};
 
-export function useSymbolSearch(q: string) {
+interface SymbolSearchOptions {
+  exchange?: string;
+  type?: string;
+  signal?: AbortSignal;
+  limit?: number;
+}
+
+async function symbolSearchQueryFn(q: string, option?: SymbolSearchOptions) {
+  let query = client
+    .from("symbols")
+    .select("ticker,name,description,type,logo,exchange,exchange_logo")
+    .ilike("name", `%${q}%`)
+    .limit(option?.limit ?? 50);
+
+  if (option?.exchange) query = query.eq("exchange", option.exchange);
+  if (option?.type) query = query = query.eq("type", option.type);
+  if (option?.signal) query = query.abortSignal(option.signal);
+
+  const { data, error } = await query;
+  if (error || !data) throw new Error("Error");
+  return data;
+}
+
+export function symbolSearch(
+  q: string,
+  options?: Omit<SymbolSearchOptions, "signal">,
+) {
+  return queryClient.fetchQuery({
+    queryKey: ["symbol_search", q, options],
+    queryFn: async ({ signal }) =>
+      symbolSearchQueryFn(q, { ...options, signal }),
+  });
+}
+
+export function useSymbolSearch(
+  q: string,
+  options?: Omit<SymbolSearchOptions, "signal">,
+) {
   return useQuery({
-    queryKey: ["symbol_search", q],
+    queryKey: ["symbol_search", q, options],
     enabled: !!q,
-    queryFn: async () => {
-      const path = "/api/v1/symbols/search";
-      const response = await webClient.get<SymbolSearchResult>(path, {
-        params: { q },
-      });
-      return response.data?.data;
-    },
+    queryFn: async ({ signal }) =>
+      symbolSearchQueryFn(q, { ...options, signal }),
   });
 }
 

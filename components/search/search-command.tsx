@@ -16,7 +16,6 @@ export function SymbolSearch() {
   const commandInputRef = useRef<HTMLInputElement>(null);
   const switcher = useGroupSymbolSwitcher();
   const { data, isLoading } = useSymbolSearch(q);
-
   const handleSelect = useCallback(
     (ticker: string) => {
       switcher(ticker);

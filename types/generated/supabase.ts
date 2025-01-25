@@ -909,7 +909,7 @@ export type Database = {
           stan_weinstein_stage: string | null
           sub_industry: string | null
           subsessions: Json | null
-          ticker: string
+          ticker: string | null
           timezone: string | null
           total_assets_fq_0: number | null
           total_assets_fq_1: number | null
@@ -1814,7 +1814,7 @@ export type Database = {
           stan_weinstein_stage?: string | null
           sub_industry?: string | null
           subsessions?: Json | null
-          ticker: string
+          ticker?: string | null
           timezone?: string | null
           total_assets_fq_0?: number | null
           total_assets_fq_1?: number | null
@@ -2719,7 +2719,7 @@ export type Database = {
           stan_weinstein_stage?: string | null
           sub_industry?: string | null
           subsessions?: Json | null
-          ticker?: string
+          ticker?: string | null
           timezone?: string | null
           total_assets_fq_0?: number | null
           total_assets_fq_1?: number | null
