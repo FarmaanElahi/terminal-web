@@ -1,7 +1,6 @@
 import type { TradingView } from "@/components/chart/charting";
 import type { TradingViewWidgetOptions } from "@/components/chart/types";
 import { Datafeed } from "@/components/chart/datafeed";
-import { AxiosInstance } from "axios";
 import { ChartStorage } from "@/components/chart/chart_storage";
 import { LogoProvider } from "@/components/chart/logo_provider";
 import { getIndicators } from "@/components/chart/indicators";
@@ -14,11 +13,10 @@ export class ChartManager {
 
   constructor(
     private readonly client: Client,
-    axios: AxiosInstance,
     logoBaseUrl: string,
   ) {
     this.logoProvider = new LogoProvider(logoBaseUrl);
-    this.datafeed = new Datafeed(axios, this.logoProvider);
+    this.datafeed = new Datafeed(this.logoProvider);
     this.chartStorage = new ChartStorage(this.client);
   }
 

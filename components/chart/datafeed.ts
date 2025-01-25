@@ -13,7 +13,6 @@ import {
   StreamingDataFeed,
   TimescaleMark,
 } from "@/components/chart/types";
-import { AxiosInstance } from "axios";
 import { LogoProvider } from "@/components/chart/logo_provider";
 import { symbolCandle, symbolResolve, symbolSearch } from "@/lib/state/symbol";
 import type { Symbol } from "@/types/symbol";
@@ -25,10 +24,7 @@ interface LibrarySymbolInfoExtended extends LibrarySymbolInfo {
 }
 
 export class Datafeed implements StreamingDataFeed {
-  constructor(
-    private readonly axios: AxiosInstance,
-    private readonly logoProvider: LogoProvider,
-  ) {}
+  constructor(private readonly logoProvider: LogoProvider) {}
 
   onReady(callback: OnReadyCallback) {
     const config = {
