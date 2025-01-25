@@ -13,6 +13,15 @@ import {
 import { DateTime } from "luxon";
 import { Client } from "@/utils/supabase/client";
 import { Json } from "@/types/generated/supabase";
+import {
+  allCharts,
+  allChartTemplates,
+  allStudyTemplates,
+  chartContent,
+  chartLayoutDrawings,
+  chartTemplateContent,
+  studyTemplateContent,
+} from "@/lib/state/symbol";
 
 export class ChartStorage implements IExternalSaveLoadAdapter {
   constructor(private readonly client: Client) {}
@@ -23,11 +32,7 @@ export class ChartStorage implements IExternalSaveLoadAdapter {
    * ===============================================================
    */
   async getAllCharts(): Promise<ChartMetaInfo[]> {
-    const { data, error } = await this.client
-      .from("chart_layouts")
-      .select(`id,symbol,resolution,name,created_at`);
-    if (error || !data) throw new Error("Cannot fetch charts");
-
+    const data = await allCharts();
     return data.map((d) => {
       return {
         id: d.id,
@@ -63,16 +68,7 @@ export class ChartStorage implements IExternalSaveLoadAdapter {
   }
 
   async getChartContent(chartId: number | string): Promise<string> {
-    chartId = typeof chartId === "number" ? "" + chartId : chartId;
-
-    const { data, error } = await this.client
-      .from("chart_layouts")
-      .select(`content`)
-      .eq("id", chartId)
-      .maybeSingle();
-
-    if (error || !data) throw new Error("Cannot fetch chart content");
-    return data.content as string;
+    return chartContent(chartId);
   }
 
   async removeChart(id: number | string) {
@@ -91,11 +87,7 @@ export class ChartStorage implements IExternalSaveLoadAdapter {
    */
 
   async getAllChartTemplates(): Promise<string[]> {
-    const { data, error } = await this.client
-      .from("chart_templates")
-      .select(`name`);
-    if (error || !data) throw new Error("Cannot fetch chart templates");
-    return data.map((d) => d.name);
+    return allChartTemplates();
   }
 
   async saveChartTemplate(
@@ -110,14 +102,7 @@ export class ChartStorage implements IExternalSaveLoadAdapter {
   }
 
   async getChartTemplateContent(name: string): Promise<ChartTemplate> {
-    const { data, error } = await this.client
-      .from("chart_templates")
-      .select(`content`)
-      .eq("name", name)
-      .maybeSingle();
-
-    if (error || !data) throw new Error("Cannot fetch chart template content");
-    return data as ChartTemplate;
+    return (await chartTemplateContent(name)) as ChartTemplate;
   }
 
   async removeChartTemplate(name: string) {
@@ -135,29 +120,16 @@ export class ChartStorage implements IExternalSaveLoadAdapter {
    */
 
   async getAllStudyTemplates(): Promise<StudyTemplateMetaInfo[]> {
-    const { data, error } = await this.client
-      .from("study_templates")
-      .select(`name`);
-    if (error || !data) throw new Error("Cannot fetch study template");
-
-    return data;
+    return allStudyTemplates();
   }
 
   async saveStudyTemplate(data: StudyTemplateData): Promise<void> {
     const { error } = await this.client.from("study_templates").upsert(data);
-
     if (error) throw new Error("Failed to save study template");
   }
 
   async getStudyTemplateContent(d: StudyTemplateMetaInfo): Promise<string> {
-    const { data, error } = await this.client
-      .from("study_templates")
-      .select(`content`)
-      .eq("name", d.name)
-      .maybeSingle();
-
-    if (error || !data) throw new Error("Cannot fetch study template content");
-    return data.content as string;
+    return studyTemplateContent(d.name);
   }
 
   async removeStudyTemplate(data: StudyTemplateMetaInfo): Promise<void> {
@@ -174,7 +146,6 @@ export class ChartStorage implements IExternalSaveLoadAdapter {
    * Chart Layout Drawing
    * ===============================================================
    */
-  private seenKeys = new Set<string>();
 
   async loadLineToolsAndGroups(
     layoutId: string,
@@ -190,14 +161,8 @@ export class ChartStorage implements IExternalSaveLoadAdapter {
       return null;
     }
 
-    const { data, error } = await this.client
-      .from("chart_drawings")
-      .select("state")
-      .eq("layout_id", layoutId)
-      .eq("symbol", symbol)
-      .maybeSingle();
-
-    if (error || !data) return null;
+    const data = await chartLayoutDrawings(layoutId, symbol);
+    if (!data) return null;
 
     const sources = new Map<string, LineToolState>();
     for (const entry of data.state as unknown as LineToolState[]) {
