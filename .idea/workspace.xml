@@ -4,17 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Refactored symbol search and resolve">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Replace screener to use supabase filter">
+      <change beforePath="$PROJECT_DIR$/components/chart/chart_storage.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/chart_storage.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/chart/datafeed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/datafeed.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/query-provider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/query-provider.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/state/charts.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lib/state/charts.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/state/client.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/state/supabase.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/state/screener.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/state/screener.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/state/symbol.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lib/state/symbol.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pnpm-lock.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/indicators/base.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/search/search-command.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/search/search-command.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/sidebar/nav-secondary.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/sidebar/nav-secondary.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/symbols/symbol_stats.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/symbols/symbol_stats.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/symbols/symbol_table.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/symbols/symbol_table.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/state/supabase.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/state/supabase.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/tsconfig.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/supabase/middleware.ts" beforeDir="false" afterPath="$PROJECT_DIR$/utils/supabase/middleware.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/supabase/server.ts" beforeDir="false" afterPath="$PROJECT_DIR$/utils/supabase/server.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,6 +64,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
+    "js.last.introduce.type": "CONST",
     "last_opened_file_path": "/Users/farmaan/Public/farmaan/Projects/terminal-web",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -126,38 +128,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1736430941500</updated>
-    </task>
-    <task id="LOCAL-00049" summary="Added sorting and column selection">
-      <option name="closed" value="true" />
-      <created>1736803128286</created>
-      <option name="number" value="00049" />
-      <option name="presentableId" value="LOCAL-00049" />
-      <option name="project" value="LOCAL" />
-      <updated>1736803128286</updated>
-    </task>
-    <task id="LOCAL-00050" summary="Added infinite query">
-      <option name="closed" value="true" />
-      <created>1736842761037</created>
-      <option name="number" value="00050" />
-      <option name="presentableId" value="LOCAL-00050" />
-      <option name="project" value="LOCAL" />
-      <updated>1736842761037</updated>
-    </task>
-    <task id="LOCAL-00051" summary="Added infinite query">
-      <option name="closed" value="true" />
-      <created>1736842843887</created>
-      <option name="number" value="00051" />
-      <option name="presentableId" value="LOCAL-00051" />
-      <option name="project" value="LOCAL" />
-      <updated>1736842843887</updated>
-    </task>
-    <task id="LOCAL-00052" summary="Added infinite query">
-      <option name="closed" value="true" />
-      <created>1736860312493</created>
-      <option name="number" value="00052" />
-      <option name="presentableId" value="LOCAL-00052" />
-      <option name="project" value="LOCAL" />
-      <updated>1736860312493</updated>
     </task>
     <task id="LOCAL-00053" summary="Refactored">
       <option name="closed" value="true" />
@@ -519,7 +489,39 @@
       <option name="project" value="LOCAL" />
       <updated>1737811121397</updated>
     </task>
-    <option name="localTasksCounter" value="98" />
+    <task id="LOCAL-00098" summary="Added upstox candle fetching">
+      <option name="closed" value="true" />
+      <created>1737819022664</created>
+      <option name="number" value="00098" />
+      <option name="presentableId" value="LOCAL-00098" />
+      <option name="project" value="LOCAL" />
+      <updated>1737819022664</updated>
+    </task>
+    <task id="LOCAL-00099" summary="Added upstox candle fetching">
+      <option name="closed" value="true" />
+      <created>1737821491377</created>
+      <option name="number" value="00099" />
+      <option name="presentableId" value="LOCAL-00099" />
+      <option name="project" value="LOCAL" />
+      <updated>1737821491377</updated>
+    </task>
+    <task id="LOCAL-00100" summary="Prevent parallel loading query">
+      <option name="closed" value="true" />
+      <created>1737822855872</created>
+      <option name="number" value="00100" />
+      <option name="presentableId" value="LOCAL-00100" />
+      <option name="project" value="LOCAL" />
+      <updated>1737822855872</updated>
+    </task>
+    <task id="LOCAL-00101" summary="Replace screener to use supabase filter">
+      <option name="closed" value="true" />
+      <created>1737824448636</created>
+      <option name="number" value="00101" />
+      <option name="presentableId" value="LOCAL-00101" />
+      <option name="project" value="LOCAL" />
+      <updated>1737824448636</updated>
+    </task>
+    <option name="localTasksCounter" value="102" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -537,10 +539,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Refactored" />
-    <MESSAGE value="Auto fetching dependent column" />
-    <MESSAGE value="Sorting order label" />
-    <MESSAGE value="Added column filtering" />
     <MESSAGE value="Added column sorting" />
     <MESSAGE value="Added theming" />
     <MESSAGE value="Added layout in dashboard" />
@@ -562,7 +560,11 @@
     <MESSAGE value="Fixed symbol changing to all chart in a layout" />
     <MESSAGE value="Change symbol search to supabase" />
     <MESSAGE value="Refactored symbol search and resolve" />
-    <option name="LAST_COMMIT_MESSAGE" value="Refactored symbol search and resolve" />
+    <MESSAGE value="A" />
+    <MESSAGE value="Added upstox candle fetching" />
+    <MESSAGE value="Prevent parallel loading query" />
+    <MESSAGE value="Replace screener to use supabase filter" />
+    <option name="LAST_COMMIT_MESSAGE" value="Replace screener to use supabase filter" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -574,7 +576,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/components/symbols/symbol_table.tsx</url>
-          <line>105</line>
+          <line>99</line>
           <option name="timeStamp" value="14" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">

@@ -92,7 +92,7 @@ function SymbolCell(props: FormattedValueProps) {
   const logo = symbol.logo;
 
   const days = symbol.earnings_release_next_date
-    ? DateTime.fromMillis(symbol.earnings_release_next_date).diffNow("day").days
+    ? DateTime.fromISO(symbol.earnings_release_next_date).diffNow("day").days
     : undefined;
   const earningFlag = days !== undefined && days <= 14 && days >= 0;
 

@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { ActionH } from "@/types/supabase";
 
 export function Stats() {
   const [freq, setFreq] = useState<"fq" | "fy">("fq");
@@ -61,9 +62,9 @@ export const StatsTable = ({ freq }: { freq: "fq" | "fy" }) => {
   const data = useMemo(() => {
     if (!quote) return { noData: true } as const;
 
-    const sales =
-      (freq === "fq" ? quote.revenue_action_fq_h : quote.revenue_action_fy_h) ??
-      [];
+    const sales = ((freq === "fq"
+      ? quote.revenue_action_fq_h
+      : quote.revenue_action_fy_h) ?? []) as unknown as ActionH[];
 
     const salesGrowth = sales.map((a, index) => {
       const current = a?.Actual ?? a.Estimate;
@@ -73,9 +74,9 @@ export const StatsTable = ({ freq }: { freq: "fq" | "fy" }) => {
       return ((current - previous) / previous) * 100;
     });
 
-    const earnings =
-      (freq === "fq" ? quote.earning_action_fq_h : quote.earning_action_fy_h) ??
-      [];
+    const earnings = ((freq === "fq"
+      ? quote.earning_action_fq_h
+      : quote.earning_action_fy_h) ?? []) as unknown as ActionH[];
 
     const earningsGrowth = earnings.map((a, index) => {
       const current = a?.Actual ?? a.Estimate;

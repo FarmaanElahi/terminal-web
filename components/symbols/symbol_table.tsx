@@ -6,12 +6,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import {
-  Column,
-  ColumnDef,
-  flexRender,
-  Table as TTable,
-} from "@tanstack/react-table";
+import { Column, flexRender, Table as TTable } from "@tanstack/react-table";
 import { useSymbolTable } from "@/components/symbols/use_symbol_table";
 import type { Symbol } from "@/types/symbol";
 import { Virtualizer } from "@tanstack/react-virtual";
@@ -43,7 +38,6 @@ import {
   ArrowDown,
   ArrowUp,
   ChevronDown,
-  ChevronsUpDown,
   ChevronUp,
   GripVertical,
   Paintbrush,

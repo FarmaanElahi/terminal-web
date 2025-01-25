@@ -17,8 +17,8 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "typeRoots": [
-      "./types"
+    "types": [
+      "./types/upstox.d.ts"
     ],
     "plugins": [
       {

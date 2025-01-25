@@ -40,7 +40,7 @@ export function SymbolSearch() {
   }, [setQ, open]);
 
   const items = data?.map((s) => (
-    <CommandItem key={s.name} onSelect={handleSelect} value={s.ticker}>
+    <CommandItem key={s.name} onSelect={handleSelect} value={s.ticker!}>
       {s.logo ? (
         <Image
           src={["/external/logos/", s.logo + ".svg"].join("/")}

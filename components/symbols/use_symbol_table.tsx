@@ -18,9 +18,9 @@ import {
   useMemo,
   useState,
 } from "react";
-import { useScreener } from "@/lib/state/screener";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useColumns } from "@/components/symbols/symbol_column";
+import { useScreener } from "@/lib/state/symbol";
 
 const getCommonPinningStyles = (column: Column<Symbol>): CSSProperties => {
   const isPinned = column.getIsPinned();
@@ -123,6 +123,7 @@ export function useSymbolTable(
   const result = useScreener({
     columns: queryColumn,
     sort: sorting.map((s) => ({ field: s.id, asc: !s.desc })),
+    type: "stock",
   });
 
   // Data

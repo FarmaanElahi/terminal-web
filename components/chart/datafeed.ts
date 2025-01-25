@@ -58,7 +58,7 @@ export class Datafeed implements StreamingDataFeed {
     symbolType: string,
     onResult: SearchSymbolsCallback,
   ) {
-    let data = await symbolSearch(userInput, { exchange, type: symbolType });
+    const data = await symbolSearch(userInput, { exchange, type: symbolType });
     const result = data.map((d) => {
       return {
         symbol: d.name,

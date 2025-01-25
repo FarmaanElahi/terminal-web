@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { queryClient, supabase, upstox } from "@/lib/state/supabase";
 import { DateTime, FixedOffsetZone } from "luxon";
 import {
@@ -9,6 +9,7 @@ import {
   HistoryApi,
 } from "upstox-js-sdk";
 import { LibrarySymbolInfo } from "@/components/chart/types";
+import type { Symbol } from "@/types/symbol";
 
 //##################### SYMBOL QUOTE #####################
 async function symbolQuoteQueryFn(ticker: string) {
@@ -224,3 +225,53 @@ function toUpstoxInstrumentKey(symbol: LibrarySymbolInfo) {
 }
 
 //##################### SYMBOL CANDLE #####################
+
+//##################### SCREENER_SCAN #####################
+type ScreenerResponse = {
+  data: Symbol[];
+  meta: { total: number };
+  nextOffset: number;
+};
+
+type ScreenerRequest = {
+  columns: string[];
+  sort: { field: string; asc: boolean }[];
+  type?: "stock" | "fund" | "index";
+};
+
+export function useScreener({ columns, sort, type }: ScreenerRequest) {
+  return useInfiniteQuery<ScreenerResponse>({
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => lastPage.nextOffset,
+    queryKey: ["symbols", columns, sort],
+    queryFn: async (context) => {
+      const page = context.pageParam as number;
+      const limit = 50;
+      const offset = page * limit;
+      const colKeys = columns.join(",");
+      let query = supabase
+        .from("symbols")
+        .select(colKeys)
+        .range(offset, offset + limit - 1);
+
+      if (type) query = query.eq("type", type);
+
+      for (const sorting of sort) {
+        query = query.order(sorting.field, {
+          ascending: false,
+          nullsFirst: false,
+        });
+      }
+
+      const { data, error } = await query;
+      if (error || !data) throw new Error("Unable to generate screener result");
+      return {
+        data: data as unknown as Symbol[],
+        meta: { total: 5000 },
+        nextOffset: page + 1,
+      };
+    },
+  });
+}
+
+//##################### SCREENER_SCAN #####################

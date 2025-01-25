@@ -238,26 +238,19 @@ export class ChartStorage implements IExternalSaveLoadAdapter {
    * Chart Layout Drawing
    * ===============================================================
    */
-  async getDrawingTemplates(toolName: string): Promise<string[]> {
+  async getDrawingTemplates(): Promise<string[]> {
     return [];
   }
 
-  loadDrawingTemplate(toolName: string, templateName: string): Promise<string> {
+  loadDrawingTemplate(): Promise<string> {
     throw new Error("Method not implemented.");
   }
 
-  removeDrawingTemplate?(
-    toolName: string,
-    templateName: string,
-  ): Promise<void> {
+  removeDrawingTemplate?(): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
-  saveDrawingTemplate(
-    toolName: string,
-    templateName: string,
-    content: string,
-  ): Promise<void> {
+  saveDrawingTemplate(): Promise<void> {
     throw new Error("Method not implemented.");
   }
 }
