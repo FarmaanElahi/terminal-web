@@ -18,6 +18,7 @@ export function Chart(props: ChartProps) {
   const manager = useChartManager();
   const symbol = useGroupSymbol();
   const theme = useTheme();
+  const initializing = useRef(false);
   const chartTheme = useMemo(() => {
     if (theme.theme === "dark") {
       return "dark";
@@ -29,12 +30,22 @@ export function Chart(props: ChartProps) {
   }, [theme]);
 
   useEffect(() => {
+    console.log(chartTheme, manager, symbol, widgetRef, chartContainerRef);
     if (chartContainerRef.current && !widgetRef.current) {
+      // If it is initializing, then we have to wait
+      if (initializing.current) return;
+
+      console.log("Initializing");
+      // Create new
+      initializing.current = true;
       widgetRef.current = manager.create(
         chartContainerRef.current,
         symbol,
         chartTheme,
       );
+
+      // Mark as initializing
+      initializing.current = false;
     } else if (widgetRef.current) {
       for (let i = 0; i < widgetRef.current.chartsCount(); i++) {
         const resolution = widgetRef.current.chart(i).resolution();

@@ -1,5 +1,4 @@
 import {
-  Bar,
   DatafeedConfiguration,
   DatafeedErrorCallback,
   GetMarksCallback,
@@ -16,9 +15,10 @@ import {
 } from "@/components/chart/types";
 import { AxiosInstance } from "axios";
 import { LogoProvider } from "@/components/chart/logo_provider";
-import { symbolQuote, symbolSearch } from "@/lib/state/symbol";
+import { symbolCandle, symbolResolve, symbolSearch } from "@/lib/state/symbol";
 import type { Symbol } from "@/types/symbol";
 import { Subsession } from "@/types/supabase";
+import { DateTime } from "luxon";
 
 interface LibrarySymbolInfoExtended extends LibrarySymbolInfo {
   quote: Symbol;
@@ -78,7 +78,8 @@ export class Datafeed implements StreamingDataFeed {
     onResolve: ResolveCallback,
     onError: DatafeedErrorCallback,
   ) {
-    const data = await symbolQuote(symbolName).catch(onError);
+    console.log("Resolving", symbolName);
+    const data = await symbolResolve(symbolName).catch(onError);
     if (!data) return;
 
     // Map it
@@ -117,47 +118,32 @@ export class Datafeed implements StreamingDataFeed {
       data_status: "endofday",
       has_daily: true,
       session_holidays: data.session_holidays,
-      quote: data,
+      isin: data.isin,
     } as LibrarySymbolInfoExtended;
     onResolve(symbol);
   }
 
   async getBars(
-    symbolInfo: LibrarySymbolInfo,
+    symbolInfo: LibrarySymbolInfoExtended,
     resolution: ResolutionString,
     periodParams: PeriodParams,
     onResult: HistoryCallback,
     onError: DatafeedErrorCallback,
   ) {
-    const path = `/api/v1/symbols/upstox/${symbolInfo.ticker}/candles/${resolution}/${periodParams.to}/${periodParams.countBack}`;
-    const response = await this.axios.get<Record<string, unknown>>(path, {
-      params: { first_request: periodParams.firstDataRequest },
-    });
-    if (response.status >= 400) {
-      onError("Unable to resolve symbol");
-      return;
-    }
-    const data = response.data;
-    if (!data) {
-      onError("Unable to resolve symbol");
-      return;
-    }
-    const values = data.v as number[][];
-    if (!values || values.length === 0) {
-      onResult([], { noData: true });
-      return;
-    }
-    const bars = values.map(
-      (v) =>
-        ({
-          time: v[0],
-          open: v[1],
-          high: v[2],
-          low: v[3],
-          close: v[4],
-          volume: v[5],
-        }) satisfies Bar,
+    const { to, from, countBack, firstDataRequest } = periodParams;
+    const toDate = DateTime.fromSeconds(to);
+    const day = Math.max(10 * 252, countBack); // Pull Min 10 year data
+    const fromDate = DateTime.fromSeconds(from).minus({ day: day });
+    const bars = await symbolCandle(
+      symbolInfo,
+      "day",
+      toDate,
+      fromDate,
+      firstDataRequest,
     );
+    if (!bars) return onError("Unable to resolve symbol");
+    if (bars.length === 0) return onResult([], { noData: true });
+
     onResult(bars);
   }
 

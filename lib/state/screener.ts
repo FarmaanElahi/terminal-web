@@ -1,6 +1,6 @@
 import type { Symbol } from "@/types/symbol";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { webClient } from "@/lib/state/client";
+import { webClient } from "@/lib/state/supabase";
 
 type ScreenerResponse = {
   data: Symbol[];

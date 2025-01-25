@@ -273,9 +273,7 @@ export interface LibrarySymbolInfo {
    */
   weekly_multipliers?: string[];
 
-  symKey: string;
-  n?: string;
-  p?: Record<string, unknown>;
+  isin?: string;
 }
 
 export type ResolutionString =

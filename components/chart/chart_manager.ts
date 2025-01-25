@@ -417,7 +417,7 @@ export class ChartManager {
         "studies_extend_time_scale",
         "hide_image_invalid_symbol",
       ],
-      save_load_adapter: this.chartStorage,
+      // save_load_adapter: this.chartStorage,
     };
   }
 }

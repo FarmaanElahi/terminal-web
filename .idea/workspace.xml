@@ -4,18 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Change symbol search to supabase">
-      <change beforePath="$PROJECT_DIR$/components/chart/chart_manager.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/chart_manager.ts" afterDir="false" />
+    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Refactored symbol search and resolve">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/chart/datafeed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/datafeed.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/search/search-command.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/search/search-command.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/query-provider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/query-provider.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/state/charts.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lib/state/charts.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/state/client.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/state/client.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/state/client.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/state/supabase.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/state/screener.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/state/screener.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/state/symbol.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lib/state/symbol.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pnpm-lock.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/generated/supabase.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/generated/supabase.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/supabase.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/supabase.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/types/symbol.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/symbol.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/tsconfig.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -127,14 +126,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1736430941500</updated>
-    </task>
-    <task id="LOCAL-00048" summary="Added sorting and column selection">
-      <option name="closed" value="true" />
-      <created>1736803023054</created>
-      <option name="number" value="00048" />
-      <option name="presentableId" value="LOCAL-00048" />
-      <option name="project" value="LOCAL" />
-      <updated>1736803023054</updated>
     </task>
     <task id="LOCAL-00049" summary="Added sorting and column selection">
       <option name="closed" value="true" />
@@ -520,7 +511,15 @@
       <option name="project" value="LOCAL" />
       <updated>1737789662177</updated>
     </task>
-    <option name="localTasksCounter" value="97" />
+    <task id="LOCAL-00097" summary="Refactored symbol search and resolve">
+      <option name="closed" value="true" />
+      <created>1737811121397</created>
+      <option name="number" value="00097" />
+      <option name="presentableId" value="LOCAL-00097" />
+      <option name="project" value="LOCAL" />
+      <updated>1737811121397</updated>
+    </task>
+    <option name="localTasksCounter" value="98" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -538,7 +537,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added infinite query" />
     <MESSAGE value="Refactored" />
     <MESSAGE value="Auto fetching dependent column" />
     <MESSAGE value="Sorting order label" />
@@ -563,7 +561,8 @@
     <MESSAGE value="Add support for supabase chart saving" />
     <MESSAGE value="Fixed symbol changing to all chart in a layout" />
     <MESSAGE value="Change symbol search to supabase" />
-    <option name="LAST_COMMIT_MESSAGE" value="Change symbol search to supabase" />
+    <MESSAGE value="Refactored symbol search and resolve" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactored symbol search and resolve" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
