@@ -78,7 +78,6 @@ export class Datafeed implements StreamingDataFeed {
     onResolve: ResolveCallback,
     onError: DatafeedErrorCallback,
   ) {
-    console.log("Resolving", symbolName);
     const data = await symbolResolve(symbolName).catch(onError);
     if (!data) return;
 

@@ -54,7 +54,11 @@ async function symbolResolveFn(ticker: string) {
 }
 
 export function symbolResolve(symbol: string) {
-  return symbolResolveFn(symbol);
+  return queryClient.fetchQuery({
+    queryKey: ["symbol_resolve", symbol],
+    staleTime: 100,
+    queryFn: async () => symbolResolveFn(symbol),
+  });
 }
 
 //##################### SYMBOL QUOTE #####################
