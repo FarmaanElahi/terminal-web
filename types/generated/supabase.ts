@@ -21,7 +21,7 @@ export type Database = {
         Insert: {
           chart_id?: string | null
           created_at?: string
-          layout_id: string
+          layout_id?: string
           state?: Json | null
           symbol: string
           user_id?: string | null
@@ -34,7 +34,15 @@ export type Database = {
           symbol?: string
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "chart_drawings_layout_id_fkey"
+            columns: ["layout_id"]
+            isOneToOne: false
+            referencedRelation: "chart_layouts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       chart_layouts: {
         Row: {

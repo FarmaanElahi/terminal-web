@@ -15,7 +15,7 @@ export class ChartManager {
 
   constructor(axios: AxiosInstance, logoBaseUrl: string) {
     this.logoProvider = new LogoProvider(logoBaseUrl);
-    this.datafeed = new Datafeed(axios, this.logoProvider);
+    this.datafeed = new Datafeed(this.client,axios, this.logoProvider);
     this.chartStorage = new ChartStorage(this.client);
   }
 

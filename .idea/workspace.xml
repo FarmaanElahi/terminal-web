@@ -4,11 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Add support for supabase chart saving">
-      <change beforePath="$PROJECT_DIR$/components/chart/chart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/chart.tsx" afterDir="false" />
+    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Fixed symbol changing to all chart in a layout">
       <change beforePath="$PROJECT_DIR$/components/chart/chart_manager.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/chart_manager.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/chart_storage.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/chart_storage.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/charting.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/charting.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/datafeed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/datafeed.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/state/symbol.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lib/state/symbol.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/types/generated/supabase.ts" beforeDir="false" afterPath="$PROJECT_DIR$/types/generated/supabase.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -120,22 +120,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1736430941500</updated>
-    </task>
-    <task id="LOCAL-00044" summary="Refactor">
-      <option name="closed" value="true" />
-      <created>1736778373668</created>
-      <option name="number" value="00044" />
-      <option name="presentableId" value="LOCAL-00044" />
-      <option name="project" value="LOCAL" />
-      <updated>1736778373668</updated>
-    </task>
-    <task id="LOCAL-00045" summary="Refactor">
-      <option name="closed" value="true" />
-      <created>1736783748805</created>
-      <option name="number" value="00045" />
-      <option name="presentableId" value="LOCAL-00045" />
-      <option name="project" value="LOCAL" />
-      <updated>1736783748805</updated>
     </task>
     <task id="LOCAL-00046" summary="Refactor">
       <option name="closed" value="true" />
@@ -513,7 +497,23 @@
       <option name="project" value="LOCAL" />
       <updated>1737760674327</updated>
     </task>
-    <option name="localTasksCounter" value="93" />
+    <task id="LOCAL-00093" summary="Fixed symbol changing to all chart in a layout">
+      <option name="closed" value="true" />
+      <created>1737762070788</created>
+      <option name="number" value="00093" />
+      <option name="presentableId" value="LOCAL-00093" />
+      <option name="project" value="LOCAL" />
+      <updated>1737762070788</updated>
+    </task>
+    <task id="LOCAL-00094" summary="Fixed symbol changing to all chart in a layout">
+      <option name="closed" value="true" />
+      <created>1737762074492</created>
+      <option name="number" value="00094" />
+      <option name="presentableId" value="LOCAL-00094" />
+      <option name="project" value="LOCAL" />
+      <updated>1737762074492</updated>
+    </task>
+    <option name="localTasksCounter" value="95" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -531,7 +531,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Chart Manager" />
     <MESSAGE value="Added sorting and column selection" />
     <MESSAGE value="Added infinite query" />
     <MESSAGE value="Refactored" />
@@ -556,7 +555,8 @@
     <MESSAGE value="Added rs indicator" />
     <MESSAGE value="Resumed" />
     <MESSAGE value="Add support for supabase chart saving" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add support for supabase chart saving" />
+    <MESSAGE value="Fixed symbol changing to all chart in a layout" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed symbol changing to all chart in a layout" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -585,11 +585,6 @@
           <url>file://$PROJECT_DIR$/components/navigation/prevent-navigation.tsx</url>
           <line>27</line>
           <option name="timeStamp" value="15" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/components/chart/datafeed.ts</url>
-          <line>3</line>
-          <option name="timeStamp" value="17" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -18,6 +18,7 @@ import { AxiosInstance } from "axios";
 import { LogoProvider } from "@/components/chart/logo_provider";
 import { symbolQuote, symbolResolve } from "@/lib/state/symbol";
 import type { Symbol } from "@/types/symbol";
+import { Client } from "@/utils/supabase/client";
 
 interface LibrarySymbolInfoExtended extends LibrarySymbolInfo {
   quote: Symbol;
@@ -25,6 +26,7 @@ interface LibrarySymbolInfoExtended extends LibrarySymbolInfo {
 
 export class Datafeed implements StreamingDataFeed {
   constructor(
+    private readonly client: Client,
     private readonly axios: AxiosInstance,
     private readonly logoProvider: LogoProvider,
   ) {}
@@ -57,19 +59,21 @@ export class Datafeed implements StreamingDataFeed {
     symbolType: string,
     onResult: SearchSymbolsCallback,
   ) {
-    const path = "/api/v1/symbols/search";
-    const response = await this.axios.get<{ data: Record<string, unknown>[] }>(
-      path,
-      {
-        params: { q: userInput, exchange, symbol_type: symbolType },
-      },
-    );
-    if (response.status >= 400) {
-      onResult([]);
-      return;
+    let query = this.client
+      .from("symbols")
+      .select("ticker,name,description,type,logo,exchange,exchange_logo")
+      .ilike("name", `%${userInput}%`)
+      .limit(50);
+
+    if (exchange) query = query.eq("exchange", exchange);
+    if (symbolType) query = query.eq("type", symbolType);
+
+    const { data, error } = await query;
+    if (error || !data) {
+      return onResult([]);
     }
 
-    const result = response.data.data.map(
+    const result = data.map(
       (d) =>
         ({
           symbol: d.name,
