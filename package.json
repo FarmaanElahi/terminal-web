@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "gen-types": "mkdir -p types/generated && supabase gen types typescript --project-id ivagqjtwoevyxadmpvqx --schema public > types/generated/supabase.ts"
+    "gen-types": "mkdir -p types/generated && supabase gen types typescript --project-id ivagqjtwoevyxadmpvqx --schema public > types/generated/supabase.ts",
+    "prepare": "husky"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -64,10 +65,18 @@
     "eslint": "^9",
     "eslint-config-next": "15.1.4",
     "eslint-config-prettier": "^9.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3",
     "postcss": "^8",
     "prettier": "3.4.2",
     "tailwindcss": "^3.4.1",
     "type-fest": "^4.33.0",
     "typescript": "^5"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --max-warnings 0 ."
+    ]
   }
 }

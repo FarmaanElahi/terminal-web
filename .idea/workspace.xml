@@ -4,8 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Fixed chart loading">
-      <change beforePath="$PROJECT_DIR$/components/chart/chart_storage.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/chart_storage.ts" afterDir="false" />
+    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Fixed type checks">
+      <change afterPath="$PROJECT_DIR$/.husky/pre-commit" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pnpm-lock.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -118,22 +120,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1736430941500</updated>
-    </task>
-    <task id="LOCAL-00059" summary="Auto fetching dependent column">
-      <option name="closed" value="true" />
-      <created>1736880866401</created>
-      <option name="number" value="00059" />
-      <option name="presentableId" value="LOCAL-00059" />
-      <option name="project" value="LOCAL" />
-      <updated>1736880866401</updated>
-    </task>
-    <task id="LOCAL-00060" summary="Auto fetching dependent column">
-      <option name="closed" value="true" />
-      <created>1736892886505</created>
-      <option name="number" value="00060" />
-      <option name="presentableId" value="LOCAL-00060" />
-      <option name="project" value="LOCAL" />
-      <updated>1736892886505</updated>
     </task>
     <task id="LOCAL-00061" summary="Auto fetching dependent column">
       <option name="closed" value="true" />
@@ -511,7 +497,23 @@
       <option name="project" value="LOCAL" />
       <updated>1737903960421</updated>
     </task>
-    <option name="localTasksCounter" value="108" />
+    <task id="LOCAL-00108" summary="Fixed build">
+      <option name="closed" value="true" />
+      <created>1737904110091</created>
+      <option name="number" value="00108" />
+      <option name="presentableId" value="LOCAL-00108" />
+      <option name="project" value="LOCAL" />
+      <updated>1737904110091</updated>
+    </task>
+    <task id="LOCAL-00109" summary="Fixed build">
+      <option name="closed" value="true" />
+      <created>1737904112582</created>
+      <option name="number" value="00109" />
+      <option name="presentableId" value="LOCAL-00109" />
+      <option name="project" value="LOCAL" />
+      <updated>1737904112582</updated>
+    </task>
+    <option name="localTasksCounter" value="110" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -529,8 +531,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added sorting icon" />
-    <MESSAGE value="Added top nav" />
     <MESSAGE value="Added ability ot perform global search for symbol and navigate" />
     <MESSAGE value="Add styling for chart" />
     <MESSAGE value="Add styling" />
@@ -554,7 +554,9 @@
     <MESSAGE value="Added refactoring" />
     <MESSAGE value="Moved chart storage query to react query" />
     <MESSAGE value="Fixed chart loading" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed chart loading" />
+    <MESSAGE value="Fixed build" />
+    <MESSAGE value="Fixed type checks" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed type checks" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
