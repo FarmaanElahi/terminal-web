@@ -277,3 +277,118 @@ export function useScreener({ columns, sort, type }: ScreenerRequest) {
 }
 
 //##################### SCREENER_SCAN #####################
+
+//##################### CHART #####################
+
+export function allCharts() {
+  return queryClient.fetchQuery({
+    queryKey: ["chart_layouts"],
+    queryFn: async ({ signal }) => {
+      const { data, error } = await supabase
+        .from("chart_layouts")
+        .select(`id,symbol,resolution,name,created_at`)
+        .abortSignal(signal);
+
+      if (error || !data) throw new Error("Cannot fetch charts");
+      return data;
+    },
+  });
+}
+
+export function chartContent(chartId: number | string) {
+  return queryClient.fetchQuery({
+    queryKey: ["chart_layouts_content", chartId],
+    queryFn: async ({ signal }) => {
+      chartId = typeof chartId === "number" ? "" + chartId : chartId;
+      const { data, error } = await supabase
+        .from("chart_layouts")
+        .select(`content`)
+        .eq("id", chartId)
+        .abortSignal(signal)
+        .maybeSingle();
+      if (error || !data) throw new Error("Cannot fetch chart content");
+      return data.content as string;
+    },
+  });
+}
+
+export function allChartTemplates() {
+  return queryClient.fetchQuery({
+    queryKey: ["chart_templates"],
+    queryFn: async ({ signal }) => {
+      const { data, error } = await supabase
+        .from("chart_templates")
+        .select(`name`)
+        .abortSignal(signal);
+      if (error || !data) throw new Error("Cannot fetch chart templates");
+      return data.map((d) => d.name);
+    },
+  });
+}
+
+export function chartTemplateContent(name: string) {
+  return queryClient.fetchQuery({
+    queryKey: ["chart_templates_content", name],
+    queryFn: async ({ signal }) => {
+      const { data, error } = await supabase
+        .from("chart_templates")
+        .select(`content`)
+        .eq("name", name)
+        .abortSignal(signal)
+        .maybeSingle();
+      if (error || !data) {
+        throw new Error("Cannot fetch chart template content");
+      }
+      return data;
+    },
+  });
+}
+
+export function allStudyTemplates() {
+  return queryClient.fetchQuery({
+    queryKey: ["study_templates"],
+    queryFn: async ({ signal }) => {
+      const { data, error } = await supabase
+        .from("study_templates")
+        .select(`name`)
+        .abortSignal(signal);
+
+      if (error || !data) throw new Error("Cannot fetch study template");
+      return data;
+    },
+  });
+}
+
+export function studyTemplateContent(name: string) {
+  return queryClient.fetchQuery({
+    queryKey: ["study_templates_content", name],
+    queryFn: async ({ signal }) => {
+      const { data, error } = await supabase
+        .from("study_templates")
+        .select(`content`)
+        .eq("name", name)
+        .abortSignal(signal)
+        .maybeSingle();
+      if (error || !data)
+        throw new Error("Cannot fetch study template content");
+      return data.content as string;
+    },
+  });
+}
+
+export function chartDrawings(symbol: string) {
+  return queryClient.fetchQuery({
+    queryKey: ["chart_drawings", symbol],
+    staleTime: 300,
+    queryFn: async ({ signal }) => {
+      const { data, error } = await supabase
+        .from("chart_drawings")
+        .select()
+        .eq("symbol", symbol)
+        .abortSignal(signal);
+
+      if (error) throw new Error("Cannot fetch chart layout drawing");
+      return data;
+    },
+  });
+}

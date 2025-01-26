@@ -58,6 +58,7 @@ export class ChartManager {
       custom_css_url: "/css/charts/styles.css",
       custom_indicators_getter: getIndicators,
       load_last_chart: true,
+      save_load_adapter: this.chartStorage,
       // custom_themes: {
       //   // The new palette for the light theme
       //   light: {
@@ -415,7 +416,6 @@ export class ChartManager {
         "studies_extend_time_scale",
         "hide_image_invalid_symbol",
       ],
-      // save_load_adapter: this.chartStorage,
     };
   }
 }
