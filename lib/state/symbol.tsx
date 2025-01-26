@@ -376,17 +376,16 @@ export function studyTemplateContent(name: string) {
   });
 }
 
-export function chartLayoutDrawings(layoutId: string, symbol: string) {
+export function chartDrawings(symbol: string) {
   return queryClient.fetchQuery({
-    queryKey: ["chart_layout_drawing", layoutId, symbol],
+    queryKey: ["chart_drawings", symbol],
+    staleTime: 300,
     queryFn: async ({ signal }) => {
       const { data, error } = await supabase
         .from("chart_drawings")
-        .select("state")
-        .eq("layout_id", layoutId)
+        .select()
         .eq("symbol", symbol)
-        .abortSignal(signal)
-        .maybeSingle();
+        .abortSignal(signal);
 
       if (error) throw new Error("Cannot fetch chart layout drawing");
       return data;

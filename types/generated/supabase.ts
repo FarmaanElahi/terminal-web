@@ -13,7 +13,9 @@ export type Database = {
         Row: {
           chart_id: string | null
           created_at: string
-          layout_id: string
+          id: string
+          layout_id: string | null
+          ownerSource: string | null
           state: Json | null
           symbol: string
           user_id: string | null
@@ -21,7 +23,9 @@ export type Database = {
         Insert: {
           chart_id?: string | null
           created_at?: string
-          layout_id?: string
+          id: string
+          layout_id?: string | null
+          ownerSource?: string | null
           state?: Json | null
           symbol: string
           user_id?: string | null
@@ -29,7 +33,9 @@ export type Database = {
         Update: {
           chart_id?: string | null
           created_at?: string
-          layout_id?: string
+          id?: string
+          layout_id?: string | null
+          ownerSource?: string | null
           state?: Json | null
           symbol?: string
           user_id?: string | null
@@ -909,7 +915,7 @@ export type Database = {
           stan_weinstein_stage: string | null
           sub_industry: string | null
           subsessions: Json | null
-          ticker: string | null
+          ticker: string
           timezone: string | null
           total_assets_fq_0: number | null
           total_assets_fq_1: number | null
@@ -1814,7 +1820,7 @@ export type Database = {
           stan_weinstein_stage?: string | null
           sub_industry?: string | null
           subsessions?: Json | null
-          ticker?: string | null
+          ticker: string
           timezone?: string | null
           total_assets_fq_0?: number | null
           total_assets_fq_1?: number | null
@@ -2719,7 +2725,7 @@ export type Database = {
           stan_weinstein_stage?: string | null
           sub_industry?: string | null
           subsessions?: Json | null
-          ticker?: string | null
+          ticker?: string
           timezone?: string | null
           total_assets_fq_0?: number | null
           total_assets_fq_1?: number | null
