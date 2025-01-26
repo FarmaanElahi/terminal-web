@@ -30,14 +30,16 @@ export function Chart(props: ChartProps) {
       () => (widgetRef.current = widget),
     );
     return () => widget.remove();
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
-    if (!widgetRef.current) return;
+    const widget = widgetRef.current;
+    if (!widget) return;
     // Change the symbol
-    for (let i = 0; i < widgetRef.current.chartsCount(); i++) {
-      const resolution = widgetRef.current.chart(i).resolution();
-      widgetRef.current.chart(i).setSymbol(symbol, resolution);
+    for (let i = 0; i < widget.chartsCount(); i++) {
+      const resolution = widget.chart(i).resolution();
+      widget.chart(i).setSymbol(symbol, resolution);
     }
   }, [symbol]);
 

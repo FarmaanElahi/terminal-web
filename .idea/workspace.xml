@@ -5,11 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Fixed chart candle color changing on symbol switch">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/components/chart/chart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/chart.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/chart_manager.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/chart_manager.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/chart_storage.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/chart_storage.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/state/symbol.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lib/state/symbol.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -127,14 +123,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1736430941500</updated>
-    </task>
-    <task id="LOCAL-00061" summary="Auto fetching dependent column">
-      <option name="closed" value="true" />
-      <created>1736893045607</created>
-      <option name="number" value="00061" />
-      <option name="presentableId" value="LOCAL-00061" />
-      <option name="project" value="LOCAL" />
-      <updated>1736893045607</updated>
     </task>
     <task id="LOCAL-00062" summary="Sorting order label">
       <option name="closed" value="true" />
@@ -520,7 +508,15 @@
       <option name="project" value="LOCAL" />
       <updated>1737904112582</updated>
     </task>
-    <option name="localTasksCounter" value="110" />
+    <task id="LOCAL-00110" summary="Fixed chart candle color changing on symbol switch">
+      <option name="closed" value="true" />
+      <created>1737921371145</created>
+      <option name="number" value="00110" />
+      <option name="presentableId" value="LOCAL-00110" />
+      <option name="project" value="LOCAL" />
+      <updated>1737921371145</updated>
+    </task>
+    <option name="localTasksCounter" value="111" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
