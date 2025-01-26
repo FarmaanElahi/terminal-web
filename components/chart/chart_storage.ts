@@ -156,9 +156,9 @@ export class ChartStorage implements IExternalSaveLoadAdapter {
   >;
 
   async loadLineToolsAndGroups(
-    layoutId: string,
-    chartId: number | string,
-    type: unknown,
+    _: string,
+    __: number | string,
+    ___: unknown,
     requestContext: LineToolsAndGroupsLoadRequestContext,
   ): Promise<Partial<LineToolsAndGroupsState> | null> {
     // We only care about the symbol of the chart
@@ -195,7 +195,7 @@ export class ChartStorage implements IExternalSaveLoadAdapter {
 
     const deleteKeys = [] as { symbol: string; id: string }[];
     const upsert = [] as LineToolState[];
-    for (let [key, drawing] of drawings) {
+    for (const [key, drawing] of drawings) {
       // Layout can be undefined when we are using unsaved chart layout
       const symbolCheckKey = `${layoutId}/${chartId}/${key}`;
       const symbol =
