@@ -307,7 +307,7 @@ export function chartContent(chartId: number | string) {
         .abortSignal(signal)
         .maybeSingle();
       if (error || !data) throw new Error("Cannot fetch chart content");
-      return data.content as string;
+      return data.content;
     },
   });
 }

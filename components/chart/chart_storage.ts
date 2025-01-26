@@ -60,7 +60,7 @@ export class ChartStorage implements IExternalSaveLoadAdapter {
         symbol: chart.symbol,
         resolution: chart.resolution,
         name: chart.name,
-        content: chart.content,
+        content: JSON.parse(chart.content),
       })
       .select("id");
 
@@ -69,7 +69,7 @@ export class ChartStorage implements IExternalSaveLoadAdapter {
   }
 
   async getChartContent(chartId: number | string): Promise<string> {
-    return chartContent(chartId);
+    return chartContent(chartId).then((r) => (r ? JSON.stringify(r) : ""));
   }
 
   async removeChart(id: number | string) {

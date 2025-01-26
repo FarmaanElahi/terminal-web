@@ -4,10 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Fixed type checks">
-      <change afterPath="$PROJECT_DIR$/.husky/pre-commit" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pnpm-lock.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
+    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Fixed chart candle color changing on symbol switch">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/chart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/chart.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/chart_manager.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/chart_manager.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/chart_storage.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/chart_storage.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/state/symbol.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lib/state/symbol.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -17,7 +19,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="be14945df6c7b4f1a4977004c488c7880c4a94df" />
+        <entry key="$PROJECT_DIR$" value="feature/screener" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -32,7 +34,11 @@
                 <list>
                   <RecentBranch>
                     <option name="branchName" value="main" />
-                    <option name="lastUsedInstant" value="1736865274" />
+                    <option name="lastUsedInstant" value="1737914633" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="feature/screener" />
+                    <option name="lastUsedInstant" value="1737904827" />
                   </RecentBranch>
                 </list>
               </option>
@@ -51,24 +57,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "fix/drawing",
-    "js.last.introduce.type": "CONST",
-    "last_opened_file_path": "/Users/farmaan/Public/farmaan/Projects/terminal-web",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "npm.dev.executor": "Run",
-    "prettierjs.PrettierConfiguration.Package": "/Users/farmaan/Public/farmaan/Projects/terminal-web/node_modules/prettier",
-    "settings.editor.selected.configurable": "settings.javascript.prettier",
-    "ts.external.directory.path": "/Users/farmaan/Public/farmaan/Projects/terminal-web/node_modules/typescript/lib"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;js.last.introduce.type&quot;: &quot;CONST&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/farmaan/Public/farmaan/Projects/terminal-web&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.dev.executor&quot;: &quot;Run&quot;,
+    &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;/Users/farmaan/Public/farmaan/Projects/terminal-web/node_modules/prettier&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.javascript.prettier&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/farmaan/Public/farmaan/Projects/terminal-web/node_modules/typescript/lib&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -98,6 +104,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="npm.dev" />
         <item itemvalue="npm.dev" />
         <item itemvalue="npm.dev" />
         <item itemvalue="npm.dev" />
@@ -531,7 +538,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added ability ot perform global search for symbol and navigate" />
     <MESSAGE value="Add styling for chart" />
     <MESSAGE value="Add styling" />
     <MESSAGE value="Refactored query provider to be used outside of react" />
@@ -556,7 +562,8 @@
     <MESSAGE value="Fixed chart loading" />
     <MESSAGE value="Fixed build" />
     <MESSAGE value="Fixed type checks" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed type checks" />
+    <MESSAGE value="Fixed chart candle color changing on symbol switch" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed chart candle color changing on symbol switch" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -579,7 +586,6 @@
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/types/supabase.ts</url>
           <line>2</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="18" />
         </line-breakpoint>
       </breakpoints>

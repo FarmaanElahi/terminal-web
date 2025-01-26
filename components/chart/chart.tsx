@@ -1,5 +1,5 @@
 "use client";
-import { HTMLAttributes, RefObject, useEffect, useMemo, useRef } from "react";
+import { HTMLAttributes, RefObject, useEffect, useRef } from "react";
 import type { TradingView } from "@/components/chart/charting";
 import { useChartManager } from "@/lib/state/charts";
 import { useGroupSymbol } from "@/lib/state/grouper";
@@ -18,42 +18,32 @@ export function Chart(props: ChartProps) {
   const manager = useChartManager();
   const symbol = useGroupSymbol();
   const theme = useTheme();
-  const chartTheme = useMemo(() => {
-    if (theme.theme === "dark") {
-      return "dark";
-    }
-    if (theme.theme === "light") {
-      return "light";
-    }
-    return theme.systemTheme ?? "light";
-  }, [theme]);
+  const chartTheme =
+    theme.theme === "dark" ? "dark" : (theme.systemTheme ?? "light");
+
+  // Only create a widget when the widget is loaded for the first time
+  useEffect(() => {
+    const widget = manager.create(
+      chartContainerRef.current,
+      symbol,
+      chartTheme,
+      () => (widgetRef.current = widget),
+    );
+    return () => widget.remove();
+  });
 
   useEffect(() => {
-    if (chartContainerRef.current && !widgetRef.current) {
-      widgetRef.current = manager.create(
-        chartContainerRef.current,
-        symbol,
-        chartTheme,
-      );
-    } else if (widgetRef.current) {
-      for (let i = 0; i < widgetRef.current.chartsCount(); i++) {
-        const resolution = widgetRef.current.chart(i).resolution();
-        widgetRef.current.chart(i).setSymbol(symbol, resolution);
-      }
-
-      widgetRef?.current?.changeTheme(chartTheme);
+    if (!widgetRef.current) return;
+    // Change the symbol
+    for (let i = 0; i < widgetRef.current.chartsCount(); i++) {
+      const resolution = widgetRef.current.chart(i).resolution();
+      widgetRef.current.chart(i).setSymbol(symbol, resolution);
     }
-  }, [chartTheme, manager, symbol, widgetRef, chartContainerRef]);
+  }, [symbol]);
 
-  // Cleanup when the component unmounts
   useEffect(() => {
-    return () => {
-      if (widgetRef.current) {
-        widgetRef.current.remove(); // Ensure proper cleanup
-        widgetRef.current = null;
-      }
-    };
-  }, []);
+    widgetRef.current?.changeTheme(chartTheme);
+  }, [chartTheme]);
 
   return (
     <div
