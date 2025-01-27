@@ -5,9 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Fixed current trading day candle not showing">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/components/chart/datafeed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/datafeed.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eslint.config.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/eslint.config.mjs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/state/symbol.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lib/state/symbol.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -126,14 +123,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1736430941500</updated>
-    </task>
-    <task id="LOCAL-00063" summary="Added column filtering">
-      <option name="closed" value="true" />
-      <created>1736897404168</created>
-      <option name="number" value="00063" />
-      <option name="presentableId" value="LOCAL-00063" />
-      <option name="project" value="LOCAL" />
-      <updated>1736897404168</updated>
     </task>
     <task id="LOCAL-00064" summary="Added column filtering">
       <option name="closed" value="true" />
@@ -519,7 +508,15 @@
       <option name="project" value="LOCAL" />
       <updated>1737921736262</updated>
     </task>
-    <option name="localTasksCounter" value="112" />
+    <task id="LOCAL-00112" summary="Fixed current trading day candle not showing">
+      <option name="closed" value="true" />
+      <created>1737961001324</created>
+      <option name="number" value="00112" />
+      <option name="presentableId" value="LOCAL-00112" />
+      <option name="project" value="LOCAL" />
+      <updated>1737961001324</updated>
+    </task>
+    <option name="localTasksCounter" value="113" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -589,7 +586,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/lib/state/symbol.tsx</url>
-          <line>177</line>
+          <line>178</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="20" />
         </line-breakpoint>

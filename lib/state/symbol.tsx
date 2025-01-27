@@ -165,13 +165,14 @@ export async function symbolCandle(
       },
     );
 
+    // Data is in descending order of time
     const { candles } = intraday.data;
     if (candles.length > 0) {
       const time = candles[0][timeIndex];
-      const open = candles[0][openIndex];
+      const open = candles[candles.length - 1][openIndex];
       const high = Math.max(...candles.map((c) => c[highIndex]));
       const low = Math.min(...candles.map((c) => c[lowIndex]));
-      const close = candles[candles.length - 1][closeIndex];
+      const close = candles[0][closeIndex];
       const volume = candles
         .map((c) => c[volumeIndex])
         .reduce((a, b) => a + b, 0);
