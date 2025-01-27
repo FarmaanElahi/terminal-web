@@ -179,9 +179,9 @@ export async function symbolCandle(
     }
   }
 
-  const candles = await historyPromise.then((h) => h.data.candles);
-  candles.push(...intradayCandle);
-
+  const candles = [...intradayCandle];
+  // Data is descending  order, so we will insert at the first index
+  candles.push(...(await historyPromise.then((h) => h.data.candles)));
   return candles
     .map(([ts, open, high, low, close, volume]) => {
       const utc = FixedOffsetZone.utcInstance;

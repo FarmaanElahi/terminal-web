@@ -4,8 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Fixed chart candle color changing on symbol switch">
-      <change beforePath="$PROJECT_DIR$/components/chart/chart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/chart.tsx" afterDir="false" />
+    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Fixed current trading day candle not showing">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/components/chart/datafeed.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/datafeed.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/eslint.config.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/eslint.config.mjs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/state/symbol.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/lib/state/symbol.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,7 +68,7 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;npm.dev.executor&quot;: &quot;Run&quot;,
+    &quot;npm.dev.executor&quot;: &quot;Debug&quot;,
     &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;/Users/farmaan/Public/farmaan/Projects/terminal-web/node_modules/prettier&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;settings.javascript.prettier&quot;,
     &quot;ts.external.directory.path&quot;: &quot;/Users/farmaan/Public/farmaan/Projects/terminal-web/node_modules/typescript/lib&quot;
@@ -123,14 +126,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1736430941500</updated>
-    </task>
-    <task id="LOCAL-00062" summary="Sorting order label">
-      <option name="closed" value="true" />
-      <created>1736893653053</created>
-      <option name="number" value="00062" />
-      <option name="presentableId" value="LOCAL-00062" />
-      <option name="project" value="LOCAL" />
-      <updated>1736893653053</updated>
     </task>
     <task id="LOCAL-00063" summary="Added column filtering">
       <option name="closed" value="true" />
@@ -516,7 +511,15 @@
       <option name="project" value="LOCAL" />
       <updated>1737921371145</updated>
     </task>
-    <option name="localTasksCounter" value="111" />
+    <task id="LOCAL-00111" summary="Fixed chart crash">
+      <option name="closed" value="true" />
+      <created>1737921736262</created>
+      <option name="number" value="00111" />
+      <option name="presentableId" value="LOCAL-00111" />
+      <option name="project" value="LOCAL" />
+      <updated>1737921736262</updated>
+    </task>
+    <option name="localTasksCounter" value="112" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -534,8 +537,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Add styling for chart" />
-    <MESSAGE value="Add styling" />
     <MESSAGE value="Refactored query provider to be used outside of react" />
     <MESSAGE value="Added earning style and fixed loading" />
     <MESSAGE value="Added theme switcher" />
@@ -559,7 +560,9 @@
     <MESSAGE value="Fixed build" />
     <MESSAGE value="Fixed type checks" />
     <MESSAGE value="Fixed chart candle color changing on symbol switch" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed chart candle color changing on symbol switch" />
+    <MESSAGE value="Fixed chart crash" />
+    <MESSAGE value="Fixed current trading day candle not showing" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed current trading day candle not showing" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -583,6 +586,12 @@
           <url>file://$PROJECT_DIR$/types/supabase.ts</url>
           <line>2</line>
           <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/lib/state/symbol.tsx</url>
+          <line>177</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="20" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

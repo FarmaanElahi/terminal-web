@@ -139,6 +139,11 @@ export class Datafeed implements StreamingDataFeed {
     if (!bars) return onError("Unable to resolve symbol");
     if (bars.length === 0) return onResult([], { noData: true });
 
+    console.log(
+      "Last Bar",
+      firstDataRequest,
+      JSON.parse(JSON.stringify(bars[bars.length - 1])),
+    );
     onResult(bars);
   }
 
