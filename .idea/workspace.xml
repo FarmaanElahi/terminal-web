@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Fixed current trading day candle not showing">
-      <change beforePath="$PROJECT_DIR$/components/chart/chart_manager.ts" beforeDir="false" afterPath="$PROJECT_DIR$/components/chart/chart_manager.ts" afterDir="false" />
-    </list>
+    <list default="true" id="0b759626-70d7-4b2c-a782-d5ea30d45fae" name="Changes" comment="Fixed last symbol not loading" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -123,14 +121,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1736430941500</updated>
-    </task>
-    <task id="LOCAL-00065" summary="Added column sorting">
-      <option name="closed" value="true" />
-      <created>1736957649041</created>
-      <option name="number" value="00065" />
-      <option name="presentableId" value="LOCAL-00065" />
-      <option name="project" value="LOCAL" />
-      <updated>1736957649041</updated>
     </task>
     <task id="LOCAL-00066" summary="Added column sorting">
       <option name="closed" value="true" />
@@ -516,7 +506,15 @@
       <option name="project" value="LOCAL" />
       <updated>1737961826690</updated>
     </task>
-    <option name="localTasksCounter" value="114" />
+    <task id="LOCAL-00114" summary="Fixed last symbol not loading">
+      <option name="closed" value="true" />
+      <created>1737964989061</created>
+      <option name="number" value="00114" />
+      <option name="presentableId" value="LOCAL-00114" />
+      <option name="project" value="LOCAL" />
+      <updated>1737964989062</updated>
+    </task>
+    <option name="localTasksCounter" value="115" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -534,7 +532,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added earning style and fixed loading" />
     <MESSAGE value="Added theme switcher" />
     <MESSAGE value="Added keyboard navigation" />
     <MESSAGE value="Refactor" />
@@ -559,7 +556,8 @@
     <MESSAGE value="Fixed chart crash" />
     <MESSAGE value="Fixed incorrect last candle" />
     <MESSAGE value="Fixed current trading day candle not showing" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixed current trading day candle not showing" />
+    <MESSAGE value="Fixed last symbol not loading" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed last symbol not loading" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

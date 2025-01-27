@@ -24,6 +24,28 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async headers() {
+    return [
+      {
+        source: "/external/charting_library", // Specify the route or pattern
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400", // Example header
+          },
+        ],
+      },
+      {
+        source: "/external/charting_library", // Specify the route or pattern
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000", // Example header
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
