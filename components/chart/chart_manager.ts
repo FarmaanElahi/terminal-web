@@ -31,7 +31,7 @@ export class ChartManager {
     const tvWidget = new TradingView.widget({
       ...c,
       container,
-      symbol: symbol ?? "NSE:NIFTY",
+      symbol,
       theme,
     });
     tvWidget.onChartReady(() => {
@@ -80,7 +80,7 @@ export class ChartManager {
         "countdown",
         "timeframes_toolbar",
         "object_tree_legend_mode",
-        "save_chart_properties_to_local_storage",
+        // "save_chart_properties_to_local_storage",
       ],
 
       enabled_features: [
