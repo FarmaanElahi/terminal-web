@@ -42,7 +42,6 @@ export function GroupSymbolProvider(props: HTMLAttributes<HTMLDivElement>) {
   const [groupSymbols, setGroupSymbol] = useState({} as Record<Group, string>);
   const switchSymbol = useCallback(
     (groupId: Group, symbol: string) => {
-      console.log(groupId, symbol);
       setGroupSymbol((s) => ({ ...s, [groupId]: symbol }));
     },
     [setGroupSymbol],

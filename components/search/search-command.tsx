@@ -40,7 +40,7 @@ export function SymbolSearch() {
   }, [setQ, open]);
 
   const items = data?.map((s) => (
-    <CommandItem key={s.name} onSelect={handleSelect} value={s.ticker!}>
+    <CommandItem key={s.name} onSelect={handleSelect} value={s.ticker!} className="m-2">
       {s.logo ? (
         <Image
           src={["/external/logos/", s.logo + ".svg"].join("/")}
@@ -63,12 +63,10 @@ export function SymbolSearch() {
         onValueChange={setQ}
         autoFocus={true}
       />
-      <div className="h-96">
-        <CommandList>
-          {!isLoading && <CommandEmpty>No symbols found</CommandEmpty>}
-          {items && items.length > 0 && items}
-        </CommandList>
-      </div>
+      <CommandList className="h-96 my-2">
+        {!isLoading && <CommandEmpty>No symbols found</CommandEmpty>}
+        {items && items.length > 0 && items}
+      </CommandList>
     </CommandDialog>
   );
 }

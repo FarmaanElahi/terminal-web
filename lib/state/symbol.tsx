@@ -45,7 +45,9 @@ async function symbolResolveFn(ticker: string) {
   const { data, error } = await supabase
     .from("symbols")
     .select(
-      `ticker,name,description,type,logo,exchange,exchange_logo,subsessions,timezone,currency,industry,sector,session_holidays,isin`,
+      `ticker,name,description,type,logo,exchange,exchange_logo,subsessions,
+      timezone,currency,industry,sector,session_holidays,isin,
+      earnings_release_date_fq_h,earnings_release_date_fq_h,earnings_release_next_date`,
     )
     .eq("ticker", ticker)
     .maybeSingle();

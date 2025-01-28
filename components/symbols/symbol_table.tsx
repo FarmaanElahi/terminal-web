@@ -265,8 +265,9 @@ function SymbolColumnSheet({ table }: { table: TTable<Symbol> }) {
           </Button>
         </SheetTrigger>
         <SheetContent
-          className={"h-full border flex flex-col"}
-          style={{ maxWidth: "25vw" }}
+          className={
+            "h-full border flex flex-col xl:w-4/12 xl:max-w-none sm:w-[400px] sm:max-w-[540px]"
+          }
         >
           <SheetHeader className="flex align-middle justify-center">
             <SheetTitle>Columns Settings</SheetTitle>

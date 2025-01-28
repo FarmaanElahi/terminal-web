@@ -114,6 +114,7 @@ export class Datafeed implements StreamingDataFeed {
       has_daily: true,
       session_holidays: data.session_holidays,
       isin: data.isin,
+      quote: data,
     } as LibrarySymbolInfoExtended;
     onResolve(symbol);
   }
@@ -127,7 +128,7 @@ export class Datafeed implements StreamingDataFeed {
   ) {
     const { to, from, countBack, firstDataRequest } = periodParams;
     const toDate = DateTime.fromSeconds(to);
-    const day = Math.max(10 * 252, countBack); // Pull Min 10 year data
+    const day = Math.max(2 * 252, countBack); // Pull Min 10 year data
     const fromDate = DateTime.fromSeconds(from).minus({ day: day });
     const bars = await symbolCandle(
       symbolInfo,
@@ -138,12 +139,6 @@ export class Datafeed implements StreamingDataFeed {
     );
     if (!bars) return onError("Unable to resolve symbol");
     if (bars.length === 0) return onResult([], { noData: true });
-
-    console.log(
-      "Last Bar",
-      firstDataRequest,
-      JSON.parse(JSON.stringify(bars[bars.length - 1])),
-    );
     onResult(bars);
   }
 
@@ -168,7 +163,7 @@ export class Datafeed implements StreamingDataFeed {
       marks.push({
         id: `${currIndex + index}`,
         time: time,
-        color: "black",
+        color: "grey",
         shape: "earning",
         label: "E",
       });

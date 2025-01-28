@@ -1,6 +1,6 @@
 "use client";
 
-import { ChartSpline, Grid3X3, List, Waypoints, X } from "lucide-react";
+import { ChartSpline, Grid3X3, List, Table, Waypoints, X } from "lucide-react";
 import React, { useState } from "react";
 import { Screener } from "@/components/screener/screener";
 import {
@@ -22,6 +22,7 @@ import { Stats } from "@/components/symbols/symbol_stats";
 export default function Page() {
   const [showStats, setShowStats] = useState(false);
   const [showDataPanel, setShowDataPanel] = useState(false);
+  const [showSymbols, setShowSymbols] = useState(true);
   return (
     <GroupSymbolProvider>
       <GrouperProvider group={1}>
@@ -33,6 +34,15 @@ export default function Page() {
             </div>
             <div className="flex space-x-4">
               <div className="space-x-2">
+                <Toggle
+                  size="sm"
+                  aria-label={"Stats"}
+                  onPressedChange={setShowSymbols}
+                  pressed={showSymbols}
+                >
+                  <Table className="size-4" />
+                </Toggle>
+
                 <Toggle
                   size="sm"
                   aria-label={"Stats"}
@@ -63,13 +73,15 @@ export default function Page() {
         </header>
         <div className="flex-1  overflow-auto">
           <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel
-              id={"screener-list"}
-              defaultSize={20}
-              className={"h-full"}
-            >
-              <Screener id={"main"} />
-            </ResizablePanel>
+            {showSymbols && (
+              <ResizablePanel
+                id={"screener-list"}
+                defaultSize={20}
+                className={"h-full"}
+              >
+                <Screener id={"main"} />
+              </ResizablePanel>
+            )}
             <ResizableHandle />
             <ResizablePanel id={"screener-center"} defaultSize={80}>
               <ResizablePanelGroup direction="vertical">
