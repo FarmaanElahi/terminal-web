@@ -12,20 +12,26 @@ const DEFAULT_HEADERS = {
 };
 
 export async function fetchStockTwit(
-  symbol: string,
+  symbol: string | "trending" | "suggested",
   params?: { filter: "top"; limit?: number },
 ) {
-  const parts = symbol.split(":");
-  const providerSymbol =
-    parts.length === 1
-      ? [parts[0], "NSE"].join(".")
-      : parts.reverse().join(".");
-
-  const url = `https://api.stocktwits.com/api/2/streams/symbol/${providerSymbol}.json`;
+  const url = `https://api.stocktwits.com/api/2/streams/${toSymbol(symbol)}.json`;
   return await axios
     .get<StockTwitFeed>(url, {
       params,
       headers: DEFAULT_HEADERS,
     })
     .then((r) => r.data);
+}
+
+function toSymbol(symbol: string) {
+  if (["trending", "suggested"].includes(symbol)) return symbol;
+
+  const parts = symbol.split(":");
+  const s =
+    parts.length === 1
+      ? [parts[0], "NSE"].join(".")
+      : parts.reverse().join(".");
+
+  return ["symbol", s].join("/");
 }

@@ -18,7 +18,7 @@ import "react-medium-image-zoom/dist/styles.css";
 
 export function SymbolDiscussion() {
   const symbol = useGroupSymbol();
-  const { data } = useSymbolDiscussion(symbol);
+  const { data } = useSymbolDiscussion(symbol ?? "trending");
 
   return (
     <div className="h-full overflow-auto mx-2">

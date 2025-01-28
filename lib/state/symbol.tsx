@@ -408,7 +408,6 @@ export function useSymbolDiscussion(
 ) {
   const [symbol, filter] = params;
   return useInfiniteQuery<StockTwitFeed>({
-    enabled: !!symbol,
     initialPageParam: 0,
     getNextPageParam: (lastResponse) => lastResponse.cursor.since + 1,
     queryKey: ["symbols_twits", symbol],
