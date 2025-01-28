@@ -261,6 +261,10 @@ export function useScreener({ columns, sort, type }: ScreenerRequest) {
 
       if (type) query = query.eq("type", type);
 
+      // Incase there is no data, we will use mcap as the sorting by default
+      // always
+      if (!sort || sort.length === 0) sort = [{ field: "mcap", asc: false }];
+
       for (const sorting of sort) {
         query = query.order(sorting.field, {
           ascending: false,
