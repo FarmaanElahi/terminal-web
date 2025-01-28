@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { SymbolSearch } from "@/components/search/search-command";
 import { Stats } from "@/components/symbols/symbol_stats";
+import { SymbolDiscussion } from "@/components/stocktwit/discussion";
 
 export default function Page() {
   const [showStats, setShowStats] = useState(false);
@@ -100,9 +101,12 @@ export default function Page() {
               </ResizablePanelGroup>
             </ResizablePanel>
             {showDataPanel && (
-              <ResizablePanel id={"screener-data-panel"} defaultSize={25}>
-                <div className="bg-blue-500 h-full">fdsfs</div>
-              </ResizablePanel>
+              <>
+                <ResizableHandle />
+                <ResizablePanel id={"screener-data-panel"} defaultSize={25}>
+                  <SymbolDiscussion />
+                </ResizablePanel>
+              </>
             )}
           </ResizablePanelGroup>
         </div>

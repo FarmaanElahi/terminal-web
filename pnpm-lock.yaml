@@ -20,6 +20,9 @@ importers:
       '@radix-ui/react-accordion':
         specifier: ^1.2.2
         version: 1.2.2(@types/react-dom@19.0.2(@types/react@19.0.4))(@types/react@19.0.4)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      '@radix-ui/react-aspect-ratio':
+        specifier: ^1.1.1
+        version: 1.1.1(@types/react-dom@19.0.2(@types/react@19.0.4))(@types/react@19.0.4)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@radix-ui/react-avatar':
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@19.0.2(@types/react@19.0.4))(@types/react@19.0.4)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -119,6 +122,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.0.0(react@19.0.0)
+      react-medium-image-zoom:
+        specifier: ^5.2.13
+        version: 5.2.13(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-query:
         specifier: ^3.39.3
         version: 3.39.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -623,6 +629,19 @@ packages:
 
   '@radix-ui/react-arrow@1.1.1':
     resolution: {integrity: sha512-NaVpZfmv8SKeZbn4ijN2V3jlHA9ngBG16VnIIm22nUR0Yk8KUALyBxT3KYEUnNuch9sTE8UTsS3whzBgKOL30w==}
+    peerDependencies:
+      '@types/react': '*'
+      '@types/react-dom': '*'
+      react: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+      react-dom: ^16.8 || ^17.0 || ^18.0 || ^19.0 || ^19.0.0-rc
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      '@types/react-dom':
+        optional: true
+
+  '@radix-ui/react-aspect-ratio@1.1.1':
+    resolution: {integrity: sha512-kNU4FIpcFMBLkOUcgeIteH06/8JLBcYY6Le1iKenDGCYNYFX3TQqCZjzkOsz37h7r94/99GTb7YhEr98ZBJibw==}
     peerDependencies:
       '@types/react': '*'
       '@types/react-dom': '*'
@@ -2697,6 +2716,12 @@ packages:
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
+  react-medium-image-zoom@5.2.13:
+    resolution: {integrity: sha512-KcBL4OsoUQJgIFh6vQgt/6sRGqDy6bQBcsbhGD2tsy4B5Pw3dWrboocVOyIm76RRALEZ6Qwp3EDvIvfEv0m5sg==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
   react-query@3.39.3:
     resolution: {integrity: sha512-nLfLz7GiohKTJDuT4us4X3h/8unOh+00MLb2yJoGTPjxKs2bc1iDhkNx2bd5MKklXnOD3NrVZ+J2UXujA5In4g==}
     peerDependencies:
@@ -3661,6 +3686,15 @@ snapshots:
       '@types/react-dom': 19.0.2(@types/react@19.0.4)
 
   '@radix-ui/react-arrow@1.1.1(@types/react-dom@19.0.2(@types/react@19.0.4))(@types/react@19.0.4)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+    dependencies:
+      '@radix-ui/react-primitive': 2.0.1(@types/react-dom@19.0.2(@types/react@19.0.4))(@types/react@19.0.4)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
+    optionalDependencies:
+      '@types/react': 19.0.4
+      '@types/react-dom': 19.0.2(@types/react@19.0.4)
+
+  '@radix-ui/react-aspect-ratio@1.1.1(@types/react-dom@19.0.2(@types/react@19.0.4))(@types/react@19.0.4)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
       '@radix-ui/react-primitive': 2.0.1(@types/react-dom@19.0.2(@types/react@19.0.4))(@types/react@19.0.4)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react: 19.0.0
@@ -5913,6 +5947,11 @@ snapshots:
       scheduler: 0.25.0
 
   react-is@16.13.1: {}
+
+  react-medium-image-zoom@5.2.13(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
+    dependencies:
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
 
   react-query@3.39.3(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:

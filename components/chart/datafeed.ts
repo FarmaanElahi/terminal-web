@@ -175,7 +175,7 @@ export class Datafeed implements StreamingDataFeed {
       marks.push({
         id: `${currIndex + 1}`,
         time,
-        color: "blue",
+        color: "red",
         shape: "earning",
         label: "E",
       });

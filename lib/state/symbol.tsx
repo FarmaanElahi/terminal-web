@@ -10,6 +10,8 @@ import {
 } from "upstox-js-sdk";
 import { LibrarySymbolInfo } from "@/components/chart/types";
 import type { Symbol } from "@/types/symbol";
+import { fetchStockTwit } from "@/server/actions";
+import type { StockTwitFeed } from "@/types/stocktwits";
 
 //##################### SYMBOL QUOTE #####################
 async function symbolQuoteQueryFn(ticker: string) {
@@ -397,5 +399,19 @@ export function chartDrawings(symbol: string) {
       if (error) throw new Error("Cannot fetch chart layout drawing");
       return data;
     },
+  });
+}
+
+//##################### SYMBOL DISCUSSION #####################
+export function useSymbolDiscussion(
+  ...params: Parameters<typeof fetchStockTwit>
+) {
+  const [symbol, filter] = params;
+  return useInfiniteQuery<StockTwitFeed>({
+    enabled: !!symbol,
+    initialPageParam: 0,
+    getNextPageParam: (lastResponse) => lastResponse.cursor.since + 1,
+    queryKey: ["symbols_twits", symbol],
+    queryFn: async () => fetchStockTwit(symbol, filter),
   });
 }

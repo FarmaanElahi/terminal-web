@@ -1,6 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      // https://media.stocktwits-cdn.com/api/3/media/1615954/default.png
+      {
+        protocol: "https",
+        hostname: "*.stocktwits-cdn.com",
+      },
+    ],
+  },
   /* config options here */
   async rewrites() {
     return [
@@ -36,7 +45,7 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: "/external/charting_library", // Specify the route or pattern
+        source: "/external/logos", // Specify the route or pattern
         headers: [
           {
             key: "Cache-Control",
