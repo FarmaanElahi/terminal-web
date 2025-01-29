@@ -18,11 +18,11 @@ import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { SymbolSearch } from "@/components/search/search-command";
 import { Stats } from "@/components/symbols/symbol_stats";
-import { SymbolDiscussion } from "@/components/stocktwit/discussion";
+import { TwitterDiscussion } from "@/components/stocktwit/twitter_discussion";
 
 export default function Page() {
   const [showStats, setShowStats] = useState(false);
-  const [showDataPanel, setShowDataPanel] = useState(false);
+  const [showDataPanel, setShowDataPanel] = useState(true);
   const [showSymbols, setShowSymbols] = useState(true);
   return (
     <GroupSymbolProvider>
@@ -104,7 +104,7 @@ export default function Page() {
               <>
                 <ResizableHandle />
                 <ResizablePanel id={"screener-data-panel"} defaultSize={25}>
-                  <SymbolDiscussion />
+                  <TwitterDiscussion />
                 </ResizablePanel>
               </>
             )}

@@ -1,4 +1,4 @@
-import { useSymbolDiscussion } from "@/lib/state/symbol";
+import { useDiscussionFeed } from "@/lib/state/symbol";
 import { useGroupSymbol, useGroupSymbolSwitcher } from "@/lib/state/grouper";
 import {
   Card,
@@ -16,18 +16,55 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
 import he from "he";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export function SymbolDiscussion() {
+export function TwitterDiscussion() {
   const symbol = useGroupSymbol();
-  const { data } = useSymbolDiscussion(symbol ?? "trending");
+  return symbol ? <SymbolDiscussion symbol={symbol} /> : null;
+}
+
+export function SymbolDiscussion({ symbol }: { symbol: string }) {
+  type SymbolFeedType = "trending" | "popular";
+  const [feed, setFeed] = useState<SymbolFeedType>("trending");
+  const { data } = useDiscussionFeed({
+    feed: "symbol",
+    symbol,
+    limit: 22,
+    filter: feed,
+  });
+
+  console.log(data);
+  const content = data?.pages?.[0]?.messages.map((m) => (
+    <Message key={m.id} message={m} />
+  ));
 
   return (
-    <div className="h-full overflow-auto mx-2">
-      {data?.pages?.[0]?.messages.map((m) => (
-        <Message key={m.id} message={m} />
-      ))}
-    </div>
+    <Tabs
+      value={feed}
+      onValueChange={(value) => setFeed(value as SymbolFeedType)}
+      className="w-full h-full flex flex-col px-2"
+    >
+      <TabsList>
+        <TabsTrigger value="trending">Trending</TabsTrigger>
+        <TabsTrigger value="popular">Popular</TabsTrigger>
+      </TabsList>
+      <TabsContent value={"trending"} />
+      <TabsContent value={"popular"} />
+      <div className="flex-1 overflow-auto w-full">
+        {/*trending Feed*/}
+        <TabsContent value={"trending"}>
+          <div>Trending</div>
+          {feed === "trending" && content}
+        </TabsContent>
+
+        {/*popular Feed*/}
+        <TabsContent value={"popular"}>
+          <div>Popular</div>
+          {feed === "popular" && content}
+        </TabsContent>
+      </div>
+    </Tabs>
   );
 }
 

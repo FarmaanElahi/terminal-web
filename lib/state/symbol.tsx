@@ -403,14 +403,13 @@ export function chartDrawings(symbol: string) {
 }
 
 //##################### SYMBOL DISCUSSION #####################
-export function useSymbolDiscussion(
-  ...params: Parameters<typeof fetchStockTwit>
+export function useDiscussionFeed(
+  params: Parameters<typeof fetchStockTwit>[0],
 ) {
-  const [symbol, filter] = params;
   return useInfiniteQuery<StockTwitFeed>({
     initialPageParam: 0,
     getNextPageParam: (lastResponse) => lastResponse.cursor.since + 1,
-    queryKey: ["symbols_twits", symbol],
-    queryFn: async () => fetchStockTwit(symbol, filter),
+    queryKey: ["discussion_feed", params],
+    queryFn: async () => fetchStockTwit(params),
   });
 }
