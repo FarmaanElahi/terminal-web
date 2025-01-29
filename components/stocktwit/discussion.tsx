@@ -18,8 +18,9 @@ import "react-medium-image-zoom/dist/styles.css";
 import he from "he";
 import { useMemo, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export function TwitterDiscussion() {
+export function Discussion() {
   const symbol = useGroupSymbol();
   return symbol ? <SymbolDiscussion symbol={symbol} /> : <GlobalDiscussion />;
 }
@@ -29,7 +30,7 @@ export function GlobalDiscussion() {
   const [feed, setFeed] = useState<GlobalFeedType>("popular");
   const { data } = useDiscussionFeed({
     feed: feed,
-    limit: 22,
+    limit: 100,
   });
 
   const content = data?.pages?.[0]?.messages.map((m) => (
@@ -40,9 +41,9 @@ export function GlobalDiscussion() {
     <Tabs
       value={feed}
       onValueChange={(value) => setFeed(value as GlobalFeedType)}
-      className="w-full h-full flex flex-col px-2"
+      className="max-w-xl h-full flex flex-col px-2 mx-auto"
     >
-      <TabsList>
+      <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="trending">Trending</TabsTrigger>
         <TabsTrigger value="popular">Popular</TabsTrigger>
         <TabsTrigger value="suggested">Suggested</TabsTrigger>
@@ -52,17 +53,17 @@ export function GlobalDiscussion() {
       <div className="flex-1 overflow-auto w-full">
         {/*trending Feed*/}
         <TabsContent value={"trending"}>
-          {feed === "trending" && content}
+          {(feed === "trending" && content) || <MessageSkeleton />}
         </TabsContent>
 
         {/*popular Feed*/}
         <TabsContent value={"popular"}>
-          {feed === "popular" && content}
+          {(feed === "popular" && content) || <MessageSkeleton />}
         </TabsContent>
 
         {/*suggested Feed*/}
         <TabsContent value={"suggested"}>
-          {feed === "suggested" && content}
+          {(feed === "suggested" && content) || <MessageSkeleton />}
         </TabsContent>
       </div>
     </Tabs>
@@ -75,7 +76,7 @@ export function SymbolDiscussion({ symbol }: { symbol: string }) {
   const { data } = useDiscussionFeed({
     feed: "symbol",
     symbol,
-    limit: 22,
+    limit: 100,
     filter: feed,
   });
 
@@ -87,9 +88,9 @@ export function SymbolDiscussion({ symbol }: { symbol: string }) {
     <Tabs
       value={feed}
       onValueChange={(value) => setFeed(value as SymbolFeedType)}
-      className="w-full h-full flex flex-col px-2"
+      className="max-w-xl h-full flex flex-col px-2 mx-auto"
     >
-      <TabsList>
+      <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="trending">Trending</TabsTrigger>
         <TabsTrigger value="popular">Popular</TabsTrigger>
       </TabsList>
@@ -98,12 +99,12 @@ export function SymbolDiscussion({ symbol }: { symbol: string }) {
       <div className="flex-1 overflow-auto w-full">
         {/*trending Feed*/}
         <TabsContent value={"trending"}>
-          {feed === "trending" && content}
+          {(feed === "trending" && content) || <MessageSkeleton />}
         </TabsContent>
 
         {/*popular Feed*/}
         <TabsContent value={"popular"}>
-          {feed === "popular" && content}
+          {(feed === "popular" && content) || <MessageSkeleton />}
         </TabsContent>
       </div>
     </Tabs>
@@ -144,7 +145,7 @@ export default function Message({ message }: MessageCardProps) {
   };
 
   return (
-    <Card className="max-w-xl mx-auto my-4">
+    <Card className="w-full my-4">
       <CardHeader>
         <div className="flex items-center space-x-4">
           <Avatar>
@@ -191,4 +192,10 @@ export default function Message({ message }: MessageCardProps) {
       </CardContent>
     </Card>
   );
+}
+
+function MessageSkeleton() {
+  return Array.from({ length: 5 }).map((_, i) => (
+    <Skeleton key={i} className="rounded w-full h-20" />
+  ));
 }
