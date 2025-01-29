@@ -15,6 +15,8 @@ import { StockTwitFeed } from "@/types/stocktwits";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import Zoom from "react-medium-image-zoom";
 import "react-medium-image-zoom/dist/styles.css";
+import he from "he";
+import { useMemo } from "react";
 
 export function SymbolDiscussion() {
   const symbol = useGroupSymbol();
@@ -36,6 +38,9 @@ interface MessageCardProps {
 export default function Message({ message }: MessageCardProps) {
   const { body, created_at, user, symbols, links, likes, entities } = message;
   const switchSymbol = useGroupSymbolSwitcher();
+  // Decode HTML entities in the body
+  const decodedBody = useMemo(() => (body ? he.decode(body) : ""), [body]);
+
   const parseLine = (line: string) => {
     const parts = line.split(/(\$\w+\.\w+)/g); // Splits the line into text and symbols
     return parts.map((part, index) => {
@@ -76,7 +81,7 @@ export default function Message({ message }: MessageCardProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <p className="mb-4 ">{parseLine(body)}</p>
+        <p className="mb-4 ">{parseLine(decodedBody)}</p>
         {entities.chart && (
           <AspectRatio ratio={entities.chart.ratio ?? 16 / 9}>
             <Zoom>
