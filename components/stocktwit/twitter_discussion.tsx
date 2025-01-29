@@ -98,13 +98,11 @@ export function SymbolDiscussion({ symbol }: { symbol: string }) {
       <div className="flex-1 overflow-auto w-full">
         {/*trending Feed*/}
         <TabsContent value={"trending"}>
-          <div>Trending</div>
           {feed === "trending" && content}
         </TabsContent>
 
         {/*popular Feed*/}
         <TabsContent value={"popular"}>
-          <div>Popular</div>
           {feed === "popular" && content}
         </TabsContent>
       </div>
