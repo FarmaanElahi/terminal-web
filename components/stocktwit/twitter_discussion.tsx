@@ -176,7 +176,7 @@ export default function Message({ message }: MessageCardProps) {
           </AspectRatio>
         )}
         <div className="flex flex-wrap gap-2 my-4">
-          {symbols.map((symbol) => (
+          {symbols?.map((symbol) => (
             <Badge key={symbol.id}>{symbol.title}</Badge>
           ))}
         </div>
