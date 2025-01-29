@@ -21,7 +21,52 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function TwitterDiscussion() {
   const symbol = useGroupSymbol();
-  return symbol ? <SymbolDiscussion symbol={symbol} /> : null;
+  return symbol ? <SymbolDiscussion symbol={symbol} /> : <GlobalDiscussion />;
+}
+
+export function GlobalDiscussion() {
+  type GlobalFeedType = "trending" | "popular" | "suggested";
+  const [feed, setFeed] = useState<GlobalFeedType>("popular");
+  const { data } = useDiscussionFeed({
+    feed: feed,
+    limit: 22,
+  });
+
+  const content = data?.pages?.[0]?.messages.map((m) => (
+    <Message key={m.id} message={m} />
+  ));
+
+  return (
+    <Tabs
+      value={feed}
+      onValueChange={(value) => setFeed(value as GlobalFeedType)}
+      className="w-full h-full flex flex-col px-2"
+    >
+      <TabsList>
+        <TabsTrigger value="trending">Trending</TabsTrigger>
+        <TabsTrigger value="popular">Popular</TabsTrigger>
+        <TabsTrigger value="suggested">Suggested</TabsTrigger>
+      </TabsList>
+      <TabsContent value={"trending"} />
+      <TabsContent value={"popular"} />
+      <div className="flex-1 overflow-auto w-full">
+        {/*trending Feed*/}
+        <TabsContent value={"trending"}>
+          {feed === "trending" && content}
+        </TabsContent>
+
+        {/*popular Feed*/}
+        <TabsContent value={"popular"}>
+          {feed === "popular" && content}
+        </TabsContent>
+
+        {/*suggested Feed*/}
+        <TabsContent value={"suggested"}>
+          {feed === "suggested" && content}
+        </TabsContent>
+      </div>
+    </Tabs>
+  );
 }
 
 export function SymbolDiscussion({ symbol }: { symbol: string }) {
@@ -34,7 +79,6 @@ export function SymbolDiscussion({ symbol }: { symbol: string }) {
     filter: feed,
   });
 
-  console.log(data);
   const content = data?.pages?.[0]?.messages.map((m) => (
     <Message key={m.id} message={m} />
   ));

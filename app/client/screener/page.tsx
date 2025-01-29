@@ -1,6 +1,6 @@
 "use client";
 
-import { ChartSpline, Grid3X3, List, Table, Waypoints, X } from "lucide-react";
+import { ChartSpline, Grid3X3, Lightbulb, List, Table, X } from "lucide-react";
 import React, { useState } from "react";
 import { Screener } from "@/components/screener/screener";
 import {
@@ -22,7 +22,7 @@ import { TwitterDiscussion } from "@/components/stocktwit/twitter_discussion";
 
 export default function Page() {
   const [showStats, setShowStats] = useState(false);
-  const [showDataPanel, setShowDataPanel] = useState(true);
+  const [showIdeas, setShowIdeas] = useState(true);
   const [showSymbols, setShowSymbols] = useState(true);
   return (
     <GroupSymbolProvider>
@@ -55,10 +55,10 @@ export default function Page() {
                 <Toggle
                   size="sm"
                   aria-label={"Data Table"}
-                  pressed={showDataPanel}
-                  onPressedChange={setShowDataPanel}
+                  pressed={showIdeas}
+                  onPressedChange={setShowIdeas}
                 >
-                  <Waypoints className="size-4" />
+                  <Lightbulb className="size-4" />
                 </Toggle>
               </div>
               <div className="space-x-2" aria-label={"List View"}>
@@ -100,7 +100,7 @@ export default function Page() {
                 )}
               </ResizablePanelGroup>
             </ResizablePanel>
-            {showDataPanel && (
+            {showIdeas && (
               <>
                 <ResizableHandle />
                 <ResizablePanel id={"screener-data-panel"} defaultSize={25}>
