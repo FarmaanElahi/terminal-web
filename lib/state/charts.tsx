@@ -1,6 +1,6 @@
 "use client";
 import { ChartManager } from "@/components/chart/chart_manager";
-import { supabase } from "@/lib/state/supabase";
+import { supabase } from "@/utils/client";
 
 const manager = new ChartManager(
   supabase,

@@ -324,22 +324,22 @@ export interface Bar {
   /**
    * Closing price of the bar.
    */
-  close: number | number[];
+  close: number;
 
   /**
    * Highest price of the bar.
    */
-  high: number | number[];
+  high: number;
 
   /**
    * Lowest price of the bar.
    */
-  low: number | number[];
+  low: number;
 
   /**
    * Opening price of the bar.
    */
-  open: number | number[];
+  open: number;
 
   /**
    * Bar time in milliseconds since Unix epoch in UTC timezone.

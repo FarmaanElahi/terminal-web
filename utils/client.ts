@@ -4,4 +4,7 @@ import { ApiClient } from "upstox-js-sdk";
 
 export const queryClient = new QueryClient();
 export const supabase = createClient();
-export const upstox = ApiClient.instance;
+
+export function refreshUpstoxToken(token: string) {
+  ApiClient.instance.authentications.OAUTH2.accessToken = token;
+}

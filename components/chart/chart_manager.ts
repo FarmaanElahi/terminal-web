@@ -5,6 +5,7 @@ import { ChartStorage } from "@/components/chart/chart_storage";
 import { LogoProvider } from "@/components/chart/logo_provider";
 import { getIndicators } from "@/components/chart/indicators";
 import { Client } from "@/utils/supabase/client";
+import { DatafeedUpstox } from "@/components/chart/datafeed_upstox";
 
 export class ChartManager {
   private readonly datafeed: Datafeed;
@@ -16,7 +17,7 @@ export class ChartManager {
     logoBaseUrl: string,
   ) {
     this.logoProvider = new LogoProvider(logoBaseUrl);
-    this.datafeed = new Datafeed(this.logoProvider);
+    this.datafeed = new DatafeedUpstox(this.logoProvider);
     this.chartStorage = new ChartStorage(this.client);
   }
 

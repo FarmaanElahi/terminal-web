@@ -1,14 +1,7 @@
 "use client";
 
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { queryClient, supabase, upstox } from "@/lib/state/supabase";
-import { DateTime, FixedOffsetZone } from "luxon";
-import {
-  GetHistoricalCandleResponse,
-  GetIntraDayCandleResponse,
-  HistoryApi,
-} from "upstox-js-sdk";
-import { LibrarySymbolInfo } from "@/components/chart/types";
+import { queryClient, supabase } from "@/utils/client";
 import type { Symbol } from "@/types/symbol";
 import { fetchStockTwit } from "@/server/actions";
 import type { StockTwitFeed } from "@/types/stocktwits";
@@ -117,119 +110,6 @@ export function useSymbolSearch(
 }
 
 //##################### SYMBOL SEARCH #####################
-
-//##################### SYMBOL CANDLE #####################
-
-const upstoxHistory = new HistoryApi(upstox);
-
-export async function symbolCandle(
-  symbolInfo: LibrarySymbolInfo,
-  interval: "day",
-  to: DateTime,
-  from: DateTime,
-  firstRequest: boolean,
-) {
-  const instrumentKey = toUpstoxInstrumentKey(symbolInfo);
-  const timeIndex = 0;
-  const openIndex = 1;
-  const highIndex = 2;
-  const lowIndex = 3;
-  const closeIndex = 4;
-  const volumeIndex = 5;
-
-  const historyPromise = new Promise<GetHistoricalCandleResponse>(
-    (resolve, reject) => {
-      upstoxHistory.getHistoricalCandleData1(
-        instrumentKey,
-        interval,
-        to.toFormat("yyyy-MM-dd"),
-        from.toFormat("yyyy-MM-dd"),
-        "v2",
-        (error, data) => {
-          if (error) return reject(error);
-          return resolve(data);
-        },
-      );
-    },
-  );
-
-  const intradayCandle = [] as GetHistoricalCandleResponse["data"]["candles"];
-  if (firstRequest) {
-    const intraday = await new Promise<GetIntraDayCandleResponse>(
-      (resolve, reject) => {
-        upstoxHistory.getIntraDayCandleData(
-          instrumentKey,
-          "30minute",
-          "v2",
-          (error, data) => {
-            if (error) return reject(error);
-            return resolve(data);
-          },
-        );
-      },
-    );
-
-    // Data is in descending order of time
-    const { candles } = intraday.data;
-    if (candles.length > 0) {
-      const time = candles[0][timeIndex];
-      const open = candles[candles.length - 1][openIndex];
-      const high = Math.max(...candles.map((c) => c[highIndex]));
-      const low = Math.min(...candles.map((c) => c[lowIndex]));
-      const close = candles[0][closeIndex];
-      const volume = candles
-        .map((c) => c[volumeIndex])
-        .reduce((a, b) => a + b, 0);
-      intradayCandle.push([time, open, high, low, close, volume, 0]);
-    }
-  }
-
-  const candles = [...intradayCandle];
-  // Data is descending  order, so we will insert at the first index
-  candles.push(...(await historyPromise.then((h) => h.data.candles)));
-  return candles
-    .map(([ts, open, high, low, close, volume]) => {
-      const utc = FixedOffsetZone.utcInstance;
-      const time = DateTime.fromISO(ts.split("+")[0], { zone: utc })
-        .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
-        .toMillis();
-      return { time, open, high, low, close, volume };
-    })
-    .reverse();
-}
-
-function toUpstoxInstrumentKey(symbol: LibrarySymbolInfo) {
-  const { type, exchange, isin, ticker } = symbol;
-  switch (type) {
-    case "index": {
-      if (!ticker || !exchange) {
-        throw new Error("Unable to generate upstox instrument key");
-      }
-      if (ticker.includes("CNX")) {
-        const new_name = ticker.replace("CNX", "NIFTY");
-        return [`${exchange}_INDEX`, new_name].join("|");
-      }
-      return [`${exchange}_INDEX`, "Nifty 50"].join("|");
-    }
-    case "stock": {
-      if (!isin) {
-        throw new Error("Unable to generate upstox instrument key");
-      }
-      return [`${exchange}_EQ`, isin].join("|");
-    }
-
-    case "fund": {
-      if (!isin) {
-        throw new Error("Unable to generate upstox instrument key");
-      }
-      return [`${exchange}_EQ`, isin].join("|");
-    }
-    default:
-      throw new Error("Not supported symbol type");
-  }
-}
-
-//##################### SYMBOL CANDLE #####################
 
 //##################### SCREENER_SCAN #####################
 type ScreenerResponse = {
