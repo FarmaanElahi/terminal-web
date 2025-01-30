@@ -40,15 +40,7 @@ export type Database = {
           symbol?: string
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "chart_drawings_layout_id_fkey"
-            columns: ["layout_id"]
-            isOneToOne: false
-            referencedRelation: "chart_layouts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       chart_layouts: {
         Row: {
@@ -2837,6 +2829,69 @@ export type Database = {
         }
         Relationships: []
       }
+      user_integrations: {
+        Row: {
+          access_token: string | null
+          created_at: string
+          id: number
+          type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          access_token?: string | null
+          created_at?: string
+          id?: number
+          type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          access_token?: string | null
+          created_at?: string
+          id?: number
+          type?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      watchlists: {
+        Row: {
+          active: boolean
+          color: string | null
+          created_at: string
+          description: string | null
+          id: number
+          last_modified_at: string
+          name: string
+          shared: boolean
+          symbols: string[]
+          type: Database["public"]["Enums"]["watchlist_type"]
+        }
+        Insert: {
+          active?: boolean
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: number
+          last_modified_at?: string
+          name?: string
+          shared?: boolean
+          symbols?: string[]
+          type?: Database["public"]["Enums"]["watchlist_type"]
+        }
+        Update: {
+          active?: boolean
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          id?: number
+          last_modified_at?: string
+          name?: string
+          shared?: boolean
+          symbols?: string[]
+          type?: Database["public"]["Enums"]["watchlist_type"]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -2845,7 +2900,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      watchlist_type: "custom" | "colored"
     }
     CompositeTypes: {
       [_ in never]: never

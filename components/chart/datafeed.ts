@@ -2,29 +2,24 @@ import {
   DatafeedConfiguration,
   DatafeedErrorCallback,
   GetMarksCallback,
-  HistoryCallback,
   LibrarySymbolInfo,
   OnReadyCallback,
-  PeriodParams,
-  ResolutionString,
   ResolveCallback,
   SearchSymbolResultItem,
   SearchSymbolsCallback,
-  StreamingDataFeed,
   TimescaleMark,
 } from "@/components/chart/types";
 import { LogoProvider } from "@/components/chart/logo_provider";
-import { symbolCandle, symbolResolve, symbolSearch } from "@/lib/state/symbol";
+import { symbolResolve, symbolSearch } from "@/lib/state/symbol";
 import type { Symbol } from "@/types/symbol";
 import { Subsession } from "@/types/supabase";
-import { DateTime } from "luxon";
 
-interface LibrarySymbolInfoExtended extends LibrarySymbolInfo {
+export interface LibrarySymbolInfoExtended extends LibrarySymbolInfo {
   quote: Symbol;
 }
 
-export class Datafeed implements StreamingDataFeed {
-  constructor(private readonly logoProvider: LogoProvider) {}
+export abstract class Datafeed {
+  protected constructor(private readonly logoProvider: LogoProvider) {}
 
   onReady(callback: OnReadyCallback) {
     const config = {
@@ -118,33 +113,6 @@ export class Datafeed implements StreamingDataFeed {
     } as LibrarySymbolInfoExtended;
     onResolve(symbol);
   }
-
-  async getBars(
-    symbolInfo: LibrarySymbolInfoExtended,
-    resolution: ResolutionString,
-    periodParams: PeriodParams,
-    onResult: HistoryCallback,
-    onError: DatafeedErrorCallback,
-  ) {
-    const { to, from, countBack, firstDataRequest } = periodParams;
-    const toDate = DateTime.fromSeconds(to);
-    const day = Math.max(2 * 252, countBack); // Pull Min 10 year data
-    const fromDate = DateTime.fromSeconds(from).minus({ day: day });
-    const bars = await symbolCandle(
-      symbolInfo,
-      "day",
-      toDate,
-      fromDate,
-      firstDataRequest,
-    );
-    if (!bars) return onError("Unable to resolve symbol");
-    if (bars.length === 0) return onResult([], { noData: true });
-    onResult(bars);
-  }
-
-  subscribeBars(): void {}
-
-  unsubscribeBars(): void {}
 
   getTimescaleMarks(
     symbolInfo: LibrarySymbolInfoExtended,

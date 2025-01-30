@@ -168,7 +168,8 @@ export default function Message({ message }: MessageCardProps) {
               <Image
                 src={entities.chart.url}
                 alt="Chart"
-                fill={true}
+                height={entities.chart.height ?? 768}
+                width={entities.chart.width ?? 1028}
                 className="rounded-md object-cover"
               />
             </Zoom>

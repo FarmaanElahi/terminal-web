@@ -27,7 +27,6 @@ type Param = GlobalFeedParam | SymbolFeedParam;
 
 export async function fetchStockTwit(params: Param) {
   const { url, q } = toRequestParam(params);
-  console.log("Hitting StockTwit", url, q);
   return await axios
     .get<StockTwitFeed>(url, {
       params: q,
