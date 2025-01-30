@@ -31,6 +31,7 @@ export class MarketDataFeeder extends Feeder {
   closingCode = -1;
   private readonly apiClient = ApiClient.instance;
   private readonly wsApi = new WebsocketApi();
+  private queued: Array<Buffer<ArrayBuffer>> = [];
 
   constructor(
     private instrumentKeys: string[] = [],
@@ -64,14 +65,20 @@ export class MarketDataFeeder extends Feeder {
 
   onOpen() {
     this.ws?.addEventListener("open", () => {
-      console.log("Opened");
       this.emit("open");
+      this.sendQueued();
     });
+  }
+
+  private sendQueued() {
+    while (this.queued.length !== 0) {
+      const q = this.queued.shift();
+      if (q) this.ws?.send(q);
+    }
   }
 
   onMessage() {
     this.ws?.addEventListener("message", async (ev) => {
-      console.log("Message");
       const decodedData = await this.decodeProtobuf(ev.data);
       this.emit("data", decodedData);
     });
@@ -79,7 +86,6 @@ export class MarketDataFeeder extends Feeder {
 
   onClose() {
     this.ws?.addEventListener("close", (ev) => {
-      console.log("Closed", ev);
       this.closingCode = ev.code;
       if (ev.code === 1000) {
         this.userClosedWebSocket = true;
@@ -89,20 +95,21 @@ export class MarketDataFeeder extends Feeder {
 
   onError() {
     this.ws?.addEventListener("error", (ev) => {
-      console.error("Errp", ev);
       this.emit("error", ev);
     });
   }
 
   disconnect() {
     this.ws?.close(1000);
+    this.queued = [];
   }
 
   subscribe(instrumentKeys: string[], mode: ModeCode) {
+    const req = this.buildRequest(instrumentKeys, Method.SUBSCRIBE, mode);
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(this.buildRequest(instrumentKeys, Method.SUBSCRIBE, mode));
+      this.ws.send(req);
     } else {
-      throw new Error("Failed to subscribe: WebSocket is not open.");
+      this.queued.push(req);
     }
   }
 
@@ -113,12 +120,11 @@ export class MarketDataFeeder extends Feeder {
   }
 
   changeMode(instrumentKeys: string[], newMode: ModeCode) {
+    const req = this.buildRequest(instrumentKeys, Method.SUBSCRIBE, newMode);
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(
-        this.buildRequest(instrumentKeys, Method.SUBSCRIBE, newMode),
-      );
+      this.ws.send(req);
     } else {
-      throw new Error("Failed to changeMode: WebSocket is not open.");
+      this.queued.push(req);
     }
   }
 

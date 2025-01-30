@@ -77,14 +77,14 @@ export default function Page() {
             {showSymbols && (
               <ResizablePanel
                 id={"screener-list"}
-                defaultSize={20}
+                defaultSize={15}
                 className={"h-full"}
               >
                 <Screener id={"main"} />
               </ResizablePanel>
             )}
             <ResizableHandle />
-            <ResizablePanel id={"screener-center"} defaultSize={80}>
+            <ResizablePanel id={"screener-center"} defaultSize={70}>
               <ResizablePanelGroup direction="vertical">
                 <ResizablePanel id={"screener-chart"} order={1}>
                   <Chart id={"main"} />
@@ -103,7 +103,7 @@ export default function Page() {
             {showIdeas && (
               <>
                 <ResizableHandle />
-                <ResizablePanel id={"screener-data-panel"} defaultSize={25}>
+                <ResizablePanel id={"screener-data-panel"} defaultSize={20}>
                   <Discussion />
                 </ResizablePanel>
               </>

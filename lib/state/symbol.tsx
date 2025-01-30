@@ -3,7 +3,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { queryClient, supabase } from "@/utils/client";
 import type { Symbol } from "@/types/symbol";
-import { fetchStockTwit } from "@/server/actions";
+import { fetchStockTwit } from "@/server/stocktwits";
 import type { StockTwitFeed } from "@/types/stocktwits";
 
 //##################### SYMBOL QUOTE #####################

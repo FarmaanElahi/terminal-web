@@ -7,6 +7,7 @@ import {
   DatafeedErrorCallback,
   HistoryCallback,
   LibrarySymbolInfo,
+  OnReadyCallback,
   PeriodParams,
   ResolutionString,
   StreamingDataFeed,
@@ -17,18 +18,16 @@ import { DateTime, FixedOffsetZone } from "luxon";
 import { LogoProvider } from "@/components/chart/logo_provider";
 import { MarketDataStreamer } from "@/utils/upstox/market_data_streamer";
 import { refreshUpstoxToken } from "@/utils/client";
-import {
-  GetHistoricalCandleResponse,
-  GetIntraDayCandleResponse,
-  HistoryApi,
-} from "upstox-js-sdk";
+import { GetHistoricalCandleResponse, HistoryApi } from "upstox-js-sdk";
 import * as MarketV3 from "@/utils/upstox/market_v3";
 import Feed = MarketV3.com.upstox.marketdatafeeder.rpc.proto.Feed;
+import { getUpstoxToken } from "@/server/upstox";
 
 export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   private readonly marketFeed = new MarketDataStreamer();
   private readonly upstoxHistoryAPI = new HistoryApi();
   private feeds?: Record<string, Feed>;
+  private token?: string;
   private readonly listeners = new Map<
     string,
     {
@@ -39,15 +38,26 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     }
   >();
 
+  onReady(callback: OnReadyCallback) {
+    void this.connect();
+    super.onReady(callback);
+  }
+
   constructor(logoProvider: LogoProvider) {
     super(logoProvider);
-    refreshUpstoxToken("**");
-    void this.marketFeed.connect();
     this.marketFeed.on("message", (data) => {
-      console.log("Feed received: ", data);
       this.feeds = { ...(this.feeds ?? {}), ...data.feeds };
       this.refreshRealtime();
     });
+    this.marketFeed.on("open", () => console.log("TBT Connected"));
+    this.marketFeed.on("error", (e) => console.error("TBT Conn Failed", e));
+    this.marketFeed.on("error", () => console.error("TBT Conn Closed"));
+  }
+
+  private async connect() {
+    this.token = this.token ?? (await getUpstoxToken());
+    refreshUpstoxToken(this.token);
+    void this.marketFeed.connect();
   }
 
   async getBars(
@@ -123,12 +133,10 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     firstRequest: boolean,
   ) {
     const instrumentKey = this.toUpstoxInstrumentKey(symbolInfo);
-    const timeIndex = 0;
-    const openIndex = 1;
-    const highIndex = 2;
-    const lowIndex = 3;
-    const closeIndex = 4;
-    const volumeIndex = 5;
+    // Initiate
+    if (firstRequest && !this.isSubscribed(instrumentKey)) {
+      this.marketFeed.subscribe([instrumentKey], "full");
+    }
 
     const historyPromise = new Promise<GetHistoricalCandleResponse>(
       (resolve, reject) => {
@@ -146,41 +154,8 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
       },
     );
 
-    const intradayCandle = [] as GetHistoricalCandleResponse["data"]["candles"];
-    if (false && firstRequest) {
-      const intraday = await new Promise<GetIntraDayCandleResponse>(
-        (resolve, reject) => {
-          this.upstoxHistoryAPI.getIntraDayCandleData(
-            instrumentKey,
-            "30minute",
-            "v2",
-            (error, data) => {
-              if (error) return reject(error);
-              return resolve(data);
-            },
-          );
-        },
-      );
-
-      // Data is in descending order of time
-      const { candles } = intraday.data;
-      if (candles.length > 0) {
-        const time = candles[0][timeIndex];
-        const open = candles[candles.length - 1][openIndex];
-        const high = Math.max(...candles.map((c) => c[highIndex]));
-        const low = Math.min(...candles.map((c) => c[lowIndex]));
-        const close = candles[0][closeIndex];
-        const volume = candles
-          .map((c) => c[volumeIndex])
-          .reduce((a, b) => a + b, 0);
-        intradayCandle.push([time, open, high, low, close, volume, 0]);
-      }
-    }
-
-    const candles = [...intradayCandle];
-    // Data is descending  order, so we will insert at the first index
-    candles.push(...(await historyPromise.then((h) => h.data.candles)));
-    return candles
+    const candles = await historyPromise.then((h) => h.data.candles);
+    const bars = candles
       .map(([ts, open, high, low, close, volume]) => {
         const utc = FixedOffsetZone.utcInstance;
         const time = DateTime.fromISO(ts.split("+")[0], { zone: utc })
@@ -189,6 +164,16 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
         return { time, open, high, low, close, volume } as Bar;
       })
       .reverse();
+
+    // Try to push the bar in the initial load itself if it exists
+    if (firstRequest && bars.length > 0) {
+      const bar = this.getTBTLatestBar(instrumentKey);
+      if (bar && bar.time > bars[bars.length - 1].time) {
+        bars.push(bar);
+      }
+    }
+
+    return bars;
   }
 
   toUpstoxInstrumentKey(symbol: LibrarySymbolInfo) {
@@ -227,27 +212,26 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
 
     for (const value of this.listeners.values()) {
       const { instrumentKey, onTick } = value;
-      const feed = this.feeds[instrumentKey];
-      if (!feed) continue;
-      const ohlc =
-        feed.ff?.indexFF?.marketOHLC ?? feed.ff?.marketFF?.marketOHLC;
-      const candle = ohlc?.ohlc?.find((f) => f.interval === "1d");
-      if (!candle) continue;
-
-      const { ts, open, high, low, close, volume } = candle;
-      const utc = FixedOffsetZone.utcInstance;
-      const time = DateTime.fromMillis(ts as number, { zone: utc })
-        .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
-        .plus({ day: 1 })
-        .toMillis();
-
-      const bar = { time, open, high, low, close, volume } as Bar;
-      console.log(
-        "Setting Realtime bar",
-        instrumentKey,
-        JSON.parse(JSON.stringify(bar)),
-      );
-      onTick(bar);
+      const bar = this.getTBTLatestBar(instrumentKey);
+      if (bar) onTick(bar);
     }
+  }
+
+  private getTBTLatestBar(instrumentKey: string) {
+    const feed = this.feeds?.[instrumentKey];
+    if (!feed) return null;
+
+    const ohlc = feed.ff?.indexFF?.marketOHLC ?? feed.ff?.marketFF?.marketOHLC;
+    const candle = ohlc?.ohlc?.find((f) => f.interval === "1d");
+    if (!candle) return null;
+
+    const { ts, open, high, low, close, volume } = candle;
+    const utc = FixedOffsetZone.utcInstance;
+    const time = DateTime.fromMillis(ts as number, { zone: utc })
+      .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+      .plus({ day: 1 })
+      .toMillis();
+
+    return { time, open, high, low, close, volume } as Bar;
   }
 }
