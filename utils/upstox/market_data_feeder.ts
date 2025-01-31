@@ -26,6 +26,10 @@ export class MarketDataFeeder extends Feeder {
   closingCode = -1;
   private queued: Array<Buffer<ArrayBuffer>> = [];
 
+  constructor() {
+    super();
+  }
+
   async connect(url: string) {
     // Skip if its already connected
     if (

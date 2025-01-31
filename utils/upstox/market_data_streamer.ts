@@ -25,7 +25,7 @@ export class MarketDataStreamer extends Streamer {
     }
     // Populate initial subscriptions if provided
     instrumentKeys.forEach((key) => this.subscriptions[mode].add(key));
-    this._marketFeeder = new MarketDataFeeder(this.instrumentKeys, this.mode);
+    this._marketFeeder = new MarketDataFeeder();
   }
 
   subscriptionEventListeners() {
