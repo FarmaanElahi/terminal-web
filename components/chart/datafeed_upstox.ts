@@ -55,10 +55,9 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
 
   private async connect() {
     if (!this.url) {
-      this.url = await getUpstoxMarketFeedUrl();
-
-      // By the time url is fetch, there might be another request for the same
+      const url = await getUpstoxMarketFeedUrl();
       if (!this.url) {
+        this.url = url;
         void this.marketFeed.connect(this.url);
       }
     }
