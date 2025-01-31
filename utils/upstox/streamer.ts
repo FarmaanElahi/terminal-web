@@ -53,7 +53,7 @@ export abstract class Streamer extends EventEmitter {
           this.Event.RECONNECTING,
           `Auto reconnect attempt ${counter + 1}/${this.retryCount}`,
         );
-        await this.connect();
+        await this.connect(this.url);
         counter++;
       }
 
@@ -106,7 +106,9 @@ export abstract class Streamer extends EventEmitter {
     this.prepareAutoReconnect();
   }
 
-  abstract connect(): Promise<void>;
+  abstract connect(url: string): Promise<void>;
 
   abstract get feeder(): Feeder;
+
+  abstract get url(): string;
 }

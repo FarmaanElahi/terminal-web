@@ -17,17 +17,16 @@ import {
 import { DateTime, FixedOffsetZone } from "luxon";
 import { LogoProvider } from "@/components/chart/logo_provider";
 import { MarketDataStreamer } from "@/utils/upstox/market_data_streamer";
-import { refreshUpstoxToken } from "@/utils/client";
 import { GetHistoricalCandleResponse, HistoryApi } from "upstox-js-sdk";
 import * as MarketV3 from "@/utils/upstox/market_v3";
+import { getUpstoxMarketFeedUrl } from "@/server/upstox";
 import Feed = MarketV3.com.upstox.marketdatafeeder.rpc.proto.Feed;
-import { getUpstoxToken } from "@/server/upstox";
 
 export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   private readonly marketFeed = new MarketDataStreamer();
   private readonly upstoxHistoryAPI = new HistoryApi();
   private feeds?: Record<string, Feed>;
-  private token?: string;
+  private url?: string;
   private readonly listeners = new Map<
     string,
     {
@@ -55,9 +54,14 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   }
 
   private async connect() {
-    this.token = this.token ?? (await getUpstoxToken());
-    refreshUpstoxToken(this.token);
-    void this.marketFeed.connect();
+    if (!this.url) {
+      this.url = await getUpstoxMarketFeedUrl();
+
+      // By the time url is fetch, there might be another request for the same
+      if (!this.url) {
+        void this.marketFeed.connect(this.url);
+      }
+    }
   }
 
   async getBars(

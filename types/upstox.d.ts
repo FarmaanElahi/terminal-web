@@ -34,28 +34,33 @@ declare module "upstox-js-sdk" {
       contentTypes: string[],
       accepts: string[],
       returnType: T,
-      cb: (err: unknown, data: T, response: unknown) => void,
+      cb: (err: unknown, data: T, response: unknown) => void
     );
   }
 
   declare class WebsocketAuthRedirectResponse
-    implements UpstoxAPIResponse<WebsocketAuthRedirectResponseData> {}
+    implements UpstoxAPIResponse<WebsocketAuthRedirectResponseData> {
+  }
 
   declare class WebsocketApi {
-    constructor(client?: ApiClient);
+    readonly apiClient: ApiClient;
+
+    constructor(apiClient?: ApiClient);
 
     getMarketDataFeedAuthorizeV3(
-      onComplete: OnComplete<WebsocketAuthRedirectResponse>,
+      onComplete: OnComplete<WebsocketAuthRedirectResponse>
     );
 
     getMarketDataFeedAuthorize(
       apiVersion: "v2" | "v3",
-      onComplete: OnComplete<WebsocketAuthRedirectResponse>,
+      onComplete: OnComplete<WebsocketAuthRedirectResponse>
     );
   }
 
   declare class HistoryApi {
-    constructor(client?: ApiClient);
+    readonly apiClient: ApiClient;
+
+    constructor(apiClient?: ApiClient);
 
     getHistoricalCandleData1(
       instrumentKey: string,
@@ -63,14 +68,14 @@ declare module "upstox-js-sdk" {
       toDate: string,
       fromDate: string,
       apiVersion: string,
-      onComplete: OnComplete<GetHistoricalCandleResponse>,
+      onComplete: OnComplete<GetHistoricalCandleResponse>
     );
 
     getIntraDayCandleData(
       instrumentKey: string,
       interval: str,
       apiVersion: string,
-      onComplete: OnComplete<GetIntraDayCandleResponse>,
+      onComplete: OnComplete<GetIntraDayCandleResponse>
     );
   }
 

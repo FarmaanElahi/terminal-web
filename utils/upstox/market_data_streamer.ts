@@ -8,6 +8,7 @@ export class MarketDataStreamer extends Streamer {
     [Mode.OPTION]: new Set(),
   } as Record<ModeCode, Set<string>>;
   private readonly _marketFeeder: MarketDataFeeder;
+  private _url?: string;
 
   constructor(
     private instrumentKeys: string[] = [],
@@ -37,10 +38,11 @@ export class MarketDataStreamer extends Streamer {
     });
   }
 
-  async connect() {
+  async connect(url: string) {
+    this._url = url;
     this.setupEventListeners();
     this.subscriptionEventListeners();
-    await this.feeder.connect();
+    await this.feeder.connect(this._url);
   }
 
   disconnect() {
@@ -89,5 +91,9 @@ export class MarketDataStreamer extends Streamer {
 
   get feeder(): MarketDataFeeder {
     return this._marketFeeder;
+  }
+
+  get url() {
+    return this._url!;
   }
 }

@@ -5,54 +5,40 @@ import { EventEmitter } from "eventemitter3";
  * Implementations should provide functionality for connecting to a data source,
  * handling connection events, and streaming data.
  */
-export default class Feeder extends EventEmitter{
+export default abstract class Feeder extends EventEmitter {
+  protected constructor() {
+    super();
+  }
 
   /**
    * Establishes a connection to the data source.
    */
-  async connect() {
-    throw new Error("Method 'connect()' must be implemented.");
-  }
+  abstract connect(url: string): Promise<void>;
 
   /**
    * Determines if a reconnection is necessary.
    */
-  shouldReconnect(): boolean {
-    throw new Error("Method 'shouldReconnect()' must be implemented.");
-  }
+  abstract shouldReconnect(): boolean;
 
   /**
    * Handles incoming messages from the WebSocket connection.
    */
-  onMessage() {
-    throw new Error("Method 'onMessage()' must be implemented.");
-  }
+  abstract onMessage(): void;
 
   /**
    * Handles the closing of the WebSocket connection.
    */
-  onClose() {
-    throw new Error("Method 'onClose()' must be implemented.");
-  }
+  abstract onClose(): void;
 
   /**
    * Handles errors from the WebSocket connection.
    */
-  onError() {
-    throw new Error("Method 'onError()' must be implemented.");
-  }
+  abstract onError(): void;
 
   /**
    * Disconnects from the data source.
    */
-  disconnect() {
-    throw new Error("Method 'disconnect()' must be implemented.");
-  }
+  abstract disconnect(): void;
 
-  /**
-   * Implementation of the Readable stream's _read method.
-   */
-  _read() {}
-
-  clearSubscriptions() {}
+  abstract clearSubscriptions(): void;
 }

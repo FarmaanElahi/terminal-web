@@ -1,8 +1,3 @@
-import {
-  ApiClient,
-  WebsocketApi,
-  WebsocketAuthRedirectResponse,
-} from "upstox-js-sdk";
 import Feeder from "./feeder";
 import * as MarketV3Proto from "@/utils/upstox/market_v3";
 import { v4 as uuidv4 } from "uuid";
@@ -29,18 +24,9 @@ export class MarketDataFeeder extends Feeder {
   ws: WebSocket | null = null;
   userClosedWebSocket = false;
   closingCode = -1;
-  private readonly apiClient = ApiClient.instance;
-  private readonly wsApi = new WebsocketApi();
   private queued: Array<Buffer<ArrayBuffer>> = [];
 
-  constructor(
-    private instrumentKeys: string[] = [],
-    private mode: ModeCode = "full",
-  ) {
-    super();
-  }
-
-  async connect() {
+  async connect(url: string) {
     // Skip if its already connected
     if (
       this.ws &&
@@ -49,7 +35,7 @@ export class MarketDataFeeder extends Feeder {
     )
       return;
 
-    this.ws = await this.connectWebSocket();
+    this.ws = await this.connectWebSocket(url);
     this.onOpen();
     this.onMessage();
     this.onClose();
@@ -129,17 +115,7 @@ export class MarketDataFeeder extends Feeder {
   }
 
   // Function to establish WebSocket connection
-  async connectWebSocket() {
-    const response = await new Promise<WebsocketAuthRedirectResponse>(
-      (resolve, reject) => {
-        this.wsApi.getMarketDataFeedAuthorize("v2", (err, data1) =>
-          err ? reject(err) : resolve(data1),
-        );
-      },
-    );
-    // eslint-disable-next-line
-    // @ts-ignore
-    const url = response.data.authorizedRedirectUri;
+  async connectWebSocket(url: string) {
     if (!url) {
       console.error("Not authorized redirect_uri");
       return null;
@@ -170,6 +146,8 @@ export class MarketDataFeeder extends Feeder {
 
     return Buffer.from(JSON.stringify(requestObj));
   }
+
+  clearSubscriptions() {}
 }
 
 // Helper functions for handling Blob and ArrayBuffer
