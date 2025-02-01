@@ -121,12 +121,15 @@ interface MessageCardProps {
 export default function Message({ message }: MessageCardProps) {
   const { body, created_at, user, symbols, links, likes, entities } = message;
   const switchSymbol = useGroupSymbolSwitcher();
-  // Decode HTML entities in the body
-  const decodedBody = useMemo(() => (body ? he.decode(body) : ""), [body]);
 
-  const parseLine = (line: string) => {
-    const parts = line.split(/(\$\w+\.\w+)/g); // Splits the line into text and symbols
+  // Decode HTML entities in the body
+  const decodedBody = useMemo(() => {
+    const line = body ? he.decode(body) : "";
+    const parts = line.split(/(\$\w+\.\w+)|(\n)/g);
+
     return parts.map((part, index) => {
+      if (!part) return null; // Ignore empty splits
+
       if (part.startsWith("$")) {
         part = part.replace("$", "").split(".").reverse().join(":");
         return (
@@ -134,7 +137,7 @@ export default function Message({ message }: MessageCardProps) {
             key={index}
             className="mr-1 cursor-pointer hover:underline animate-out transition font-bold"
             onClick={() => {
-              const symbol = part.split(".").reverse().join(":");
+              const symbol = part.split(":").reverse().join(".");
               switchSymbol(symbol);
             }}
           >
@@ -142,10 +145,14 @@ export default function Message({ message }: MessageCardProps) {
           </span>
         );
       }
-      // Render regular text
+
+      if (part === "\n") {
+        return <br key={index} />; // Convert newlines to <br />
+      }
+
       return <span key={index}>{part}</span>;
     });
-  };
+  }, [body, switchSymbol]);
 
   return (
     <Card className="w-full my-4">
@@ -164,7 +171,7 @@ export default function Message({ message }: MessageCardProps) {
         </div>
       </CardHeader>
       <CardContent>
-        <p className="mb-4 ">{parseLine(decodedBody)}</p>
+        <p className="mb-4 ">{decodedBody}</p>
         {entities.chart && (
           <AspectRatio ratio={entities.chart.ratio ?? 16 / 9}>
             <Zoom>
@@ -200,6 +207,6 @@ export default function Message({ message }: MessageCardProps) {
 
 function MessageSkeleton() {
   return Array.from({ length: 5 }).map((_, i) => (
-    <Skeleton key={i} className="rounded w-full h-20" />
+    <Skeleton key={i} className="rounded w-full h-40 my-4" />
   ));
 }
