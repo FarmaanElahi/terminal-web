@@ -22,6 +22,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function Discussion() {
   const symbol = useGroupSymbol();
+  if (symbol === "NSE:NIFTY") {
+    return <GlobalDiscussion />;
+  }
   return symbol ? <SymbolDiscussion symbol={symbol} /> : <GlobalDiscussion />;
 }
 
