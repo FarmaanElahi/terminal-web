@@ -8,3 +8,4 @@ node_modules
 .idea/httpRequests/
 .idea/dataSources/
 .idea/dataSources.local.xml
+.idea/codestream.xml
