@@ -33,7 +33,7 @@ export async function getUpstoxMarketFeedUrl(): Promise<string> {
       err ? reject(err) : resolve(data1),
     );
   }).catch((reason) => {
-    console.error("Failed to get feed url", reason);
+    console.error("Failed to get feed url", reason, token);
     throw new Error("Failed to get feed url");
   });
   // eslint-disable-next-line
