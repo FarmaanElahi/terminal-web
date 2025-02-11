@@ -26,6 +26,9 @@ export async function getUpstoxMarketFeedUrl(): Promise<string> {
     wsApi.getMarketDataFeedAuthorize("v2", (err, data1) =>
       err ? reject(err) : resolve(data1),
     );
+  }).catch((reason) => {
+    console.error("Failed to get feed url", reason);
+    throw new Error("Failed to get feed url");
   });
   // eslint-disable-next-line
   // @ts-ignore

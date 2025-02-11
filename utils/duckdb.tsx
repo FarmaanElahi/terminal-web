@@ -34,13 +34,16 @@ async function simpleQuery(
   props?: QueryProps,
 ) {
   let conn: AsyncDuckDBConnection | null = null;
-  const { columns = ["*"], where, order = [], limit = 500 } = props ?? {};
+  const { columns = [], where, order = [], limit = 500 } = props ?? {};
+  if (columns.length === 0) {
+  }
 
   // Columns Builder
-  if (columns.length === 0) {
-    throw new Error("No columns selected");
-  }
-  const colsString = columns.map((c) => `"${c}"`).join(",");
+  let colsString = columns
+    .map((c) => `"${c}"`)
+    .join(",")
+    .trim();
+  if (!colsString) colsString = "*";
 
   // Filter Builder
   const whereString = where ? ["WHERE", where].join(" ") : "";

@@ -15,31 +15,27 @@ export function Screener({ className, ...props }: ScreenerProps) {
     if (conn.status === "loaded") {
       console.log("DB loaded");
       conn
-        .runQuery(
-          // `select ticker,name,market_cap_basic,close,sector,industry,relative_volume_10d_calc,gap_up from ${t.symbols} limit 10`,
-          "symbols",
-          {
-            columns: [
-              "price_earnings_ttm",
-              "ticker",
-              "name",
-              "market_cap_basic",
-              "close",
-              "sector",
-              "industry",
-              "relative_volume_10d_calc",
-              "gap_up",
-            ],
-            limit: 10,
-            order: [
-              {
-                field: "market_cap_basic",
-                sort: "DESC",
-                nullLast: true,
-              },
-            ],
-          },
-        )
+        .runQuery("symbols", {
+          columns: [
+            "price_earnings_ttm",
+            "ticker",
+            "name",
+            "market_cap_basic",
+            "close",
+            "sector",
+            "industry",
+            "relative_volume_10d_calc",
+            "gap_up",
+          ],
+          limit: 10,
+          order: [
+            {
+              field: "market_cap_basic",
+              sort: "DESC",
+              nullLast: true,
+            },
+          ],
+        })
         .then((tbl) => {
           console.log(tbl.toArray().map((r) => r.toJSON()));
         });
