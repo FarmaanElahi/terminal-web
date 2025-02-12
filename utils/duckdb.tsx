@@ -144,15 +144,17 @@ export function useDuckDB() {
   return data;
 }
 
-export async function queryDuckDB(
+export async function queryDuckDB<T>(
   table: keyof typeof TABLES,
   props?: QueryProps,
-): ReturnType<AsyncDuckDBConnection["query"]> {
+) {
   const db = await getDuckDB();
   let conn: AsyncDuckDBConnection | null = null;
   try {
     conn = await db.connect();
-    return await simpleQuery(db, table, props);
+    return await simpleQuery(db, table, props).then(
+      (r) => JSON.parse(JSON.stringify(r.toArray())) as T[],
+    );
   } finally {
     await conn?.close();
   }

@@ -9,14 +9,12 @@ import { queryDuckDB } from "@/utils/duckdb";
 
 //##################### SYMBOL QUOTE #####################
 async function symbolQuoteQueryFn(ticker: string) {
-  const { data, error } = await supabase
-    .from("symbols")
-    .select()
-    .eq("ticker", ticker)
-    .maybeSingle();
-
-  if (error || !data) throw new Error("Unable to resolve symbol");
-  return data;
+  const d = await queryDuckDB<Symbol>("symbols", {
+    where: `ticker = '${ticker}'`,
+    limit: 1,
+  });
+  if (d.length === 0) throw new Error("Cannot find quote");
+  return d;
 }
 
 export function symbolQuote(symbol: string) {
@@ -38,18 +36,33 @@ export function useSymbolQuote(symbolName?: string) {
 
 //##################### SYMBOL RESOLVE #####################
 async function symbolResolveFn(ticker: string) {
-  const { data, error } = await supabase
-    .from("symbols")
-    .select(
-      `ticker,name,description,type,logo,exchange,exchange_logo,subsessions,
-      timezone,currency,industry,sector,session_holidays,isin,
-      earnings_release_date_fq_h,earnings_release_date_fq_h,earnings_release_next_date`,
-    )
-    .eq("ticker", ticker)
-    .maybeSingle();
+  const d = await queryDuckDB<Symbol>("symbols", {
+    columns: [
+      "ticker",
+      "name",
+      "description",
+      "type",
+      "logo",
+      "exchange",
+      "exchange_logo",
+      "subsessions",
+      "timezone",
+      "currency",
+      "industry",
+      "sector",
+      "session_holidays",
+      "isin",
+      "earnings_release_date_fq_h",
+      "earnings_release_date_fq_h",
+      "earnings_release_next_date",
+    ],
+    where: `ticker = '${ticker}'`,
+    limit: 1,
+  });
 
-  if (error || !data) throw new Error("Unable to resolve symbol");
-  return data;
+  if (d.length === 0) throw new Error("Cannot find quote");
+  console.log("SS", d[0]);
+  return d[0];
 }
 
 export function symbolResolve(symbol: string) {
@@ -72,19 +85,27 @@ interface SymbolSearchOptions {
 }
 
 async function symbolSearchQueryFn(q: string, option?: SymbolSearchOptions) {
-  let query = supabase
-    .from("symbols")
-    .select("ticker,name,description,type,logo,exchange,exchange_logo")
-    .ilike("name", `%${q}%`)
-    .limit(option?.limit ?? 50);
+  const where = [
+    `"name" ILIKE '%${q}%'`,
+    option?.exchange ? `"exchange" = '${option.exchange}'` : undefined,
+    option?.type ? `"type" = '${option.type}'` : undefined,
+  ]
+    .filter((q) => q)
+    .join(" &");
 
-  if (option?.exchange) query = query.eq("exchange", option.exchange);
-  if (option?.type) query = query = query.eq("type", option.type);
-  if (option?.signal) query = query.abortSignal(option.signal);
-
-  const { data, error } = await query;
-  if (error || !data) throw new Error("Error");
-  return data;
+  return await queryDuckDB<Symbol>("symbols", {
+    columns: [
+      "ticker",
+      "name",
+      "description",
+      "type",
+      "logo",
+      "exchange",
+      "exchange_logo",
+    ],
+    where,
+    limit: option?.limit ?? 50,
+  });
 }
 
 export function symbolSearch(
@@ -150,34 +171,13 @@ export function useScreener({ columns, sort, type }: ScreenerRequest) {
         limit,
         offset,
       });
-
-      const data = result.toArray().map((r) => r.toJSON());
+      const data = result as Symbol[];
       return {
         data: data as unknown as Symbol[],
         meta: { total: 5000 },
         nextOffset: page + 1,
       };
     },
-  });
-}
-
-type ScreenerRequest2 = Parameters<typeof queryDuckDB>[1];
-
-export function useScreener2(props?: ScreenerRequest2) {
-  return useQuery({
-    queryKey: ["symbols2", props],
-    queryFn: () =>
-      queryDuckDB("symbols", props).then((t) =>
-        t.toArray().map((r) => r.toJSON()),
-      ),
-  });
-}
-
-export function useScreenerColumns() {
-  return useQuery({
-    queryKey: ["symbols_columns"],
-    queryFn: () =>
-      queryDuckDB("columns").then((t) => t.toArray().map((r) => r.toJSON())),
   });
 }
 
