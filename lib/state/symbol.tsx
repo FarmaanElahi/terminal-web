@@ -5,6 +5,7 @@ import { queryClient, supabase } from "@/utils/client";
 import type { Symbol } from "@/types/symbol";
 import { fetchStockTwit } from "@/server/stocktwits";
 import type { StockTwitFeed } from "@/types/stocktwits";
+import { queryDuckDB } from "@/utils/duckdb";
 
 //##################### SYMBOL QUOTE #####################
 async function symbolQuoteQueryFn(ticker: string) {
@@ -162,6 +163,26 @@ export function useScreener({ columns, sort, type }: ScreenerRequest) {
         nextOffset: page + 1,
       };
     },
+  });
+}
+
+type ScreenerRequest2 = Parameters<typeof queryDuckDB>[1];
+
+export function useScreener2(props?: ScreenerRequest2) {
+  return useQuery({
+    queryKey: ["symbols2", props],
+    queryFn: () =>
+      queryDuckDB("symbols", props).then((t) =>
+        t.toArray().map((r) => r.toJSON()),
+      ),
+  });
+}
+
+export function useScreenerColumns() {
+  return useQuery({
+    queryKey: ["symbols_columns"],
+    queryFn: () =>
+      queryDuckDB("columns").then((t) => t.toArray().map((r) => r.toJSON())),
   });
 }
 

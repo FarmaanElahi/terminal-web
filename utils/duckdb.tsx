@@ -7,7 +7,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { initializeDuckDb } from "duckdb-wasm-kit";
+import { getDuckDB, initializeDuckDb } from "duckdb-wasm-kit";
 import {
   AsyncDuckDB,
   AsyncDuckDBConnection,
@@ -34,7 +34,7 @@ async function simpleQuery(
   props?: QueryProps,
 ) {
   let conn: AsyncDuckDBConnection | null = null;
-  const { columns = [], where, order = [], limit = 500 } = props ?? {};
+  const { columns = [], where, order = [], limit } = props ?? {};
   if (columns.length === 0) {
   }
 
@@ -58,7 +58,9 @@ async function simpleQuery(
     .trim();
   const orderString = orderClause ? `ORDER BY ${orderClause}` : "";
 
-  const limitString = `LIMIT ${limit}`;
+  const limitClause =
+    typeof limit === "number" && limit > 0 ? `LIMIT ${limit}` : "undefined";
+
   const tableString = `'${TABLES[table]}'`;
   const query = [
     `SELECT`,
@@ -67,7 +69,7 @@ async function simpleQuery(
     tableString,
     whereString,
     orderString,
-    limitString,
+    limitClause,
   ]
     .filter((p) => p)
     .join(" ");
@@ -136,6 +138,20 @@ export function useDuckDB() {
     throw new Error("Please specify a duckDB context.");
   }
   return data;
+}
+
+export async function queryDuckDB(
+  table: keyof typeof TABLES,
+  props?: QueryProps,
+): ReturnType<AsyncDuckDBConnection["query"]> {
+  const db = await getDuckDB();
+  let conn: AsyncDuckDBConnection | null = null;
+  try {
+    conn = await db.connect();
+    return await simpleQuery(db, table, props);
+  } finally {
+    await conn?.close();
+  }
 }
 
 export function DuckDBProvider({ children }: { children: ReactNode }) {
