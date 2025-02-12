@@ -136,27 +136,22 @@ export function useScreener({ columns, sort, type }: ScreenerRequest) {
       const page = context.pageParam as number;
       const limit = 50;
       const offset = page * limit;
-      const colKeys = [...defCols, columns].join(",");
-      let query = supabase
-        .from("symbols")
-        .select(colKeys)
-        .range(offset, offset + limit - 1);
+      const result = await queryDuckDB("symbols", {
+        columns: [...defCols, ...columns],
+        where: type ? `"type" = '${type}'` : undefined,
+        order:
+          sort && sort.length > 0
+            ? sort.map((s) => ({
+                field: s.field,
+                sort: s.asc ? "ASC" : "DESC",
+                nullLast: true,
+              }))
+            : [{ field: "mcap", sort: "DESC", nullLast: true }],
+        limit,
+        offset,
+      });
 
-      if (type) query = query.eq("type", type);
-
-      // Incase there is no data, we will use mcap as the sorting by default
-      // always
-      if (!sort || sort.length === 0) sort = [{ field: "mcap", asc: false }];
-
-      for (const sorting of sort) {
-        query = query.order(sorting.field, {
-          ascending: false,
-          nullsFirst: false,
-        });
-      }
-
-      const { data, error } = await query;
-      if (error || !data) throw new Error("Unable to generate screener result");
+      const data = result.toArray().map((r) => r.toJSON());
       return {
         data: data as unknown as Symbol[],
         meta: { total: 5000 },

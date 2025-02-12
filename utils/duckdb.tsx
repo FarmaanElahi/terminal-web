@@ -15,8 +15,7 @@ import {
 } from "@duckdb/duckdb-wasm";
 
 const TABLES = {
-  symbols:
-    "https://raw.githubusercontent.com/FarmaanElahi/terminal-data/refs/heads/main/data/scan/symbols.parquet",
+  symbols: "https://t-files.farmaan.xyz/symbols2.parquet",
   columns:
     "https://raw.githubusercontent.com/FarmaanElahi/terminal-data/refs/heads/main/data/scan/cols.parquet",
 };
@@ -24,8 +23,9 @@ const TABLES = {
 interface QueryProps {
   columns?: string[];
   where?: string;
-  order?: [{ field: string; sort: "DESC" | "ASC"; nullLast?: boolean }];
+  order?: { field: string; sort: "DESC" | "ASC"; nullLast?: boolean }[];
   limit?: number;
+  offset?: number;
 }
 
 async function simpleQuery(
@@ -34,7 +34,7 @@ async function simpleQuery(
   props?: QueryProps,
 ) {
   let conn: AsyncDuckDBConnection | null = null;
-  const { columns = [], where, order = [], limit } = props ?? {};
+  const { columns = [], where, order = [], limit, offset } = props ?? {};
   if (columns.length === 0) {
   }
 
@@ -59,7 +59,10 @@ async function simpleQuery(
   const orderString = orderClause ? `ORDER BY ${orderClause}` : "";
 
   const limitClause =
-    typeof limit === "number" && limit > 0 ? `LIMIT ${limit}` : "undefined";
+    typeof limit === "number" && limit > 0 ? `LIMIT ${limit}` : undefined;
+
+  const offsetClause =
+    typeof offset === "number" && offset > 0 ? `OFFSET ${offset}` : undefined;
 
   const tableString = `'${TABLES[table]}'`;
   const query = [
@@ -70,6 +73,7 @@ async function simpleQuery(
     whereString,
     orderString,
     limitClause,
+    offsetClause,
   ]
     .filter((p) => p)
     .join(" ");
