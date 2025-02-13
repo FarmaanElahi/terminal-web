@@ -14,7 +14,7 @@ async function symbolQuoteQueryFn(ticker: string) {
     limit: 1,
   });
   if (d.length === 0) throw new Error("Cannot find quote");
-  return d;
+  return d[0];
 }
 
 export function symbolQuote(symbol: string) {
