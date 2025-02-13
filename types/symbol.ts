@@ -150,7 +150,7 @@ export interface Symbol {
   earnings_release_date_fq?: number;
   earnings_release_time_fq?: boolean;
   earnings_release_date_fy?: number;
-  earnings_release_next_date?: number;
+  earnings_release_next_date?: string;
   earnings_release_next_time?: boolean;
   earnings_release_next_date_fq?: number;
   earnings_release_next_time_fq?: boolean;
