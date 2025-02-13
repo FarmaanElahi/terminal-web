@@ -1,3 +1,5 @@
+"use client";
+
 import React, { HTMLAttributes, useMemo } from "react";
 import { SymbolTable } from "@/components/symbols/symbol_table";
 

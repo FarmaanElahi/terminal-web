@@ -16,7 +16,13 @@ export async function getUpstoxMarketFeedUrl(): Promise<string> {
     throw new Error("No upstox found token");
   }
   // Decrypt the token
-  const token = decrypt(integration?.data.access_token);
+  let token: string;
+  try {
+    token = decrypt(integration?.data.access_token);
+  } catch (e) {
+    console.error("Failed to decreypt token", e);
+    throw new Error("Unable to decrypt token");
+  }
 
   const wsApi = new WebsocketApi();
   if (wsApi.apiClient) {
@@ -26,6 +32,9 @@ export async function getUpstoxMarketFeedUrl(): Promise<string> {
     wsApi.getMarketDataFeedAuthorize("v2", (err, data1) =>
       err ? reject(err) : resolve(data1),
     );
+  }).catch((reason) => {
+    console.error("Failed to get feed url", reason, token);
+    throw new Error("Failed to get feed url");
   });
   // eslint-disable-next-line
   // @ts-ignore
