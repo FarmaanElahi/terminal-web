@@ -30,6 +30,7 @@ const myTheme = themeQuartz.withParams({
   headerFontSize: 14,
   headerFontWeight: 700,
   fontFamily: { googleFont: "Quicksand" },
+  wrapperBorderRadius: 0,
 });
 
 export function SymbolTable2({ columns }: SymbolTableProps) {
