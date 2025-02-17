@@ -61,7 +61,7 @@ function forwardCols(
   return cols;
 }
 
-const defaultSymbolColumns: ColumnDef<Symbol>[] = [
+export const defaultSymbolColumns: ColumnDef<Symbol>[] = [
   // #############################  Generals  ################################
   {
     accessorKey: "name",

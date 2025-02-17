@@ -181,6 +181,19 @@ export function useScreener({ columns, sort, type }: ScreenerRequest) {
   });
 }
 
+export function useScreener2() {
+  return useQuery({
+    queryKey: ["symbols2"],
+    queryFn: async () => {
+      const result = await queryDuckDB("symbols", {
+        columns: [], // Will load all columns
+        where: `type = 'stock'`,
+      });
+      return result as Symbol[];
+    },
+  });
+}
+
 //##################### SCREENER_SCAN #####################
 
 //##################### CHART #####################
