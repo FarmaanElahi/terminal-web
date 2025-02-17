@@ -133,7 +133,8 @@ export class ChartStorage implements IExternalSaveLoadAdapter {
   }
 
   async getStudyTemplateContent(d: StudyTemplateMetaInfo): Promise<string> {
-    const content = studyTemplateContent(d.name);
+    const content = await studyTemplateContent(d.name);
+    console.log(content);
     return content ? JSON.stringify(content) : "";
   }
 
