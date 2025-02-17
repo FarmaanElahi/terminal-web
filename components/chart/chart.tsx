@@ -1,5 +1,5 @@
 "use client";
-import { HTMLAttributes, RefObject, useEffect, useRef } from "react";
+import React, { HTMLAttributes, RefObject, useEffect, useRef } from "react";
 import type { TradingView } from "@/components/chart/charting";
 import { useChartManager } from "@/lib/state/charts";
 import { useGroupSymbol } from "@/lib/state/grouper";

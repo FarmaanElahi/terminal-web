@@ -1,7 +1,7 @@
 "use client";
 
 import React, { HTMLAttributes, useMemo } from "react";
-import { SymbolTable } from "@/components/symbols/symbol_table";
+import { SymbolTable2 } from "@/components/symbols/symbol_table2";
 
 interface ScreenerProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
@@ -27,7 +27,7 @@ export function Screener({ className, ...props }: ScreenerProps) {
   );
   const sort = useMemo(() => [{ field: "mcap", asc: false }], []);
   return (
-    <SymbolTable
+    <SymbolTable2
       columns={columns}
       sort={sort}
       className={className}
