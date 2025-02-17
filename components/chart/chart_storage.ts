@@ -125,12 +125,16 @@ export class ChartStorage implements IExternalSaveLoadAdapter {
   }
 
   async saveStudyTemplate(data: StudyTemplateData): Promise<void> {
-    const { error } = await this.client.from("study_templates").upsert(data);
+    const { error } = await this.client.from("study_templates").upsert({
+      content: data.content ? JSON.parse(data.content) : undefined,
+      name: data.name,
+    });
     if (error) throw new Error("Failed to save study template");
   }
 
   async getStudyTemplateContent(d: StudyTemplateMetaInfo): Promise<string> {
-    return studyTemplateContent(d.name);
+    const content = studyTemplateContent(d.name);
+    return content ? JSON.stringify(content) : "";
   }
 
   async removeStudyTemplate(data: StudyTemplateMetaInfo): Promise<void> {

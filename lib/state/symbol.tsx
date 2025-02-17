@@ -276,7 +276,7 @@ export function studyTemplateContent(name: string) {
         .maybeSingle();
       if (error || !data)
         throw new Error("Cannot fetch study template content");
-      return data.content as string;
+      return data.content as unknown;
     },
   });
 }
