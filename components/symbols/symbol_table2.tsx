@@ -7,6 +7,7 @@ import React, { HTMLAttributes, useMemo } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { useScreener2 } from "@/lib/state/symbol";
 import { useGroupSymbolSwitcher } from "@/lib/state/grouper";
+import "../grid/ag-theme.css";
 // Register all Community features
 ModuleRegistry.registerModules([AllCommunityModule, AllEnterpriseModule]);
 
@@ -14,24 +15,6 @@ interface SymbolTableProps extends HTMLAttributes<HTMLDivElement> {
   columns: string[];
   sort: Array<{ field: string; asc: boolean }>;
 }
-
-import { themeQuartz } from "ag-grid-community";
-
-// to use myTheme in an application, pass it to the theme grid option
-const myTheme = themeQuartz.withParams({
-  backgroundColor: "#1f2836",
-  browserColorScheme: "dark",
-  chromeBackgroundColor: {
-    ref: "foregroundColor",
-    mix: 0.07,
-    onto: "backgroundColor",
-  },
-  foregroundColor: "#FFF",
-  headerFontSize: 14,
-  headerFontWeight: 700,
-  fontFamily: { googleFont: "Quicksand" },
-  wrapperBorderRadius: 0,
-});
 
 export function SymbolTable2({ columns }: SymbolTableProps) {
   const colDefs = useMemo(() => {
@@ -56,7 +39,7 @@ export function SymbolTable2({ columns }: SymbolTableProps) {
   return (
     <div className="h-full relative">
       <AgGridReact
-        theme={myTheme}
+        className="ag-terminal-theme"
         enableAdvancedFilter={true}
         includeHiddenColumnsInAdvancedFilter={true}
         rowData={rowData}
