@@ -1,9 +1,10 @@
+"use client";
 import { AllCommunityModule, ColDef, ModuleRegistry } from "ag-grid-community";
 import { AllEnterpriseModule } from "ag-grid-enterprise";
 import { defaultSymbolColumns } from "@/components/symbols/symbol_column";
 import { Symbol } from "@/types/symbol";
 import { AccessorKeyColumnDef } from "@tanstack/react-table";
-import React, { HTMLAttributes, useMemo } from "react";
+import React, { HTMLAttributes, useMemo, useRef } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { useScreener2 } from "@/lib/state/symbol";
 import { useGroupSymbolSwitcher } from "@/lib/state/grouper";
@@ -17,6 +18,7 @@ interface SymbolTableProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export function SymbolTable2({ columns }: SymbolTableProps) {
+  const grid = useRef<AgGridReact>(null);
   const colDefs = useMemo(() => {
     const colSet = new Set(columns);
     return defaultSymbolColumns.map((c) => {
@@ -39,6 +41,7 @@ export function SymbolTable2({ columns }: SymbolTableProps) {
   return (
     <div className="h-full relative">
       <AgGridReact
+        ref={grid}
         className="ag-terminal-theme"
         enableAdvancedFilter={true}
         includeHiddenColumnsInAdvancedFilter={true}

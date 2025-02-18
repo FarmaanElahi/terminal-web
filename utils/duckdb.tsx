@@ -105,7 +105,19 @@ async function init() {
       reliableHeadRequests: true,
     },
   };
-  return await initializeDuckDb({ config, debug: true });
+  const db = await initializeDuckDb({ config, debug: true });
+  await initTables(db);
+  return db;
+}
+
+async function initTables(db: AsyncDuckDB) {
+  let conn: AsyncDuckDBConnection | null = null;
+  try {
+    conn = await db.connect();
+    await conn?.query("SET default_null_order = 'nulls_last';");
+  } finally {
+    await conn?.close();
+  }
 }
 
 function buildQuery(db: AsyncDuckDB) {
