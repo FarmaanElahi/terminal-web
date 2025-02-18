@@ -1,4 +1,5 @@
 export * from "./generated/supabase";
+import type { Database } from "@/types/generated/supabase";
 
 export interface Subsession {
   description?: string;
@@ -17,3 +18,5 @@ export interface ActionH {
   Surprise?: number;
   Type?: number;
 }
+
+export type Screen = Database["public"]["Tables"]["screens"]["Row"];

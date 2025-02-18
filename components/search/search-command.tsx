@@ -27,6 +27,18 @@ export function SymbolSearch() {
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
+      const activeElement = document.activeElement as HTMLElement;
+
+      // Prevent triggering if the user is typing in an input, textarea, or contenteditable
+      if (
+        activeElement &&
+        (activeElement.tagName === "INPUT" ||
+          activeElement.tagName === "TEXTAREA" ||
+          activeElement.isContentEditable)
+      ) {
+        return;
+      }
+
       if (open) return;
       if (!e.metaKey && e.key.length === 1 && /^[a-zA-Z]$/.test(e.key)) {
         e.preventDefault();

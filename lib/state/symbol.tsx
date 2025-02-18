@@ -6,6 +6,7 @@ import type { Symbol } from "@/types/symbol";
 import { fetchStockTwit } from "@/server/stocktwits";
 import type { StockTwitFeed } from "@/types/stocktwits";
 import { queryDuckDB } from "@/utils/duckdb";
+import { Json } from "@/types/generated/supabase";
 
 //##################### SYMBOL QUOTE #####################
 async function symbolQuoteQueryFn(ticker: string) {
@@ -323,3 +324,67 @@ export function useDiscussionFeed(
     queryFn: async () => fetchStockTwit(params),
   });
 }
+
+//##################### SCREENS #####################
+export interface ScreenState {
+  filter: unknown;
+  sort: unknown;
+  visibleColumns: string[];
+}
+
+export function useCreateScreen(name: string, state: Json) {
+  return queryClient.fetchQuery({
+    queryKey: ["screens", "create"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("screens")
+        .insert({
+          name,
+          state: state as unknown as Json,
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useUpdateScreen(id: string, state: Json) {
+  return queryClient.fetchQuery({
+    queryKey: ["screens", "update", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("screens")
+        .update({
+          state: state as unknown as Json,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useScreens() {
+  return useQuery({
+    queryKey: ["screens"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("screens")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+//##################### SCREENS #####################

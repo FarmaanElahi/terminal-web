@@ -19,19 +19,26 @@ import { Toggle } from "@/components/ui/toggle";
 import { SymbolSearch } from "@/components/search/search-command";
 import { Stats } from "@/components/symbols/symbol_stats";
 import { Discussion } from "@/components/stocktwit/discussion";
+import { ScreenSelector } from "@/components/screener/screen-selector";
 
 export default function Page() {
   const [showStats, setShowStats] = useState(false);
   const [showIdeas, setShowIdeas] = useState(true);
   const [showSymbols, setShowSymbols] = useState(true);
+  const [activeScreenId, setActiveScreenId] = useState<string | null>(null);
+
   return (
     <GroupSymbolProvider>
       <GrouperProvider group={1}>
         <header className="flex h-12 shrink-0 items-center gap-2">
           <SymbolSearch />
           <div className="flex items-center justify-between gap-2 px-4 w-full">
-            <div>
+            <div className="flex gap-2">
               <Tag placeholder={"Search Symbol"} name={"JINDRILL"} />
+              <ScreenSelector
+                activeScreenId={activeScreenId}
+                setActiveScreenId={setActiveScreenId}
+              />
             </div>
             <div className="flex space-x-4">
               <div className="space-x-2">
@@ -80,7 +87,7 @@ export default function Page() {
                 className={"h-full"}
                 defaultSize={20}
               >
-                <Screener id={"main"} />
+                <Screener id={"main"} activeScreenId={activeScreenId} />
               </ResizablePanel>
             )}
             <ResizableHandle />

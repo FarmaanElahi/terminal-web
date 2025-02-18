@@ -18,5 +18,9 @@
 }
 
 .ag-terminal-theme .ag-row-selected {
-    background-color: hsl(var(--secondary));
+    @apply bg-secondary
+}
+
+.ag-terminal-theme .ag-header-cell-text {
+    @apply font-bold
 }
