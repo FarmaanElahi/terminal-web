@@ -126,6 +126,7 @@ function ScreenCreatorDialog({
           </div>
         </div>
         <DialogFooter>
+          <Button variant="secondary">Cancel</Button>
           <Button>Create</Button>
         </DialogFooter>
       </DialogContent>

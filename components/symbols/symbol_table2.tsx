@@ -20,7 +20,7 @@ interface SymbolTable2Props {
 }
 
 export const SymbolTable2 = forwardRef<AgGridReact, SymbolTable2Props>(
-  function SymbolTable2({ columns, onStateUpdated, className }, ref) {
+  ({ columns, className, onStateUpdated }, ref) => {
     const colDefs = useMemo(() => {
       const colSet = new Set(columns);
       return defaultSymbolColumns.map((c) => {
@@ -40,6 +40,7 @@ export const SymbolTable2 = forwardRef<AgGridReact, SymbolTable2Props>(
 
     const switcher = useGroupSymbolSwitcher();
     const { data: rowData } = useScreener2();
+
     return (
       <div className={className}>
         <AgGridReact
@@ -71,3 +72,4 @@ export const SymbolTable2 = forwardRef<AgGridReact, SymbolTable2Props>(
     );
   },
 );
+SymbolTable2.displayName = "SymbolTable";
