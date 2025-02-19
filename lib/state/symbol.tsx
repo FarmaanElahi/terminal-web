@@ -1,12 +1,18 @@
 "use client";
 
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { queryClient, supabase } from "@/utils/client";
 import type { Symbol } from "@/types/symbol";
 import { fetchStockTwit } from "@/server/stocktwits";
 import type { StockTwitFeed } from "@/types/stocktwits";
 import { queryDuckDB } from "@/utils/duckdb";
 import { Json } from "@/types/generated/supabase";
+import { InsertScreen, Screen } from "@/types/supabase";
 
 //##################### SYMBOL QUOTE #####################
 async function symbolQuoteQueryFn(ticker: string) {
@@ -326,21 +332,18 @@ export function useDiscussionFeed(
 }
 
 //##################### SCREENS #####################
-export interface ScreenState {
-  filter: unknown;
-  sort: unknown;
-  visibleColumns: string[];
-}
-
-export function useCreateScreen(name: string, state: Json) {
-  return queryClient.fetchQuery({
-    queryKey: ["screens", "create"],
-    queryFn: async () => {
+export function useCreateScreen(onComplete: (screen: Screen) => void) {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: (screen: Screen) => {
+      void client.invalidateQueries({ queryKey: ["screens"] });
+      onComplete(screen);
+    },
+    mutationFn: async (screen: InsertScreen) => {
       const { data, error } = await supabase
         .from("screens")
         .insert({
-          name,
-          state: state as unknown as Json,
+          ...screen,
           updated_at: new Date().toISOString(),
         })
         .select()

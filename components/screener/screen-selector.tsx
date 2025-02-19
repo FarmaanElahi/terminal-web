@@ -1,4 +1,6 @@
-import { Check, ChevronsUpDown, Plus, X } from "lucide-react";
+"use client";
+
+import { Check, ChevronsUpDown, Loader2, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Command,
@@ -6,6 +8,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import {
   Popover,
@@ -23,7 +26,8 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useScreens } from "@/lib/state/symbol";
+import { useCreateScreen, useScreens } from "@/lib/state/symbol";
+import { toast } from "sonner";
 
 interface ScreenSelectorProps {
   activeScreenId: string | null;
@@ -34,7 +38,8 @@ export function ScreenSelector({
   activeScreenId,
   setActiveScreenId,
 }: ScreenSelectorProps) {
-  const { data: screens } = useScreens();
+  const { data: screens = [] } = useScreens();
+  console.log(screens);
   const [open, setOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const activeScreen = screens?.find((s) => s.id === activeScreenId);
@@ -49,34 +54,40 @@ export function ScreenSelector({
             aria-expanded={open}
             className="w-[200px] justify-between font-bold"
           >
-            {activeScreen?.name || "Select screen..."}
+            {activeScreen?.name || "Select Screen"}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0">
+        <PopoverContent className="w-[300px] p-0">
           <Command>
-            <CommandInput placeholder="Search screen..." />
-            <CommandEmpty>No screen found.</CommandEmpty>
-            <CommandGroup>
-              {screens?.map((s) => (
-                <CommandItem
-                  key={s.id}
-                  value={s.name}
-                  onSelect={() => {
-                    setActiveScreenId(s.id);
-                    setOpen(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      activeScreenId === s.id ? "opacity-100" : "opacity-0",
-                    )}
-                  />
-                  {s.name}
-                </CommandItem>
-              ))}
-            </CommandGroup>
+            <CommandInput placeholder="Search screens..." className="h-9" />
+            <CommandList>
+              <CommandEmpty>No screen found.</CommandEmpty>
+              <CommandGroup>
+                {screens.map((screen) => (
+                  <CommandItem
+                    key={screen.id}
+                    value={screen.id}
+                    onSelect={(currentValue) => {
+                      setActiveScreenId(
+                        currentValue === activeScreenId ? "" : currentValue,
+                      );
+                      setOpen(false);
+                    }}
+                  >
+                    {screen.name}
+                    <Check
+                      className={cn(
+                        "ml-auto",
+                        activeScreenId === screen.id
+                          ? "opacity-100"
+                          : "opacity-0",
+                      )}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
           </Command>
         </PopoverContent>
       </Popover>
@@ -84,16 +95,6 @@ export function ScreenSelector({
       <Button variant="outline" size="sm" onClick={() => setOpenDialog(true)}>
         <Plus className="size-4" />
       </Button>
-
-      {activeScreen && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setActiveScreenId(null)}
-        >
-          <X className="size-4" />
-        </Button>
-      )}
 
       <ScreenCreatorDialog open={openDialog} setOpen={setOpenDialog} />
     </div>
@@ -108,6 +109,25 @@ function ScreenCreatorDialog({
   setOpen: (open: boolean) => void;
 }) {
   const [newScreenName, setNewScreenName] = useState<string>();
+  const { mutate: createScreen, isPending } = useCreateScreen((screen) => {
+    setOpen(false);
+    toast(`${screen.name} screen created!`);
+  });
+
+  const defaultColumns = [
+    "name",
+    "mcap",
+    "day_close",
+    "sector",
+    "industry",
+    "dcr",
+    "wcr",
+    "relative_vol_10D",
+    "RS_10D_pct",
+    "RS_20D_pct",
+    "RSNH_1M",
+    "gap_pct_D",
+  ];
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
@@ -119,15 +139,22 @@ function ScreenCreatorDialog({
             <Label htmlFor="name">Screen Name</Label>
             <Input
               id="name"
-              value={newScreenName}
               onChange={(e) => setNewScreenName(e.target.value)}
               placeholder="Enter screen name"
             />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="secondary">Cancel</Button>
-          <Button>Create</Button>
+          <Button
+            disabled={!newScreenName}
+            onClick={() => {
+              createScreen({ name: newScreenName!, columns: defaultColumns });
+              setOpen(false);
+            }}
+          >
+            {isPending && <Loader2 className="animate-spin" />}
+            Create
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
