@@ -1,4 +1,4 @@
-import { ColDef, DataTypeDefinition } from "ag-grid-community";
+import { ColDef, DataTypeDefinition, CellClassParams } from "ag-grid-community";
 import type { Symbol } from "@/types/symbol";
 import {
   BooleanCell,
@@ -771,10 +771,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price % Change Today",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -783,10 +783,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     cellDataType: "percentage" satisfies CellDataType,
     // TODO Colorize
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -794,10 +794,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price % Change from High",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   // TODO: Missing field
@@ -851,10 +851,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     field: "away_from_daily_vwap_pct",
     headerName: "Away From Daily VWAP",
     cellDataType: "percentage" satisfies CellDataType,
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
     context: { category: "Price & Volume" },
   },
@@ -862,10 +862,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     field: "away_from_weekly_vwap_pct",
     headerName: "Away From Weekly VWAP",
     cellDataType: "percentage" satisfies CellDataType,
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
     context: { category: "Price & Volume" },
   },
@@ -873,10 +873,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     field: "away_from_monthly_vwap_pct",
     headerName: "Away From Monthly VWAP",
     cellDataType: "percentage" satisfies CellDataType,
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
     context: { category: "Price & Volume" },
   },
@@ -884,10 +884,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     field: "away_from_yearly_vwap_pct",
     headerName: "Away From YTD VWAP",
     cellDataType: "percentage" satisfies CellDataType,
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
     context: { category: "Price & Volume" },
   },
@@ -944,10 +944,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Gap $ Daily",
     cellDataType: "price" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -955,10 +955,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Gap $ Weekly",
     cellDataType: "price" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -966,10 +966,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Gap $ Monthly",
     cellDataType: "price" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -977,10 +977,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Gap % Daily",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -988,10 +988,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Gap % Weekly",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -999,10 +999,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Gap % Monthly",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1010,10 +1010,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Unfilled Gap $ Daily",
     cellDataType: "price" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1021,10 +1021,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Unfilled Gap $ Weekly",
     cellDataType: "price" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1032,10 +1032,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Unfilled Gap $ Monthly",
     cellDataType: "price" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1043,10 +1043,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Unfilled Gap % Daily",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1054,10 +1054,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Unfilled Gap % Weekly",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1065,10 +1065,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Unfilled Gap % Monthly",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1146,10 +1146,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % Last Earning",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1157,10 +1157,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % Current Week",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1168,10 +1168,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % Current Week Open",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1179,10 +1179,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % 2D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1190,10 +1190,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % 3D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1201,10 +1201,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % 4D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1212,10 +1212,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % MTD",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1223,10 +1223,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % 2M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1234,10 +1234,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % 3M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1245,10 +1245,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % 4M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1256,10 +1256,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % 5M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1267,10 +1267,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % 6M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1278,10 +1278,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % 7M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1289,10 +1289,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % 8M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1300,10 +1300,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % 9M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1311,10 +1311,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % 10M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1322,10 +1322,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % 11M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1333,10 +1333,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % YTD",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1344,10 +1344,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % 2Y",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1355,10 +1355,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % 3Y",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1366,10 +1366,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Change % 4Y",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1377,10 +1377,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price vs SMA 5D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1388,10 +1388,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price vs SMA 10D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1399,10 +1399,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price vs SMA 20D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1410,10 +1410,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price vs SMA 30D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1421,10 +1421,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price vs SMA 40D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1432,10 +1432,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price vs SMA 50D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1443,10 +1443,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price vs SMA 100D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1454,10 +1454,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price vs SMA 200D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1465,10 +1465,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price vs SMA 10W",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1476,10 +1476,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price vs SMA 20W",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1487,10 +1487,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price vs SMA 30W",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1498,10 +1498,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price vs SMA 40W",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1509,10 +1509,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price vs SMA 50W",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1726,10 +1726,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Vol vs Yesterday Vol",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1737,10 +1737,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Week Vol vs Last Week Vol",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
 
@@ -1749,10 +1749,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Vol vs SMA 5D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1760,10 +1760,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Vol vs SMA 10D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1771,10 +1771,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Vol vs SMA 20D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1782,10 +1782,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Vol vs SMA 30D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1793,10 +1793,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Vol vs SMA 40D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1804,10 +1804,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Vol vs SMA 50D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1815,10 +1815,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Vol vs SMA 100D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1826,10 +1826,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Vol vs SMA 200D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1837,10 +1837,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Vol vs SMA 10W",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1848,10 +1848,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Vol vs SMA 20W",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1859,10 +1859,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Vol vs SMA 30W",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1870,10 +1870,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Vol vs SMA 40W",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
@@ -1881,10 +1881,10 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Vol vs SMA 50W",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
-    cellClass: ({ value }) =>
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
       cn("font-bold", {
-        "text-bullish": value > 0,
-        "text-bearish": value < 0,
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
       }),
   },
   {
