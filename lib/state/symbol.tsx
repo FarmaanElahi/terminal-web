@@ -11,8 +11,7 @@ import type { Symbol } from "@/types/symbol";
 import { fetchStockTwit } from "@/server/stocktwits";
 import type { StockTwitFeed } from "@/types/stocktwits";
 import { queryDuckDB } from "@/utils/duckdb";
-import { Json } from "@/types/generated/supabase";
-import { InsertScreen, Screen } from "@/types/supabase";
+import { InsertScreen, Screen, UpdateScreen } from "@/types/supabase";
 
 //##################### SYMBOL QUOTE #####################
 async function symbolQuoteQueryFn(ticker: string) {
@@ -332,12 +331,12 @@ export function useDiscussionFeed(
 }
 
 //##################### SCREENS #####################
-export function useCreateScreen(onComplete: (screen: Screen) => void) {
+export function useCreateScreen(onComplete?: (screen: Screen) => void) {
   const client = useQueryClient();
   return useMutation({
     onSuccess: (screen: Screen) => {
       void client.invalidateQueries({ queryKey: ["screens"] });
-      onComplete(screen);
+      onComplete?.(screen);
     },
     mutationFn: async (screen: InsertScreen) => {
       const { data, error } = await supabase
@@ -355,14 +354,24 @@ export function useCreateScreen(onComplete: (screen: Screen) => void) {
   });
 }
 
-export function useUpdateScreen(id: string, state: Json) {
-  return queryClient.fetchQuery({
-    queryKey: ["screens", "update", id],
-    queryFn: async () => {
+export function useUpdateScreen(onComplete?: (screen: Screen) => void) {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: (screen: Screen) => {
+      void client.invalidateQueries({ queryKey: ["screens"] });
+      onComplete?.(screen);
+    },
+    mutationFn: async ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: UpdateScreen;
+    }) => {
       const { data, error } = await supabase
         .from("screens")
         .update({
-          state: state as unknown as Json,
+          ...payload,
           updated_at: new Date().toISOString(),
         })
         .eq("id", id)

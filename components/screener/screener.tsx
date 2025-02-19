@@ -32,22 +32,11 @@ export function Screener({ activeScreenId, ...props }: ScreenerProps) {
     );
   }, [activeScreen?.columns]);
 
-  const sort = useMemo(() => {
-    if (activeScreen?.sort) {
-      try {
-        return activeScreen.sort as { field: string; asc: boolean }[];
-      } catch (e) {
-        console.error("Error parsing sort state:", e);
-      }
-    }
-    return [{ field: "mcap", asc: false }];
-  }, [activeScreen]);
-
   return (
     <SymbolTable2
       columns={visibleColumns}
-      sort={sort}
       className="h-full"
+      activeScreenId={activeScreenId}
       {...props}
     />
   );

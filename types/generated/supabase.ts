@@ -97,7 +97,7 @@ export type Database = {
           filters: Json | null
           id: string
           name: string
-          sort: Json[] | null
+          sort: Json | null
           updated_at: string | null
           user_id: string | null
         }
@@ -107,7 +107,7 @@ export type Database = {
           filters?: Json | null
           id?: string
           name: string
-          sort?: Json[] | null
+          sort?: Json | null
           updated_at?: string | null
           user_id?: string | null
         }
@@ -117,7 +117,7 @@ export type Database = {
           filters?: Json | null
           id?: string
           name?: string
-          sort?: Json[] | null
+          sort?: Json | null
           updated_at?: string | null
           user_id?: string | null
         }
