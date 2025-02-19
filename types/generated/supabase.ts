@@ -92,32 +92,26 @@ export type Database = {
       }
       screens: {
         Row: {
-          columns: string[] | null
           created_at: string
-          filters: Json | null
           id: string
           name: string
-          sort: Json | null
+          state: Json | null
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
-          columns?: string[] | null
           created_at?: string
-          filters?: Json | null
           id?: string
           name: string
-          sort?: Json | null
+          state?: Json | null
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
-          columns?: string[] | null
           created_at?: string
-          filters?: Json | null
           id?: string
           name?: string
-          sort?: Json | null
+          state?: Json | null
           updated_at?: string | null
           user_id?: string | null
         }

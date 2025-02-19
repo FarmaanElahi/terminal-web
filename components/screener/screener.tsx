@@ -6,16 +6,14 @@ import {
   ClientSideRowModelModule,
   ColDef,
   ColumnApiModule,
-  ColumnVisibleEvent,
   CustomFilterModule,
   DateFilterModule,
-  FilterChangedEvent,
   GridState,
   GridStateModule,
   ModuleRegistry,
   NumberFilterModule,
   RowApiModule,
-  SortChangedEvent,
+  StateUpdatedEvent,
   TextFilterModule,
   ValidationModule,
 } from "ag-grid-community";
@@ -35,7 +33,6 @@ import {
   MultiFilterModule,
   SetFilterModule,
   SideBarModule,
-  AdvancedFilterModel,
 } from "ag-grid-enterprise";
 
 // Register all Community features
@@ -98,20 +95,22 @@ function useScreenerChangeCallback(activeScreenId?: string | null) {
 
   // Handle grid state changes
   return useCallback(
-    (params: FilterChangedEvent | SortChangedEvent | ColumnVisibleEvent) => {
-      console.log("Handle state", params);
+    (params: StateUpdatedEvent) => {
       const id = activeScreenId;
       if (!id) return;
 
-      // Filter
-      const filters = params.api.getAdvancedFilterModel() as Json | null;
-      // Visible columns
-      const columns = params.api
-        .getColumnState()
-        .filter((col) => !col.hide)
-        .map((col) => col.colId);
+      const state = params.api.getState() as Json;
 
-      updateScreen({ id, payload: { columns, filters } });
+      // const state = {
+      //   columnVisibility,
+      //   columnOrder,
+      //   columnPinning,
+      //   filter,
+      //   sort,
+      //   columnSizing,
+      // } as Json;
+
+      updateScreen({ id, payload: { state } });
     },
     [activeScreenId, updateScreen],
   );
@@ -120,29 +119,34 @@ function useScreenerChangeCallback(activeScreenId?: string | null) {
 function useGridInitialState(activeScreenId?: string | null) {
   const activeScreen = useActiveScreen(activeScreenId);
   const colDefs = useColumnDefs();
-  return useMemo(() => {
-    const visibleCols = activeScreen?.columns ?? ["name"];
-    const visibleColSet = new Set(activeScreen?.columns ?? ["name"]);
 
-    // Hidden col
+  const defaultState = useMemo(() => {
+    const defaultVisible = new Set([
+      "name",
+      "mcap",
+      "day_close",
+      "sector",
+      "industry",
+      "dcr",
+      "wcr",
+      "relative_vol_10D",
+      "RS_10D_pct",
+      "RS_20D_pct",
+      "RSNH_1M",
+      "gap_pct_D",
+    ]);
+
     const hiddenColIds = colDefs
-      .filter((col) => !visibleColSet.has(col.colId))
-      .map((col) => col.colId);
-
-    // Col order
-    const orderedColIds = [...visibleCols, ...hiddenColIds];
-
-    // Filter
-    const advancedFilterModel =
-      activeScreen?.filters as unknown as AdvancedFilterModel;
+      .filter((c) => !defaultVisible.has(c.colId))
+      .map((c) => c.colId);
 
     return {
       columnVisibility: { hiddenColIds },
-      columnOrder: { orderedColIds },
       columnPinning: { leftColIds: ["name"], rightColIds: [] },
-      filter: { advancedFilterModel },
     } satisfies GridState;
-  }, [activeScreen, colDefs]);
+  }, [colDefs]);
+
+  return (activeScreen?.state ?? defaultState) as GridState;
 }
 
 export function Screener({ activeScreenId }: ScreenerProps) {
@@ -168,9 +172,7 @@ export function Screener({ activeScreenId }: ScreenerProps) {
           resizable: true,
         }}
         sideBar={true}
-        onFilterChanged={handleStateChange}
-        onSortChanged={handleStateChange}
-        onColumnVisible={handleStateChange}
+        onStateUpdated={handleStateChange}
         onCellFocused={(event) => {
           const { rowIndex } = event;
           if (rowIndex === undefined || rowIndex === null) return;

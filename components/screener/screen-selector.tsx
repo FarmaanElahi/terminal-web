@@ -114,20 +114,6 @@ function ScreenCreatorDialog({
     toast(`${screen.name} screen created!`);
   });
 
-  const defaultColumns = [
-    "name",
-    "mcap",
-    "day_close",
-    "sector",
-    "industry",
-    "dcr",
-    "wcr",
-    "relative_vol_10D",
-    "RS_10D_pct",
-    "RS_20D_pct",
-    "RSNH_1M",
-    "gap_pct_D",
-  ];
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
@@ -148,7 +134,7 @@ function ScreenCreatorDialog({
           <Button
             disabled={!newScreenName}
             onClick={() => {
-              createScreen({ name: newScreenName!, columns: defaultColumns });
+              createScreen({ name: newScreenName! });
               setOpen(false);
             }}
           >
