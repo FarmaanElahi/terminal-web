@@ -1,23 +1,32 @@
-import { AccessorKeyColumnDef, ColumnDef } from "@tanstack/react-table";
+import { ColDef, DataTypeDefinition } from "ag-grid-community";
 import type { Symbol } from "@/types/symbol";
-import React from "react";
-import { FormattedValue } from "@/components/symbols/symbol_value";
-import { ColDef } from "ag-grid-community";
+import {
+  BooleanCell,
+  CandleStickCell,
+  LogoTextCell,
+  SymbolCell,
+  VolumeCell,
+} from "@/components/symbols/symbol_value";
+import { DateTime } from "luxon";
+import { cn } from "@/lib/utils";
+
+type CellDataType = "percentage" | "price" | "fundamental_price" | "date";
 
 function agoCols(
-  meta: Record<string, unknown>,
   metric: string,
   name_prefix: string,
   freq: "fq" | "fy",
   ago: number,
-): ColumnDef<Symbol>[] {
+  context?: unknown,
+  cellDataType?: CellDataType,
+): ColDef<Symbol>[] {
   const freqNameMapping = { fq: "Qtr", fy: "Yr" } as Record<
     typeof freq,
     string
   >;
   const freqName = freqNameMapping[freq];
 
-  const cols = [] as ColumnDef<Symbol>[];
+  const cols = [] as ColDef<Symbol>[];
   for (let i = 0; i <= ago; i++) {
     let hist =
       i === 0
@@ -27,538 +36,624 @@ function agoCols(
           : undefined;
 
     hist = hist ? hist : `${i} ${freqName}s Ago`;
+    const sign = cellDataType === "percentage" ? "%" : "";
     cols.push({
-      accessorKey: [metric, freq, i].join("_"),
-      header: [name_prefix, hist, meta.sign].filter((s) => s).join(" "),
-      meta,
+      field: [metric, freq, i].join("_") as keyof Symbol,
+      headerName: [name_prefix, hist, sign].filter((s) => s).join(" "),
+      context,
+      cellDataType,
     });
   }
   return cols;
 }
 
 function forwardCols(
-  meta: Record<string, unknown>,
   metric: string,
   name_prefix: string,
   freq: "fq" | "fy",
   ago: number,
-): ColumnDef<Symbol>[] {
+  context?: unknown,
+  cellDataType?: CellDataType,
+): ColDef<Symbol>[] {
   const freqNameMapping = { fq: "Qtr", fy: "Yr" } as Record<
     typeof freq,
     string
   >;
   const freqName = freqNameMapping[freq];
 
-  const cols = [] as ColumnDef<Symbol>[];
+  const cols = [] as ColDef<Symbol>[];
   for (let i = 0; i <= ago; i++) {
     let hist = i === 0 ? `Next ${freqName}` : undefined;
     hist = hist ? hist : `${i + 1} ${freqName}s Forward`;
+
+    const sign = cellDataType === "percentage" ? "%" : "";
     cols.push({
-      accessorKey: [metric, freq, i].join("_"),
-      header: [name_prefix, hist, meta.sign].filter((s) => s).join(" "),
-      meta,
+      field: [metric, freq, i].join("_") as keyof Symbol,
+      headerName: [name_prefix, hist, sign].filter((s) => s).join(" "),
+      cellDataType,
+      context,
     });
   }
   return cols;
 }
 
-export const defaultSymbolColumns: ColumnDef<Symbol>[] = [
+export const extendedColumnType = {
+  fundamental_price: {
+    extendsDataType: "number",
+    baseDataType: "number",
+    valueFormatter: (params) => {
+      const value = params.value;
+      if (value === null || value === undefined) return "-";
+      // TODO Make it dynamic
+      const currencyCode = "INR";
+      return new Intl.NumberFormat("en-IN", {
+        maximumFractionDigits: value > 1_00_00_000 ? 2 : 0,
+        minimumFractionDigits: 0,
+        currencyDisplay: "symbol",
+        notation: value > 1_00_00_000 ? "compact" : "standard",
+        ...(currencyCode ? { currency: currencyCode, style: "currency" } : {}),
+      }).format(value);
+    },
+  },
+  price: {
+    extendsDataType: "number",
+    baseDataType: "number",
+    valueFormatter: (params) => {
+      const value = params.value;
+      if (value === null || value === undefined) return "-";
+      // TODO Make it dynamic
+      const currencyCode = "INR";
+      return new Intl.NumberFormat("en-IN", {
+        maximumFractionDigits: 2,
+        minimumFractionDigits: 0,
+        currencyDisplay: "symbol",
+        currency: currencyCode,
+        style: "currency",
+      }).format(value);
+    },
+  },
+  percentage: {
+    extendsDataType: "number",
+    baseDataType: "number",
+    valueFormatter: (params) => {
+      const value = params.value;
+      if (value === null || value === undefined) return "-";
+
+      const number = new Intl.NumberFormat("en-IN", {
+        maximumFractionDigits: 2,
+      }).format(value);
+      return `${number} %`;
+    },
+  },
+  // TODO
+  date: {
+    extendsDataType: "date",
+    baseDataType: "date",
+    appendColumnTypes: false,
+    valueParser: (params) => {
+      const value = params.newValue as unknown;
+      console.log("Da", params);
+      if (typeof value === "number")
+        return DateTime.fromMillis(value).toJSDate();
+      if (typeof value === "string") return DateTime.fromISO(value).toJSDate();
+      return null;
+    },
+    valueFormatter: (params) =>
+      params.value
+        ? DateTime.fromJSDate(params.value).toFormat("dd/MM/yyyy")
+        : "-",
+  },
+} satisfies Record<CellDataType, DataTypeDefinition<Symbol>>;
+
+export const defaultColumns: Array<ColDef<Symbol>> = [
   // #############################  Generals  ################################
   {
-    accessorKey: "name",
-    header: "Symbol",
-    enableHiding: false,
-    meta: {
-      format: "symbol",
-      category: "General",
-      pinLeft: true,
-      cols: ["logo", "earnings_release_next_date"],
-    },
+    field: "name",
+    headerName: "Symbol",
+    lockPinned: true,
+    lockVisible: true,
+    lockPosition: true,
+    context: { category: "General" },
+    cellRenderer: SymbolCell,
   },
-  { accessorKey: "isin", header: "ISIN", meta: { category: "General" } },
+  { field: "isin", headerName: "ISIN", context: { category: "General" } },
   {
-    accessorKey: "day_open",
-    header: "Open",
-    meta: { format: "numeric", category: "General" },
-  },
-  {
-    accessorKey: "day_high",
-    header: "High",
-    meta: { format: "numeric", category: "General" },
+    field: "day_open",
+    headerName: "Open",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "General" },
   },
   {
-    accessorKey: "day_low",
-    header: "Low",
-    meta: { format: "numeric", category: "General" },
+    field: "day_high",
+    headerName: "High",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "General" },
   },
   {
-    accessorKey: "day_close",
-    header: "Last",
-    meta: { format: "numeric", category: "General" },
+    field: "day_low",
+    headerName: "Low",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "General" },
   },
   {
-    accessorKey: "day_volume",
-    header: "Volume",
-    meta: { format: "numeric", category: "General" },
+    field: "day_close",
+    headerName: "Last",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "General" },
   },
   {
-    accessorKey: "week_open",
-    header: "Week Open",
-    meta: { format: "numeric", category: "General" },
+    field: "day_volume",
+    headerName: "Volume",
+    context: { category: "General" },
   },
   {
-    accessorKey: "week_high",
-    header: "Week High",
-    meta: { format: "numeric", category: "General" },
+    field: "week_open",
+    headerName: "Week Open",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "General" },
   },
   {
-    accessorKey: "week_low",
-    header: "Week Low",
-    meta: { format: "numeric", category: "General" },
+    field: "week_high",
+    headerName: "Week High",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "General" },
   },
   {
-    accessorKey: "week_close",
-    header: "Week Close",
-    meta: { format: "numeric", category: "General" },
+    field: "week_low",
+    headerName: "Week Low",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "General" },
   },
   {
-    accessorKey: "week_volume",
-    header: "Week Volume",
-    meta: { format: "numeric", category: "General" },
+    field: "week_close",
+    headerName: "Week Close",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "General" },
   },
   {
-    accessorKey: "month_open",
-    header: "Month Open",
-    meta: { format: "numeric", category: "General" },
+    field: "week_volume",
+    headerName: "Week Volume",
+    context: { category: "General" },
   },
   {
-    accessorKey: "month_high",
-    header: "Month High",
-    meta: { format: "numeric", category: "General" },
+    field: "month_open",
+    headerName: "Month Open",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "General" },
   },
   {
-    accessorKey: "month_low",
-    header: "Month Low",
-    meta: { format: "numeric", category: "General" },
+    field: "month_high",
+    headerName: "Month High",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "General" },
   },
   {
-    accessorKey: "month_close",
-    header: "Month Close",
-    meta: { format: "numeric", category: "General" },
+    field: "month_low",
+    headerName: "Month Low",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "General" },
   },
   {
-    accessorKey: "month_volume",
-    header: "Month Volume",
-    meta: { format: "numeric", category: "General" },
+    field: "month_close",
+    headerName: "Month Close",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "General" },
   },
   {
-    accessorKey: "description",
-    header: "Name",
-    meta: { category: "General" },
+    field: "month_volume",
+    headerName: "Month Volume",
+    context: { category: "General" },
   },
   {
-    accessorKey: "website",
-    header: "Website",
-    meta: { category: "General" },
+    field: "description",
+    headerName: "Name",
+    context: { category: "General" },
   },
   {
-    accessorKey: "ceo",
-    header: "CEO",
-    meta: { category: "General" },
+    field: "website",
+    headerName: "Website",
+    context: { category: "General" },
   },
   {
-    accessorKey: "employees",
-    header: "Employee Count",
-    meta: { category: "General" },
+    field: "ceo",
+    headerName: "CEO",
+    context: { category: "General" },
   },
   {
-    accessorKey: "country",
-    header: "Country",
-    meta: {
-      format: "textlogo",
-      logoCol: "country_code",
-      logoPrefix: "country",
-      category: "General",
-    },
-  },
-  { accessorKey: "location", header: "City", meta: { category: "General" } },
-  {
-    accessorKey: "ipo_date",
-    header: "IPO Date",
-    meta: { format: "date", category: "General" },
+    field: "employees",
+    headerName: "Employee Count",
+    context: { category: "General" },
   },
   {
-    accessorKey: "most_recent_split",
-    header: "Recent Split",
-    meta: { format: "date", category: "General" },
+    field: "country",
+    headerName: "Country",
+    cellRenderer: LogoTextCell,
+    cellRendererParams: { logoCol: "country_code", logoPrefix: "country" },
+    context: { category: "General" },
   },
-  { accessorKey: "type", header: "Type", meta: { category: "General" } },
+  { field: "location", headerName: "City", context: { category: "General" } },
   {
-    accessorKey: "exchange",
-    header: "Exchange",
-    meta: {
-      format: "textlogo",
-      logoCol: "exchange_logo",
-      category: "General",
-    },
-  },
-  {
-    accessorKey: "mcap",
-    header: "Market Cap",
-    meta: { format: "currency", category: "General" },
+    field: "ipo_date",
+    headerName: "IPO Date",
+    cellDataType: "date",
+    context: { category: "General" },
   },
   {
-    accessorKey: "shares_float",
-    header: "Shares Float",
-    meta: {
-      format: "numeric",
-      maximumFractionDigits: 0,
-      category: "General",
-    },
+    field: "most_recent_split",
+    headerName: "Recent Split",
+    cellDataType: "date",
+    context: { category: "General" },
+  },
+  { field: "type", headerName: "Type", context: { category: "General" } },
+  {
+    field: "exchange",
+    headerName: "Exchange",
+    cellRenderer: LogoTextCell,
+    cellRendererParams: { logoCol: "exchange_logo", logoPrefix: "country" },
+    context: { category: "General" },
+  },
+  {
+    field: "mcap",
+    headerName: "Market Cap",
+    cellDataType: "fundamental_price" satisfies CellDataType,
+    context: { category: "General" },
+  },
+  {
+    field: "shares_float",
+    headerName: "Shares Float",
+    context: { category: "General" },
   },
   {
     // Weighted Shares Outstanding.
-    accessorKey: "total_shares_outstanding",
-    header: "Total Outstanding Shares",
-    meta: {
-      format: "numeric",
-      maximumFractionDigits: 0,
-      category: "General",
-    },
+    field: "total_shares_outstanding",
+    headerName: "Total Outstanding Shares",
+    context: { category: "General" },
   },
   // TODO: Add Non-Weighted Shares Outstanding
   {
-    accessorKey: "timezone",
-    header: "Timezone",
-    meta: { category: "General" },
+    field: "timezone",
+    headerName: "Timezone",
+    context: { category: "General" },
   },
   {
-    accessorKey: "currency",
-    header: "Currency",
-    meta: {
-      format: "textlogo",
-      logoCol: "currency_logo",
-      category: "General",
-    },
+    field: "currency",
+    headerName: "Currency",
+    cellRenderer: LogoTextCell,
+    cellRendererParams: { logoCol: "currency_logo" },
+    context: { category: "General" },
   },
   // #############################  Generals  ################################
 
   // ##############################  Earnings  ###############################
   {
-    accessorKey: "earnings_release_date",
-    header: "Earnings Date",
-    meta: { format: "date", category: "Earnings" },
+    field: "earnings_release_date",
+    headerName: "Earnings Date",
+    cellDataType: "date",
+    context: { category: "Earnings" },
   },
   {
-    accessorKey: "earnings_release_next_date",
-    header: "Next Earnings Date",
-    meta: { format: "date", category: "Earnings" },
+    field: "earnings_release_next_date",
+    headerName: "Next Earnings Date",
+    cellDataType: "date",
+    context: { category: "Earnings" },
   },
   {
-    accessorKey: "days_since_latest_earning",
-    header: "Days since last earning",
-    meta: { format: "numeric", category: "Earnings" },
+    field: "days_since_latest_earning",
+    headerName: "Days since last earning",
+    context: { category: "Earnings" },
   },
   {
-    accessorKey: "earnings_per_share_ttm",
-    header: "EPS TTM",
-    meta: { format: "numeric", category: "Earnings" },
+    field: "earnings_per_share_ttm",
+    headerName: "EPS TTM",
+    context: { category: "Earnings" },
   },
 
-  ...agoCols(
-    { format: "numeric", category: "Earnings" },
-    "eps",
-    "EPS",
-    "fq",
-    9,
-  ),
-  ...agoCols(
-    { format: "numeric", category: "Earnings" },
-    "eps",
-    "EPS",
-    "fy",
-    3,
-  ),
+  ...agoCols("eps", "EPS", "fq", 9, { category: "Earnings" }),
+  ...agoCols("eps", "EPS", "fy", 3, { category: "Earnings" }),
 
   ...agoCols(
-    { format: "numeric", sign: "%", category: "Earnings" },
     "earning_surprise",
     "EPS Surprise",
     "fq",
     9,
+    { category: "Earnings" },
+    "percentage",
   ),
   ...agoCols(
-    { format: "numeric", sign: "%", category: "Earnings" },
     "earning_surprise",
     "EPS Surprise",
     "fy",
     3,
+    { category: "Earnings" },
+    "percentage",
   ),
-  ...forwardCols(
-    { format: "numeric", category: "Earnings" },
-    "eps_estimated",
-    "EPS Estimate",
-    "fq",
-    3,
-  ),
-  ...forwardCols(
-    { format: "numeric", category: "Earnings" },
-    "eps_estimated",
-    "EPS Estimate",
-    "fy",
-    2,
-  ),
+  ...forwardCols("eps_estimated", "EPS Estimate", "fq", 3, {
+    category: "Earnings",
+  }),
+  ...forwardCols("eps_estimated", "EPS Estimate", "fy", 2, {
+    category: "Earnings",
+  }),
   ...agoCols(
-    { format: "numeric", sign: "%", category: "Earnings" },
     "eps_growth",
     "EPS Growth",
     "fq",
     9,
+    { category: "Earnings" },
+    "percentage",
   ),
   ...agoCols(
-    { format: "numeric", sign: "%", category: "Earnings" },
     "eps_growth",
     "EPS Growth",
     "fy",
     3,
+    { category: "Earnings" },
+    "percentage",
   ),
   {
-    accessorKey: "eps_avg_growth_fq_2",
-    header: "Average Quarterly EPS Growth Last 2 Qtrs",
-    meta: { format: "numeric", sign: "%", category: "Earnings" },
+    field: "eps_avg_growth_fq_2",
+    headerName: "Average Quarterly EPS Growth Last 2 Qtrs",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Earnings" },
   },
   {
-    accessorKey: "eps_avg_growth_fq_3",
-    header: "Average Quarterly EPS Growth Last 3 Qtrs",
-    meta: { format: "numeric", sign: "%", category: "Earnings" },
+    field: "eps_avg_growth_fq_3",
+    headerName: "Average Quarterly EPS Growth Last 3 Qtrs",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Earnings" },
   },
   {
-    accessorKey: "eps_avg_growth_fy_2",
-    header: "Average Annual EPS Growth Last 2 Yrs",
-    meta: { format: "numeric", sign: "%", category: "Earnings" },
+    field: "eps_avg_growth_fy_2",
+    headerName: "Average Annual EPS Growth Last 2 Yrs",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Earnings" },
   },
   {
-    accessorKey: "eps_avg_growth_fy_3",
-    header: "Average Annual EPS Growth Last 3 Yrs",
-    meta: { format: "numeric", sign: "%", category: "Earnings" },
+    field: "eps_avg_growth_fy_3",
+    headerName: "Average Annual EPS Growth Last 3 Yrs",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Earnings" },
   },
   // TODO: Quarterly Earnings Acceleration
   // TODO: Quarter Over Quarter EPS $ Growth
   ...forwardCols(
-    { format: "numeric", sign: "%", category: "Earnings" },
     "eps_estimated_growth",
     "Quarterly EPS Estimated Growth",
     "fq",
     3,
+    { category: "Earnings" },
+    "percentage",
   ),
   ...forwardCols(
-    { format: "numeric", sign: "%", category: "Earnings" },
     "eps_estimated_growth",
     "Annual EPS Estimated Growth",
     "fy",
     2,
+    { category: "Earnings" },
+    "percentage",
   ),
   {
-    accessorKey: "eps_estimated_growth_avg_fq_2",
-    header: "Average Quarterly Estimated EPS Growth 2 Qtrs Forward",
-    meta: { format: "numeric", sign: "%", category: "Earnings" },
+    field: "eps_estimated_growth_avg_fq_2",
+    headerName: "Average Quarterly Estimated EPS Growth 2 Qtrs Forward",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Earnings" },
   },
   {
-    accessorKey: "eps_estimated_growth_avg_fq_3",
-    header: "Average Quarterly Estimated EPS Growth 3 Qtrs Forward",
-    meta: { format: "numeric", sign: "%", category: "Earnings" },
+    field: "eps_estimated_growth_avg_fq_3",
+    headerName: "Average Quarterly Estimated EPS Growth 3 Qtrs Forward",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Earnings" },
   },
   {
-    accessorKey: "eps_estimated_growth_avg_fy_2",
-    header: "Average Annual Estimated EPS Growth 2 Yrs Forward",
-    meta: { format: "numeric", sign: "%", category: "Earnings" },
+    field: "eps_estimated_growth_avg_fy_2",
+    headerName: "Average Annual Estimated EPS Growth 2 Yrs Forward",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Earnings" },
   },
   {
-    accessorKey: "eps_estimated_growth_avg_fy_3",
-    header: "Average Annual Estimated EPS Growth 3 Yrs Forward",
-    meta: { format: "numeric", sign: "%", category: "Earnings" },
+    field: "eps_estimated_growth_avg_fy_3",
+    headerName: "Average Annual Estimated EPS Growth 3 Yrs Forward",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Earnings" },
   },
   // ##############################  Earnings  ###############################
 
   // ##############################  Sales  ##################################
   ...agoCols(
-    { format: "currency", category: "Fundamentals" },
     "ebitda",
     "EBITDA",
     "fq",
     9,
+    { category: "Sales" },
+    "fundamental_price",
   ),
   ...agoCols(
-    { format: "currency", category: "Fundamentals" },
     "ebit",
     "EBIT",
     "fq",
     9,
+    { category: "Sales" },
+    "fundamental_price",
   ),
   ...agoCols(
-    { format: "currency", category: "Sales" },
     "revenue",
     "Sales",
     "fq",
     9,
+    { category: "Sales" },
+    "fundamental_price",
   ),
   ...agoCols(
-    { format: "currency", category: "Sales" },
     "revenue",
     "Sales",
     "fy",
     3,
+    { category: "Sales" },
+    "fundamental_price",
   ),
   ...forwardCols(
-    { format: "currency", category: "Sales" },
     "revenue_forecast",
     "Sales Estimate",
     "fq",
     3,
+    { category: "Sales" },
+    "fundamental_price",
   ),
   ...forwardCols(
-    { format: "currency", category: "Sales" },
     "revenue_forecast",
     "Sales Estimate ",
     "fy",
     2,
+    { category: "Sales" },
+    "fundamental_price",
   ),
   // TODO: Quarterly Estimated Sales – Latest Reported
   // TODO: Annual Estimated Sales – Latest Reported Year
   ...agoCols(
-    { format: "numeric", sign: "%", category: "Sales" },
     "revenue_growth",
     "Sales Growth",
     "fq",
     9,
+    { category: "Sales" },
+    "percentage",
   ),
   ...agoCols(
-    { format: "numeric", sign: "%", category: "Sales" },
     "revenue_growth",
     "Sales Growth",
     "fy",
     3,
+    { category: "Sales" },
+    "percentage",
   ),
   {
-    accessorKey: "revenue_avg_growth_fq_2",
-    header: "Average Quarterly Sales Growth 2 Qtrs",
-    meta: { format: "numeric", sign: "%", category: "Sales" },
+    field: "revenue_avg_growth_fq_2",
+    headerName: "Average Quarterly Sales Growth 2 Qtrs",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Sales" },
   },
   {
-    accessorKey: "revenue_avg_growth_fq_3",
-    header: "Average Quarterly Sales Growth 3 Qtrs",
-    meta: { format: "numeric", sign: "%", category: "Sales" },
+    field: "revenue_avg_growth_fq_3",
+    headerName: "Average Quarterly Sales Growth 3 Qtrs",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Sales" },
   },
   {
-    accessorKey: "revenue_avg_growth_fy_2",
-    header: "Average Annual Sales Growth 2 Yrs",
-    meta: { format: "numeric", sign: "%", category: "Sales" },
+    field: "revenue_avg_growth_fy_2",
+    headerName: "Average Annual Sales Growth 2 Yrs",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Sales" },
   },
   {
-    accessorKey: "revenue_avg_growth_fy_3",
-    header: "Average Annual Sales Growth 3 Yrs",
-    meta: { format: "numeric", sign: "%", category: "Sales" },
+    field: "revenue_avg_growth_fy_3",
+    headerName: "Average Annual Sales Growth 3 Yrs",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Sales" },
   }, // TODO: Quarterly Sales Acceleration
 
   ...agoCols(
-    { format: "numeric", sign: "%", category: "Sales" },
     "revenue_growth_yoy",
     "QoQ Sales Growth",
     "fq",
     9,
+    { category: "Sales" },
+    "percentage",
   ),
 
   ...forwardCols(
-    { format: "number", sign: "%", category: "Sales" },
     "revenue_forecast_growth",
     "Sales Growth Estimated",
     "fq",
     3,
+    { category: "Sales" },
+    "percentage",
   ),
   ...forwardCols(
-    { format: "number", sign: "%", category: "Sales" },
     "revenue_forecast_growth",
     "Sales Growth Estimated",
     "fy",
     2,
+    { category: "Sales" },
+    "percentage",
   ),
   {
-    accessorKey: "revenue_forecast_growth_avg_fq_2",
-    header: "Average Quarterly Estimated Sales Growth 2 Qtrs",
-    meta: { format: "numeric", sign: "%", category: "Sales" },
+    field: "revenue_forecast_growth_avg_fq_2",
+    headerName: "Average Quarterly Estimated Sales Growth 2 Qtrs",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Sales" },
   },
   {
-    accessorKey: "revenue_forecast_growth_avg_fq_3",
-    header: "Average Quarterly Estimated Sales Growth 3 Qtrs",
-    meta: { format: "numeric", sign: "%", category: "Sales" },
+    field: "revenue_forecast_growth_avg_fq_3",
+    headerName: "Average Quarterly Estimated Sales Growth 3 Qtrs",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Sales" },
   },
 
   {
-    accessorKey: "revenue_forecast_growth_avg_fy_2",
-    header: "Average Quarterly Estimated Sales Growth 2 Yrs",
-    meta: { format: "numeric", sign: "%", category: "Sales" },
+    field: "revenue_forecast_growth_avg_fy_2",
+    headerName: "Average Quarterly Estimated Sales Growth 2 Yrs",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Sales" },
   },
   {
-    accessorKey: "revenue_forecast_growth_avg_fy_3",
-    header: "Average Quarterly Estimated Sales Growth 3 Yrs",
-    meta: { format: "numeric", sign: "%", category: "Sales" },
+    field: "revenue_forecast_growth_avg_fy_3",
+    headerName: "Average Quarterly Estimated Sales Growth 3 Yrs",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Sales" },
   },
   // TODO: Quarterly Sales Acceleration
   ...agoCols(
-    { format: "numeric", sign: "%", category: "Sales" },
     "revenue_surprise",
     "Sales Surprise",
     "fq",
     9,
+    { category: "Sales" },
+    "percentage",
   ),
   ...agoCols(
-    { format: "numeric", sign: "%", category: "Sales" },
     "revenue_surprise",
     "Sales Surprise",
     "fy",
     3,
+    { category: "Sales" },
+    "percentage",
   ),
 
   // ##############################  Sales  ##################################
 
   // ##########################  Sector & Industry  ##########################
   {
-    accessorKey: "sector",
-    header: "Sector",
-    meta: { category: "Sector & Industry" },
-    size: 200,
+    field: "sector",
+    headerName: "Sector",
+    context: { category: "Sector & Industry" },
   },
   {
-    accessorKey: "group",
-    header: "Group",
-    meta: { category: "Sector & Industry" },
-    size: 200,
+    field: "group",
+    headerName: "Group",
+    context: { category: "Sector & Industry" },
   },
   {
-    accessorKey: "industry",
-    header: "Industry",
-    meta: { category: "Sector & Industry" },
-    size: 250,
+    field: "industry",
+    headerName: "Industry",
+    context: { category: "Sector & Industry" },
   },
   {
-    accessorKey: "sub_industry",
-    header: "Sub Industry",
-    meta: { category: "Sector & Industry" },
-    size: 200,
+    field: "sub_industry",
+    headerName: "Sub Industry",
+    context: { category: "Sector & Industry" },
   },
   // ##########################  Sector & Industry  ##########################
 
   // ##############################  Fundamental  ############################
   {
-    accessorKey: "price_revenue_ttm",
-    header: "Price Revenue TTM",
-    meta: { format: "numeric", category: "Sales" },
+    field: "price_revenue_ttm",
+    headerName: "Price Revenue TTM",
+    context: { category: "Fundamentals" },
   },
 
   {
-    accessorKey: "dividend_amount",
-    header: "Last Dividend Amount",
-    meta: { format: "currency", category: "Fundamentals" },
+    field: "dividend_amount",
+    headerName: "Last Dividend Amount",
+    cellDataType: "fundamental_price" satisfies CellDataType,
+    context: { category: "Fundamentals" },
   },
   // TODO: Missing Dividend Declaration Date
   //Declaration Date - Date on which dividend is declared
@@ -566,1424 +661,1249 @@ export const defaultSymbolColumns: ColumnDef<Symbol>[] = [
   //Record Date- This date determines all shareholders of record who are entitled to the dividend payment and it usually occurs two days after the ex-date. Date -This is when dividend payments are issued to shareholders and it's usually about one month after the record date
   //Payment Date -This is when dividend payments are issued to shareholders and it's usually about one month after the record date
   {
-    accessorKey: "divided_ex_date",
-    header: "Last Dividend Ex Date",
-    meta: { format: "date", category: "Fundamentals" },
+    field: "divided_ex_date",
+    headerName: "Last Dividend Ex Date",
+    cellDataType: "date" satisfies CellDataType,
+    context: { category: "Fundamentals" },
   },
   {
-    accessorKey: "dividend_yield",
-    header: "Dividend Yield",
-    meta: { format: "numeric", category: "Fundamentals" },
+    field: "dividend_yield",
+    headerName: "Dividend Yield",
+    context: { category: "Fundamentals" },
   },
   {
-    accessorKey: "price_earnings_ttm",
-    header: "Price Earning",
-    meta: { format: "numeric", category: "Fundamentals" },
+    field: "price_earnings_ttm",
+    headerName: "Price Earning",
+    context: { category: "Fundamentals" },
   },
   {
-    accessorKey: "price_earnings_run_rate",
-    header: "Price Earning Run Rate",
-    meta: { format: "numeric", category: "Fundamentals" },
+    field: "price_earnings_run_rate",
+    headerName: "Price Earning Run Rate",
+    context: { category: "Fundamentals" },
   },
   {
-    accessorKey: "forward_price_earnings",
-    header: "Forward Price Earnings",
-    meta: { format: "numeric", category: "Fundamentals" },
+    field: "forward_price_earnings",
+    headerName: "Forward Price Earnings",
+    context: { category: "Fundamentals" },
   },
 
   ...agoCols(
-    { format: "currency", category: "Fundamentals" },
     "net_income",
     "Net Income",
     "fy",
     2,
+    { category: "Fundamentals" },
+    "fundamental_price",
   ),
   ...agoCols(
-    { format: "currency", category: "Fundamentals" },
     "total_assets",
     "Total Assets",
     "fq",
     3,
+    { category: "Fundamentals" },
+    "fundamental_price",
   ),
   ...agoCols(
-    { format: "currency", category: "Fundamentals" },
     "total_liabilities",
     "Total Liabilities",
     "fq",
     3,
+    { category: "Fundamentals" },
+    "fundamental_price",
   ),
-  ...agoCols(
-    { format: "numeric", category: "Fundamentals" },
-    "current_ratio",
-    "Current Ratio",
-    "fq",
-    3,
-  ),
+  ...agoCols("current_ratio", "Current Ratio", "fq", 3, {
+    category: "Fundamentals",
+  }),
   {
-    accessorKey: "net_income_ttm_0",
-    header: "Net Income TTM",
-    meta: { format: "currency", category: "Fundamentals" },
+    field: "net_income_ttm_0",
+    headerName: "Net Income TTM",
+    context: { category: "Fundamentals" },
   },
 
   {
-    accessorKey: "price_earnings_growth_ttm",
-    header: "Price Earning Growth",
-    meta: { format: "numeric", category: "Fundamentals" },
+    field: "price_earnings_growth_ttm",
+    headerName: "Price Earning Growth",
+    context: { category: "Fundamentals" },
   },
   {
-    accessorKey: "price_sales_ttm",
-    header: "Price Sales",
-    meta: { format: "numeric", category: "Fundamentals" },
+    field: "price_sales_ttm",
+    headerName: "Price Sales",
+    context: { category: "Fundamentals" },
   },
-  ...agoCols(
-    { format: "numeric", category: "Fundamentals" },
-    "price_earnings",
-    "Price Earning",
-    "fq",
-    3,
-  ),
-  ...agoCols(
-    { format: "numeric", category: "Fundamentals" },
-    "debt_to_equity",
-    "Debt to Equity",
-    "fq",
-    3,
-  ),
-  ...agoCols(
-    { format: "numeric", category: "Fundamentals" },
-    "price_book",
-    "Price Book",
-    "fq",
-    3,
-  ),
-  ...agoCols(
-    { format: "numeric", category: "Fundamentals" },
-    "price_sales",
-    "Price Sales",
-    "fy",
-    3,
-  ),
+  ...agoCols("price_earnings", "Price Earning", "fq", 3, {
+    category: "Fundamentals",
+  }),
+  ...agoCols("debt_to_equity", "Debt to Equity", "fq", 3, {
+    category: "Fundamentals",
+  }),
+  ...agoCols("price_book", "Price Book", "fq", 3, { category: "Fundamentals" }),
+  ...agoCols("price_sales", "Price Sales", "fy", 3, {
+    category: "Fundamentals",
+  }),
   // ##############################  Fundamental  ############################
-
   // ######################  Price and Volume  #######################
   {
-    accessorKey: "price_change_today_abs",
-    header: "Price Change Today",
-    meta: { format: "price", category: "Price & Volume" },
+    field: "price_change_today_abs",
+    headerName: "Price Change Today",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "price_change_from_open_abs",
-    header: "Price Change from Open",
-    meta: { format: "price", category: "Price & Volume" },
+    field: "price_change_from_open_abs",
+    headerName: "Price Change from Open",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "price_change_from_high_abs",
-    header: "Price Change from High",
-    meta: { format: "price", category: "Price & Volume" },
+    field: "price_change_from_high_abs",
+    headerName: "Price Change from High",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "price_change_from_low_abs",
-    header: "Price Change from Low",
-    meta: { format: "price", category: "Price & Volume" },
+    field: "price_change_from_low_abs",
+    headerName: "Price Change from Low",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "price_change_today_pct",
-    header: "Price % Change Today",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      colorize: true,
-      category: "Price & Volume",
-    },
+    field: "price_change_today_pct",
+    headerName: "Price % Change Today",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "price_change_from_open_pct",
-    header: "Price % Change from Open",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      colorize: true,
-      category: "Price & Volume",
-    },
+    field: "price_change_from_open_pct",
+    headerName: "Price % Change from Open",
+    cellDataType: "percentage" satisfies CellDataType,
+    // TODO Colorize
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "price_change_from_high_pct",
-    header: "Price % Change from High",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      colorize: true,
-      category: "Price & Volume",
-    },
+    field: "price_change_from_high_pct",
+    headerName: "Price % Change from High",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   // TODO: Missing field
-  {
-    accessorKey: "price_change_from_low_pct",
-    header: "Price % Change from Low",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      colorize: true,
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "dcr",
-    header: "DCR",
-    meta: {
-      format: "candlestick",
-      category: "Price & Volume",
-      cols: ["day_open", "day_high", "day_low", "day_close"],
-    },
-  },
-  {
-    accessorKey: "wcr",
-    header: "WCR",
-    meta: {
-      format: "candlestick",
-      category: "Price & Volume",
-      cols: ["week_open", "week_high", "week_low", "week_close"],
-    },
-  },
-  {
-    accessorKey: "mcr",
-    header: "MCR",
-    meta: {
-      format: "candlestick",
-      category: "Price & Volume",
-      cols: ["month_open", "month_high", "month_low", "month_close"],
-    },
-  },
-  {
-    accessorKey: "away_from_daily_vwap_pct",
-    header: "Away From Daily VWAP",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "away_from_weekly_vwap_pct",
-    header: "Away From Weekly VWAP",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "away_from_monthly_vwap_pct",
-    header: "Away From Monthly VWAP",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "away_from_yearly_vwap_pct",
-    header: "Away From YTD VWAP",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_above_daily_vwap",
-    header: "Price Above Daily VWAP",
-    meta: {
-      format: "boolean",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "price_above_weekly_vwap",
-    header: "Price Above Weekly VWAP",
-    meta: {
-      format: "boolean",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "price_above_monthly_vwap",
-    header: "Price Above Monthly VWAP",
-    meta: {
-      format: "boolean",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "price_above_yearly_vwap",
-    header: "Price Above Yearly VWAP",
-    meta: {
-      format: "boolean",
-      category: "Price & Volume",
-    },
-  },
-
-  {
-    accessorKey: "daily_vwap",
-    header: "Daily VWAP",
-    meta: {
-      format: "price",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "weekly_vwap",
-    header: "Weekly VWAP",
-    meta: {
-      format: "price",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "monthly_vwap",
-    header: "Monthly VWAP",
-    meta: {
-      format: "price",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "yearly_vwap",
-    header: "YTD VWAP",
-    meta: {
-      format: "price",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "gap_dollar_D",
-    header: "Gap $ Daily",
-    meta: {
-      format: "price",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "gap_dollar_W",
-    header: "Gap $ Weekly",
-    meta: {
-      format: "price",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "gap_dollar_M",
-    header: "Gap $ Monthly",
-    meta: {
-      format: "price",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "gap_pct_D",
-    header: "Gap % Daily",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "gap_pct_W",
-    header: "Gap % Weekly",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "gap_pct_M",
-    header: "Gap % Monthly",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "unfilled_gap_D",
-    header: "Unfilled Gap $ Daily",
-    meta: {
-      format: "price",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "unfilled_gap_W",
-    header: "Unfilled Gap $ Weekly",
-    meta: {
-      format: "price",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "unfilled_gap_M",
-    header: "Unfilled Gap $ Monthly",
-    meta: {
-      format: "price",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "unfilled_gap_pct_D",
-    header: "Unfilled Gap % Daily",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "unfilled_gap_pct_W",
-    header: "Unfilled Gap % Weekly",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "unfilled_gap_pct_M",
-    header: "Unfilled Gap % Monthly",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "high_52_week",
-    header: "High 52W",
-    meta: {
-      format: "price",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "low_52_week",
-    header: "Low 52W",
-    meta: {
-      format: "price",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "high_52_week_today",
-    header: "High 52W Today",
-    meta: {
-      format: "boolean",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "low_52_week_today",
-    header: "Low 52W Today",
-    meta: {
-      format: "boolean",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "away_from_52_week_high_pct",
-    header: "Away from 52W High",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "away_from_52_week_low_pct",
-    header: "Away from 52W Low",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "all_time_high",
-    header: "All Time High",
-    meta: {
-      format: "price",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "all_time_low",
-    header: "All Time Low",
-    meta: {
-      format: "price",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "all_time_high_today",
-    header: "All Time High Today",
-    meta: {
-      format: "boolean",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "all_time_low_today",
-    header: "All Time Low Today",
-    meta: {
-      format: "boolean",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "away_from_all_time_high_pct",
-    header: "Away from All Time High",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "away_from_all_time_low_pct",
-    header: "Away from All Time Low",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "price_change_since_earning_pct",
-    header: "Price Change % Last Earning",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_1W",
-    header: "Price Change % Current Week",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_curr_week_open_pct",
-    header: "Price Change % Current Week Open",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_2D",
-    header: "Price Change % 2D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_3D",
-    header: "Price Change % 3D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_4D",
-    header: "Price Change % 4D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_1M",
-    header: "Price Change % MTD",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_2M",
-    header: "Price Change % 2M",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_3M",
-    header: "Price Change % 3M",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_4M",
-    header: "Price Change % 4M",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_5M",
-    header: "Price Change % 5M",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_6M",
-    header: "Price Change % 6M",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_7M",
-    header: "Price Change % 7M",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_8M",
-    header: "Price Change % 8M",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_9M",
-    header: "Price Change % 9M",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_10M",
-    header: "Price Change % 10M",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_11M",
-    header: "Price Change % 11M",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_1Y",
-    header: "Price Change % YTD",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_2Y",
-    header: "Price Change % 2Y",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_3Y",
-    header: "Price Change % 3Y",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_change_pct_4Y",
-    header: "Price Change % 4Y",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_vs_price_sma_5D",
-    header: "Price vs SMA 5D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_vs_price_sma_10D",
-    header: "Price vs SMA 10D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_vs_price_sma_20D",
-    header: "Price vs SMA 20D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_vs_price_sma_30D",
-    header: "Price vs SMA 30D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_vs_price_sma_40D",
-    header: "Price vs SMA 40D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_vs_price_sma_50D",
-    header: "Price vs SMA 50D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_vs_price_sma_100D",
-    header: "Price vs SMA 100D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
+  // {
+  //   field: "price_change_from_low_pct",
+  //   headerName: "Price % Change from Low",
+  //   context: {
+  //     format: "numeric",
+  //     sign: "%",
+  //     colorize: true,
+  //     category: "Price & Volume",
+  //   },
+  // },
+  {
+    field: "dcr",
+    headerName: "DCR",
+    cellRenderer: CandleStickCell,
+    cellRendererParams: {
+      open_col: "day_open",
+      high_col: "day_high",
+      low_col: "day_low",
+      close_col: "day_close",
+    },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "wcr",
+    headerName: "WCR",
+    cellRenderer: CandleStickCell,
+    cellRendererParams: {
+      open_col: "week_open",
+      high_col: "week_high",
+      low_col: "week_low",
+      close_col: "week_close",
+    },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "mcr",
+    headerName: "MCR",
+    cellRenderer: CandleStickCell,
+    cellRendererParams: {
+      open_col: "month_open",
+      high_col: "month_high",
+      low_col: "month_low",
+      close_col: "month_close",
+    },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "away_from_daily_vwap_pct",
+    headerName: "Away From Daily VWAP",
+    cellDataType: "percentage" satisfies CellDataType,
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "away_from_weekly_vwap_pct",
+    headerName: "Away From Weekly VWAP",
+    cellDataType: "percentage" satisfies CellDataType,
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "away_from_monthly_vwap_pct",
+    headerName: "Away From Monthly VWAP",
+    cellDataType: "percentage" satisfies CellDataType,
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "away_from_yearly_vwap_pct",
+    headerName: "Away From YTD VWAP",
+    cellDataType: "percentage" satisfies CellDataType,
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "price_above_daily_vwap",
+    headerName: "Price Above Daily VWAP",
+    cellRenderer: BooleanCell,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "price_above_weekly_vwap",
+    headerName: "Price Above Weekly VWAP",
+    cellRenderer: BooleanCell,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "price_above_monthly_vwap",
+    headerName: "Price Above Monthly VWAP",
+    cellRenderer: BooleanCell,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "price_above_yearly_vwap",
+    headerName: "Price Above Yearly VWAP",
+    cellRenderer: BooleanCell,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "daily_vwap",
+    headerName: "Daily VWAP",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "weekly_vwap",
+    headerName: "Weekly VWAP",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "monthly_vwap",
+    headerName: "Monthly VWAP",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "yearly_vwap",
+    headerName: "YTD VWAP",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "gap_dollar_D",
+    headerName: "Gap $ Daily",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "gap_dollar_W",
+    headerName: "Gap $ Weekly",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "gap_dollar_M",
+    headerName: "Gap $ Monthly",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "gap_pct_D",
+    headerName: "Gap % Daily",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "gap_pct_W",
+    headerName: "Gap % Weekly",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "gap_pct_M",
+    headerName: "Gap % Monthly",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "unfilled_gap_D",
+    headerName: "Unfilled Gap $ Daily",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "unfilled_gap_W",
+    headerName: "Unfilled Gap $ Weekly",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "unfilled_gap_M",
+    headerName: "Unfilled Gap $ Monthly",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "price_vs_price_sma_200D",
-    header: "Price vs SMA 200D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_vs_price_sma_10W",
-    header: "Price vs SMA 10W",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_vs_price_sma_20W",
-    header: "Price vs SMA 20W",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_vs_price_sma_30W",
-    header: "Price vs SMA 30W",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_vs_price_sma_40W",
-    header: "Price vs SMA 40W",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "price_vs_price_sma_50W",
-    header: "Price vs SMA 50W",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
-  },
-  {
-    accessorKey: "relative_vol_5D",
-    header: "RV 5D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-      bold: true,
-      activityLevel: 1.5,
-    },
-  },
-  {
-    accessorKey: "relative_vol_10D",
-    header: "RV 10D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-      bold: true,
-      activityLevel: 1.5,
-    },
-  },
-  {
-    accessorKey: "relative_vol_20D",
-    header: "RV 20D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-      bold: true,
-      activityLevel: 1.5,
-    },
-  },
-  {
-    accessorKey: "relative_vol_30D",
-    header: "RV 30D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-      bold: true,
-      activityLevel: 1.5,
-    },
-  },
-  {
-    accessorKey: "relative_vol_40D",
-    header: "RV 40D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-      bold: true,
-      activityLevel: 1.5,
-    },
-  },
-  {
-    accessorKey: "relative_vol_50D",
-    header: "RV 50D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-      bold: true,
-      activityLevel: 1.5,
-    },
+    field: "unfilled_gap_pct_D",
+    headerName: "Unfilled Gap % Daily",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "relative_vol_100D",
-    header: "RV 100D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-      bold: true,
-      activityLevel: 1.5,
-    },
-  },
-  {
-    accessorKey: "relative_vol_200D",
-    header: "RV 200D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-      bold: true,
-      activityLevel: 1.5,
-    },
-  },
-  {
-    accessorKey: "run_rate_vol_5D",
-    header: "Run Rate 5D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-      bold: true,
-      activityLevel: 150,
-    },
-  },
-  {
-    accessorKey: "run_rate_vol_10D",
-    header: "Run Rate 10D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-      bold: true,
-      activityLevel: 150,
-    },
-  },
-  {
-    accessorKey: "run_rate_vol_20D",
-    header: "Run Rate 20D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-      bold: true,
-      activityLevel: 150,
-    },
-  },
-  {
-    accessorKey: "run_rate_vol_30D",
-    header: "Run Rate 30D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-      bold: true,
-      activityLevel: 150,
-    },
-  },
-  {
-    accessorKey: "run_rate_vol_40D",
-    header: "Run Rate 40D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-      bold: true,
-      activityLevel: 150,
-    },
-  },
-  {
-    accessorKey: "run_rate_vol_50D",
-    header: "Run Rate 50D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-      bold: true,
-      activityLevel: 150,
-    },
-  },
-  {
-    accessorKey: "run_rate_vol_100D",
-    header: "Run Rate 100D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-      bold: true,
-      activityLevel: 150,
-    },
-  },
-  {
-    accessorKey: "run_rate_vol_200D",
-    header: "Run Rate 200D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-      bold: true,
-      activityLevel: 150,
-    },
-  },
-  {
-    accessorKey: "up_down_day_20D",
-    header: "U/D 20D",
-    meta: {
-      format: "numeric",
-      category: "Price & Volume",
-    },
-  },
-  {
-    accessorKey: "up_down_day_50D",
-    header: "U/D 50D",
-    meta: {
-      format: "numeric",
-      category: "Price & Volume",
-    },
+    field: "unfilled_gap_pct_W",
+    headerName: "Unfilled Gap % Weekly",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "unfilled_gap_pct_M",
+    headerName: "Unfilled Gap % Monthly",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "high_52_week",
+    headerName: "High 52W",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "low_52_week",
+    headerName: "Low 52W",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "high_52_week_today",
+    headerName: "High 52W Today",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "low_52_week_today",
+    headerName: "Low 52W Today",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "away_from_52_week_high_pct",
+    headerName: "Away from 52W High",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "away_from_52_week_low_pct",
+    headerName: "Away from 52W Low",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "all_time_high",
+    headerName: "All Time High",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "all_time_low",
+    headerName: "All Time Low",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "all_time_high_today",
+    headerName: "All Time High Today",
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "all_time_low_today",
+    headerName: "All Time Low Today",
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "away_from_all_time_high_pct",
+    headerName: "Away from All Time High",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "away_from_all_time_low_pct",
+    headerName: "Away from All Time Low",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "price_change_since_earning_pct",
+    headerName: "Price Change % Last Earning",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_1W",
+    headerName: "Price Change % Current Week",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_curr_week_open_pct",
+    headerName: "Price Change % Current Week Open",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_2D",
+    headerName: "Price Change % 2D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_3D",
+    headerName: "Price Change % 3D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_4D",
+    headerName: "Price Change % 4D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_1M",
+    headerName: "Price Change % MTD",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_2M",
+    headerName: "Price Change % 2M",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_3M",
+    headerName: "Price Change % 3M",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_4M",
+    headerName: "Price Change % 4M",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_5M",
+    headerName: "Price Change % 5M",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_6M",
+    headerName: "Price Change % 6M",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_7M",
+    headerName: "Price Change % 7M",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_8M",
+    headerName: "Price Change % 8M",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_9M",
+    headerName: "Price Change % 9M",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_10M",
+    headerName: "Price Change % 10M",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_11M",
+    headerName: "Price Change % 11M",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_1Y",
+    headerName: "Price Change % YTD",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_2Y",
+    headerName: "Price Change % 2Y",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_3Y",
+    headerName: "Price Change % 3Y",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_change_pct_4Y",
+    headerName: "Price Change % 4Y",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_sma_5D",
+    headerName: "Price vs SMA 5D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_sma_10D",
+    headerName: "Price vs SMA 10D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_sma_20D",
+    headerName: "Price vs SMA 20D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_sma_30D",
+    headerName: "Price vs SMA 30D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_sma_40D",
+    headerName: "Price vs SMA 40D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_sma_50D",
+    headerName: "Price vs SMA 50D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_sma_100D",
+    headerName: "Price vs SMA 100D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_sma_200D",
+    headerName: "Price vs SMA 200D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_sma_10W",
+    headerName: "Price vs SMA 10W",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_sma_20W",
+    headerName: "Price vs SMA 20W",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_sma_30W",
+    headerName: "Price vs SMA 30W",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_sma_40W",
+    headerName: "Price vs SMA 40W",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_sma_50W",
+    headerName: "Price vs SMA 50W",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
+  },
+  {
+    field: "relative_vol_5D",
+    headerName: "RV 5D",
+    cellRenderer: VolumeCell,
+    cellRendererParams: { activityLevel: 1.5, bold: true },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "relative_vol_10D",
+    headerName: "RV 10D",
+    cellRendererParams: { activityLevel: 1.5, bold: true },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "relative_vol_20D",
+    headerName: "RV 20D",
+    cellRendererParams: { activityLevel: 1.5, bold: true },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "relative_vol_30D",
+    headerName: "RV 30D",
+    cellRendererParams: { activityLevel: 1.5, bold: true },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "relative_vol_40D",
+    headerName: "RV 40D",
+    cellRendererParams: { activityLevel: 1.5, bold: true },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "relative_vol_50D",
+    headerName: "RV 50D",
+    cellRendererParams: { activityLevel: 1.5, bold: true },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "relative_vol_100D",
+    headerName: "RV 100D",
+    cellRendererParams: { activityLevel: 1.5, bold: true },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "relative_vol_200D",
+    headerName: "RV 200D",
+    cellRendererParams: { activityLevel: 1.5, bold: true },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "run_rate_vol_5D",
+    headerName: "Run Rate 5D",
+    cellRendererParams: { activityLevel: 1.5, bold: true },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "run_rate_vol_10D",
+    headerName: "Run Rate 10D",
+    cellRendererParams: { activityLevel: 1.5, bold: true },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "run_rate_vol_20D",
+    headerName: "Run Rate 20D",
+    cellRendererParams: { activityLevel: 1.5, bold: true },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "run_rate_vol_30D",
+    headerName: "Run Rate 30D",
+    cellRendererParams: { activityLevel: 1.5, bold: true },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "run_rate_vol_40D",
+    headerName: "Run Rate 40D",
+    cellRendererParams: { activityLevel: 1.5, bold: true },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "run_rate_vol_50D",
+    headerName: "Run Rate 50D",
+    cellRendererParams: { activityLevel: 1.5, bold: true },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "run_rate_vol_100D",
+    headerName: "Run Rate 100D",
+    cellRendererParams: { activityLevel: 1.5, bold: true },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "run_rate_vol_200D",
+    headerName: "Run Rate 200D",
+    cellRendererParams: { activityLevel: 1.5, bold: true },
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "up_down_day_20D",
+    headerName: "U/D 20D",
+    context: { category: "Price & Volume" },
+  },
+  {
+    field: "up_down_day_50D",
+    headerName: "U/D 50D",
+    context: { category: "Price & Volume" },
   },
   // TODO: Check this
   {
-    accessorKey: "highest_vol_since_earning",
-    header: "Highest Volume Since Earning",
-    meta: {
-      format: "boolean",
-      category: "Price & Volume",
-    },
+    field: "highest_vol_since_earning",
+    headerName: "Highest Volume Since Earning",
+    context: { category: "Price & Volume" },
+    cellRenderer: BooleanCell,
   },
   {
-    accessorKey: "highest_vol_in_1_year",
-    header: "Highest Volume 1Y",
-    meta: {
-      format: "boolean",
-      category: "Price & Volume",
-    },
+    field: "highest_vol_in_1_year",
+    headerName: "Highest Volume 1Y",
+    context: { category: "Price & Volume" },
+    cellRenderer: BooleanCell,
   },
   {
-    accessorKey: "highest_vol_ever",
-    header: "Highest Volume Ever",
-    meta: {
-      format: "boolean",
-      category: "Price & Volume",
-    },
+    field: "highest_vol_ever",
+    headerName: "Highest Volume Ever",
+    context: { category: "Price & Volume" },
+    cellRenderer: BooleanCell,
   },
   {
-    accessorKey: "price_volume",
-    header: "Dollar Volume",
-    meta: {
-      format: "price",
-      category: "Price & Volume",
-    },
+    field: "price_volume",
+    headerName: "Dollar Volume",
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "price_volume_sma_20D",
-    header: "Dollar Volume 20D",
-    meta: {
-      format: "numeric",
-      category: "Price & Volume",
-    },
+    field: "price_volume_sma_20D",
+    headerName: "Dollar Volume 20D",
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "price_volume_sma_50D",
-    header: "Dollar Volume 50D",
-    meta: {
-      format: "numeric",
-      category: "Price & Volume",
-    },
+    field: "price_volume_sma_50D",
+    headerName: "Dollar Volume 50D",
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "vol_sma_5D",
-    header: "Vol SMA 5D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-    },
+    field: "vol_sma_5D",
+    headerName: "Vol SMA 5D",
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "vol_sma_10D",
-    header: "Vol SMA 10D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-    },
+    field: "vol_sma_10D",
+    headerName: "Vol SMA 10D",
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "vol_sma_20D",
-    header: "Vol SMA 20D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-    },
+    field: "vol_sma_20D",
+    headerName: "Vol SMA 20D",
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "vol_sma_30D",
-    header: "Vol SMA 30D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-    },
+    field: "vol_sma_30D",
+    headerName: "Vol SMA 30D",
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "vol_sma_40D",
-    header: "Vol SMA 40D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-    },
+    field: "vol_sma_40D",
+    headerName: "Vol SMA 40D",
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "vol_sma_50D",
-    header: "Vol SMA 50D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-    },
+    field: "vol_sma_50D",
+    headerName: "Vol SMA 50D",
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "vol_sma_100D",
-    header: "Vol SMA 100D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-    },
+    field: "vol_sma_100D",
+    headerName: "Vol SMA 100D",
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "vol_sma_200D",
-    header: "Vol SMA 200D",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-    },
+    field: "vol_sma_200D",
+    headerName: "Vol SMA 200D",
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "vol_sma_10W",
-    header: "Vol SMA 10W",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-    },
+    field: "vol_sma_10W",
+    headerName: "Vol SMA 10W",
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "vol_sma_20W",
-    header: "Vol SMA 20W",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-    },
+    field: "vol_sma_20W",
+    headerName: "Vol SMA 20W",
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "vol_sma_30W",
-    header: "Vol SMA 30W",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-    },
+    field: "vol_sma_30W",
+    headerName: "Vol SMA 30W",
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "vol_sma_40W",
-    header: "Vol SMA 40W",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-    },
+    field: "vol_sma_40W",
+    headerName: "Vol SMA 40W",
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "vol_sma_50W",
-    header: "Vol SMA 50W",
-    meta: {
-      format: "volume",
-      category: "Price & Volume",
-    },
+    field: "vol_sma_50W",
+    headerName: "Vol SMA 50W",
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "vol_vs_yesterday_vol",
-    header: "Vol vs Yesterday Vol",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
+    field: "vol_vs_yesterday_vol",
+    headerName: "Vol vs Yesterday Vol",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "week_vol_vs_prev_week_vol",
-    header: "Week Vol vs Last Week Vol",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
+    field: "week_vol_vs_prev_week_vol",
+    headerName: "Week Vol vs Last Week Vol",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
 
   {
-    accessorKey: "vol_vs_vol_sma_5D",
-    header: "Vol vs SMA 5D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
+    field: "vol_vs_vol_sma_5D",
+    headerName: "Vol vs SMA 5D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "vol_vs_vol_sma_10D",
-    header: "Vol vs SMA 10D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
+    field: "vol_vs_vol_sma_10D",
+    headerName: "Vol vs SMA 10D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "vol_vs_vol_sma_20D",
-    header: "Vol vs SMA 20D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
+    field: "vol_vs_vol_sma_20D",
+    headerName: "Vol vs SMA 20D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "vol_vs_vol_sma_30D",
-    header: "Vol vs SMA 30D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
+    field: "vol_vs_vol_sma_30D",
+    headerName: "Vol vs SMA 30D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "vol_vs_vol_sma_40D",
-    header: "Vol vs SMA 40D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
+    field: "vol_vs_vol_sma_40D",
+    headerName: "Vol vs SMA 40D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "vol_vs_vol_sma_50D",
-    header: "Vol vs SMA 50D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
+    field: "vol_vs_vol_sma_50D",
+    headerName: "Vol vs SMA 50D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "vol_vs_vol_sma_100D",
-    header: "Vol vs SMA 100D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
+    field: "vol_vs_vol_sma_100D",
+    headerName: "Vol vs SMA 100D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "vol_vs_vol_sma_200D",
-    header: "Vol vs SMA 200D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
+    field: "vol_vs_vol_sma_200D",
+    headerName: "Vol vs SMA 200D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "vol_vs_vol_sma_10W",
-    header: "Vol vs SMA 10W",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
+    field: "vol_vs_vol_sma_10W",
+    headerName: "Vol vs SMA 10W",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "vol_vs_vol_sma_20W",
-    header: "Vol vs SMA 20W",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
+    field: "vol_vs_vol_sma_20W",
+    headerName: "Vol vs SMA 20W",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "vol_vs_vol_sma_30W",
-    header: "Vol vs SMA 30W",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
+    field: "vol_vs_vol_sma_30W",
+    headerName: "Vol vs SMA 30W",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "vol_vs_vol_sma_40W",
-    header: "Vol vs SMA 40W",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
+    field: "vol_vs_vol_sma_40W",
+    headerName: "Vol vs SMA 40W",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "vol_vs_vol_sma_50W",
-    header: "Vol vs SMA 50W",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-      colorize: true,
-      bold: true,
-    },
+    field: "vol_vs_vol_sma_50W",
+    headerName: "Vol vs SMA 50W",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value }) =>
+      cn("font-bold", {
+        "text-bullish": value > 0,
+        "text-bearish": value < 0,
+      }),
   },
   {
-    accessorKey: "float_turnover",
-    header: "Float Turnover",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-    },
+    field: "float_turnover",
+    headerName: "Float Turnover",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "float_turnover_sma_20D",
-    header: "Float Turnover SMA 20D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-    },
+    field: "float_turnover_sma_20D",
+    headerName: "Float Turnover SMA 20D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
   },
   {
-    accessorKey: "float_turnover_sma_50D",
-    header: "Float Turnover SMA 50D",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Price & Volume",
-    },
+    field: "float_turnover_sma_50D",
+    headerName: "Float Turnover SMA 50D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
   },
 
   // ######################  Price and Volume  #######################
@@ -1991,1057 +1911,746 @@ export const defaultSymbolColumns: ColumnDef<Symbol>[] = [
   // ##########################  Technical  ##########################
 
   {
-    accessorKey: "beta_1_year",
-    header: "Beta 1Y",
-    meta: { format: "numeric", category: "Technicals" },
+    field: "beta_1_year",
+    headerName: "Beta 1Y",
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "beta_3_year",
-    header: "Beta 3 Yrs",
-    meta: { format: "numeric", category: "Technicals" },
+    field: "beta_3_year",
+    headerName: "Beta 3 Yrs",
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "beta_5_year",
-    header: "Beta 5Y",
-    meta: { format: "numeric", category: "Technicals" },
+    field: "beta_5_year",
+    headerName: "Beta 5Y",
+    context: { category: "Technicals" },
   },
 
   {
-    accessorKey: "day_open_gt_prev_open",
-    header: "Day Open > Prev Day Open",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "day_open_gt_prev_open",
+    headerName: "Day Open > Prev Day Open",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "day_high_gt_prev_high",
-    header: "Day High > Prev Day High",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "day_high_gt_prev_high",
+    headerName: "Day High > Prev Day High",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "day_low_gt_prev_low",
-    header: "Day Low > Prev Day Low",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "day_low_gt_prev_low",
+    headerName: "Day Low > Prev Day Low",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "day_close_gt_prev_close",
-    header: "Day Close > Prev Day Close",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "day_close_gt_prev_close",
+    headerName: "Day Close > Prev Day Close",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "day_open_lt_prev_open",
-    header: "Day Open < Prev Day Open",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "day_open_lt_prev_open",
+    headerName: "Day Open < Prev Day Open",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "day_high_lt_prev_high",
-    header: "Day High < Prev Day High",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "day_high_lt_prev_high",
+    headerName: "Day High < Prev Day High",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "day_low_lt_prev_low",
-    header: "Day Low < Prev Day Low",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "day_low_lt_prev_low",
+    headerName: "Day Low < Prev Day Low",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "day_close_lt_prev_close",
-    header: "Day Close < Prev Day Close",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "day_close_lt_prev_close",
+    headerName: "Day Close < Prev Day Close",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "day_open_eq_high",
-    header: "Day Open = Day High",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "day_open_eq_high",
+    headerName: "Day Open = Day High",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "day_open_eq_low",
-    header: "Day Open = Day Low",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "day_open_eq_low",
+    headerName: "Day Open = Day Low",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "inside_day",
-    header: "Inside Day",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "inside_day",
+    headerName: "Inside Day",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "double_inside_day",
-    header: "Double Inside Day",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "double_inside_day",
+    headerName: "Double Inside Day",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "inside_week",
-    header: "Inside Week",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "inside_week",
+    headerName: "Inside Week",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "double_inside_week",
-    header: "Double Inside Week",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "double_inside_week",
+    headerName: "Double Inside Week",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "outside_day",
-    header: "Outside Day",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "outside_day",
+    headerName: "Outside Day",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "outside_week",
-    header: "Outside Week",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "outside_week",
+    headerName: "Outside Week",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "outside_bullish_day",
-    header: "Outside Bullish Day",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "outside_bullish_day",
+    headerName: "Outside Bullish Day",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "outside_bearish_day",
-    header: "Outside Bearish Day",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "outside_bearish_day",
+    headerName: "Outside Bearish Day",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "outside_bullish_week",
-    header: "Outside Bullish Week",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "outside_bullish_week",
+    headerName: "Outside Bullish Week",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "outside_bearish_week",
-    header: "Outside Bearish Week",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "outside_bearish_week",
+    headerName: "Outside Bearish Week",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "wick_play",
-    header: "Wick Play",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "wick_play",
+    headerName: "Wick Play",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "in_the_wick",
-    header: "In the Wick",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "in_the_wick",
+    headerName: "In the Wick",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "3_line_strike_bearish",
-    header: "3 Line Strike Bearish",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "3_line_strike_bearish",
+    headerName: "3 Line Strike Bearish",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "3_line_strike_bullish",
-    header: "3 Line Strike Bullish",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "3_line_strike_bullish",
+    headerName: "3 Line Strike Bullish",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "3_bar_break",
-    header: "3 Bar Break",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "3_bar_break",
+    headerName: "3 Bar Break",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "bullish_reversal",
-    header: "Bullish Reversal",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "bullish_reversal",
+    headerName: "Bullish Reversal",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "upside_reversal",
-    header: "Upside Reversal",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "upside_reversal",
+    headerName: "Upside Reversal",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "oops_reversal",
-    header: "Oops Reversal",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "oops_reversal",
+    headerName: "Oops Reversal",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "key_reversal",
-    header: "Key Reversal",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "key_reversal",
+    headerName: "Key Reversal",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "pocket_pivot",
-    header: "Pocket Pivot",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "pocket_pivot",
+    headerName: "Pocket Pivot",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "volume_dry_up",
-    header: "Volume Dry Up Day",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "volume_dry_up",
+    headerName: "Volume Dry Up Day",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "slingshot",
-    header: "Slingshot",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "slingshot",
+    headerName: "Slingshot",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "minicoil",
-    header: "Slingshot",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "minicoil",
+    headerName: "Slingshot",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "3_week_tight",
-    header: "3 Week Tight",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "3_week_tight",
+    headerName: "3 Week Tight",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "5_week_up",
-    header: "5 Week Tight",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "5_week_up",
+    headerName: "5 Week Tight",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "high_tight_flag",
-    header: "High Tight Flag",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "high_tight_flag",
+    headerName: "High Tight Flag",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "ants",
-    header: "Ants",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "ants",
+    headerName: "Ants",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "power_trend",
-    header: "Power Trend",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "power_trend",
+    headerName: "Power Trend",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "launchpad",
-    header: "Launchpad",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "launchpad",
+    headerName: "Launchpad",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "launchpad_weekly",
-    header: "Weekly Launchpad",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "launchpad_weekly",
+    headerName: "Weekly Launchpad",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   // TODO: Missing  Green Line Breakout
   {
-    accessorKey: "doji",
-    header: "Doji",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "doji",
+    headerName: "Doji",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "morning_star",
-    header: "Morning Star",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "morning_star",
+    headerName: "Morning Star",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "evening_star",
-    header: "Evening Star",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "evening_star",
+    headerName: "Evening Star",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "shooting_star",
-    header: "Shooting Star",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "shooting_star",
+    headerName: "Shooting Star",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "hammer",
-    header: "Hammer",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "hammer",
+    headerName: "Hammer",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "inverted_hammer",
-    header: "Inverted Hammer",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "inverted_hammer",
+    headerName: "Inverted Hammer",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "bearish_harami",
-    header: "Bearish Hammer",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "bearish_harami",
+    headerName: "Bearish Hammer",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "bullish_harami",
-    header: "Bullish Hammer",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "bullish_harami",
+    headerName: "Bullish Hammer",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   // TODO: Missing  Engulfing, Kicker
   {
-    accessorKey: "piercing_line",
-    header: "Piercing Line",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "piercing_line",
+    headerName: "Piercing Line",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "hanging_man",
-    header: "Hanging Man",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "hanging_man",
+    headerName: "Hanging Man",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "dark_cloud_cover",
-    header: "Dark Cloud Cover",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "dark_cloud_cover",
+    headerName: "Dark Cloud Cover",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "gravestone_doji",
-    header: "Gravestone Doji",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "gravestone_doji",
+    headerName: "Gravestone Doji",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "3_back_crows",
-    header: "3 Black Crows",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "3_back_crows",
+    headerName: "3 Black Crows",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "dragonfly_doji",
-    header: "Dragonfly Doji",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "dragonfly_doji",
+    headerName: "Dragonfly Doji",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "3_white_soldiers",
-    header: "3 White Soldier",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "3_white_soldiers",
+    headerName: "3 White Soldier",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "sigma_spike",
-    header: "Sigma Spike",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "sigma_spike",
+    headerName: "Sigma Spike",
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "stan_weinstein_stage",
-    header: "Stan Weinstein Stage",
-    meta: {
-      category: "Technicals",
-    },
+    field: "stan_weinstein_stage",
+    headerName: "Stan Weinstein Stage",
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "sma_200_vs_sma_200_1M_ago",
-    header: "200D SMA > 200SMA 1M Ago",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "sma_200_vs_sma_200_1M_ago",
+    headerName: "200D SMA > 200SMA 1M Ago",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "sma_200_vs_sma_200_2M_ago",
-    header: "200D SMA > 200SMA 2M Ago",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "sma_200_vs_sma_200_2M_ago",
+    headerName: "200D SMA > 200SMA 2M Ago",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "sma_200_vs_sma_200_3M_ago",
-    header: "200D SMA > 200SMA 3M Ago",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "sma_200_vs_sma_200_3M_ago",
+    headerName: "200D SMA > 200SMA 3M Ago",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "sma_200_vs_sma_200_4M_ago",
-    header: "200D SMA > 200SMA 4M Ago",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "sma_200_vs_sma_200_4M_ago",
+    headerName: "200D SMA > 200SMA 4M Ago",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "sma_200_vs_sma_200_5M_ago",
-    header: "200D SMA > 200SMA 5M Ago",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "sma_200_vs_sma_200_5M_ago",
+    headerName: "200D SMA > 200SMA 5M Ago",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "sma_200_vs_sma_200_6M_ago",
-    header: "200D SMA > 200SMA 6M Ago",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "sma_200_vs_sma_200_6M_ago",
+    headerName: "200D SMA > 200SMA 6M Ago",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "alpha_6M",
-    header: "Alpha 6M",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Technicals",
-    },
+    field: "alpha_6M",
+    headerName: "Alpha 6M",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "10Dsma_vs_ema_slope_pct",
-    header: "10D SMA Vs EMA Slope %",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Technicals",
-    },
+    field: "10Dsma_vs_ema_slope_pct",
+    headerName: "10D SMA Vs EMA Slope %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "20Dsma_vs_ema_slope_pct",
-    header: "20D SMA Vs EMA Slope %",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Technicals",
-    },
+    field: "20Dsma_vs_ema_slope_pct",
+    headerName: "20D SMA Vs EMA Slope %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "30Dsma_vs_ema_slope_pct",
-    header: "30D SMA Vs EMA Slope %",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Technicals",
-    },
+    field: "30Dsma_vs_ema_slope_pct",
+    headerName: "30D SMA Vs EMA Slope %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "40Dsma_vs_ema_slope_pct",
-    header: "40D SMA Vs EMA Slope %",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Technicals",
-    },
+    field: "40Dsma_vs_ema_slope_pct",
+    headerName: "40D SMA Vs EMA Slope %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "50Dsma_vs_ema_slope_pct",
-    header: "50D SMA Vs EMA Slope %",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Technicals",
-    },
+    field: "50Dsma_vs_ema_slope_pct",
+    headerName: "50D SMA Vs EMA Slope %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "100Dsma_vs_ema_slope_pct",
-    header: "100D SMA Vs EMA Slope %",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Technicals",
-    },
+    field: "100Dsma_vs_ema_slope_pct",
+    headerName: "100D SMA Vs EMA Slope %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "200Dsma_vs_ema_slope_pct",
-    header: "200D SMA Vs EMA Slope %",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Technicals",
-    },
+    field: "200Dsma_vs_ema_slope_pct",
+    headerName: "200D SMA Vs EMA Slope %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
 
   {
-    accessorKey: "10Dsma_vs_ema_slope_adr",
-    header: "10D SMA Vs EMA Slope ADR",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "10Dsma_vs_ema_slope_adr",
+    headerName: "10D SMA Vs EMA Slope ADR",
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "20Dsma_vs_ema_slope_adr",
-    header: "20D SMA Vs EMA Slope ADR",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "20Dsma_vs_ema_slope_adr",
+    headerName: "20D SMA Vs EMA Slope ADR",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "30Dsma_vs_ema_slope_adr",
-    header: "30D SMA Vs EMA Slope ADR",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "30Dsma_vs_ema_slope_adr",
+    headerName: "30D SMA Vs EMA Slope ADR",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "40Dsma_vs_ema_slope_adr",
-    header: "40D SMA Vs EMA Slope ADR",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "40Dsma_vs_ema_slope_adr",
+    headerName: "40D SMA Vs EMA Slope ADR",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "50Dsma_vs_ema_slope_adr",
-    header: "50D SMA Vs EMA Slope ADR",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "50Dsma_vs_ema_slope_adr",
+    headerName: "50D SMA Vs EMA Slope ADR",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "100Dsma_vs_ema_slope_adr",
-    header: "100D SMA Vs EMA Slope ADR",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "100Dsma_vs_ema_slope_adr",
+    headerName: "100D SMA Vs EMA Slope ADR",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "200Dsma_vs_ema_slope_adr",
-    header: "200D SMA Vs EMA Slope ADR",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "200Dsma_vs_ema_slope_adr",
+    headerName: "200D SMA Vs EMA Slope ADR",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RS_5D",
-    header: "RS 5D",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "RS_5D",
+    headerName: "RS 5D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RS_10D",
-    header: "RS 10D",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "RS_10D",
+    headerName: "RS 10D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RS_15D",
-    header: "RS 15D",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "RS_15D",
+    headerName: "RS 15D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RS_20D",
-    header: "RS 20D",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "RS_20D",
+    headerName: "RS 20D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RS_25D",
-    header: "RS 25D",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "RS_25D",
+    headerName: "RS 25D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RS_30D",
-    header: "RS 30D",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "RS_30D",
+    headerName: "RS 30D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RS_60D",
-    header: "RS 60D",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "RS_60D",
+    headerName: "RS 60D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RS_90D",
-    header: "RS 90D",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "RS_90D",
+    headerName: "RS 90D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
 
   {
-    accessorKey: "RS_5D_pct",
-    header: "RS 5D %",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-      sign: "%",
-    },
+    field: "RS_5D_pct",
+    headerName: "RS 5D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RS_10D_pct",
-    header: "RS 10D %",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-      sign: "%",
-    },
+    field: "RS_10D_pct",
+    headerName: "RS 10D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RS_15D_pct",
-    header: "RS 15D %",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-      sign: "%",
-    },
+    field: "RS_15D_pct",
+    headerName: "RS 15D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RS_20D_pct",
-    header: "RS 20D %",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-      sign: "%",
-    },
+    field: "RS_20D_pct",
+    headerName: "RS 20D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RS_25D_pct",
-    header: "RS 25D %",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-      sign: "%",
-    },
+    field: "RS_25D_pct",
+    headerName: "RS 25D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RS_30D_pct",
-    header: "RS 30D %",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-      sign: "%",
-    },
+    field: "RS_30D_pct",
+    headerName: "RS 30D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RS_60D_pct",
-    header: "RS 60D %",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-      sign: "%",
-    },
+    field: "RS_60D_pct",
+    headerName: "RS 60D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RS_90D_pct",
-    header: "RS 90D %",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-      sign: "%",
-    },
+    field: "RS_90D_pct",
+    headerName: "RS 90D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RSNH_1M",
-    header: "RSNH 1M",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "RSNH_1M",
+    headerName: "RSNH 1M",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RSNH_3M",
-    header: "RSNH 3M",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "RSNH_3M",
+    headerName: "RSNH 3M",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RSNH_6M",
-    header: "RSNH 6M",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "RSNH_6M",
+    headerName: "RSNH 6M",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RSNH_9M",
-    header: "RSNH 9M",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "RSNH_9M",
+    headerName: "RSNH 9M",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RSNH_12M",
-    header: "RSNH 12M",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "RSNH_12M",
+    headerName: "RSNH 12M",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RSNHBP_1M",
-    header: "RSNHBP 1M",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "RSNHBP_1M",
+    headerName: "RSNHBP 1M",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RSNHBP_3M",
-    header: "RSNHBP 3M",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "RSNHBP_3M",
+    headerName: "RSNHBP 3M",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RSNHBP_6M",
-    header: "RSNHBP 6M",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "RSNHBP_6M",
+    headerName: "RSNHBP 6M",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RSNHBP_9M",
-    header: "RSNHBP 9M",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "RSNHBP_9M",
+    headerName: "RSNHBP 9M",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "RSNHBP_12M",
-    header: "RSNHBP 12M",
-    meta: {
-      format: "boolean",
-      category: "Technicals",
-    },
+    field: "RSNHBP_12M",
+    headerName: "RSNHBP 12M",
+    cellRenderer: BooleanCell,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "ADR_1D",
-    header: "ADR 1D $",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "ADR_1D",
+    headerName: "ADR 1D $",
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "ADR_2D",
-    header: "ADR 2D $",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "ADR_2D",
+    headerName: "ADR 2D $",
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "ADR_5D",
-    header: "ADR 5D $",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "ADR_5D",
+    headerName: "ADR 5D $",
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "ADR_10D",
-    header: "ADR 10D $",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "ADR_10D",
+    headerName: "ADR 10D $",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "ADR_14D",
-    header: "ADR 14D $",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "ADR_14D",
+    headerName: "ADR 14D $",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "ADR_20D",
-    header: "ADR 20D $",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "ADR_20D",
+    headerName: "ADR 20D $",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
 
   {
-    accessorKey: "ADR_pct_1D",
-    header: "ADR 1D %",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "ADR_pct_1D",
+    headerName: "ADR 1D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "ADR_pct_2D",
-    header: "ADR 2D %",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "ADR_pct_2D",
+    headerName: "ADR 2D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "ADR_pct_5D",
-    header: "ADR 5D %",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "ADR_pct_5D",
+    headerName: "ADR 5D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "ADR_pct_10D",
-    header: "ADR 10D %",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "ADR_pct_10D",
+    headerName: "ADR 10D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "ADR_pct_14D",
-    header: "ADR 14D %",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "ADR_pct_14D",
+    headerName: "ADR 14D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "ADR_pct_20D",
-    header: "ADR 20D %",
-    meta: {
-      format: "numeric",
-      category: "Technicals",
-    },
+    field: "ADR_pct_20D",
+    headerName: "ADR 20D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "ATR_2D",
-    header: "ATR 2D %",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Technicals",
-    },
+    field: "ATR_2D",
+    headerName: "ATR 2D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "ATR_5D",
-    header: "ATR 5D %",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Technicals",
-    },
+    field: "ATR_5D",
+    headerName: "ATR 5D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "ATR_10D",
-    header: "ATR 10D %",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Technicals",
-    },
+    field: "ATR_10D",
+    headerName: "ATR 10D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "ATR_14D",
-    header: "ATR 14D %",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Technicals",
-    },
+    field: "ATR_14D",
+    headerName: "ATR 14D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
   {
-    accessorKey: "ATR_20D",
-    header: "ATR 20D %",
-    meta: {
-      format: "numeric",
-      sign: "%",
-      category: "Technicals",
-    },
+    field: "ATR_20D",
+    headerName: "ATR 20D %",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Technicals" },
   },
 
   // ##########################  Technical  ##########################
 ];
-
-export const defaultAgGridSymbolColumns: ColDef<Symbol>[] =
-  defaultSymbolColumns.map((c) => {
-    const field = (c as AccessorKeyColumnDef<Symbol>)
-      .accessorKey as keyof Symbol;
-    const meta = c.meta as Record<string, unknown>;
-
-    return {
-      field,
-      colId: field,
-      headerName: typeof c.header === "string" ? c.header : undefined,
-      lockPinned: field === "name",
-      lockVisible: field === "name",
-      lockPosition: field === "name",
-      // Preserve category and other meta information
-      headerTooltip: meta?.category ? `Category: ${meta.category}` : undefined,
-      cellRenderer: (params: Record<string, unknown>) => {
-        return (
-          <FormattedValue
-            value={params.value}
-            symbol={params.data as Symbol}
-            id={field}
-            meta={meta}
-          />
-        );
-      },
-      // Set width based on original size if specified
-      width: c.size,
-      // Add filter based on format type
-      filter:
-        meta?.format === "numeric" || meta?.format === "currency"
-          ? "agNumberColumnFilter"
-          : meta?.format === "date"
-            ? "agDateColumnFilter"
-            : meta?.format === "boolean"
-              ? "agSetColumnFilter"
-              : "agTextColumnFilter",
-      // Add sorting
-      sortable: true,
-      // Make all columns resizable
-      resizable: true,
-    };
-  });

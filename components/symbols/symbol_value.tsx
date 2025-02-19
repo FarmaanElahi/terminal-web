@@ -7,54 +7,31 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface FormattedValueProps {
-  id: string;
   value?: unknown;
-  meta?: Record<string, unknown>;
-  symbol: Symbol;
+  data: Symbol;
 }
 
-export function FormattedValue(props: FormattedValueProps) {
-  const { defaultValue, format } = props.meta ?? {};
-  const value = (props.value as string) || (defaultValue as string) || "-";
-  if (format === "symbol") {
-    return <SymbolCell {...props} />;
-  }
-  if (format === "date") {
-    return <DateCell {...props} />;
-  }
-  if (format === "textlogo") {
-    return <LogoTextCell {...props} />;
-  }
-  if (format === "currency") {
-    return <CurrencyCell {...props} />;
-  }
-  if (format === "numeric") {
-    return <NumericCell {...props} />;
-  }
-  if (format === "price") {
-    return <PriceCell {...props} />;
-  }
-  if (format === "candlestick") {
-    return <CandleStickCell {...props} />;
-  }
-  if (format === "boolean") {
-    return <BooleanCell {...props} />;
-  }
-  if (format === "volume") {
-    return <VolumeCell {...props} />;
-  }
-  return <span className="truncate">{String(value)}</span>;
-}
-
-function BooleanCell(props: FormattedValueProps) {
+export function BooleanCell(props: FormattedValueProps) {
   const { value } = props;
-
   return value ? <Check className="size-4" /> : <X className="size-4" />;
 }
 
-function CandleStickCell(props: FormattedValueProps) {
-  const { meta = {}, symbol, value: cellValue } = props;
-  const [open_col, high_col, low_col, close_col] = meta.cols as string[];
+interface CandleStickCellProps extends FormattedValueProps {
+  open_col: string;
+  high_col: string;
+  low_col: string;
+  close_col: string;
+}
+
+export function CandleStickCell(props: CandleStickCellProps) {
+  const {
+    data: symbol,
+    value: cellValue,
+    open_col,
+    high_col,
+    low_col,
+    close_col,
+  } = props;
   let candlestick: ReactNode;
   if (open_col && high_col && low_col && close_col) {
     const open = symbol[open_col as keyof Symbol] as number;
@@ -86,8 +63,8 @@ function CandleStickCell(props: FormattedValueProps) {
   return <span>{value}</span>;
 }
 
-function SymbolCell(props: FormattedValueProps) {
-  const { symbol, value } = props;
+export function SymbolCell(props: FormattedValueProps) {
+  const { data: symbol, value } = props;
   const text = value;
   const logo = symbol.logo;
 
@@ -123,11 +100,15 @@ function SymbolCell(props: FormattedValueProps) {
   );
 }
 
-function LogoTextCell(props: FormattedValueProps) {
-  const { value, meta = {}, symbol } = props;
-  const { logoCol, logoPrefix } = meta;
+interface LogoTextCellProps extends FormattedValueProps {
+  logoCol?: string;
+  logoPrefix?: string;
+}
+
+export function LogoTextCell(props: LogoTextCellProps) {
+  const { value, data, logoPrefix, logoCol } = props;
   const text = value as string;
-  let logo = logoCol ? (symbol[logoCol as keyof Symbol] as string) : undefined;
+  let logo = logoCol ? (data[logoCol as keyof Symbol] as string) : undefined;
   logo = logoPrefix ? [logoPrefix, logo].join("/") : logo;
 
   return (
@@ -144,49 +125,13 @@ function LogoTextCell(props: FormattedValueProps) {
   );
 }
 
-function DateCell(props: FormattedValueProps) {
-  const { value } = props;
-
-  if (!value || typeof value !== "number") {
-    return <span>-</span>;
-  }
-  const str = DateTime.fromMillis(value).toFormat("dd/MM/yyyy");
-  return <span>{str}</span>;
+interface VolumeCellProps extends FormattedValueProps {
+  activityLevel: number;
+  bold: boolean;
 }
 
-function NumericCell(props: FormattedValueProps) {
-  const { value, meta = {} } = props;
-  if (!value || typeof value !== "number") {
-    return <span>-</span>;
-  }
-
-  const {
-    sign,
-    maximumFractionDigits,
-    colorize,
-    bold,
-    colorizeLevel = 0,
-  } = meta;
-  const numberFormater = new Intl.NumberFormat("en-IN", {
-    maximumFractionDigits: (maximumFractionDigits as number) ?? 2,
-  });
-  const result = [numberFormater.format(value), sign].filter((s) => s).join("");
-  return (
-    <span
-      className={cn({
-        "text-bullish": colorize && value > (colorizeLevel as number),
-        "text-bearish": colorize && value < (colorizeLevel as number),
-        "font-bold": bold,
-      })}
-    >
-      {result}
-    </span>
-  );
-}
-
-function VolumeCell(props: FormattedValueProps) {
-  const { value, meta = {} } = props;
-  const { activityLevel } = meta;
+export function VolumeCell(props: VolumeCellProps) {
+  const { value, activityLevel, bold } = props;
 
   const showIndicator =
     activityLevel !== undefined &&
@@ -195,68 +140,15 @@ function VolumeCell(props: FormattedValueProps) {
     value >= (activityLevel as number);
 
   return (
-    <div className="inline-flex gap-1">
+    <div className={cn("inline-flex gap-1", { "font-bold": bold })}>
       <span
-        className={cn("text-volume-activity", { "opacity-0": !showIndicator })}
+        className={cn("text-volume-activity", {
+          "opacity-0": !showIndicator,
+        })}
       >
         •
       </span>
-      <NumericCell {...props} />
+      <span>{value?.toString()}</span>
     </div>
-  );
-}
-
-function CurrencyCell(props: FormattedValueProps) {
-  const { value, symbol } = props;
-  if (!value || typeof value !== "number") {
-    return <span>-</span>;
-  }
-
-  const currencyCode = symbol.currency as string;
-  const formatter = new Intl.NumberFormat("en-IN", {
-    maximumFractionDigits: value > 1_00_00_000 ? 2 : 0,
-    minimumFractionDigits: 0,
-    currencyDisplay: "symbol",
-    notation: value > 1_00_00_000 ? "compact" : "standard",
-    ...(currencyCode
-      ? {
-          currency: currencyCode,
-          style: "currency",
-        }
-      : {}),
-  });
-
-  const amount = formatter.format(value);
-
-  return <span>{amount}</span>;
-}
-
-function PriceCell(props: FormattedValueProps) {
-  const { value, meta = {}, symbol } = props;
-  if (!value || typeof value !== "number") {
-    return <span>-</span>;
-  }
-
-  const { colorize, bold, colorizeLevel = 0 } = meta;
-  const currencyCode = symbol.currency as string;
-  const formatter = new Intl.NumberFormat("en-IN", {
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 0,
-    currencyDisplay: "symbol",
-    currency: currencyCode,
-    style: "currency",
-  });
-
-  const num = formatter.format(value);
-  return (
-    <span
-      className={cn({
-        "text-bullish": colorize && value > (colorizeLevel as number),
-        "text-bearish": colorize && value < (colorizeLevel as number),
-        "font-bold": bold,
-      })}
-    >
-      {num}
-    </span>
   );
 }

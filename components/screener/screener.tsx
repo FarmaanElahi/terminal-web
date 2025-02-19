@@ -3,6 +3,7 @@
 import React, { HTMLAttributes, useCallback, useMemo } from "react";
 import { useScreener2, useScreens, useUpdateScreen } from "@/lib/state/symbol";
 import {
+  CellStyleModule,
   ClientSideRowModelModule,
   ColumnApiModule,
   CustomFilterModule,
@@ -17,7 +18,10 @@ import {
   TooltipModule,
   ValidationModule,
 } from "ag-grid-community";
-import { defaultAgGridSymbolColumns } from "@/components/symbols/symbol_column";
+import {
+  defaultColumns,
+  extendedColumnType,
+} from "@/components/symbols/symbol_column";
 import { AgGridReact } from "ag-grid-react";
 import { useGroupSymbolSwitcher } from "@/lib/state/grouper";
 import "../grid/ag-theme.css";
@@ -51,6 +55,7 @@ ModuleRegistry.registerModules([
   ColumnApiModule,
   RowApiModule,
   TooltipModule,
+  CellStyleModule,
 ]);
 
 interface ScreenerProps extends HTMLAttributes<HTMLDivElement> {
@@ -58,7 +63,7 @@ interface ScreenerProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 function useColumnDefs() {
-  return useMemo(() => defaultAgGridSymbolColumns, []);
+  return useMemo(() => defaultColumns, []);
 }
 
 function useActiveScreen(activeScreenId?: string | null) {
@@ -134,6 +139,7 @@ export function Screener({ activeScreenId }: ScreenerProps) {
   return (
     <div className={"h-full"}>
       <AgGridReact
+        dataTypeDefinitions={extendedColumnType}
         key={activeScreenId ?? "default"}
         className="ag-terminal-theme"
         enableAdvancedFilter={true}
