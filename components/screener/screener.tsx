@@ -120,6 +120,8 @@ function useGridInitialState(activeScreenId?: string | null) {
       .map((c) => c.colId!)
       .filter(Boolean);
 
+    console.log("hiddenColIds", hiddenColIds);
+
     return {
       columnVisibility: { hiddenColIds },
       columnPinning: { leftColIds: ["name"], rightColIds: [] },

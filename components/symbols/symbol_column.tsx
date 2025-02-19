@@ -2653,4 +2653,4 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
 
   // ##########################  Technical  ##########################
-];
+].map((c) => ({ ...c, colId: c.field as keyof Symbol }) as ColDef<Symbol>);
