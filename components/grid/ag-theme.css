@@ -1,0 +1,26 @@
+.ag-terminal-theme {
+    --ag-background-color: hsl(var(--background));
+    --ag-foreground-color: hsl(var(--foreground));
+    --ag-header-background-color: hsl(var(--background));
+    --ag-header-text-color: hsl(var(--foreground));
+    --ag-font-size: 14px;
+    /*noinspection CssUnresolvedCustomProperty*/
+    --ag-font-family: var(--font-quicksand-sans);
+    --ag-row-hover-color: hsl(var(--muted));
+    --ag-selected-row-background-color: hsl(var(--secondary));
+
+    /* Example additional custom styling for headers */
+    --ag-header-height: 40px;
+    --ag-header-cell-horizontal-padding: 10px;
+    /* use dark scrollbars */
+    --ag-browser-color-scheme: dark;
+    --ag-wrapper-border-radius: 0;
+}
+
+.ag-terminal-theme .ag-row-selected {
+    @apply bg-secondary
+}
+
+.ag-terminal-theme .ag-header-cell-text {
+    @apply font-bold
+}

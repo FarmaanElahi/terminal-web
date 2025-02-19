@@ -1,11 +1,17 @@
 "use client";
 
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { queryClient, supabase } from "@/utils/client";
 import type { Symbol } from "@/types/symbol";
 import { fetchStockTwit } from "@/server/stocktwits";
 import type { StockTwitFeed } from "@/types/stocktwits";
 import { queryDuckDB } from "@/utils/duckdb";
+import { InsertScreen, Screen, UpdateScreen } from "@/types/supabase";
 
 //##################### SYMBOL QUOTE #####################
 async function symbolQuoteQueryFn(ticker: string) {
@@ -181,6 +187,20 @@ export function useScreener({ columns, sort, type }: ScreenerRequest) {
   });
 }
 
+export function useScreener2() {
+  return useQuery({
+    queryKey: ["symbols2"],
+    queryFn: async () => {
+      const result = await queryDuckDB("symbols", {
+        columns: [], // Will load all columns
+        where: `type = 'stock'`,
+        order: [{ field: "mcap", sort: "DESC" }],
+      });
+      return result as Symbol[];
+    },
+  });
+}
+
 //##################### SCREENER_SCAN #####################
 
 //##################### CHART #####################
@@ -309,3 +329,74 @@ export function useDiscussionFeed(
     queryFn: async () => fetchStockTwit(params),
   });
 }
+
+//##################### SCREENS #####################
+export function useCreateScreen(onComplete?: (screen: Screen) => void) {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: (screen: Screen) => {
+      void client.invalidateQueries({ queryKey: ["screens"] });
+      onComplete?.(screen);
+    },
+    mutationFn: async (screen: InsertScreen) => {
+      const { data, error } = await supabase
+        .from("screens")
+        .insert({
+          ...screen,
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useUpdateScreen(onComplete?: (screen: Screen) => void) {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: (screen: Screen) => {
+      void client.invalidateQueries({ queryKey: ["screens"] });
+      onComplete?.(screen);
+    },
+    mutationFn: async ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: UpdateScreen;
+    }) => {
+      const { data, error } = await supabase
+        .from("screens")
+        .update({
+          ...payload,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useScreens() {
+  return useQuery({
+    queryKey: ["screens"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("screens")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+//##################### SCREENS #####################

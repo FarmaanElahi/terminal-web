@@ -90,6 +90,33 @@ export type Database = {
         }
         Relationships: []
       }
+      screens: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          state: Json | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          state?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          state?: Json | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       study_templates: {
         Row: {
           content: Json | null
