@@ -4,7 +4,6 @@ import React, { HTMLAttributes, useCallback, useMemo } from "react";
 import { useScreener2, useScreens, useUpdateScreen } from "@/lib/state/symbol";
 import {
   ClientSideRowModelModule,
-  ColDef,
   ColumnApiModule,
   CustomFilterModule,
   DateFilterModule,
@@ -15,11 +14,10 @@ import {
   RowApiModule,
   StateUpdatedEvent,
   TextFilterModule,
+  TooltipModule,
   ValidationModule,
 } from "ag-grid-community";
-import { defaultSymbolColumns } from "@/components/symbols/symbol_column";
-import { Symbol } from "@/types/symbol";
-import { AccessorKeyColumnDef } from "@tanstack/react-table";
+import { defaultAgGridSymbolColumns } from "@/components/symbols/symbol_column";
 import { AgGridReact } from "ag-grid-react";
 import { useGroupSymbolSwitcher } from "@/lib/state/grouper";
 import "../grid/ag-theme.css";
@@ -52,6 +50,7 @@ ModuleRegistry.registerModules([
   GridStateModule,
   ColumnApiModule,
   RowApiModule,
+  TooltipModule,
 ]);
 
 interface ScreenerProps extends HTMLAttributes<HTMLDivElement> {
@@ -59,22 +58,7 @@ interface ScreenerProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 function useColumnDefs() {
-  // Get initial column definitions with screen state
-  return useMemo(() => {
-    return defaultSymbolColumns.map((c) => {
-      const field = (c as AccessorKeyColumnDef<Symbol>)
-        .accessorKey as keyof Symbol;
-
-      return {
-        field,
-        colId: field,
-        lockPinned: field === "name",
-        lockVisible: field === "name",
-        lockPosition: field === "name",
-        headerName: typeof c.header === "string" ? c.header : undefined,
-      } satisfies ColDef<Symbol>;
-    });
-  }, []);
+  return useMemo(() => defaultAgGridSymbolColumns, []);
 }
 
 function useActiveScreen(activeScreenId?: string | null) {
@@ -100,16 +84,6 @@ function useScreenerChangeCallback(activeScreenId?: string | null) {
       if (!id) return;
 
       const state = params.api.getState() as Json;
-
-      // const state = {
-      //   columnVisibility,
-      //   columnOrder,
-      //   columnPinning,
-      //   filter,
-      //   sort,
-      //   columnSizing,
-      // } as Json;
-
       updateScreen({ id, payload: { state } });
     },
     [activeScreenId, updateScreen],
@@ -137,8 +111,9 @@ function useGridInitialState(activeScreenId?: string | null) {
     ]);
 
     const hiddenColIds = colDefs
-      .filter((c) => !defaultVisible.has(c.colId))
-      .map((c) => c.colId);
+      .filter((c) => c.colId && !defaultVisible.has(c.colId))
+      .map((c) => c.colId!)
+      .filter(Boolean);
 
     return {
       columnVisibility: { hiddenColIds },

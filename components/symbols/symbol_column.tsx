@@ -1,7 +1,8 @@
-import { ColumnDef } from "@tanstack/react-table";
+import { AccessorKeyColumnDef, ColumnDef } from "@tanstack/react-table";
 import type { Symbol } from "@/types/symbol";
 import React from "react";
 import { FormattedValue } from "@/components/symbols/symbol_value";
+import { ColDef } from "ag-grid-community";
 
 function agoCols(
   meta: Record<string, unknown>,
@@ -3002,24 +3003,45 @@ export const defaultSymbolColumns: ColumnDef<Symbol>[] = [
   // ##########################  Technical  ##########################
 ];
 
-const columns = defaultSymbolColumns.map((c) => {
-  // eslint-disable-next-line
-  // @ts-ignore
-  const id = c.id ?? c.accessorKey;
-  return {
-    ...c,
-    id,
-    cell: (props) => (
-      <FormattedValue
-        value={props.cell.getValue()}
-        symbol={props.cell.row.original}
-        id={id}
-        meta={props.cell.column.columnDef.meta as Record<string, unknown>}
-      />
-    ),
-  } as ColumnDef<Symbol>;
-});
+export const defaultAgGridSymbolColumns: ColDef<Symbol>[] =
+  defaultSymbolColumns.map((c) => {
+    const field = (c as AccessorKeyColumnDef<Symbol>)
+      .accessorKey as keyof Symbol;
+    const meta = c.meta as Record<string, unknown>;
 
-export function useColumns() {
-  return columns;
-}
+    return {
+      field,
+      colId: field,
+      headerName: typeof c.header === "string" ? c.header : undefined,
+      lockPinned: field === "name",
+      lockVisible: field === "name",
+      lockPosition: field === "name",
+      // Preserve category and other meta information
+      headerTooltip: meta?.category ? `Category: ${meta.category}` : undefined,
+      cellRenderer: (params: Record<string, unknown>) => {
+        return (
+          <FormattedValue
+            value={params.value}
+            symbol={params.data as Symbol}
+            id={field}
+            meta={meta}
+          />
+        );
+      },
+      // Set width based on original size if specified
+      width: c.size,
+      // Add filter based on format type
+      filter:
+        meta?.format === "numeric" || meta?.format === "currency"
+          ? "agNumberColumnFilter"
+          : meta?.format === "date"
+            ? "agDateColumnFilter"
+            : meta?.format === "boolean"
+              ? "agSetColumnFilter"
+              : "agTextColumnFilter",
+      // Add sorting
+      sortable: true,
+      // Make all columns resizable
+      resizable: true,
+    };
+  });
