@@ -96,6 +96,7 @@ export const SymbolTable2 = forwardRef<AgGridReact, SymbolTable2Props>(
     return (
       <div className={className}>
         <AgGridReact
+          key={activeScreenId ?? "default"}
           ref={(element) => {
             if (typeof ref === "function") {
               ref(element);
