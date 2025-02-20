@@ -77,9 +77,6 @@ async function simpleQuery(
   ]
     .filter((p) => p)
     .join(" ");
-  if (process.env.NODE_ENV !== "production") {
-    console.log("QUERY:", query);
-  }
   try {
     conn = await db.connect();
     return await conn.query(query);

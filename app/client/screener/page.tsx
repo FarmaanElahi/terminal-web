@@ -1,14 +1,7 @@
 "use client";
 
 import { ChartSpline, Grid3X3, Lightbulb, List, Table, X } from "lucide-react";
-import React, { useState } from "react";
-import { Screener } from "@/components/screener/screener";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { Chart } from "@/components/chart/chart";
+import React from "react";
 import {
   GrouperProvider,
   GroupSymbolProvider,
@@ -17,104 +10,86 @@ import {
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { SymbolSearch } from "@/components/search/search-command";
-import { Stats } from "@/components/symbols/symbol_stats";
-import { Discussion } from "@/components/stocktwit/discussion";
 import { ScreenSelector } from "@/components/screener/screen-selector";
+import { PersistentLayout } from "@/components/ui/persistent-layout";
+import { LayoutProvider, useLayout } from "@/hooks/use-layout";
+import { ScreenerProvider } from "@/hooks/use-active-screener";
 
 export default function Page() {
-  const [showStats, setShowStats] = useState(false);
-  const [showIdeas, setShowIdeas] = useState(true);
-  const [showSymbols, setShowSymbols] = useState(true);
-  const [activeScreenId, setActiveScreenId] = useState<string | null>(null);
-
   return (
     <GroupSymbolProvider>
       <GrouperProvider group={1}>
-        <header className="flex h-12 shrink-0 items-center gap-2">
-          <SymbolSearch />
-          <div className="flex items-center justify-between gap-2 px-4 w-full">
-            <div className="flex gap-2">
-              <Tag placeholder={"Search Symbol"} name={"JINDRILL"} />
-              <ScreenSelector
-                activeScreenId={activeScreenId}
-                setActiveScreenId={setActiveScreenId}
-              />
-            </div>
-            <div className="flex space-x-4">
-              <div className="space-x-2">
-                <Toggle
-                  size="sm"
-                  aria-label={"Stats"}
-                  onPressedChange={setShowSymbols}
-                  pressed={showSymbols}
-                >
-                  <Table className="size-4" />
-                </Toggle>
-
-                <Toggle
-                  size="sm"
-                  aria-label={"Stats"}
-                  onPressedChange={setShowStats}
-                  pressed={showStats}
-                >
-                  <ChartSpline className="size-4" />
-                </Toggle>
-                <Toggle
-                  size="sm"
-                  aria-label={"Data Table"}
-                  pressed={showIdeas}
-                  onPressedChange={setShowIdeas}
-                >
-                  <Lightbulb className="size-4" />
-                </Toggle>
-              </div>
-              <div className="space-x-2" aria-label={"List View"}>
-                <Toggle size="sm">
-                  <List className="size-4" />
-                </Toggle>
-                <Toggle size="sm">
-                  <Grid3X3 className="size-4" aria-label={"Chart View"} />
-                </Toggle>
-              </div>
-            </div>
-          </div>
-        </header>
-        <div className="flex-1  overflow-auto">
-          <ResizablePanelGroup direction="horizontal">
-            {showSymbols && (
-              <ResizablePanel
-                id={"screener-list"}
-                className={"h-full"}
-                defaultSize={20}
-              >
-                <Screener id={"main"} activeScreenId={activeScreenId} />
-              </ResizablePanel>
-            )}
-            <ResizableHandle />
-            <ResizablePanel id={"screener-center"} defaultSize={60}>
-              <ResizablePanelGroup direction="vertical">
-                <ResizablePanel id={"screener-chart"} order={1}>
-                  <Chart id={"main"} />
-                </ResizablePanel>
-                {showStats && (
-                  <ResizablePanel id={"screener-stats"} order={2}>
-                    <Stats />
-                  </ResizablePanel>
-                )}
-              </ResizablePanelGroup>
-            </ResizablePanel>
-            {showIdeas && (
-              <>
-                <ResizableHandle />
-                <ResizablePanel id={"screener-data-panel"} defaultSize={20}>
-                  <Discussion />
-                </ResizablePanel>
-              </>
-            )}
-          </ResizablePanelGroup>
-        </div>
+        <LayoutProvider>
+          <ScreenerProvider>
+            <ScreenerContent />
+          </ScreenerProvider>
+        </LayoutProvider>
       </GrouperProvider>
     </GroupSymbolProvider>
+  );
+}
+
+function ScreenerContent() {
+  const { updateItemVisibility } = useLayout();
+
+  return (
+    <>
+      <header className="flex h-12 shrink-0 items-center gap-2">
+        <SymbolSearch />
+        <div className="flex items-center justify-between gap-2 px-4 w-full">
+          <div className="flex gap-2">
+            <Tag placeholder={"Search Symbol"} name={"JINDRILL"} />
+            <ScreenSelector />
+          </div>
+          <div className="flex space-x-4">
+            <div className="space-x-2">
+              <Toggle
+                size="sm"
+                aria-label={"Screener"}
+                onPressedChange={(pressed) =>
+                  updateItemVisibility("screener", pressed)
+                }
+                pressed={true}
+              >
+                <Table className="size-4" />
+              </Toggle>
+
+              <Toggle
+                size="sm"
+                aria-label={"Stats"}
+                onPressedChange={(pressed) =>
+                  updateItemVisibility("stats", pressed)
+                }
+                pressed={true}
+              >
+                <ChartSpline className="size-4" />
+              </Toggle>
+              <Toggle
+                size="sm"
+                aria-label={"Ideas"}
+                pressed={true}
+                onPressedChange={(pressed) =>
+                  updateItemVisibility("ideas", pressed)
+                }
+              >
+                <Lightbulb className="size-4" />
+              </Toggle>
+            </div>
+            <div className="space-x-2" aria-label={"List View"}>
+              <Toggle size="sm">
+                <List className="size-4" />
+              </Toggle>
+              <Toggle size="sm">
+                <Grid3X3 className="size-4" aria-label={"Chart View"} />
+              </Toggle>
+            </div>
+          </div>
+        </div>
+      </header>
+      <div className="flex-1 overflow-auto">
+        <PersistentLayout />
+      </div>
+    </>
   );
 }
 

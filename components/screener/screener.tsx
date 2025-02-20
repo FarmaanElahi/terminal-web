@@ -36,6 +36,7 @@ import {
   SetFilterModule,
   SideBarModule,
 } from "ag-grid-enterprise";
+import { useActiveScreener } from "@/hooks/use-active-screener";
 
 // Register all Community features
 ModuleRegistry.registerModules([
@@ -58,9 +59,7 @@ ModuleRegistry.registerModules([
   CellStyleModule,
 ]);
 
-interface ScreenerProps extends HTMLAttributes<HTMLDivElement> {
-  activeScreenId?: string | null;
-}
+type ScreenerProps = HTMLAttributes<HTMLDivElement>;
 
 function useColumnDefs() {
   return useMemo(() => defaultColumns, []);
@@ -139,8 +138,6 @@ function useGridInitialState(activeScreenId?: string | null) {
       .map((c) => c.colId!)
       .filter(Boolean);
 
-    console.log("hiddenColIds", hiddenColIds);
-
     return {
       columnVisibility: { hiddenColIds },
       columnPinning: { leftColIds: ["name"], rightColIds: [] },
@@ -150,7 +147,8 @@ function useGridInitialState(activeScreenId?: string | null) {
   return (activeScreen?.state ?? defaultState) as GridState;
 }
 
-export function Screener({ activeScreenId }: ScreenerProps) {
+export function Screener(props: ScreenerProps) {
+  const { activeScreenId } = useActiveScreener();
   const colDefs = useColumnDefs();
   const switcher = useGroupSymbolSwitcher();
   const handleStateChange = useScreenerChangeCallback(activeScreenId);
@@ -158,7 +156,7 @@ export function Screener({ activeScreenId }: ScreenerProps) {
   const initialState = useGridInitialState(activeScreenId);
 
   return (
-    <div className={"h-full"}>
+    <div {...props} className={"h-full"}>
       <AgGridReact
         dataTypeDefinitions={extendedColumnType}
         key={activeScreenId ?? "default"}

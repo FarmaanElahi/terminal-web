@@ -28,18 +28,11 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useCreateScreen, useScreens } from "@/lib/state/symbol";
 import { toast } from "sonner";
+import { useActiveScreener } from "@/hooks/use-active-screener";
 
-interface ScreenSelectorProps {
-  activeScreenId: string | null;
-  setActiveScreenId: (id: string | null) => void;
-}
-
-export function ScreenSelector({
-  activeScreenId,
-  setActiveScreenId,
-}: ScreenSelectorProps) {
+export function ScreenSelector() {
+  const { activeScreenId, setActiveScreenId } = useActiveScreener();
   const { data: screens = [] } = useScreens();
-  console.log(screens);
   const [open, setOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const activeScreen = screens?.find((s) => s.id === activeScreenId);
