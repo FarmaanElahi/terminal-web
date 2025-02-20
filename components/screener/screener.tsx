@@ -171,7 +171,19 @@ export function Screener(props: ScreenerProps) {
           sortable: true,
           resizable: true,
         }}
-        sideBar={true}
+        sideBar={{
+          toolPanels: [
+            {
+              id: "columns",
+              labelDefault: "Columns",
+              labelKey: "columns",
+              iconKey: "columns",
+              toolPanel: "agColumnsToolPanel",
+            },
+          ],
+          defaultToolPanel: "",
+          hiddenByDefault: true, // Collapse the sidebar by default
+        }}
         onStateUpdated={handleStateChange}
         onCellFocused={(event) => {
           const { rowIndex } = event;
