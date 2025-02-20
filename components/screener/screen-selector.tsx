@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronsUpDown, Loader2, Plus } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Command,
@@ -53,9 +53,21 @@ export function ScreenSelector({
             size="sm"
             aria-expanded={open}
             className="w-[200px] justify-between font-bold"
+            onClick={(e) => {
+              if (activeScreen) {
+                e.preventDefault();
+                setActiveScreenId(null);
+                return;
+              }
+              setOpen(!open);
+            }}
           >
-            {activeScreen?.name || "Select Screen"}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            {activeScreen?.name || "My Screens"}
+            {activeScreen ? (
+              <X className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            ) : (
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[300px] p-0">
