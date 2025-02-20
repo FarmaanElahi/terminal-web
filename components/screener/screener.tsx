@@ -77,7 +77,7 @@ function useScreenerChangeCallback(activeScreenId?: string | null) {
   );
 
   const initialStateRef = React.useRef<Json | null>(null);
-  
+
   // Reset initial state when screen changes
   React.useEffect(() => {
     initialStateRef.current = null;
@@ -96,7 +96,7 @@ function useScreenerChangeCallback(activeScreenId?: string | null) {
       if (!id) return;
 
       const currentState = params.api.getState() as Json;
-      
+
       // Initialize the reference state if not set
       if (!initialStateRef.current) {
         initialStateRef.current = currentState;
@@ -104,7 +104,9 @@ function useScreenerChangeCallback(activeScreenId?: string | null) {
       }
 
       // Only update if the state has actually changed from initial
-      if (JSON.stringify(initialStateRef.current) !== JSON.stringify(currentState)) {
+      if (
+        JSON.stringify(initialStateRef.current) !== JSON.stringify(currentState)
+      ) {
         updateScreen({ id, payload: { state: currentState } });
       }
     },

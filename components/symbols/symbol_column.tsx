@@ -1,4 +1,4 @@
-import { ColDef, DataTypeDefinition, CellClassParams } from "ag-grid-community";
+import { CellClassParams, ColDef, DataTypeDefinition } from "ag-grid-community";
 import type { Symbol } from "@/types/symbol";
 import {
   BooleanCell,
