@@ -4,7 +4,7 @@ import {
   useCallback,
   useContext,
   useMemo,
-  useState
+  useState,
 } from "react";
 
 const LAYOUT_STORAGE_KEY = "screener-layout-config";
@@ -53,11 +53,11 @@ interface LayoutContextType {
 
 function getInitialLayout(): LayoutConfig {
   if (typeof window === "undefined") return defaultLayout;
-  
+
   try {
     const stored = localStorage.getItem(LAYOUT_STORAGE_KEY);
     if (!stored) return defaultLayout;
-    
+
     const savedLayout = JSON.parse(stored) as LayoutConfig;
     return savedLayout;
   } catch (error) {
@@ -83,15 +83,17 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
   const updateItemVisibility = useCallback(
     (itemId: string, visible: boolean) => {
       const updateVisibility = (item: LayoutItem | LayoutGroup): boolean => {
-        if ('type' in item) {
+        if ("type" in item) {
           if (item.id === itemId) {
             item.visible = visible;
             return true;
           }
         }
-        
-        if ('children' in item) {
-          return item.children.some((child) => updateVisibility(child));
+
+        if ("children" in item) {
+          return (
+            item.children?.some((child) => updateVisibility(child)) ?? false
+          );
         }
         return false;
       };
@@ -101,21 +103,21 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
         saveLayout(newLayout);
       }
     },
-    [layout, saveLayout]
+    [layout, saveLayout],
   );
 
   const updateItemSize = useCallback(
     (itemId: string, size: number) => {
       const updateSize = (item: LayoutItem | LayoutGroup): boolean => {
-        if ('type' in item) {
+        if ("type" in item) {
           if (item.id === itemId) {
             item.size = size;
             return true;
           }
         }
-        
-        if ('children' in item) {
-          return item.children.some((child) => updateSize(child));
+
+        if ("children" in item) {
+          return item.children?.some((child) => updateSize(child)) ?? false;
         }
         return false;
       };
@@ -125,7 +127,7 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
         saveLayout(newLayout);
       }
     },
-    [layout, saveLayout]
+    [layout, saveLayout],
   );
 
   const value = useMemo(
@@ -134,13 +136,11 @@ export function LayoutProvider({ children }: { children: ReactNode }) {
       updateItemVisibility,
       updateItemSize,
     }),
-    [layout, updateItemVisibility, updateItemSize]
+    [layout, updateItemVisibility, updateItemSize],
   );
 
   return (
-    <LayoutContext.Provider value={value}>
-      {children}
-    </LayoutContext.Provider>
+    <LayoutContext.Provider value={value}>{children}</LayoutContext.Provider>
   );
 }
 
