@@ -81,7 +81,9 @@ export function SymbolCell(props: FormattedValueProps) {
   return (
     <div className="inline-flex justify-start items-center gap-2 align-middle">
       <Image
-        src={["/external/logos/", logo + ".svg"].join("/")}
+        src={[`${process.env.NEXT_PUBLIC_LOGO_BASE_URL}`, `${logo}.svg`].join(
+          "/",
+        )}
         alt="Logo"
         width={24}
         height={24}
