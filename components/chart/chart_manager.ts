@@ -81,6 +81,7 @@ export class ChartManager {
         "countdown",
         "timeframes_toolbar",
         "object_tree_legend_mode",
+        "show_object_tree",
         // "save_chart_properties_to_local_storage",
       ],
 
