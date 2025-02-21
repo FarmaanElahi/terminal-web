@@ -15,7 +15,7 @@ import {
 } from "@duckdb/duckdb-wasm";
 
 const TABLES = {
-  symbols: "https://t-files.farmaan.xyz/symbols-full.parquet",
+  symbols: "https://t-files.farmaan.xyz/files/symbols-full.parquet",
   columns:
     "https://raw.githubusercontent.com/FarmaanElahi/terminal-data/refs/heads/main/data/scan/cols.parquet",
 };
