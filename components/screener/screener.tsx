@@ -6,6 +6,7 @@ import {
   CellStyleModule,
   ClientSideRowModelModule,
   ColumnApiModule,
+  ColumnAutoSizeModule,
   CustomFilterModule,
   DateFilterModule,
   GridState,
@@ -57,6 +58,7 @@ ModuleRegistry.registerModules([
   RowApiModule,
   TooltipModule,
   CellStyleModule,
+  ColumnAutoSizeModule,
 ]);
 
 type ScreenerProps = HTMLAttributes<HTMLDivElement>;
@@ -75,13 +77,6 @@ function useScreenerChangeCallback(activeScreenId?: string | null) {
     toast(`${screen.name} screen updated`),
   );
 
-  const initialStateRef = React.useRef<Json | null>(null);
-
-  // Reset initial state when screen changes
-  React.useEffect(() => {
-    initialStateRef.current = null;
-  }, [activeScreenId]);
-
   // Debounced update function
   const updateScreen = useMemo(
     () => debounce(mutation.mutate, 1000),
@@ -91,23 +86,17 @@ function useScreenerChangeCallback(activeScreenId?: string | null) {
   // Handle grid state changes
   return useCallback(
     (params: StateUpdatedEvent) => {
+      console.log("EV", params);
+
+      // Started because the grid was created
+      if (params.sources?.[0] === "gridInitializing") return;
+
+      // Doesn't have active screener
       const id = activeScreenId;
       if (!id) return;
 
       const currentState = params.api.getState() as Json;
-
-      // Initialize the reference state if not set
-      if (!initialStateRef.current) {
-        initialStateRef.current = currentState;
-        return;
-      }
-
-      // Only update if the state has actually changed from initial
-      if (
-        JSON.stringify(initialStateRef.current) !== JSON.stringify(currentState)
-      ) {
-        updateScreen({ id, payload: { state: currentState } });
-      }
+      updateScreen({ id, payload: { state: currentState } });
     },
     [activeScreenId, updateScreen],
   );
@@ -141,6 +130,12 @@ function useGridInitialState(activeScreenId?: string | null) {
     return {
       columnVisibility: { hiddenColIds },
       columnPinning: { leftColIds: ["name"], rightColIds: [] },
+      sideBar: {
+        visible: true,
+        position: "right",
+        openToolPanel: null,
+        toolPanels: { columns: { expandedGroupIds: [] } },
+      },
     } satisfies GridState;
   }, [colDefs]);
 
@@ -162,27 +157,25 @@ export function Screener(props: ScreenerProps) {
         key={activeScreenId ?? "default"}
         className="ag-terminal-theme"
         enableAdvancedFilter={true}
+        sideBar={true}
         includeHiddenColumnsInAdvancedFilter={true}
         rowData={rowData}
+        autoSizeStrategy={{
+          type: "fitGridWidth",
+          defaultMinWidth: 120,
+          columnLimits: [
+            {
+              colId: "name",
+              minWidth: 180,
+            },
+          ],
+        }}
         columnDefs={colDefs}
         initialState={initialState}
         defaultColDef={{
           filter: true,
           sortable: true,
           resizable: true,
-        }}
-        sideBar={{
-          toolPanels: [
-            {
-              id: "columns",
-              labelDefault: "Columns",
-              labelKey: "columns",
-              iconKey: "columns",
-              toolPanel: "agColumnsToolPanel",
-            },
-          ],
-          defaultToolPanel: "",
-          hiddenByDefault: true, // Collapse the sidebar by default
         }}
         onStateUpdated={handleStateChange}
         onCellFocused={(event) => {
