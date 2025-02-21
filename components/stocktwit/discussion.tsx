@@ -131,17 +131,14 @@ export default function Message({ message }: MessageCardProps) {
       if (!part) return null; // Ignore empty splits
 
       if (part.startsWith("$")) {
-        part = part.replace("$", "").split(".").reverse().join(":");
+        const symbol = part.replace("$", "").split(".").reverse().join(":");
         return (
           <span
             key={index}
             className="mr-1 cursor-pointer hover:underline animate-out transition font-bold"
-            onClick={() => {
-              const symbol = part.split(":").reverse().join(".");
-              switchSymbol(symbol);
-            }}
+            onClick={() => switchSymbol(symbol)}
           >
-            {part}
+            {symbol}
           </span>
         );
       }
