@@ -3,21 +3,10 @@
 import React, { HTMLAttributes, useCallback, useMemo } from "react";
 import { useScreener2, useScreens, useUpdateScreen } from "@/lib/state/symbol";
 import {
-  CellStyleModule,
-  ClientSideRowModelModule,
-  ColumnApiModule,
-  ColumnAutoSizeModule,
-  CustomFilterModule,
-  DateFilterModule,
+  GetRowIdFunc,
+  GetRowIdParams,
   GridState,
-  GridStateModule,
-  ModuleRegistry,
-  NumberFilterModule,
-  RowApiModule,
   StateUpdatedEvent,
-  TextFilterModule,
-  TooltipModule,
-  ValidationModule,
 } from "ag-grid-community";
 import {
   defaultColumns,
@@ -29,37 +18,8 @@ import "../grid/ag-theme.css";
 import debounce from "debounce";
 import { toast } from "sonner";
 import { Json } from "@/types/generated/supabase";
-import {
-  AdvancedFilterModule,
-  ColumnsToolPanelModule,
-  GroupFilterModule,
-  MultiFilterModule,
-  SetFilterModule,
-  SideBarModule,
-} from "ag-grid-enterprise";
 import { useActiveScreener } from "@/hooks/use-active-screener";
-
-// Register all Community features
-ModuleRegistry.registerModules([
-  ClientSideRowModelModule,
-  ValidationModule,
-  AdvancedFilterModule,
-  SideBarModule,
-  TextFilterModule,
-  NumberFilterModule,
-  DateFilterModule,
-  SetFilterModule,
-  MultiFilterModule,
-  GroupFilterModule,
-  CustomFilterModule,
-  ColumnsToolPanelModule,
-  GridStateModule,
-  ColumnApiModule,
-  RowApiModule,
-  TooltipModule,
-  CellStyleModule,
-  ColumnAutoSizeModule,
-]);
+import type { Symbol } from "@/types/symbol";
 
 type ScreenerProps = HTMLAttributes<HTMLDivElement>;
 
@@ -127,7 +87,6 @@ function useGridInitialState(activeScreenId?: string | null) {
 
     return {
       columnVisibility: { hiddenColIds },
-      columnPinning: { leftColIds: ["name"], rightColIds: [] },
       sideBar: {
         visible: true,
         position: "right",
@@ -148,6 +107,24 @@ export function Screener(props: ScreenerProps) {
   const { data: rowData } = useScreener2();
   const initialState = useGridInitialState(activeScreenId);
 
+  const statusBar = useMemo(
+    () => ({
+      statusPanels: [
+        { statusPanel: "agTotalAndFilteredRowCountComponent" },
+        { statusPanel: "agTotalRowCountComponent" },
+        { statusPanel: "agFilteredRowCountComponent" },
+        { statusPanel: "agSelectedRowCountComponent" },
+        { statusPanel: "agAggregationComponent" },
+      ],
+    }),
+    [],
+  );
+
+  const getRowId = useCallback<GetRowIdFunc>(
+    ({ data }: GetRowIdParams<Symbol>) => data.ticker!,
+    [],
+  );
+
   return (
     <div {...props} className={"h-full"}>
       <AgGridReact
@@ -155,9 +132,12 @@ export function Screener(props: ScreenerProps) {
         key={activeScreenId ?? "default"}
         className="ag-terminal-theme"
         enableAdvancedFilter={true}
+        rowSelection={{ mode: "multiRow" }}
+        selectionColumnDef={{ pinned: "left" }}
         sideBar={true}
         includeHiddenColumnsInAdvancedFilter={true}
         rowData={rowData}
+        enableCharts
         autoSizeStrategy={{
           type: "fitGridWidth",
           defaultMinWidth: 120,
@@ -170,12 +150,16 @@ export function Screener(props: ScreenerProps) {
         }}
         columnDefs={colDefs}
         initialState={initialState}
+        getRowId={getRowId}
         defaultColDef={{
           filter: true,
           sortable: true,
           resizable: true,
+          enableRowGroup: true,
         }}
+        rowGroupPanelShow={"onlyWhenGrouping"}
         onStateUpdated={handleStateChange}
+        statusBar={statusBar}
         onCellFocused={(event) => {
           const { rowIndex } = event;
           if (rowIndex === undefined || rowIndex === null) return;

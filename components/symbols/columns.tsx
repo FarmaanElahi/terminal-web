@@ -147,9 +147,6 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   {
     field: "name",
     headerName: "Symbol",
-    lockPinned: true,
-    lockVisible: true,
-    lockPosition: true,
     context: { category: "General" },
     cellRenderer: SymbolCell,
   },
@@ -2681,6 +2678,8 @@ export function CandleStickCell(props: CandleStickCellProps) {
     close_col,
   } = props;
   let candlestick: ReactNode;
+  if (!symbol) return "-";
+
   if (open_col && high_col && low_col && close_col) {
     const open = symbol[open_col as keyof Symbol] as number;
     const high = symbol[high_col as keyof Symbol] as number;
@@ -2713,6 +2712,8 @@ export function CandleStickCell(props: CandleStickCellProps) {
 
 export function SymbolCell(props: FormattedValueProps) {
   const { data: symbol, value } = props;
+  if (!symbol) return "-";
+
   const text = value;
   const logo = symbol.logo;
 
@@ -2757,6 +2758,7 @@ interface LogoTextCellProps extends FormattedValueProps {
 
 export function LogoTextCell(props: LogoTextCellProps) {
   const { value, data, logoPrefix, logoCol } = props;
+  if (!value) return "-";
   const text = value as string;
   let logo = logoCol ? (data[logoCol as keyof Symbol] as string) : undefined;
   logo = logoPrefix ? [logoPrefix, logo].join("/") : logo;
@@ -2782,6 +2784,7 @@ interface VolumeCellProps extends FormattedValueProps {
 
 export function VolumeCell(props: VolumeCellProps) {
   const { value, activityLevel, bold } = props;
+  if (!value) return "-";
 
   const showIndicator =
     activityLevel !== undefined &&

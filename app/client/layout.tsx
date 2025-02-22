@@ -4,7 +4,6 @@ import { ReactQueryProvider } from "@/components/query-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { DuckDBProvider } from "@/utils/duckdb";
-import "@/components/grid/GridLicensePatcher";
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (

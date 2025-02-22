@@ -21,6 +21,7 @@ import { Screener } from "@/components/screener/screener";
 import { Chart } from "@/components/chart/chart";
 import { Stats } from "@/components/symbols/stats";
 import { Ideas } from "@/components/symbols/ideas";
+import "@/components/grid/grid_init";
 import { ImperativePanelHandle } from "react-resizable-panels";
 
 export default function Page() {
