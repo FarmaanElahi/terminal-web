@@ -199,6 +199,7 @@ export function Watchlist(props: WatchlistProps) {
         getContextMenuItems={getContextMenuItems}
         sideBar={true}
         rowData={rowData}
+        animateRows
         autoSizeStrategy={{
           type: "fitGridWidth",
           defaultMinWidth: 120,

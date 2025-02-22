@@ -428,8 +428,13 @@ export function useDeleteWatchlist(onComplete?: () => void) {
 export function useUpdateWatchlist(onComplete?: (screen: Watchlist) => void) {
   const client = useQueryClient();
   return useMutation({
-    onSuccess: (watchlist: Watchlist) => {
-      void client.invalidateQueries({ queryKey: ["watchlist"] });
+    onSuccess: async (watchlist: Watchlist, params) => {
+      await client.invalidateQueries({ queryKey: ["watchlist"] });
+      if ((params.payload.symbols?.length ?? 0) > 0) {
+        await client.invalidateQueries({
+          queryKey: ["watchlist", watchlist.id, "symbols"],
+        });
+      }
       onComplete?.(watchlist);
     },
     mutationFn: async ({
@@ -472,11 +477,12 @@ export function useWatchlist() {
 
 export function useWatchlistSymbols(watchlist?: Watchlist) {
   return useQuery({
-    queryKey: ["watchlist", "symbols", watchlist?.id, watchlist?.symbols],
+    queryKey: ["watchlist", watchlist?.id, "symbols"],
     queryFn: async () => {
       const symbols = watchlist?.symbols;
       if (!symbols || (symbols?.length ?? 0) === 0) return [];
 
+      console.log("Query wathclist symbl", watchlist?.name, symbols);
       const inQuery = symbols.map((s) => `'${s}'`).join(",");
       const result = await queryDuckDB("symbols", {
         columns: [], // Will load all columns
