@@ -61,7 +61,7 @@ export function WatchlistSymbol({
             })
           }
         >
-          <Trash size={3} />
+          <Trash size={2} />
         </Button>
       ) : (
         <Button
@@ -75,7 +75,7 @@ export function WatchlistSymbol({
             })
           }
         >
-          <Plus size={3} />
+          <Plus size={2} />
         </Button>
       )}
     </CommandItem>

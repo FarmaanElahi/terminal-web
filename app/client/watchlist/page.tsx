@@ -80,7 +80,7 @@ function WatchlistContent() {
           </div>
         </div>
       </header>
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto border">
         <ResizablePanelGroup
           autoSaveId={"watchlist-main"}
           direction={"horizontal"}

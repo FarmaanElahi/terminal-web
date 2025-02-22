@@ -160,7 +160,7 @@ export function WatchlistSelector() {
   );
 }
 
-function WatchlistCreatorDialog({
+export function WatchlistCreatorDialog({
   open,
   setOpen,
   default: defaultState,
@@ -169,10 +169,13 @@ function WatchlistCreatorDialog({
   setOpen: (open: boolean) => void;
   default?: { name: string; state: Json; symbols: string[] };
 }) {
+  const { setActiveWatchlistId } = useActiveWatchlistId();
+
   const { mutate: createWatchlist, isPending } = useCreateWatchlist(
     (watchlist) => {
       setOpen(false);
       toast(`${watchlist.name} watchlist created!`);
+      setActiveWatchlistId(watchlist.id);
     },
   );
   const [watchlistName, setNewWatchlistName] = useState<string>();

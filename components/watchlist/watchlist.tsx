@@ -1,6 +1,12 @@
 "use client";
 
-import React, { HTMLAttributes, useCallback, useMemo } from "react";
+import React, {
+  HTMLAttributes,
+  JSX,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import {
   useUpdateWatchlist,
   useWatchlist,
@@ -26,8 +32,8 @@ import type { Symbol } from "@/types/symbol";
 import { useActiveWatchlistId } from "@/hooks/use-active-watchlist";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { WatchlistCreatorDialog } from "./watchlist-selector";
 import { WatchlistSymbol } from "@/components/watchlist/watchlist-symbol";
-import { Watchlist as WatchlistModel } from "@/types/supabase";
 
 type WatchlistProps = HTMLAttributes<HTMLDivElement>;
 
@@ -135,12 +141,18 @@ export function Watchlist(props: WatchlistProps) {
     [],
   );
 
-  if (watchlist && (!rowData || rowData.length === 0)) {
-    return <NoSymbolInWatchlist watchlist={watchlist} />;
-  }
+  const [openWatchlistSymbol, setOpenWatchlistSymbol] = useState(false);
+  const [openWatchlistCreator, setOpenWatchlistCreator] = useState(false);
+  const { data: allWatchlist } = useWatchlist();
 
-  return (
-    <div {...props} className={"h-full"}>
+  let node: JSX.Element | null = null;
+
+  if (!activeWatchlistId || !allWatchlist || allWatchlist.length === 0) {
+    node = <CreateWatchlist setOpen={setOpenWatchlistCreator} />;
+  } else if (watchlist && (!rowData || rowData.length === 0)) {
+    node = <AddSymbolToWatchlist setOpen={setOpenWatchlistSymbol} />;
+  } else if (rowData && rowData.length > 0) {
+    node = (
       <AgGridReact
         dataTypeDefinitions={extendedColumnType}
         key={activeWatchlistId ?? "default"}
@@ -179,30 +191,63 @@ export function Watchlist(props: WatchlistProps) {
           switcher([exchange, name].join(":"));
         }}
       />
+    );
+  }
+
+  return (
+    <div {...props} className={"h-full"}>
+      {watchlist && (
+        <WatchlistSymbol
+          open={openWatchlistSymbol}
+          setOpen={setOpenWatchlistSymbol}
+          watchlist={watchlist}
+        />
+      )}
+      <WatchlistCreatorDialog
+        open={openWatchlistCreator}
+        setOpen={setOpenWatchlistCreator}
+      />
+      {node}
     </div>
   );
 }
 
 interface NoSymbolInWatchlistProps extends HTMLAttributes<HTMLDivElement> {
-  watchlist: WatchlistModel;
+  setOpen: (open: boolean) => void;
 }
 
-function NoSymbolInWatchlist({
-  watchlist,
-  ...props
-}: NoSymbolInWatchlistProps) {
-  const [open, setOpen] = React.useState(false);
+function AddSymbolToWatchlist({ setOpen, ...props }: NoSymbolInWatchlistProps) {
   return (
     <div
       {...props}
       className={"h-full flex justify-center items-center align-middle"}
     >
-      <WatchlistSymbol watchlist={watchlist} open={open} setOpen={setOpen} />
       <div className="space-y-2">
         <div>Your watchlist is empty</div>
         <Button variant="default" onClick={() => setOpen(true)}>
           <Plus size={4} />
           Add Symbols
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+interface WatchlistCreateDialogProps extends HTMLAttributes<HTMLDivElement> {
+  setOpen: (open: boolean) => void;
+}
+
+function CreateWatchlist({ setOpen, ...props }: WatchlistCreateDialogProps) {
+  return (
+    <div
+      {...props}
+      className={"h-full flex justify-center items-center align-middle"}
+    >
+      <div className="space-y-2">
+        <div>Select or Create a new watchlist</div>
+        <Button variant="default" onClick={() => setOpen(true)}>
+          <Plus size={4} />
+          New Watchlist
         </Button>
       </div>
     </div>
