@@ -59,7 +59,7 @@ export function WatchlistSelector() {
   const [open, setOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [newWatchlistDefault, setNewWatchlistDefault] =
-    useState<Pick<Watchlist, "name" | "state">>();
+    useState<Pick<Watchlist, "name" | "state" | "symbols">>();
   const activeWatchlist = watchlist?.find((s) => s.id === activeWatchlistId);
 
   return (
@@ -116,6 +116,7 @@ export function WatchlistSelector() {
                         setNewWatchlistDefault({
                           name: `${watchlist.name} (Copy)`,
                           state: watchlist.state,
+                          symbols: watchlist.symbols,
                         });
                         setOpenDialog(true);
                       }}
@@ -166,7 +167,7 @@ function WatchlistCreatorDialog({
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
-  default?: { name: string; state: Json };
+  default?: { name: string; state: Json; symbols: string[] };
 }) {
   const { mutate: createWatchlist, isPending } = useCreateWatchlist(
     (watchlist) => {
@@ -204,6 +205,7 @@ function WatchlistCreatorDialog({
               createWatchlist({
                 name: watchlistName!,
                 state: defaultState?.state,
+                symbols: defaultState?.symbols ?? [],
               });
               setOpen(false);
             }}

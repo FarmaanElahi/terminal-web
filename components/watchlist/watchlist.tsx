@@ -24,6 +24,10 @@ import { toast } from "sonner";
 import { Json } from "@/types/generated/supabase";
 import type { Symbol } from "@/types/symbol";
 import { useActiveWatchlistId } from "@/hooks/use-active-watchlist";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { WatchlistSymbol } from "@/components/watchlist/watchlist-symbol";
+import { Watchlist as WatchlistModel } from "@/types/supabase";
 
 type WatchlistProps = HTMLAttributes<HTMLDivElement>;
 
@@ -131,6 +135,10 @@ export function Watchlist(props: WatchlistProps) {
     [],
   );
 
+  if (watchlist && (!rowData || rowData.length === 0)) {
+    return <NoSymbolInWatchlist watchlist={watchlist} />;
+  }
+
   return (
     <div {...props} className={"h-full"}>
       <AgGridReact
@@ -171,6 +179,32 @@ export function Watchlist(props: WatchlistProps) {
           switcher([exchange, name].join(":"));
         }}
       />
+    </div>
+  );
+}
+
+interface NoSymbolInWatchlistProps extends HTMLAttributes<HTMLDivElement> {
+  watchlist: WatchlistModel;
+}
+
+function NoSymbolInWatchlist({
+  watchlist,
+  ...props
+}: NoSymbolInWatchlistProps) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div
+      {...props}
+      className={"h-full flex justify-center items-center align-middle"}
+    >
+      <WatchlistSymbol watchlist={watchlist} open={open} setOpen={setOpen} />
+      <div className="space-y-2">
+        <div>Your watchlist is empty</div>
+        <Button variant="default" onClick={() => setOpen(true)}>
+          <Plus size={4} />
+          Add Symbols
+        </Button>
+      </div>
     </div>
   );
 }
