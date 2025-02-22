@@ -65,6 +65,7 @@ export function ScreenSelector() {
                 {screens.map((screen) => (
                   <CommandItem
                     key={screen.id}
+                    className="font-bold"
                     value={screen.id}
                     onSelect={(currentValue) => {
                       setActiveScreenId(

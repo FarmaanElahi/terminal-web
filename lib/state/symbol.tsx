@@ -67,7 +67,6 @@ async function symbolResolveFn(ticker: string) {
   });
 
   if (d.length === 0) throw new Error("Cannot find quote");
-  console.log("SS", d[0]);
   return d[0];
 }
 

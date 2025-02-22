@@ -5,9 +5,7 @@ import { useChartManager } from "@/lib/state/charts";
 import { useGroupSymbol } from "@/lib/state/grouper";
 import { useTheme } from "next-themes";
 
-interface ChartProps extends HTMLAttributes<HTMLDivElement> {
-  id: string;
-}
+type ChartProps = HTMLAttributes<HTMLDivElement>;
 
 export function Chart(props: ChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(

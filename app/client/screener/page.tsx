@@ -1,7 +1,7 @@
 "use client";
 
 import { ChartSpline, Grid3X3, Lightbulb, List, Table, X } from "lucide-react";
-import React from "react";
+import React, { useRef } from "react";
 import {
   GrouperProvider,
   GroupSymbolProvider,
@@ -11,27 +11,34 @@ import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
 import { SymbolSearch } from "@/components/search/search-command";
 import { ScreenSelector } from "@/components/screener/screen-selector";
-import { PersistentLayout } from "@/components/ui/persistent-layout";
-import { LayoutProvider, useLayout } from "@/hooks/use-layout";
 import { ScreenerProvider } from "@/hooks/use-active-screener";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import { Screener } from "@/components/screener/screener";
+import { Chart } from "@/components/chart/chart";
+import { Stats } from "@/components/symbols/stats";
+import { Ideas } from "@/components/symbols/ideas";
+import { ImperativePanelHandle } from "react-resizable-panels";
 
 export default function Page() {
   return (
     <GroupSymbolProvider>
       <GrouperProvider group={1}>
-        <LayoutProvider>
-          <ScreenerProvider>
-            <ScreenerContent />
-          </ScreenerProvider>
-        </LayoutProvider>
+        <ScreenerProvider>
+          <ScreenerMain />
+        </ScreenerProvider>
       </GrouperProvider>
     </GroupSymbolProvider>
   );
 }
 
-function ScreenerContent() {
-  const { updateItemVisibility } = useLayout();
-
+function ScreenerMain() {
+  const screener = useRef<ImperativePanelHandle | null>(null);
+  const ideas = useRef<ImperativePanelHandle | null>(null);
+  const stats = useRef<ImperativePanelHandle | null>(null);
   return (
     <>
       <header className="flex h-12 shrink-0 items-center gap-2">
@@ -46,10 +53,12 @@ function ScreenerContent() {
               <Toggle
                 size="sm"
                 aria-label={"Screener"}
-                onPressedChange={(pressed) =>
-                  updateItemVisibility("screener", pressed)
-                }
                 pressed={true}
+                onPressedChange={() =>
+                  screener.current?.isExpanded()
+                    ? screener.current?.collapse()
+                    : screener.current?.expand()
+                }
               >
                 <Table className="size-4" />
               </Toggle>
@@ -57,10 +66,12 @@ function ScreenerContent() {
               <Toggle
                 size="sm"
                 aria-label={"Stats"}
-                onPressedChange={(pressed) =>
-                  updateItemVisibility("stats", pressed)
-                }
                 pressed={true}
+                onPressedChange={() =>
+                  stats.current?.isExpanded()
+                    ? stats.current?.collapse()
+                    : stats.current?.expand()
+                }
               >
                 <ChartSpline className="size-4" />
               </Toggle>
@@ -68,8 +79,10 @@ function ScreenerContent() {
                 size="sm"
                 aria-label={"Ideas"}
                 pressed={true}
-                onPressedChange={(pressed) =>
-                  updateItemVisibility("ideas", pressed)
+                onPressedChange={() =>
+                  ideas.current?.isExpanded()
+                    ? ideas.current?.collapse()
+                    : ideas.current?.expand()
                 }
               >
                 <Lightbulb className="size-4" />
@@ -87,7 +100,45 @@ function ScreenerContent() {
         </div>
       </header>
       <div className="flex-1 overflow-auto">
-        <PersistentLayout />
+        <ResizablePanelGroup
+          autoSaveId={"screener-main"}
+          direction={"horizontal"}
+        >
+          <ResizablePanel
+            ref={screener}
+            collapsible
+            collapsedSize={0}
+            id={"screener"}
+            defaultSize={20}
+            minSize={20}
+          >
+            <Screener />
+          </ResizablePanel>
+          <ResizableHandle />
+          <ResizablePanel collapsible id={"screener-center"}>
+            <ResizablePanelGroup
+              direction={"vertical"}
+              autoSaveId={"screener-center"}
+            >
+              <ResizablePanel collapsible id={"chart"} defaultSize={80}>
+                <Chart />
+              </ResizablePanel>
+              <ResizableHandle />
+              <ResizablePanel
+                collapsible
+                id={"stats"}
+                defaultSize={20}
+                ref={stats}
+              >
+                <Stats />
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </ResizablePanel>
+          <ResizableHandle />
+          <ResizablePanel collapsible id={"ideas"} defaultSize={20} ref={ideas}>
+            <Ideas />
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     </>
   );

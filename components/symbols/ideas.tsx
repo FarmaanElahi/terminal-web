@@ -20,7 +20,7 @@ import { useMemo, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function Discussion() {
+export function Ideas() {
   const symbol = useGroupSymbol();
   if (symbol === "NSE:NIFTY") {
     return <GlobalDiscussion />;
@@ -44,7 +44,7 @@ export function GlobalDiscussion() {
     <Tabs
       value={feed}
       onValueChange={(value) => setFeed(value as GlobalFeedType)}
-      className="max-w-xl h-full flex flex-col px-2 mx-auto"
+      className="max-w-xl h-full flex flex-col px-2 mx-auto min-w-32"
     >
       <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="trending">Trending</TabsTrigger>

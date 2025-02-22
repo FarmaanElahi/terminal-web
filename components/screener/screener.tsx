@@ -22,7 +22,7 @@ import {
 import {
   defaultColumns,
   extendedColumnType,
-} from "@/components/symbols/symbol_column";
+} from "@/components/symbols/columns";
 import { AgGridReact } from "ag-grid-react";
 import { useGroupSymbolSwitcher } from "@/lib/state/grouper";
 import "../grid/ag-theme.css";
