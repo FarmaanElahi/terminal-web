@@ -13,6 +13,7 @@ import {
   useWatchlistSymbols,
 } from "@/lib/state/symbol";
 import {
+  AgColumn,
   GetRowIdFunc,
   GetRowIdParams,
   GridState,
@@ -182,6 +183,12 @@ export function Watchlist(props: WatchlistProps) {
         statusBar={statusBar}
         onStateUpdated={handleStateChange}
         onCellFocused={(event) => {
+          // If the cell was focus because of selection change, we will ignore
+          // switching the symbol
+          if ((event.column as AgColumn)?.colId === "ag-Grid-SelectionColumn") {
+            return;
+          }
+
           const { rowIndex } = event;
           if (rowIndex === undefined || rowIndex === null) return;
           const symbol = event.api.getDisplayedRowAtIndex(rowIndex)?.data;

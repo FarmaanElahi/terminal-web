@@ -3,6 +3,7 @@
 import React, { HTMLAttributes, useCallback, useMemo } from "react";
 import { useScreener, useScreens, useUpdateScreen } from "@/lib/state/symbol";
 import {
+  AgColumn,
   GetRowIdFunc,
   GetRowIdParams,
   GridState,
@@ -126,7 +127,7 @@ export function Screener(props: ScreenerProps) {
   );
 
   return (
-    <div {...props} className={"h-full"}>
+    <div {...props} className={"h-full relative"}>
       <AgGridReact
         dataTypeDefinitions={extendedColumnType}
         key={activeScreenId ?? "default"}
@@ -160,6 +161,12 @@ export function Screener(props: ScreenerProps) {
         onStateUpdated={handleStateChange}
         statusBar={statusBar}
         onCellFocused={(event) => {
+          // If the cell was focus because of selection change, we will ignore
+          // switching the symbol
+          if ((event.column as AgColumn)?.colId === "ag-Grid-SelectionColumn") {
+            return;
+          }
+
           const { rowIndex } = event;
           if (rowIndex === undefined || rowIndex === null) return;
           const symbol = event.api.getDisplayedRowAtIndex(rowIndex)?.data;
