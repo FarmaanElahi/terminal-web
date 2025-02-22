@@ -1,9 +1,16 @@
 "use client";
 
 import React, { HTMLAttributes, useCallback, useMemo } from "react";
-import { useScreener, useScreens, useUpdateScreen } from "@/lib/state/symbol";
+import {
+  useScreener,
+  useScreens,
+  useUpdateScreen,
+  useUpdateWatchlist,
+  useWatchlist,
+} from "@/lib/state/symbol";
 import {
   AgColumn,
+  GetContextMenuItems,
   GetRowIdFunc,
   GetRowIdParams,
   GridState,
@@ -126,11 +133,51 @@ export function Screener(props: ScreenerProps) {
     [],
   );
 
+  const { data: watchlists } = useWatchlist();
+  const { mutate: updateWatchlist } = useUpdateWatchlist((w) => {
+    toast(`${w.name} updated`);
+  });
+
+  const getContextMenuItems = useCallback<GetContextMenuItems<Symbol>>(
+    (params) => {
+      const symbol = params.node?.data;
+      if (!symbol?.ticker) return [];
+
+      return [
+        // Watchlist menu
+        {
+          name: `Add ${params.node?.data?.name} to Watchlist`,
+          subMenu: watchlists?.map((w) => {
+            const checked = w.symbols?.includes(symbol.ticker!);
+            const updatedSymbols = checked
+              ? w.symbols.filter((s) => s !== symbol.ticker)
+              : [...(w.symbols ?? []), symbol.ticker!];
+            return {
+              name: w.name,
+              subMenuRole: "menu",
+              checked,
+              action: () =>
+                updateWatchlist({
+                  id: w.id,
+                  payload: { symbols: updatedSymbols },
+                }),
+            };
+          }),
+          suppressCloseOnSelect: true,
+        },
+        "separator",
+        "copy",
+      ];
+    },
+    [watchlists, updateWatchlist],
+  );
+
   return (
     <div {...props} className={"h-full relative"}>
       <AgGridReact
         dataTypeDefinitions={extendedColumnType}
         key={activeScreenId ?? "default"}
+        getContextMenuItems={getContextMenuItems}
         className="ag-terminal-theme"
         enableAdvancedFilter={true}
         rowSelection={{ mode: "multiRow" }}

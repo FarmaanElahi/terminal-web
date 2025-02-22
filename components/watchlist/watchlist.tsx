@@ -14,6 +14,7 @@ import {
 } from "@/lib/state/symbol";
 import {
   AgColumn,
+  GetContextMenuItems,
   GetRowIdFunc,
   GetRowIdParams,
   GridState,
@@ -145,6 +146,42 @@ export function Watchlist(props: WatchlistProps) {
   const [openWatchlistSymbol, setOpenWatchlistSymbol] = useState(false);
   const [openWatchlistCreator, setOpenWatchlistCreator] = useState(false);
   const { data: allWatchlist } = useWatchlist();
+  const { mutate: updateWatchlist } = useUpdateWatchlist((w) => {
+    toast(`${w.name} updated`);
+  });
+  const getContextMenuItems = useCallback<GetContextMenuItems<Symbol>>(
+    (params) => {
+      const symbol = params.node?.data;
+      if (!symbol?.ticker) return [];
+
+      return [
+        // Watchlist menu
+        {
+          name: `Add ${params.node?.data?.name} to Watchlist`,
+          subMenu: allWatchlist?.map((w) => {
+            const checked = w.symbols?.includes(symbol.ticker!);
+            const updatedSymbols = checked
+              ? w.symbols.filter((s) => s !== symbol.ticker)
+              : [...(w.symbols ?? []), symbol.ticker!];
+            return {
+              name: w.name,
+              subMenuRole: "menu",
+              checked,
+              action: () =>
+                updateWatchlist({
+                  id: w.id,
+                  payload: { symbols: updatedSymbols },
+                }),
+            };
+          }),
+          suppressCloseOnSelect: true,
+        },
+        "separator",
+        "copy",
+      ];
+    },
+    [activeWatchlistId, updateWatchlist],
+  );
 
   let node: JSX.Element | null = null;
 
@@ -152,14 +189,14 @@ export function Watchlist(props: WatchlistProps) {
     node = <CreateWatchlist setOpen={setOpenWatchlistCreator} />;
   } else if (watchlist && (!rowData || rowData.length === 0)) {
     node = <AddSymbolToWatchlist setOpen={setOpenWatchlistSymbol} />;
-  } else if (rowData && rowData.length > 0) {
+  } else if (rowData && rowData.length > 0)
     node = (
       <AgGridReact
         dataTypeDefinitions={extendedColumnType}
         key={activeWatchlistId ?? "default"}
         className="ag-terminal-theme"
         rowSelection={{ mode: "multiRow" }}
-        // selectionColumnDef={{ pinned: "left" }}
+        getContextMenuItems={getContextMenuItems}
         sideBar={true}
         rowData={rowData}
         autoSizeStrategy={{
@@ -199,7 +236,6 @@ export function Watchlist(props: WatchlistProps) {
         }}
       />
     );
-  }
 
   return (
     <div {...props} className={"h-full"}>
