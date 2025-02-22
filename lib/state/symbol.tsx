@@ -353,6 +353,26 @@ export function useCreateScreen(onComplete?: (screen: Screen) => void) {
   });
 }
 
+export function useDeleteScreen(onComplete?: () => void) {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["screens"] });
+      onComplete?.();
+    },
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from("screens")
+        .delete()
+        .eq("id", id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 export function useUpdateScreen(onComplete?: (screen: Screen) => void) {
   const client = useQueryClient();
   return useMutation({

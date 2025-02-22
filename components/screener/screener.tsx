@@ -86,8 +86,6 @@ function useScreenerChangeCallback(activeScreenId?: string | null) {
   // Handle grid state changes
   return useCallback(
     (params: StateUpdatedEvent) => {
-      console.log("EV", params);
-
       // Started because the grid was created
       if (params.sources?.[0] === "gridInitializing") return;
 
