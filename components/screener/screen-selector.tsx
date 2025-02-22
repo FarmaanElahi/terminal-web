@@ -227,10 +227,14 @@ function DeleteScreen({
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete {screen.name}</AlertDialogTitle>
+          <AlertDialogTitle>Delete Screener</AlertDialogTitle>
           <AlertDialogDescription>
             This action cannot be undone. This will permanently delete
-            <span className="font-bold"> {screen.name}</span> screener
+            <span className="font-bold text-destructive">
+              {" "}
+              {screen.name}
+            </span>{" "}
+            screener
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
