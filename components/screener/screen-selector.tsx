@@ -54,13 +54,13 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export function ScreenSelector() {
-  const { activeWatchlistId, setActiveScreenId } = useActiveScreenerId();
+  const { activeScreenId, setActiveScreenId } = useActiveScreenerId();
   const { data: screens = [] } = useScreens();
   const [open, setOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [newScreenDefault, setNewScreenDefault] =
     useState<Pick<Screen, "name" | "state">>();
-  const activeScreen = screens?.find((s) => s.id === activeWatchlistId);
+  const activeScreen = screens?.find((s) => s.id === activeScreenId);
 
   return (
     <div className="flex gap-1">
@@ -93,14 +93,14 @@ export function ScreenSelector() {
                     value={screen.id}
                     onSelect={(currentValue) => {
                       setActiveScreenId(
-                        currentValue === activeWatchlistId ? null : currentValue,
+                        currentValue === activeScreenId ? null : currentValue,
                       );
                     }}
                   >
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        activeWatchlistId === screen.id
+                        activeScreenId === screen.id
                           ? "opacity-100"
                           : "opacity-0",
                       )}
