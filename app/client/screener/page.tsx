@@ -103,6 +103,7 @@ function ScreenerMain() {
         <ResizablePanelGroup
           autoSaveId={"screener-main"}
           direction={"horizontal"}
+          className={"transition"}
         >
           <ResizablePanel
             ref={screener}
@@ -110,7 +111,8 @@ function ScreenerMain() {
             collapsedSize={0}
             id={"screener"}
             defaultSize={20}
-            minSize={20}
+            minSize={5}
+            className={"transition"}
           >
             <Screener />
           </ResizablePanel>
@@ -129,13 +131,22 @@ function ScreenerMain() {
                 id={"stats"}
                 defaultSize={20}
                 ref={stats}
+                collapsedSize={0}
+                minSize={5}
               >
                 <Stats />
               </ResizablePanel>
             </ResizablePanelGroup>
           </ResizablePanel>
           <ResizableHandle />
-          <ResizablePanel collapsible id={"ideas"} defaultSize={20} ref={ideas}>
+          <ResizablePanel
+            collapsible
+            id={"ideas"}
+            defaultSize={20}
+            ref={ideas}
+            collapsedSize={0}
+            minSize={5}
+          >
             <Ideas />
           </ResizablePanel>
         </ResizablePanelGroup>
