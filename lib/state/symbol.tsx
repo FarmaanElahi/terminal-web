@@ -11,7 +11,14 @@ import type { Symbol } from "@/types/symbol";
 import { fetchStockTwit } from "@/server/stocktwits";
 import type { StockTwitFeed } from "@/types/stocktwits";
 import { queryDuckDB } from "@/utils/duckdb";
-import { InsertScreen, Screen, UpdateScreen } from "@/types/supabase";
+import {
+  InsertScreen,
+  InsertWatchlist,
+  Screen,
+  UpdateScreen,
+  UpdateWatchlist,
+  Watchlist,
+} from "@/types/supabase";
 
 //##################### SYMBOL QUOTE #####################
 async function symbolQuoteQueryFn(ticker: string) {
@@ -139,54 +146,8 @@ export function useSymbolSearch(
 //##################### SYMBOL SEARCH #####################
 
 //##################### SCREENER_SCAN #####################
-type ScreenerResponse = {
-  data: Symbol[];
-  meta: { total: number };
-  nextOffset: number;
-};
 
-type ScreenerRequest = {
-  columns: string[];
-  sort: { field: string; asc: boolean }[];
-  type?: "stock" | "fund" | "index";
-};
-
-export function useScreener({ columns, sort, type }: ScreenerRequest) {
-  return useInfiniteQuery<ScreenerResponse>({
-    initialPageParam: 0,
-    getNextPageParam: (lastPage) => lastPage.nextOffset,
-    queryKey: ["symbols", columns, sort],
-    queryFn: async (context) => {
-      const defCols = ["name", "exchange", "logo", "country_code", "currency"];
-
-      const page = context.pageParam as number;
-      const limit = 50;
-      const offset = page * limit;
-      const result = await queryDuckDB("symbols", {
-        columns: [...defCols, ...columns],
-        where: type ? `"type" = '${type}'` : undefined,
-        order:
-          sort && sort.length > 0
-            ? sort.map((s) => ({
-                field: s.field,
-                sort: s.asc ? "ASC" : "DESC",
-                nullLast: true,
-              }))
-            : [{ field: "mcap", sort: "DESC", nullLast: true }],
-        limit,
-        offset,
-      });
-      const data = result as Symbol[];
-      return {
-        data: data as unknown as Symbol[],
-        meta: { total: 5000 },
-        nextOffset: page + 1,
-      };
-    },
-  });
-}
-
-export function useScreener2() {
+export function useScreener() {
   return useQuery({
     queryKey: ["symbols2"],
     queryFn: async () => {
@@ -410,10 +371,118 @@ export function useScreens() {
       const { data, error } = await supabase
         .from("screens")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("updated_at", { ascending: false });
 
       if (error) throw error;
       return data;
+    },
+  });
+}
+
+//##################### WATCHLIST #####################
+
+//##################### SCREENS #####################
+export function useCreateWatchlist(onComplete?: (screen: Watchlist) => void) {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: (watchlist: Watchlist) => {
+      void client.invalidateQueries({ queryKey: ["watchlist"] });
+      onComplete?.(watchlist);
+    },
+    mutationFn: async (watchlist: InsertWatchlist) => {
+      const { data, error } = await supabase
+        .from("watchlists")
+        .insert({
+          ...watchlist,
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useDeleteWatchlist(onComplete?: () => void) {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["watchlist"] });
+      onComplete?.();
+    },
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from("watchlists")
+        .delete()
+        .eq("id", id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useUpdateWatchlist(onComplete?: (screen: Watchlist) => void) {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: (watchlist: Watchlist) => {
+      void client.invalidateQueries({ queryKey: ["watchlist"] });
+      onComplete?.(watchlist);
+    },
+    mutationFn: async ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: UpdateWatchlist;
+    }) => {
+      const { data, error } = await supabase
+        .from("watchlists")
+        .update({
+          ...payload,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useWatchlist() {
+  return useQuery({
+    queryKey: ["watchlist"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("watchlists")
+        .select("*")
+        .order("updated_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useWatchlistSymbols(watchlist?: Watchlist) {
+  return useQuery({
+    queryKey: ["watchlist", "symbols", watchlist?.id, watchlist?.symbols],
+    queryFn: async () => {
+      const symbols = watchlist?.symbols;
+      if (!symbols || (symbols?.length ?? 0) === 0) return [];
+
+      const inQuery = symbols.map((s) => `'${s}'`).join(",");
+      const result = await queryDuckDB("symbols", {
+        columns: [], // Will load all columns
+        where: `ticker IN (${inQuery})`,
+      });
+      return result as Symbol[];
     },
   });
 }

@@ -166,38 +166,44 @@ export type Database = {
         Row: {
           active: boolean
           color: string | null
-          created_at: string
+          created_at: string | null
           description: string | null
-          id: number
-          last_modified_at: string
+          id: string
           name: string
           shared: boolean
+          state: Json | null
           symbols: string[]
           type: Database["public"]["Enums"]["watchlist_type"]
+          updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           active?: boolean
           color?: string | null
-          created_at?: string
+          created_at?: string | null
           description?: string | null
-          id?: number
-          last_modified_at?: string
+          id?: string
           name?: string
           shared?: boolean
+          state?: Json | null
           symbols?: string[]
           type?: Database["public"]["Enums"]["watchlist_type"]
+          updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           active?: boolean
           color?: string | null
-          created_at?: string
+          created_at?: string | null
           description?: string | null
-          id?: number
-          last_modified_at?: string
+          id?: string
           name?: string
           shared?: boolean
+          state?: Json | null
           symbols?: string[]
           type?: Database["public"]["Enums"]["watchlist_type"]
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

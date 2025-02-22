@@ -29,14 +29,14 @@ export default function Page() {
     <GroupSymbolProvider>
       <GrouperProvider group={1}>
         <ScreenerProvider>
-          <ScreenerMain />
+          <ScreenerContent />
         </ScreenerProvider>
       </GrouperProvider>
     </GroupSymbolProvider>
   );
 }
 
-function ScreenerMain() {
+function ScreenerContent() {
   const screener = useRef<ImperativePanelHandle | null>(null);
   const ideas = useRef<ImperativePanelHandle | null>(null);
   const stats = useRef<ImperativePanelHandle | null>(null);

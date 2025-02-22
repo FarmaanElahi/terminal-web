@@ -34,13 +34,12 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
-  useCreateScreen,
-  useDeleteScreen,
-  useScreens,
+  useCreateWatchlist,
+  useDeleteWatchlist,
+  useWatchlist,
 } from "@/lib/state/symbol";
 import { toast } from "sonner";
-import { useActiveScreenerId } from "@/hooks/use-active-screener";
-import { Json, Screen } from "@/types/supabase";
+import { Json, Watchlist } from "@/types/supabase";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,15 +51,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useActiveWatchlistId } from "@/hooks/use-active-watchlist";
 
-export function ScreenSelector() {
-  const { activeWatchlistId, setActiveScreenId } = useActiveScreenerId();
-  const { data: screens = [] } = useScreens();
+export function WatchlistSelector() {
+  const { activeWatchlistId, setActiveWatchlistId } = useActiveWatchlistId();
+  const { data: watchlist = [] } = useWatchlist();
   const [open, setOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [newScreenDefault, setNewScreenDefault] =
-    useState<Pick<Screen, "name" | "state">>();
-  const activeScreen = screens?.find((s) => s.id === activeWatchlistId);
+  const [newWatchlistDefault, setNewWatchlistDefault] =
+    useState<Pick<Watchlist, "name" | "state">>();
+  const activeWatchlist = watchlist?.find((s) => s.id === activeWatchlistId);
 
   return (
     <div className="flex gap-1">
@@ -73,54 +73,56 @@ export function ScreenSelector() {
             aria-expanded={open}
             className="w-[200px] justify-between font-bold"
             onClick={() => {
-              if (!activeScreen) setOpen(!open);
+              if (!activeWatchlist) setOpen(!open);
             }}
           >
-            {activeScreen?.name || "My Screens"}
+            {activeWatchlist?.name || "My Watchlist"}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[300px] p-0">
           <Command>
-            <CommandInput placeholder="Search screens..." className="h-9" />
+            <CommandInput placeholder="Search watchlist..." className="h-9" />
             <CommandList>
-              <CommandEmpty>No screen found.</CommandEmpty>
+              <CommandEmpty>No watchlist found.</CommandEmpty>
               <CommandGroup>
-                {screens.map((screen) => (
+                {watchlist.map((watchlist) => (
                   <CommandItem
-                    key={screen.id}
+                    key={watchlist.id}
                     className="font-bold group relative"
-                    value={screen.id}
+                    value={watchlist.id}
                     onSelect={(currentValue) => {
-                      setActiveScreenId(
-                        currentValue === activeWatchlistId ? null : currentValue,
+                      setActiveWatchlistId(
+                        currentValue === activeWatchlistId
+                          ? null
+                          : currentValue,
                       );
                     }}
                   >
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        activeWatchlistId === screen.id
+                        activeWatchlistId === watchlist.id
                           ? "opacity-100"
                           : "opacity-0",
                       )}
                     />
-                    <span className="flex-1">{screen.name}</span>
+                    <span className="flex-1">{watchlist.name}</span>
                     <Button
                       className="opacity-0 group-hover:opacity-100 h-7 w-7"
                       variant="ghost"
                       size="icon"
                       onClick={() => {
-                        setNewScreenDefault({
-                          name: `${screen.name} (Copy)`,
-                          state: screen.state,
+                        setNewWatchlistDefault({
+                          name: `${watchlist.name} (Copy)`,
+                          state: watchlist.state,
                         });
                         setOpenDialog(true);
                       }}
                     >
                       <Copy size="3" />
                     </Button>
-                    <DeleteScreen screen={screen}>
+                    <DeleteWatchlist watchlist={watchlist}>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -128,7 +130,7 @@ export function ScreenSelector() {
                       >
                         <Trash size="3" />
                       </Button>
-                    </DeleteScreen>
+                    </DeleteWatchlist>
                   </CommandItem>
                 ))}
               </CommandGroup>
@@ -141,23 +143,23 @@ export function ScreenSelector() {
         variant="outline"
         size="sm"
         onClick={() => {
-          setNewScreenDefault(undefined);
+          setNewWatchlistDefault(undefined);
           setOpenDialog(true);
         }}
       >
         <Plus className="size-4" />
       </Button>
 
-      <ScreenCreatorDialog
+      <WatchlistCreatorDialog
         open={openDialog}
         setOpen={setOpenDialog}
-        default={newScreenDefault}
+        default={newWatchlistDefault}
       />
     </div>
   );
 }
 
-function ScreenCreatorDialog({
+function WatchlistCreatorDialog({
   open,
   setOpen,
   default: defaultState,
@@ -165,40 +167,44 @@ function ScreenCreatorDialog({
   open: boolean;
   setOpen: (open: boolean) => void;
   default?: { name: string; state: Json };
-  cloneFromId?: string;
 }) {
-  const { mutate: createScreen, isPending } = useCreateScreen((screen) => {
-    setOpen(false);
-    toast(`${screen.name} screen created!`);
-  });
-  const [screenName, setNewScreenName] = useState<string>();
-  useEffect(() => setNewScreenName(defaultState?.name), [defaultState]);
+  const { mutate: createWatchlist, isPending } = useCreateWatchlist(
+    (watchlist) => {
+      setOpen(false);
+      toast(`${watchlist.name} watchlist created!`);
+    },
+  );
+  const [watchlistName, setNewWatchlistName] = useState<string>();
+  useEffect(() => setNewWatchlistName(defaultState?.name), [defaultState]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {defaultState?.name ? "Clone Screen" : "Create New Screen"}
+            {defaultState?.name ? "Clone Watchlist" : "Create New Watchlist"}
           </DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="name">Screen Name</Label>
+            <Label htmlFor="name">Watchlist Name</Label>
             <Input
               id="name"
-              value={screenName}
-              onChange={(e) => setNewScreenName(e.target.value)}
-              placeholder="Enter screen name"
+              value={watchlistName}
+              onChange={(e) => setNewWatchlistName(e.target.value)}
+              placeholder="Enter watchlist"
             />
           </div>
         </div>
         <DialogFooter>
           <Button
-            disabled={!screenName}
+            disabled={!watchlistName}
             onClick={(e) => {
               e.stopPropagation();
-              createScreen({ name: screenName!, state: defaultState?.state });
+              createWatchlist({
+                name: watchlistName!,
+                state: defaultState?.state,
+              });
               setOpen(false);
             }}
           >
@@ -211,15 +217,15 @@ function ScreenCreatorDialog({
   );
 }
 
-function DeleteScreen({
-  screen,
+function DeleteWatchlist({
+  watchlist,
   children,
 }: {
-  screen: Screen;
+  watchlist: Watchlist;
   children: ReactNode;
 }) {
-  const { mutate: deleteScreen } = useDeleteScreen(() =>
-    toast(`Deleted ${screen.name}`),
+  const { mutate: deleteWatchlist } = useDeleteWatchlist(() =>
+    toast(`Deleted ${watchlist.name}`),
   );
 
   return (
@@ -227,21 +233,21 @@ function DeleteScreen({
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete Screener</AlertDialogTitle>
+          <AlertDialogTitle>Delete Watchlist</AlertDialogTitle>
           <AlertDialogDescription>
             This action cannot be undone. This will permanently delete
             <span className="font-bold text-destructive">
               {" "}
-              {screen.name}
+              {watchlist.name}
             </span>{" "}
-            screener
+            watchlist
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             className={buttonVariants({ variant: "destructive" })}
-            onClick={() => deleteScreen(screen.id)}
+            onClick={() => deleteWatchlist(watchlist.id)}
           >
             Continue
           </AlertDialogAction>

@@ -22,3 +22,9 @@ export interface ActionH {
 export type Screen = Database["public"]["Tables"]["screens"]["Row"];
 export type InsertScreen = Database["public"]["Tables"]["screens"]["Insert"];
 export type UpdateScreen = Database["public"]["Tables"]["screens"]["Update"];
+
+export type Watchlist = Database["public"]["Tables"]["watchlists"]["Row"];
+export type InsertWatchlist =
+  Database["public"]["Tables"]["watchlists"]["Insert"];
+export type UpdateWatchlist =
+  Database["public"]["Tables"]["watchlists"]["Update"];

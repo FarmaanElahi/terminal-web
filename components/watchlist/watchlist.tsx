@@ -1,7 +1,11 @@
 "use client";
 
 import React, { HTMLAttributes, useCallback, useMemo } from "react";
-import { useScreener, useScreens, useUpdateScreen } from "@/lib/state/symbol";
+import {
+  useUpdateWatchlist,
+  useWatchlist,
+  useWatchlistSymbols,
+} from "@/lib/state/symbol";
 import {
   GetRowIdFunc,
   GetRowIdParams,
@@ -18,27 +22,27 @@ import "../grid/ag-theme.css";
 import debounce from "debounce";
 import { toast } from "sonner";
 import { Json } from "@/types/generated/supabase";
-import { useActiveScreenerId } from "@/hooks/use-active-screener";
 import type { Symbol } from "@/types/symbol";
+import { useActiveWatchlistId } from "@/hooks/use-active-watchlist";
 
-type ScreenerProps = HTMLAttributes<HTMLDivElement>;
+type WatchlistProps = HTMLAttributes<HTMLDivElement>;
 
 function useColumnDefs() {
   return useMemo(() => defaultColumns, []);
 }
 
-function useActiveScreen(activeScreenId?: string | null) {
-  const { data: screens } = useScreens();
-  return screens?.find((s) => s.id && s.id === activeScreenId);
+function useActiveWatchlist(activeWatchlistId?: string | null) {
+  const { data: watchlist } = useWatchlist();
+  return watchlist?.find((s) => s.id && s.id === activeWatchlistId);
 }
 
-function useScreenerChangeCallback(activeScreenId?: string | null) {
-  const mutation = useUpdateScreen((screen) =>
-    toast(`${screen.name} screen updated`),
+function useWatchlistChangeCallback(activeWatchlist?: string | null) {
+  const mutation = useUpdateWatchlist((watchlist) =>
+    toast(`${watchlist.name} Watchlist updated`),
   );
 
   // Debounced update function
-  const updateScreen = useMemo(
+  const updateWatchlist = useMemo(
     () => debounce(mutation.mutate, 1000),
     [mutation.mutate],
   );
@@ -50,18 +54,18 @@ function useScreenerChangeCallback(activeScreenId?: string | null) {
       if (params.sources?.[0] === "gridInitializing") return;
 
       // Doesn't have active screener
-      const id = activeScreenId;
+      const id = activeWatchlist;
       if (!id) return;
 
       const currentState = params.api.getState() as Json;
-      updateScreen({ id, payload: { state: currentState } });
+      updateWatchlist({ id, payload: { state: currentState } });
     },
-    [activeScreenId, updateScreen],
+    [activeWatchlist, updateWatchlist],
   );
 }
 
 function useGridInitialState(activeScreenId?: string | null) {
-  const activeScreen = useActiveScreen(activeScreenId);
+  const activeScreen = useActiveWatchlist(activeScreenId);
   const colDefs = useColumnDefs();
 
   const defaultState = useMemo(() => {
@@ -99,13 +103,20 @@ function useGridInitialState(activeScreenId?: string | null) {
   return (activeScreen?.state ?? defaultState) as GridState;
 }
 
-export function Screener(props: ScreenerProps) {
-  const { activeScreenId } = useActiveScreenerId();
-  const colDefs = useColumnDefs();
+export function Watchlist(props: WatchlistProps) {
+  const { activeWatchlistId } = useActiveWatchlistId();
+  const watchlist = useActiveWatchlist(activeWatchlistId);
+  const { data: rowData } = useWatchlistSymbols(watchlist);
+
   const switcher = useGroupSymbolSwitcher();
-  const handleStateChange = useScreenerChangeCallback(activeScreenId);
-  const { data: rowData } = useScreener();
-  const initialState = useGridInitialState(activeScreenId);
+  const handleStateChange = useWatchlistChangeCallback(activeWatchlistId);
+  const colDefs = useColumnDefs();
+  const initialState = useGridInitialState(activeWatchlistId);
+
+  const getRowId = useCallback<GetRowIdFunc>(
+    ({ data }: GetRowIdParams<Symbol>) => data.ticker!,
+    [],
+  );
 
   const statusBar = useMemo(
     () => ({
@@ -120,22 +131,15 @@ export function Screener(props: ScreenerProps) {
     [],
   );
 
-  const getRowId = useCallback<GetRowIdFunc>(
-    ({ data }: GetRowIdParams<Symbol>) => data.ticker!,
-    [],
-  );
-
   return (
     <div {...props} className={"h-full"}>
       <AgGridReact
         dataTypeDefinitions={extendedColumnType}
-        key={activeScreenId ?? "default"}
+        key={activeWatchlistId ?? "default"}
         className="ag-terminal-theme"
-        enableAdvancedFilter={true}
         rowSelection={{ mode: "multiRow" }}
-        selectionColumnDef={{ pinned: "left" }}
+        // selectionColumnDef={{ pinned: "left" }}
         sideBar={true}
-        includeHiddenColumnsInAdvancedFilter={true}
         rowData={rowData}
         autoSizeStrategy={{
           type: "fitGridWidth",
@@ -151,14 +155,12 @@ export function Screener(props: ScreenerProps) {
         initialState={initialState}
         getRowId={getRowId}
         defaultColDef={{
-          filter: true,
+          filter: false,
           sortable: true,
           resizable: true,
-          enableRowGroup: true,
         }}
-        rowGroupPanelShow={"onlyWhenGrouping"}
-        onStateUpdated={handleStateChange}
         statusBar={statusBar}
+        onStateUpdated={handleStateChange}
         onCellFocused={(event) => {
           const { rowIndex } = event;
           if (rowIndex === undefined || rowIndex === null) return;

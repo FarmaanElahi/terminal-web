@@ -16,7 +16,7 @@ export function ScreenerProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useActiveScreener() {
+export function useActiveScreenerId() {
   const value = useContext(ScreenerContext);
   if (!value) {
     throw new Error("ScreenerContext not configured");
