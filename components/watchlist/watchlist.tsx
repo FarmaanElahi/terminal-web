@@ -180,7 +180,7 @@ export function Watchlist(props: WatchlistProps) {
         "copy",
       ];
     },
-    [activeWatchlistId, updateWatchlist],
+    [allWatchlist, updateWatchlist],
   );
 
   let node: JSX.Element | null = null;
@@ -212,12 +212,27 @@ export function Watchlist(props: WatchlistProps) {
         columnDefs={colDefs}
         initialState={initialState}
         getRowId={getRowId}
+        processDataFromClipboard={(params) => {
+          if (!watchlist) return params.data;
+          const tickers = params.data[0]?.[0]
+            ?.split(/[\\n ,]+/)
+            ?.filter((s) => s)
+            ?.map((s) => s?.trim()?.toUpperCase());
+
+          if (!tickers || tickers.length === 0) return params.data;
+          updateWatchlist({
+            id: watchlist.id,
+            payload: { symbols: [...watchlist.symbols, ...tickers] },
+          });
+
+          return params.data;
+        }}
+        statusBar={statusBar}
         defaultColDef={{
           filter: false,
           sortable: true,
           resizable: true,
         }}
-        statusBar={statusBar}
         onStateUpdated={handleStateChange}
         onCellFocused={(event) => {
           // If the cell was focus because of selection change, we will ignore
