@@ -4,20 +4,19 @@ import { ChartStorage } from "@/components/chart/chart_storage";
 import { LogoProvider } from "@/components/chart/logo_provider";
 import { getIndicators } from "@/components/chart/indicators";
 import { Client } from "@/utils/supabase/client";
-import { MarketDataStreamer } from "@/utils/upstox/market_data_streamer";
 import { DatafeedUpstox } from "@/components/chart/datafeed_upstox";
 
 export class ChartManager {
   private readonly chartStorage: ChartStorage;
   private readonly logoProvider: LogoProvider;
-  private marketDataStreamer = new MarketDataStreamer();
+  private readonly datafeed: DatafeedUpstox;
 
   constructor(
     private readonly client: Client,
     logoBaseUrl: string,
   ) {
-    void this.marketDataStreamer.connectNow();
     this.logoProvider = new LogoProvider(logoBaseUrl);
+    this.datafeed = new DatafeedUpstox(this.logoProvider);
     this.chartStorage = new ChartStorage(this.client);
   }
 
@@ -56,10 +55,10 @@ export class ChartManager {
     // await userSettingAdapter.load();
     const timezone = "Asia/Kolkata";
     return {
-      datafeed: new DatafeedUpstox(this.logoProvider, this.marketDataStreamer),
+      datafeed: this.datafeed,
       autosize: true,
       library_path: "/external/charting_library/",
-      debug: false,
+      debug: true,
       timezone,
       interval: "1D",
       locale: "en",

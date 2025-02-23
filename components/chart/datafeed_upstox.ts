@@ -23,8 +23,7 @@ import Feed = MarketV3.com.upstox.marketdatafeeder.rpc.proto.Feed;
 
 export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   private readonly upstoxHistoryAPI = new HistoryApi();
-  // Bar are arrange in the oldest candle last order. Key is the ticker
-  private readonly historyCandle = {} as Record<string, Bar[]>;
+  private marketFeed = new MarketDataStreamer();
   private feeds?: Record<string, Feed>;
   private readonly listeners = new Map<
     string,
@@ -40,11 +39,9 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     super.onReady(callback);
   }
 
-  constructor(
-    logoProvider: LogoProvider,
-    private readonly marketFeed: MarketDataStreamer,
-  ) {
+  constructor(logoProvider: LogoProvider) {
     super(logoProvider);
+    void this.marketFeed.connectNow();
     this.marketFeed.on("message", (data) => {
       this.feeds = { ...(this.feeds ?? {}), ...data.feeds };
       this.refreshRealtime();
@@ -66,11 +63,11 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
 
     const bars = await this.ensureEnoughCandleReady(
       symbolInfo,
-      periodParams.to,
+      !periodParams.firstDataRequest ? periodParams.to : periodParams.to - 1,
       periodParams.from,
       "day",
     );
-    const filtered = bars.splice(-periodParams.countBack);
+    const filtered = bars.splice(0, bars.length - 1);
 
     if (!filtered) return onError("Unable to resolve symbol");
     if (filtered.length === 0) return onResult([], { noData: true });
@@ -231,22 +228,8 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     from: number,
     interval: "day",
   ) {
-    // Ensure we have an array first
-    const key = symbolInfo.ticker!;
-    if (!this.historyCandle[key]) {
-      this.historyCandle[symbolInfo.ticker!] = [];
-    }
-
-    const previousBars = this.historyCandle[key];
-    if (previousBars[0] && previousBars[0].time < from * 1000) {
-      // We don't need additional data to be loaded now
-      return previousBars;
-    }
-
     // Load additional data
-    const toDate = previousBars[0]
-      ? DateTime.fromMillis(previousBars[0].time)
-      : DateTime.fromSeconds(to);
+    const toDate = DateTime.fromSeconds(to);
     const fromDate = DateTime.fromSeconds(from).minus({ year: 10 });
     const instrumentKey = this.toUpstoxInstrumentKey(symbolInfo);
     const candles = await new Promise<GetHistoricalCandleResponse>(
@@ -266,7 +249,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     ).then((h) => h.data.candles);
 
     const seen = new Set<number>();
-    const current = candles
+    return candles
       .map(([ts, open, high, low, close, volume]) => {
         const utc = FixedOffsetZone.utcInstance;
         const time = DateTime.fromISO(ts.split("T")[0], { zone: utc })
@@ -274,17 +257,12 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
           .toMillis();
         return { time, open, high, low, close, volume } as Bar;
       })
-      .reverse();
-
-    // Update the total bars. Recently loaded keep first
-    this.historyCandle[key] = [...current, ...previousBars]
       .filter((b) => {
         if (seen.has(b.time)) return false;
         seen.add(b.time);
         return true;
       })
       .sort((a, b) => a.time - b.time);
-    return this.historyCandle[key];
   }
 
   private ensureTBTSubscribe(
