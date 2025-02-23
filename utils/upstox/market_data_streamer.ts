@@ -1,5 +1,6 @@
 import { MarketDataFeeder, Mode, ModeCode } from "./market_data_feeder";
 import { Streamer } from "./streamer";
+import { getUpstoxMarketFeedUrl } from "@/server/upstox";
 
 export class MarketDataStreamer extends Streamer {
   private readonly subscriptions = {
@@ -36,6 +37,11 @@ export class MarketDataStreamer extends Streamer {
         }
       });
     });
+  }
+
+  async connectNow() {
+    const url = await getUpstoxMarketFeedUrl();
+    return this.connect(url);
   }
 
   async connect(url: string) {

@@ -1,23 +1,23 @@
 import type { TradingView } from "@/components/chart/charting";
 import type { TradingViewWidgetOptions } from "@/components/chart/types";
-import { Datafeed } from "@/components/chart/datafeed";
 import { ChartStorage } from "@/components/chart/chart_storage";
 import { LogoProvider } from "@/components/chart/logo_provider";
 import { getIndicators } from "@/components/chart/indicators";
 import { Client } from "@/utils/supabase/client";
+import { MarketDataStreamer } from "@/utils/upstox/market_data_streamer";
 import { DatafeedUpstox } from "@/components/chart/datafeed_upstox";
 
 export class ChartManager {
-  private readonly datafeed: Datafeed;
   private readonly chartStorage: ChartStorage;
   private readonly logoProvider: LogoProvider;
+  private marketDataStreamer = new MarketDataStreamer();
 
   constructor(
     private readonly client: Client,
     logoBaseUrl: string,
   ) {
+    void this.marketDataStreamer.connectNow();
     this.logoProvider = new LogoProvider(logoBaseUrl);
-    this.datafeed = new DatafeedUpstox(this.logoProvider);
     this.chartStorage = new ChartStorage(this.client);
   }
 
@@ -56,7 +56,7 @@ export class ChartManager {
     // await userSettingAdapter.load();
     const timezone = "Asia/Kolkata";
     return {
-      datafeed: this.datafeed,
+      datafeed: new DatafeedUpstox(this.logoProvider, this.marketDataStreamer),
       autosize: true,
       library_path: "/external/charting_library/",
       debug: false,

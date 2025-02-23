@@ -105,11 +105,9 @@ export abstract class Datafeed {
       sector: data.sector,
       has_intraday: false,
       session_display: session_display,
-      data_status: "endofday",
+      data_status: "streaming",
       has_daily: true,
-      session_holidays: data.session_holidays,
       isin: data.isin,
-      quote: data,
     } as LibrarySymbolInfoExtended;
     onResolve(symbol);
   }

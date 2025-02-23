@@ -19,14 +19,13 @@ import { LogoProvider } from "@/components/chart/logo_provider";
 import { MarketDataStreamer } from "@/utils/upstox/market_data_streamer";
 import { GetHistoricalCandleResponse, HistoryApi } from "upstox-js-sdk";
 import * as MarketV3 from "@/utils/upstox/market_v3";
-import { getUpstoxMarketFeedUrl } from "@/server/upstox";
 import Feed = MarketV3.com.upstox.marketdatafeeder.rpc.proto.Feed;
 
 export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
-  private readonly marketFeed = new MarketDataStreamer();
   private readonly upstoxHistoryAPI = new HistoryApi();
+  // Bar are arrange in the oldest candle last order. Key is the ticker
+  private readonly historyCandle = {} as Record<string, Bar[]>;
   private feeds?: Record<string, Feed>;
-  private url?: string;
   private readonly listeners = new Map<
     string,
     {
@@ -38,11 +37,13 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   >();
 
   onReady(callback: OnReadyCallback) {
-    void this.connect();
     super.onReady(callback);
   }
 
-  constructor(logoProvider: LogoProvider) {
+  constructor(
+    logoProvider: LogoProvider,
+    private readonly marketFeed: MarketDataStreamer,
+  ) {
     super(logoProvider);
     this.marketFeed.on("message", (data) => {
       this.feeds = { ...(this.feeds ?? {}), ...data.feeds };
@@ -53,16 +54,6 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     this.marketFeed.on("error", () => console.error("TBT Conn Closed"));
   }
 
-  private async connect() {
-    if (!this.url) {
-      const url = await getUpstoxMarketFeedUrl();
-      if (!this.url) {
-        this.url = url;
-        void this.marketFeed.connect(this.url);
-      }
-    }
-  }
-
   async getBars(
     symbolInfo: LibrarySymbolInfoExtended,
     resolution: ResolutionString,
@@ -70,20 +61,20 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     onResult: HistoryCallback,
     onError: DatafeedErrorCallback,
   ) {
-    const { to, from, countBack, firstDataRequest } = periodParams;
-    const toDate = DateTime.fromSeconds(to);
-    const day = Math.max(2 * 252, countBack); // Pull Min 10 year data
-    const fromDate = DateTime.fromSeconds(from).minus({ day: day });
-    const bars = await this.symbolCandle(
+    // Ensure we are subscribe to realtime date
+    this.ensureTBTSubscribe(symbolInfo, periodParams.firstDataRequest);
+
+    const bars = await this.ensureEnoughCandleReady(
       symbolInfo,
+      periodParams.to,
+      periodParams.from,
       "day",
-      toDate,
-      fromDate,
-      firstDataRequest,
     );
-    if (!bars) return onError("Unable to resolve symbol");
-    if (bars.length === 0) return onResult([], { noData: true });
-    onResult(bars);
+    const filtered = bars.splice(-periodParams.countBack);
+
+    if (!filtered) return onError("Unable to resolve symbol");
+    if (filtered.length === 0) return onResult([], { noData: true });
+    onResult(filtered);
   }
 
   /**
@@ -136,10 +127,6 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     firstRequest: boolean,
   ) {
     const instrumentKey = this.toUpstoxInstrumentKey(symbolInfo);
-    // Initiate
-    if (firstRequest && !this.isSubscribed(instrumentKey)) {
-      this.marketFeed.subscribe([instrumentKey], "full");
-    }
 
     const historyPromise = new Promise<GetHistoricalCandleResponse>(
       (resolve, reject) => {
@@ -236,5 +223,78 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
       .toMillis();
 
     return { time, open, high, low, close, volume } as Bar;
+  }
+
+  private async ensureEnoughCandleReady(
+    symbolInfo: LibrarySymbolInfoExtended,
+    to: number,
+    from: number,
+    interval: "day",
+  ) {
+    // Ensure we have an array first
+    const key = symbolInfo.ticker!;
+    if (!this.historyCandle[key]) {
+      this.historyCandle[symbolInfo.ticker!] = [];
+    }
+
+    const previousBars = this.historyCandle[key];
+    if (previousBars[0] && previousBars[0].time < from * 1000) {
+      // We don't need additional data to be loaded now
+      return previousBars;
+    }
+
+    // Load additional data
+    const toDate = previousBars[0]
+      ? DateTime.fromMillis(previousBars[0].time)
+      : DateTime.fromSeconds(to);
+    const fromDate = DateTime.fromSeconds(from).minus({ year: 10 });
+    const instrumentKey = this.toUpstoxInstrumentKey(symbolInfo);
+    const candles = await new Promise<GetHistoricalCandleResponse>(
+      (resolve, reject) => {
+        this.upstoxHistoryAPI.getHistoricalCandleData1(
+          instrumentKey,
+          interval,
+          toDate.toFormat("yyyy-MM-dd"),
+          fromDate.toFormat("yyyy-MM-dd"),
+          "v2",
+          (error, data) => {
+            if (error) return reject(error);
+            return resolve(data);
+          },
+        );
+      },
+    ).then((h) => h.data.candles);
+
+    const seen = new Set<number>();
+    const current = candles
+      .map(([ts, open, high, low, close, volume]) => {
+        const utc = FixedOffsetZone.utcInstance;
+        const time = DateTime.fromISO(ts.split("T")[0], { zone: utc })
+          .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
+          .toMillis();
+        return { time, open, high, low, close, volume } as Bar;
+      })
+      .reverse();
+
+    // Update the total bars. Recently loaded keep first
+    this.historyCandle[key] = [...current, ...previousBars]
+      .filter((b) => {
+        if (seen.has(b.time)) return false;
+        seen.add(b.time);
+        return true;
+      })
+      .sort((a, b) => a.time - b.time);
+    return this.historyCandle[key];
+  }
+
+  private ensureTBTSubscribe(
+    symbolInfo: LibrarySymbolInfoExtended,
+    firstRequest: boolean,
+  ) {
+    const instrumentKey = this.toUpstoxInstrumentKey(symbolInfo);
+    // Initiate
+    if (firstRequest && !this.isSubscribed(instrumentKey)) {
+      this.marketFeed.subscribe([instrumentKey], "full");
+    }
   }
 }
