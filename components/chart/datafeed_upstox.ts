@@ -36,12 +36,12 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   >();
 
   onReady(callback: OnReadyCallback) {
+    void this.marketFeed.connectNow();
     super.onReady(callback);
   }
 
   constructor(logoProvider: LogoProvider) {
     super(logoProvider);
-    void this.marketFeed.connectNow();
     this.marketFeed.on("message", (data) => {
       this.feeds = { ...(this.feeds ?? {}), ...data.feeds };
       this.refreshRealtime();
@@ -61,13 +61,13 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     // Ensure we are subscribe to realtime date
     this.ensureTBTSubscribe(symbolInfo, periodParams.firstDataRequest);
 
-    const bars = await this.ensureEnoughCandleReady(
+    const filtered = await this.ensureEnoughCandleReady(
       symbolInfo,
       !periodParams.firstDataRequest ? periodParams.to : periodParams.to - 1,
       periodParams.from,
       "day",
     );
-    const filtered = bars.splice(0, bars.length - 1);
+    console.log(JSON.parse(JSON.stringify(filtered)));
 
     if (!filtered) return onError("Unable to resolve symbol");
     if (filtered.length === 0) return onResult([], { noData: true });
