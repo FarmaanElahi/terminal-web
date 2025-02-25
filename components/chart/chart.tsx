@@ -17,7 +17,11 @@ export function Chart(props: ChartProps) {
   const symbol = useGroupSymbol();
   const theme = useTheme();
   const chartTheme =
-    theme.theme === "dark" ? "dark" : (theme.systemTheme ?? "light");
+    theme.theme === "dark"
+      ? "dark"
+      : theme.theme === "light"
+        ? "light"
+        : (theme.systemTheme ?? "light");
 
   // Only create a widget when the widget is loaded for the first time
   useEffect(() => {
