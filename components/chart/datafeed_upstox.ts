@@ -65,12 +65,9 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     // Ensure we are subscribe to realtime date
     this.ensureTBTSubscribe(symbolInfo, periodParams.firstDataRequest);
 
-    console.log("Get", resolution, periodParams);
     const filtered = await (resolution === "1D"
       ? this.pullDayCandle(symbolInfo, periodParams)
       : this.pullMinutesCandles(symbolInfo, periodParams));
-
-    console.log(JSON.parse(JSON.stringify(filtered)));
 
     if (!filtered) return onError("Unable to resolve symbol");
     if (filtered.length === 0) return onResult([], { noData: true });
