@@ -290,6 +290,7 @@ export type ResolutionString =
   | "180"
   | "240"
   | "D"
+  | "1D"
   | "1W"
   | "1M"
   | "3M"

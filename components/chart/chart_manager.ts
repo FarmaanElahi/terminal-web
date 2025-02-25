@@ -58,7 +58,7 @@ export class ChartManager {
       datafeed: this.datafeed,
       autosize: true,
       library_path: "/external/charting_library/",
-      debug: false,
+      debug: true,
       timezone,
       interval: "1D",
       locale: "en",

@@ -80,7 +80,6 @@ async function symbolResolveFn(ticker: string) {
 export function symbolResolve(symbol: string) {
   return queryClient.fetchQuery({
     queryKey: ["symbol_resolve", symbol],
-    staleTime: 100,
     queryFn: async () => symbolResolveFn(symbol),
   });
 }

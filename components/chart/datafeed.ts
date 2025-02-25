@@ -23,7 +23,22 @@ export abstract class Datafeed {
 
   onReady(callback: OnReadyCallback) {
     const config = {
-      supported_resolutions: ["D", "1W", "1M", "3M", "6M", "12M"],
+      supported_resolutions: [
+        "1",
+        "2",
+        "3",
+        "5",
+        "10",
+        "15",
+        "30",
+        "45",
+        "D",
+        "1W",
+        "1M",
+        "3M",
+        "6M",
+        "12M",
+      ],
       supports_time: true,
       exchanges: [
         { name: "All", value: "", desc: "" },
@@ -79,7 +94,6 @@ export abstract class Datafeed {
     const sessionDetails = (data.subsessions as Subsession[]).find(
       (s) => s.id === subsession_id,
     );
-    const corrections = sessionDetails?.["session-correction"];
     const session = sessionDetails?.session;
     const session_display = sessionDetails?.["session-display"];
     const listed_exchange = data.exchange;
@@ -96,15 +110,17 @@ export abstract class Datafeed {
       timezone: data.timezone,
       subsessions: data.subsessions,
       subsession_id: subsession_id,
-      corrections: corrections,
       minmov: minmov,
       pricescale: pricescale,
       currency_code: data.currency,
       session: session,
       industry: data.industry,
       sector: data.sector,
-      has_intraday: false,
+      has_intraday: true,
+      has_seconds: false,
+      intraday_multipliers: ["1", "2", "3", "5", "10", "15", "30", "45"],
       session_display: session_display,
+      has_weekly_and_monthly: false,
       data_status: "streaming",
       has_daily: true,
       isin: data.isin,
@@ -112,7 +128,7 @@ export abstract class Datafeed {
     onResolve(symbol);
   }
 
-  getTimescaleMarks(
+  async getTimescaleMarks(
     symbolInfo: LibrarySymbolInfoExtended,
     from: number,
     to: number,
