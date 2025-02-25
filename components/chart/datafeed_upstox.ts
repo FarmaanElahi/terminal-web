@@ -25,6 +25,9 @@ import {
 import * as MarketV3 from "@/utils/upstox/market_v3";
 import Feed = MarketV3.com.upstox.marketdatafeeder.rpc.proto.Feed;
 
+type UpstoxInterval = "day" | "1minute";
+type UpstoxIntradayInterval = "1d" | "I1";
+
 export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   private readonly upstoxHistoryAPI = new HistoryApi();
   private marketFeed = new MarketDataStreamer();
@@ -65,9 +68,11 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     // Ensure we are subscribe to realtime date
     this.ensureTBTSubscribe(symbolInfo, periodParams.firstDataRequest);
 
-    const filtered = await (resolution === "1D"
-      ? this.pullDayCandle(symbolInfo, periodParams)
-      : this.pullMinutesCandles(symbolInfo, periodParams));
+    const interval: UpstoxInterval = resolution === "1D" ? "day" : "1minute";
+
+    const filtered = await (interval === "day"
+      ? this.pullDayCandle(symbolInfo, periodParams, interval)
+      : this.pullMinutesCandles(symbolInfo, periodParams, interval));
 
     if (!filtered) return onError("Unable to resolve symbol");
     if (filtered.length === 0) return onResult([], { noData: true });
@@ -158,7 +163,8 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   }
 
   private getTBTLatestBar(instrumentKey: string, resolution: ResolutionString) {
-    const upstoxInterval = resolution === "D" ? "1d" : "I1";
+    const upstoxInterval: UpstoxIntradayInterval =
+      resolution === "1D" ? "1d" : "I1";
     const feed = this.feeds?.[instrumentKey];
     if (!feed) return null;
 
@@ -172,7 +178,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     const utc = FixedOffsetZone.utcInstance;
 
     // If it is day, it has to be in UTC 12 AM
-    if (resolution === "D") {
+    if (upstoxInterval === "1d") {
       const time = DateTime.fromMillis(ts as number, { zone: utc })
         .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
         .toMillis();
@@ -187,6 +193,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   private async pullDayCandle(
     symbolInfo: LibrarySymbolInfoExtended,
     period: PeriodParams,
+    interval: UpstoxInterval,
   ) {
     const { to, from, countBack } = period;
     // Load additional data
@@ -201,7 +208,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
       (resolve, reject) => {
         this.upstoxHistoryAPI.getHistoricalCandleData1(
           instrumentKey,
-          "day",
+          interval,
           toDate.toFormat("yyyy-MM-dd"),
           fromDate.toFormat("yyyy-MM-dd"),
           "v2",
@@ -233,9 +240,9 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   private async pullMinutesCandles(
     symbolInfo: LibrarySymbolInfoExtended,
     period: PeriodParams,
+    interval: UpstoxInterval,
   ) {
     const { to, from, countBack } = period;
-    const interval = "1minute";
     // Load additional data
     const toDate = DateTime.fromSeconds(to);
     const fromDate = DateTime.fromSeconds(from).minus({
