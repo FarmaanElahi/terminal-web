@@ -6,8 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import type { WidgetType } from "./dashboard-constant";
-import { widgets } from "@/components/dashboard/widget-registry";
+import { widgets, WidgetType } from "./widget-registry";
 
 interface WidgetSelectorProps {
   open: boolean;
