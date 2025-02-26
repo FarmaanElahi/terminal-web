@@ -199,6 +199,7 @@ export function Screener(props: ScreenerProps) {
         initialState={initialState}
         getRowId={getRowId}
         defaultColDef={{
+          wrapHeaderText: true,
           filter: true,
           sortable: true,
           resizable: true,

@@ -230,9 +230,11 @@ export function Watchlist(props: WatchlistProps) {
         }}
         statusBar={statusBar}
         defaultColDef={{
-          filter: false,
+          wrapHeaderText: true,
+          filter: true,
           sortable: true,
           resizable: true,
+          enableRowGroup: true,
         }}
         onStateUpdated={handleStateChange}
         onCellFocused={(event) => {
