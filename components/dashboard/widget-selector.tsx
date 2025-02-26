@@ -6,42 +6,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import type { WidgetType } from "./dashboard";
+import type { WidgetType } from "./dashboard-constant";
+import { widgets } from "@/components/dashboard/widget-registry";
 
 interface WidgetSelectorProps {
   open: boolean;
   onClose: () => void;
   onSelect: (type: WidgetType) => void;
 }
-
-const widgets: Array<{ type: WidgetType; name: string; description: string }> =
-  [
-    {
-      type: "screener",
-      name: "Stock Screener",
-      description: "Screen stocks based on various criteria",
-    },
-    {
-      type: "watchlist",
-      name: "Watchlist",
-      description: "Track your favorite stocks",
-    },
-    {
-      type: "stats",
-      name: "Statistics",
-      description: "View detailed statistics",
-    },
-    {
-      type: "ideas",
-      name: "Trading Ideas",
-      description: "Get trading ideas and insights",
-    },
-    {
-      type: "chart",
-      name: "Chart",
-      description: "Chart Widget",
-    },
-  ];
 
 export function WidgetSelector({
   open,
