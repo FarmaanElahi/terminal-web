@@ -204,7 +204,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     });
 
     const instrumentKey = this.toUpstoxInstrumentKey(symbolInfo);
-    const candles = await new Promise<GetHistoricalCandleResponse>(
+    const historicalCandlePromise = new Promise<GetHistoricalCandleResponse>(
       (resolve, reject) => {
         this.upstoxHistoryAPI.getHistoricalCandleData1(
           instrumentKey,
@@ -220,7 +220,41 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
       },
     ).then((h) => h.data.candles);
 
+    const intradayCandlePromise = period.firstDataRequest
+      ? new Promise<GetIntraDayCandleResponse>((resolve, reject) => {
+          this.upstoxHistoryAPI.getIntraDayCandleData(
+            instrumentKey,
+            "30minute",
+            "v2",
+            (error, data) => {
+              if (error) return reject(error);
+              return resolve(data);
+            },
+          );
+        }).then((h) => {
+          const first = h.data.candles[h.data.candles.length - 1];
+          const last = h.data.candles[0];
+          const candle = [
+            first[0], // timestamp,
+            first[1], // open,
+            Math.max(...h.data.candles.map((c) => c[2])), // High
+            Math.min(...h.data.candles.map((c) => c[3])), // Low
+            last[4], // Close
+            h.data.candles.map((c) => c[5]).reduce((a, b) => a + b, 0), // Volume
+          ] as const;
+          return [candle];
+        })
+      : [];
+
+    const [historical, intraday] = await Promise.all([
+      historicalCandlePromise,
+      intradayCandlePromise,
+    ]);
+
+    const candles =
+      intraday.length > 0 ? [...historical, ...intraday] : historical;
     const seen = new Set<number>();
+
     return candles
       .map(([ts, open, high, low, close, volume]) => {
         const utc = FixedOffsetZone.utcInstance;
