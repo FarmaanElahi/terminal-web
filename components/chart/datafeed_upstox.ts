@@ -232,6 +232,8 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
             },
           );
         }).then((h) => {
+          if (h.data.candles.length === 0) return [];
+
           const first = h.data.candles[h.data.candles.length - 1];
           const last = h.data.candles[0];
           const candle = [
