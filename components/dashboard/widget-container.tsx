@@ -21,7 +21,7 @@ export function WidgetContainer({
         {/* Drag handle button - positioned absolutely on the left */}
         <Button
           variant="secondary"
-          className="absolute top-2 left-2 h-5 w-5 drag-handle bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 z-10 hover:z-50"
+          className="absolute top-2 left-2 h-5 w-5 drag-handle bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 z-50 hover:z-50"
         >
           <GripVertical className="h-4 w-4" />
         </Button>
@@ -30,7 +30,7 @@ export function WidgetContainer({
         <Button
           variant="secondary"
           size="icon"
-          className="absolute top-2 right-2 h-5 w-5 bg-background/80 backdrop-blur-sm hover:bg-destructive hover:text-destructive-foreground opacity-0 group-hover:opacity-100 z-10 hover:z-50"
+          className="absolute top-2 right-2 h-5 w-5 bg-background/80 backdrop-blur-sm hover:bg-destructive hover:text-destructive-foreground opacity-0 group-hover:opacity-100 z-50 hover:z-50"
           onClick={() => onRemove(layout.i)}
         >
           <X className="h-4 w-4" />
