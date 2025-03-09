@@ -511,7 +511,7 @@ export function useDashboards() {
 
       if (error) throw error;
       data?.forEach((d) => {
-        client.setQueryData(["dashboards", d.id], () => d);
+        client.setQueryData(["dashboards", d.id], d);
       });
       return data;
     },
@@ -567,8 +567,10 @@ export function useUpdatedDashboard() {
   const client = useQueryClient();
   return useMutation({
     onSuccess: (dashboard: Dashboard) => {
-      void client.invalidateQueries({ queryKey: ["dashboards"] });
-      void client.invalidateQueries({ queryKey: ["dashboard", dashboard.id] });
+      client.setQueryData(["dashboards"], (dashboards: Dashboard[]) =>
+        dashboards.map((d) => (d.id === dashboard.id ? dashboard : d)),
+      );
+      client.setQueryData(["dashboards", dashboard.id], () => dashboard);
     },
     mutationFn: async ({
       id,
@@ -577,6 +579,7 @@ export function useUpdatedDashboard() {
       id: string;
       payload: UpdateDashboard;
     }) => {
+      console.log("Updating dashboard with ID: ", id, payload);
       const { data, error } = await supabase
         .from("dashboards")
         .update({
@@ -595,7 +598,7 @@ export function useUpdatedDashboard() {
 
 export function useDashboardData(id: string) {
   return useQuery({
-    queryKey: ["dashboard", id],
+    queryKey: ["dashboards", id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("dashboards")

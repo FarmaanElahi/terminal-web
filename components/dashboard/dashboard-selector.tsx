@@ -45,12 +45,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Dashboard } from "@/types/supabase";
+import type { LayoutItem } from "@/components/dashboard/use-dashboard";
 
 interface DashboardSelectorProps {
   dashboards: Dashboard[];
   activeDashboard?: string;
   setActiveDashboard: (id: string) => void;
-  onCreateDashboard: (name: string) => void;
+  onCreateDashboard: (name: string, layouts: LayoutItem[]) => void;
   onDeleteDashboard: (id: string) => void;
   onAddWidget: () => void;
   canAddWidget: boolean;
@@ -176,7 +177,7 @@ export function DashboardSelector({
         open={openDialog}
         setOpen={setOpenDialog}
         defaultName={newDashboardDefault}
-        onCreate={onCreateDashboard}
+        onCreate={(name) => onCreateDashboard(name, [])}
       />
     </div>
   );

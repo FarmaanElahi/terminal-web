@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { DashboardSelector } from "./dashboard-selector";
 import { Dashboard } from "./dashboard";
 import { toast } from "sonner";
-import { DEFAULT_LAYOUT } from "@/components/dashboard/widget-registry";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -29,6 +28,7 @@ import {
   useDeleteDashboard,
 } from "@/lib/state/symbol";
 import { Json } from "@/types/generated/supabase";
+import { LayoutItem } from "@/components/dashboard/use-dashboard";
 
 interface TabItemProps {
   id: string;
@@ -85,8 +85,7 @@ const TabItem = ({ id, name, isActive, onSelect, onClose }: TabItemProps) => {
 };
 
 export function DashboardManager() {
-  const { data: dashboards = [], isLoading: isDashboardsLoading } =
-    useDashboards();
+  const { data: dashboards = [], isLoading } = useDashboards();
 
   const { mutate: createDashboard } = useCreateDashboard();
   const { mutate: deleteDashboard } = useDeleteDashboard();
@@ -126,9 +125,9 @@ export function DashboardManager() {
     }
   }, [dashboards, activeDashboardId, setActiveDashboardId]);
 
-  const handleCreateDashboard = (name: string) => {
+  const handleCreateDashboard = (name: string, layouts: LayoutItem[]) => {
     createDashboard(
-      { name, layout: DEFAULT_LAYOUT as unknown as Json },
+      { name, layout: layouts as unknown as Json },
       {
         onSuccess: (newDashboard) => {
           setActiveDashboardId(newDashboard.id);
@@ -212,13 +211,14 @@ export function DashboardManager() {
 
   const activeDashboard = dashboards.find((d) => d.id === activeDashboardId);
 
-  if (isDashboardsLoading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
         Loading dashboards...
       </div>
     );
   }
+  console.log("Dashboard", activeDashboard, dashboards);
 
   return (
     <div className="h-full flex flex-col">

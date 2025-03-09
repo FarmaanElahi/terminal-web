@@ -3,12 +3,7 @@ import { Responsive, WidthProvider } from "react-grid-layout";
 import { WidgetSelector } from "./widget-selector";
 import { useDashboard } from "./use-dashboard";
 import { WidgetContainer } from "./widget-container";
-import {
-  DEFAULT_LAYOUT,
-  WIDGET_SIZES,
-  widgetComponents,
-  WidgetType,
-} from "./widget-registry";
+import { WIDGET_SIZES, widgetComponents, WidgetType } from "./widget-registry";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import "./dashboard-module.css";
@@ -29,17 +24,23 @@ export function Dashboard({
 }: DashboardProps) {
   const {
     layouts,
+    isLoading,
     handleLayoutChange,
     addWidget,
     removeWidget,
     updateWidgetSettings,
-  } = useDashboard(id, DEFAULT_LAYOUT);
+  } = useDashboard(id);
 
   const handleAddWidget = (type: WidgetType) => {
     if (addWidget(type)) {
       onAddingWidgetChange(false);
     }
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+  console.log(layouts);
 
   return (
     <div className="h-full w-full">
