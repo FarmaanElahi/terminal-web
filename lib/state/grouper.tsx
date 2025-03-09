@@ -67,6 +67,10 @@ export function useGroup() {
   return useGrouper().group;
 }
 
+export function useSetGroup() {
+  return useGrouper().setGroup;
+}
+
 export function useGroupSymbolSwitcher() {
   const group = useGroup();
   const { switchSymbol } = useSymbolGrouper();

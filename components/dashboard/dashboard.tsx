@@ -7,6 +7,7 @@ import { WIDGET_SIZES, widgetComponents, WidgetType } from "./widget-registry";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import "./dashboard-module.css";
+import { Group } from "@/lib/state/grouper";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -67,6 +68,7 @@ export function Dashboard({
               data-grid={{ ...item, minW, minH }}
               layout={item}
               onRemove={removeWidget}
+              group={(item.settings?.group ?? 0) as Group}
             >
               <Widget
                 layout={item}
