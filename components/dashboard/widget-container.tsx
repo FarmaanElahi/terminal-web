@@ -18,22 +18,23 @@ export function WidgetContainer({
   return (
     <div {...props} className="relative h-full w-full group">
       <div className="h-full w-full overflow-hidden border bg-card">
-        <div className="absolute hover:z-50 top-2 left-2 right-2 flex justify-between transition-opacity duration-200">
-          <Button
-            variant="secondary"
-            className="h-5 w-5 drag-handle bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100"
-          >
-            <GripVertical className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="secondary"
-            size="icon"
-            className="h-5 w-5 bg-background/80 backdrop-blur-sm hover:bg-destructive hover:text-destructive-foreground"
-            onClick={() => onRemove(layout.i)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+        {/* Drag handle button - positioned absolutely on the left */}
+        <Button
+          variant="secondary"
+          className="absolute top-2 left-2 h-5 w-5 drag-handle bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 z-10 hover:z-50"
+        >
+          <GripVertical className="h-4 w-4" />
+        </Button>
+
+        {/* Remove button - positioned absolutely on the right */}
+        <Button
+          variant="secondary"
+          size="icon"
+          className="absolute top-2 right-2 h-5 w-5 bg-background/80 backdrop-blur-sm hover:bg-destructive hover:text-destructive-foreground opacity-0 group-hover:opacity-100 z-10 hover:z-50"
+          onClick={() => onRemove(layout.i)}
+        >
+          <X className="h-4 w-4" />
+        </Button>
 
         <div className="h-full w-full react-grid-item">{children}</div>
       </div>

@@ -1,8 +1,4 @@
 .react-grid-item > .react-resizable-handle {
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.react-grid-item:hover > .react-resizable-handle {
-  opacity: 1;
+    opacity: 0;
+    transition: opacity 0.2s;
 }
