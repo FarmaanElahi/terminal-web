@@ -62,9 +62,9 @@ const TabItem = ({ id, name, isActive, onSelect, onClose }: TabItemProps) => {
       {...attributes}
       {...listeners}
       className={cn(
-        "inline-flex items-center h-8 px-3 py-1 text-sm cursor-pointer select-none touch-none relative",
+        "inline-flex items-center h-8 px-3 py-1 text-sm cursor-pointer select-none touch-none relative text-secondary-foreground font-bold",
         isActive
-          ? "bg-background border-b-2 border-primary text-primary-foreground"
+          ? "bg-background border-b-2 border-primary"
           : "hover:bg-muted/60 border-b-2 border-transparent",
         isDragging ? "opacity-70" : "opacity-100",
         "min-w-[100px] max-w-[150px]",
