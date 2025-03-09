@@ -10,7 +10,7 @@ export default function Page() {
     <GroupSymbolProvider>
       <GrouperProvider group={1}>
         <ScreenerProvider>
-          <DashboardManager />;
+          <DashboardManager />
         </ScreenerProvider>
       </GrouperProvider>
     </GroupSymbolProvider>
