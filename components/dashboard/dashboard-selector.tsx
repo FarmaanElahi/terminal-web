@@ -44,10 +44,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import type { DashboardConfig } from "./dashboard-manager";
+import { Dashboard } from "@/types/supabase";
 
 interface DashboardSelectorProps {
-  dashboards: DashboardConfig[];
+  dashboards: Dashboard[];
   activeDashboard?: string;
   setActiveDashboard: (id: string) => void;
   onCreateDashboard: (name: string) => void;
@@ -82,7 +82,7 @@ export function DashboardSelector({
               role="combobox"
               size="sm"
               aria-expanded={open}
-              className="w-[200px] justify-between font-bold"
+              className="w-[160px] justify-between font-bold"
             >
               <div className="flex items-center">
                 <LayoutIcon className="mr-2 h-4 w-4" />
@@ -241,7 +241,7 @@ function DeleteDashboard({
   onDelete,
   children,
 }: {
-  dashboard: DashboardConfig;
+  dashboard: Dashboard;
   onDelete: (id: string) => void;
   children: ReactNode;
 }) {

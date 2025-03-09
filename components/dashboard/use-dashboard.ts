@@ -1,17 +1,51 @@
 import { useCallback, useMemo } from "react";
 import { Layout } from "react-grid-layout";
 import { toast } from "sonner";
-import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useQueryClient } from "@tanstack/react-query";
 import { WIDGET_SIZES, WidgetType } from "./widget-registry";
+import { useDashboardData, useUpdatedDashboard } from "@/lib/state/symbol";
+import { Json } from "@/types/generated/supabase";
+import { Dashboard } from "@/types/supabase";
+
+export type WidgetSettings = Record<string, unknown>;
 
 export interface LayoutItem extends Layout {
   type: WidgetType;
+  settings?: WidgetSettings;
 }
 
 export function useDashboard(id: string, initialLayout: LayoutItem[]) {
-  const [layouts, setLayouts] = useLocalStorage<LayoutItem[]>(
-    `dashboard-${id}`,
-    initialLayout,
+  const { data: dashboardData, isLoading } = useDashboardData(id);
+  const { mutate: updateDashboard } = useUpdatedDashboard();
+  const queryClient = useQueryClient();
+
+  // Get the stored layout or fall back to initial layout
+  const layouts = useMemo(() => {
+    if (dashboardData?.layout) {
+      try {
+        return (dashboardData.layout ?? []) as unknown as LayoutItem[];
+      } catch (err) {
+        console.error("Error parsing dashboard layout:", err);
+        toast.error("Failed to parse dashboard layout");
+        return initialLayout;
+      }
+    }
+    return initialLayout;
+  }, [dashboardData, initialLayout]);
+
+  const saveDashboard = useCallback(
+    async (newLayouts: LayoutItem[]) => {
+      try {
+        updateDashboard({
+          id,
+          payload: { layout: newLayouts as unknown as Json },
+        });
+      } catch (error) {
+        console.error("Error saving dashboard layout:", error);
+        toast.error("Failed to save dashboard layout");
+      }
+    },
+    [id, updateDashboard],
   );
 
   const handleLayoutChange = useCallback(
@@ -21,18 +55,55 @@ export function useDashboard(id: string, initialLayout: LayoutItem[]) {
         return {
           ...item,
           type: existingWidget?.type || "screener",
+          settings: existingWidget?.settings || {},
         };
       });
-      setLayouts(updatedLayouts);
+
+      // Update the cached data optimistically
+      queryClient.setQueryData(["dashboard", id], (old: Dashboard) => {
+        if (!old) return old;
+        return { ...old, layout: updatedLayouts as Json };
+      });
+
+      // Save to the database
+      saveDashboard(updatedLayouts);
     },
-    [layouts, setLayouts],
+    [layouts, saveDashboard, queryClient, id],
+  );
+
+  const updateWidgetSettings = useCallback(
+    (widgetId: string, settings: WidgetSettings) => {
+      const updatedLayouts = layouts.map((item) => {
+        if (item.i === widgetId) {
+          return {
+            ...item,
+            settings: {
+              ...item.settings,
+              ...settings,
+            },
+          };
+        }
+        return item;
+      });
+
+      // Update the cached data optimistically
+      queryClient.setQueryData(["dashboard", id], (old: Dashboard) => {
+        if (!old) return old;
+        return { ...old, layout: updatedLayouts };
+      });
+
+      // Save to the database
+      void saveDashboard(updatedLayouts);
+    },
+    [layouts, saveDashboard, queryClient, id],
   );
 
   const hasAvailableSpace = useCallback(
     (type: WidgetType) => {
+      console.log(typeof layouts, "type");
       const { w, h } = WIDGET_SIZES[type];
       const cols = 12;
-      const maxHeight = Math.max(...layouts.map((item) => item.y + item.h));
+      const maxHeight = Math.max(...layouts.map((item) => item.y + item.h), 0);
 
       const occupiedSpaces = new Set<string>();
 
@@ -69,7 +140,7 @@ export function useDashboard(id: string, initialLayout: LayoutItem[]) {
     (type: WidgetType) => {
       const { w, h } = WIDGET_SIZES[type];
       const cols = 12;
-      const maxHeight = Math.max(...layouts.map((item) => item.y + item.h));
+      const maxHeight = Math.max(...layouts.map((item) => item.y + item.h), 0);
 
       for (let y = 0; y <= maxHeight + 1; y++) {
         for (let x = 0; x <= cols - w; x++) {
@@ -94,7 +165,7 @@ export function useDashboard(id: string, initialLayout: LayoutItem[]) {
   );
 
   const addWidget = useCallback(
-    (type: WidgetType) => {
+    (type: WidgetType, initialSettings?: WidgetSettings) => {
       if (!hasAvailableSpace(type)) {
         toast.error("Not enough space for this widget");
         return false;
@@ -114,19 +185,43 @@ export function useDashboard(id: string, initialLayout: LayoutItem[]) {
         w,
         h,
         type,
+        settings: initialSettings || {},
       };
 
-      setLayouts([...layouts, newWidget]);
+      const updatedLayouts = [...layouts, newWidget];
+
+      // Update the cached data optimistically
+      queryClient.setQueryData(["dashboard", id], (old: Dashboard) => {
+        if (!old) return old;
+        return { ...old, layout: updatedLayouts };
+      });
+
+      saveDashboard(updatedLayouts);
       return true;
     },
-    [layouts, setLayouts, hasAvailableSpace, findWidgetPosition],
+    [
+      layouts,
+      hasAvailableSpace,
+      findWidgetPosition,
+      saveDashboard,
+      queryClient,
+      id,
+    ],
   );
 
   const removeWidget = useCallback(
     (widgetId: string) => {
-      setLayouts(layouts.filter((item) => item.i !== widgetId));
+      const updatedLayouts = layouts.filter((item) => item.i !== widgetId);
+
+      // Update the cached data optimistically
+      queryClient.setQueryData(["dashboard", id], (old: Dashboard) => {
+        if (!old) return old;
+        return { ...old, layout: updatedLayouts as unknown as Json };
+      });
+
+      void saveDashboard(updatedLayouts);
     },
-    [layouts, setLayouts],
+    [layouts, saveDashboard, queryClient, id],
   );
 
   const availableWidgets = useMemo(() => {
@@ -138,8 +233,10 @@ export function useDashboard(id: string, initialLayout: LayoutItem[]) {
   return {
     layouts,
     availableWidgets,
+    isLoading,
     handleLayoutChange,
     addWidget,
     removeWidget,
+    updateWidgetSettings,
   };
 }

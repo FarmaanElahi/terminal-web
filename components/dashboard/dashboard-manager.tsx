@@ -2,10 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { DashboardSelector } from "./dashboard-selector";
 import { Dashboard } from "./dashboard";
-import { useLocalStorage } from "@/hooks/use-local-storage";
 import { toast } from "sonner";
 import { DEFAULT_LAYOUT } from "@/components/dashboard/widget-registry";
-import type { LayoutItem } from "./use-dashboard";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -24,12 +22,13 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
-
-export interface DashboardConfig {
-  id: string;
-  name: string;
-  layouts: LayoutItem[];
-}
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import {
+  useCreateDashboard,
+  useDashboards,
+  useDeleteDashboard,
+} from "@/lib/state/symbol";
+import { Json } from "@/types/generated/supabase";
 
 interface TabItemProps {
   id: string;
@@ -86,11 +85,14 @@ const TabItem = ({ id, name, isActive, onSelect, onClose }: TabItemProps) => {
 };
 
 export function DashboardManager() {
-  const [dashboards, setDashboards] = useLocalStorage<DashboardConfig[]>(
-    "dashboards",
-    [],
-  );
-  const [activeDashboard, setActiveDashboard] = useLocalStorage<string>(
+  const { data: dashboards = [], isLoading: isDashboardsLoading } =
+    useDashboards();
+
+  const { mutate: createDashboard } = useCreateDashboard();
+  const { mutate: deleteDashboard } = useDeleteDashboard();
+
+  // Keep using localStorage for open tabs and active dashboard (UI state)
+  const [activeDashboardId, setActiveDashboardId] = useLocalStorage<string>(
     "active-dashboard",
     "",
   );
@@ -112,56 +114,76 @@ export function DashboardManager() {
 
   // Ensure the active dashboard is in the open tabs
   useEffect(() => {
-    if (activeDashboard && !openTabs.includes(activeDashboard)) {
-      setOpenTabs([...openTabs, activeDashboard]);
+    if (activeDashboardId && !openTabs.includes(activeDashboardId)) {
+      setOpenTabs([...openTabs, activeDashboardId]);
     }
-  }, [activeDashboard, openTabs, setOpenTabs]);
+  }, [activeDashboardId, openTabs, setOpenTabs]);
+
+  // Set initial active dashboard if we have dashboards but no active one
+  useEffect(() => {
+    if (dashboards.length > 0 && !activeDashboardId) {
+      setActiveDashboardId(dashboards[0].id);
+    }
+  }, [dashboards, activeDashboardId, setActiveDashboardId]);
 
   const handleCreateDashboard = (name: string) => {
-    const newDashboard: DashboardConfig = {
-      id: `dashboard-${Date.now()}`,
-      name,
-      layouts: DEFAULT_LAYOUT,
-    };
-    setDashboards([...dashboards, newDashboard]);
-    setActiveDashboard(newDashboard.id);
-    // Add new dashboard to tabs
-    setOpenTabs([...openTabs, newDashboard.id]);
-    toast(`Dashboard ${name} created`);
+    createDashboard(
+      { name, layout: DEFAULT_LAYOUT as unknown as Json },
+      {
+        onSuccess: (newDashboard) => {
+          setActiveDashboardId(newDashboard.id);
+          // Add new dashboard to tabs
+          setOpenTabs([...openTabs, newDashboard.id]);
+          toast(`Dashboard ${name} created`);
+        },
+        onError: (error) => {
+          console.error("Error creating dashboard:", error);
+          toast.error("Failed to create dashboard");
+        },
+      },
+    );
   };
 
   const handleDeleteDashboard = (id: string) => {
     const dashboard = dashboards.find((d) => d.id === id);
-    setDashboards(dashboards.filter((d) => d.id !== id));
 
-    // Remove from open tabs
-    setOpenTabs(openTabs.filter((tabId) => tabId !== id));
+    deleteDashboard(id, {
+      onSuccess: () => {
+        // Remove from open tabs
+        setOpenTabs(openTabs.filter((tabId) => tabId !== id));
 
-    if (activeDashboard === id) {
-      // Set the active dashboard to the last open tab, or empty if none
-      const remainingTabs = openTabs.filter((tabId) => tabId !== id);
-      setActiveDashboard(
-        remainingTabs.length > 0 ? remainingTabs[remainingTabs.length - 1] : "",
-      );
-    }
-
-    toast(`Dashboard ${dashboard?.name} deleted`);
+        if (activeDashboardId === id) {
+          // Set the active dashboard to the last open tab, or empty if none
+          const remainingTabs = openTabs.filter((tabId) => tabId !== id);
+          setActiveDashboardId(
+            remainingTabs.length > 0
+              ? remainingTabs[remainingTabs.length - 1]
+              : "",
+          );
+        }
+        toast(`Dashboard ${dashboard?.name} deleted`);
+      },
+      onError: (error) => {
+        console.error("Error deleting dashboard:", error);
+        toast.error("Failed to delete dashboard");
+      },
+    });
   };
 
   const handleTabClose = (id: string) => {
     setOpenTabs(openTabs.filter((tabId) => tabId !== id));
 
-    if (activeDashboard === id) {
+    if (activeDashboardId === id) {
       // Set the active dashboard to the last open tab, or empty if none
       const remainingTabs = openTabs.filter((tabId) => tabId !== id);
-      setActiveDashboard(
+      setActiveDashboardId(
         remainingTabs.length > 0 ? remainingTabs[remainingTabs.length - 1] : "",
       );
     }
   };
 
   const handleDashboardSelect = (id: string) => {
-    setActiveDashboard(id);
+    setActiveDashboardId(id);
 
     // Add to open tabs if not already there
     if (!openTabs.includes(id)) {
@@ -188,9 +210,15 @@ export function DashboardManager() {
     setOpenTabs(newOpenTabs);
   };
 
-  const activeDashboardConfig = dashboards.find(
-    (d) => d.id === activeDashboard,
-  );
+  const activeDashboard = dashboards.find((d) => d.id === activeDashboardId);
+
+  if (isDashboardsLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        Loading dashboards...
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col">
@@ -199,12 +227,12 @@ export function DashboardManager() {
           <div className="flex items-center flex-shrink-0 mb-2 sm:mb-0">
             <DashboardSelector
               dashboards={dashboards}
-              activeDashboard={activeDashboard}
+              activeDashboard={activeDashboardId}
               setActiveDashboard={handleDashboardSelect}
               onCreateDashboard={handleCreateDashboard}
               onDeleteDashboard={handleDeleteDashboard}
               onAddWidget={() => setIsAddingWidget(true)}
-              canAddWidget={!!activeDashboardConfig}
+              canAddWidget={!!activeDashboard}
             />
           </div>
 
@@ -231,7 +259,7 @@ export function DashboardManager() {
                           key={dashboard.id}
                           id={dashboard.id}
                           name={dashboard.name}
-                          isActive={activeDashboard === dashboard.id}
+                          isActive={activeDashboardId === dashboard.id}
                           onSelect={handleDashboardSelect}
                           onClose={handleTabClose}
                         />
@@ -246,11 +274,11 @@ export function DashboardManager() {
       </div>
 
       <div className="flex-1">
-        {activeDashboardConfig && (
+        {activeDashboard && (
           <Dashboard
-            key={activeDashboardConfig.id}
-            id={activeDashboardConfig.id}
-            name={activeDashboardConfig.name}
+            key={activeDashboard.id}
+            id={activeDashboard.id}
+            name={activeDashboard.name}
             isAddingWidget={isAddingWidget}
             onAddingWidgetChange={setIsAddingWidget}
           />

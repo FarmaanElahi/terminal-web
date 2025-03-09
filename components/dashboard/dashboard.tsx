@@ -27,10 +27,13 @@ export function Dashboard({
   isAddingWidget,
   onAddingWidgetChange,
 }: DashboardProps) {
-  const { layouts, handleLayoutChange, addWidget, removeWidget } = useDashboard(
-    id,
-    DEFAULT_LAYOUT,
-  );
+  const {
+    layouts,
+    handleLayoutChange,
+    addWidget,
+    removeWidget,
+    updateWidgetSettings,
+  } = useDashboard(id, DEFAULT_LAYOUT);
 
   const handleAddWidget = (type: WidgetType) => {
     if (addWidget(type)) {
@@ -64,7 +67,12 @@ export function Dashboard({
               layout={item}
               onRemove={removeWidget}
             >
-              <Widget />
+              <Widget
+                layout={item}
+                updateSettings={(settings) =>
+                  updateWidgetSettings(item.i, settings)
+                }
+              />
             </WidgetContainer>
           );
         })}

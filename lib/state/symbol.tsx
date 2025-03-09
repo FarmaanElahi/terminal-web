@@ -12,9 +12,12 @@ import { fetchStockTwit } from "@/server/stocktwits";
 import type { StockTwitFeed } from "@/types/stocktwits";
 import { queryDuckDB } from "@/utils/duckdb";
 import {
+  Dashboard,
+  InsertDashboard,
   InsertScreen,
   InsertWatchlist,
   Screen,
+  UpdateDashboard,
   UpdateScreen,
   UpdateWatchlist,
   Watchlist,
@@ -494,3 +497,114 @@ export function useWatchlistSymbols(watchlist?: Watchlist) {
 }
 
 //##################### SCREENS #####################
+
+//##################### DASHBOARD #####################
+export function useDashboards() {
+  const client = useQueryClient();
+  return useQuery({
+    queryKey: ["dashboards"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("dashboards")
+        .select("*")
+        .order("updated_at", { ascending: false });
+
+      if (error) throw error;
+      data?.forEach((d) => {
+        client.setQueryData(["dashboards", d.id], () => d);
+      });
+      return data;
+    },
+  });
+}
+
+export function useCreateDashboard(
+  onComplete?: (dashboard: Dashboard) => void,
+) {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: (dashboard: Dashboard) => {
+      void client.invalidateQueries({ queryKey: ["dashboards"] });
+      onComplete?.(dashboard);
+    },
+    mutationFn: async (dashboard: InsertDashboard) => {
+      const { data, error } = await supabase
+        .from("dashboards")
+        .upsert({
+          ...dashboard,
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Dashboard;
+    },
+  });
+}
+
+export function useDeleteDashboard(onComplete?: () => void) {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["dashboards"] });
+      onComplete?.();
+    },
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from("dashboards")
+        .delete()
+        .eq("id", id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useUpdatedDashboard() {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: (dashboard: Dashboard) => {
+      void client.invalidateQueries({ queryKey: ["dashboards"] });
+      void client.invalidateQueries({ queryKey: ["dashboard", dashboard.id] });
+    },
+    mutationFn: async ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: UpdateDashboard;
+    }) => {
+      const { data, error } = await supabase
+        .from("dashboards")
+        .update({
+          ...payload,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Dashboard;
+    },
+  });
+}
+
+export function useDashboardData(id: string) {
+  return useQuery({
+    queryKey: ["dashboard", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("dashboards")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) throw error;
+      return data as Dashboard;
+    },
+  });
+}
