@@ -28,3 +28,7 @@ export type InsertWatchlist =
   Database["public"]["Tables"]["watchlists"]["Insert"];
 export type UpdateWatchlist =
   Database["public"]["Tables"]["watchlists"]["Update"];
+
+export type Dashboard = Database["public"]["Tables"]["dashboards"]["Row"];
+export type InsertDashboard = Database["public"]["Tables"]["dashboards"]["Insert"];
+export type UpdateDashboard = Database["public"]["Tables"]["dashboards"]["Update"];

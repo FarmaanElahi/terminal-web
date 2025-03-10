@@ -25,10 +25,21 @@ type GroupSymbolContextType = {
 // @ts-ignore
 const GrouperContext = createContext<GroupContextType>();
 
-export function GrouperProvider(props: { children: ReactNode; group: Group }) {
+export function GrouperProvider(props: {
+  children: ReactNode;
+  group: Group;
+  onChange?: (group: Group) => void;
+}) {
   const [group, setGroup] = useState<Group>(props.group);
+  const setGroupCb = useCallback(
+    (group: Group) => {
+      setGroup(group);
+      props.onChange?.(group);
+    },
+    [props],
+  );
   return (
-    <GrouperContext.Provider value={{ group, setGroup }}>
+    <GrouperContext.Provider value={{ group, setGroup: setGroupCb }}>
       {props.children}
     </GrouperContext.Provider>
   );
@@ -65,6 +76,10 @@ export function useSymbolGrouper() {
 
 export function useGroup() {
   return useGrouper().group;
+}
+
+export function useSetGroup() {
+  return useGrouper().setGroup;
 }
 
 export function useGroupSymbolSwitcher() {

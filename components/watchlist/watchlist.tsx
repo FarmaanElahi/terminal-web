@@ -36,6 +36,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WatchlistCreatorDialog } from "./watchlist-selector";
 import { WatchlistSymbol } from "@/components/watchlist/watchlist-symbol";
+import { cn } from "@/lib/utils";
 
 type WatchlistProps = HTMLAttributes<HTMLDivElement>;
 
@@ -197,7 +198,7 @@ export function Watchlist(props: WatchlistProps) {
         className="ag-terminal-theme"
         rowSelection={{ mode: "multiRow" }}
         getContextMenuItems={getContextMenuItems}
-        sideBar={true}
+        sideBar={false}
         rowData={rowData}
         animateRows
         autoSizeStrategy={{
@@ -256,7 +257,7 @@ export function Watchlist(props: WatchlistProps) {
     );
 
   return (
-    <div {...props} className={"h-full"}>
+    <div {...props} className={cn("h-full", props.className)}>
       {watchlist && (
         <WatchlistSymbol
           open={openWatchlistSymbol}

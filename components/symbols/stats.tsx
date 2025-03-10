@@ -120,7 +120,7 @@ export const StatsTable = ({ freq }: { freq: "fq" | "fy" }) => {
 
   const { tableData, firstEstimateIndex } = data;
   return (
-    <div className="w-full overflow-auto h-full transition-colors cursor-default border ms-2  relative">
+    <div className="w-full overflow-auto h-full transition-colors cursor-default border relative">
       <Table ref={tableRef} className="w-full table-auto h-full">
         <TableHeader className="bg-muted">
           <TableRow>
