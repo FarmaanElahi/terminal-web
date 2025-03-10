@@ -176,13 +176,14 @@ export function Screener(props: ScreenerProps) {
   return (
     <div {...props} className={cn("h-full relative", props.className)}>
       <AgGridReact
+        headerHeight={48}
         dataTypeDefinitions={extendedColumnType}
         key={activeScreenId ?? "default"}
         getContextMenuItems={getContextMenuItems}
         className="ag-terminal-theme"
         enableAdvancedFilter={true}
         rowSelection={{ mode: "multiRow" }}
-        selectionColumnDef={{ pinned: "left" }}
+        selectionColumnDef={{ pinned: "left", maxWidth: 48 }}
         sideBar={false}
         includeHiddenColumnsInAdvancedFilter={true}
         rowData={rowData}

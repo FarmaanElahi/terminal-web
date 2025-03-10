@@ -197,6 +197,7 @@ export function Watchlist(props: WatchlistProps) {
         key={activeWatchlistId ?? "default"}
         className="ag-terminal-theme"
         rowSelection={{ mode: "multiRow" }}
+        selectionColumnDef={{ pinned: "left", maxWidth: 48 }}
         getContextMenuItems={getContextMenuItems}
         sideBar={false}
         rowData={rowData}
