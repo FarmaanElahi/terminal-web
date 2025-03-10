@@ -2,7 +2,6 @@ import React from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { WidgetSelector } from "./widget-selector";
 import { useDashboard } from "./use-dashboard";
-import { WidgetContainer } from "./widget-container";
 import { WIDGET_SIZES, widgetComponents, WidgetType } from "./widget-registry";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
@@ -63,20 +62,18 @@ export function Dashboard({
           const { minW, minH } = WIDGET_SIZES[item.type];
 
           return (
-            <WidgetContainer
+            <div
               key={item.i}
               data-grid={{ ...item, minW, minH }}
-              layout={item}
-              onRemove={removeWidget}
-              group={(item.settings?.group ?? 0) as Group}
+              className="border"
             >
               <Widget
                 layout={item}
-                updateSettings={(settings) =>
-                  updateWidgetSettings(item.i, settings)
-                }
+                updateSettings={(s) => updateWidgetSettings(item.i, s)}
+                onRemoveWidget={removeWidget}
+                group={(item.settings?.group ?? 0) as Group}
               />
-            </WidgetContainer>
+            </div>
           );
         })}
       </ResponsiveGridLayout>

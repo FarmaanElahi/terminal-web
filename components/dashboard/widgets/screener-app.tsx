@@ -1,23 +1,45 @@
 import { ScreenerProvider } from "@/hooks/use-active-screener";
 import { Screener } from "@/components/screener/screener";
 import { ScreenSelector } from "@/components/screener/screen-selector";
-import { WidgetProps } from "@/components/dashboard/widgets/widget-props";
+import type { WidgetProps } from "@/components/dashboard/widgets/widget-props";
+import { GrouperProvider } from "@/lib/state/grouper";
+import { useCallback } from "react";
+import { WidgetControl } from "@/components/dashboard/widget-control";
 
-export function ScreenerApp(props: WidgetProps) {
+export function ScreenerApp({
+  updateSettings,
+  group,
+  layout,
+  onRemoveWidget,
+}: WidgetProps) {
+  const defaultActiveScreenId = layout?.settings?.activeScreenId as
+    | string
+    | undefined;
+
+  const screenChanged = useCallback(
+    (screenerId: string | null) => {
+      updateSettings({ ...layout?.settings, activeScreenId: screenerId });
+    },
+    [updateSettings, layout],
+  );
+
   return (
-    <ScreenerProvider
-      defaultActiveScreenId={
-        props.layout?.settings?.activeScreenId as string | undefined
-      }
-      onActiveScreenIdChange={(screenerId) =>
-        props.updateSettings({
-          ...props.layout?.settings,
-          activeScreenId: screenerId,
-        })
-      }
-    >
-      <ScreenSelector />
-      <Screener />
-    </ScreenerProvider>
+    <GrouperProvider group={group}>
+      <ScreenerProvider
+        defaultActiveScreenId={defaultActiveScreenId}
+        onActiveScreenIdChange={screenChanged}
+      >
+        <div className={"h-full flex flex-col"}>
+          <WidgetControl
+            layout={layout}
+            onRemove={onRemoveWidget}
+            className={"m-2"}
+          >
+            <ScreenSelector />
+          </WidgetControl>
+          <Screener className="flex-1" />
+        </div>
+      </ScreenerProvider>
+    </GrouperProvider>
   );
 }

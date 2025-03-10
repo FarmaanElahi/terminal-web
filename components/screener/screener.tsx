@@ -28,6 +28,7 @@ import { toast } from "sonner";
 import { Json } from "@/types/generated/supabase";
 import { useActiveScreenerId } from "@/hooks/use-active-screener";
 import type { Symbol } from "@/types/symbol";
+import { cn } from "@/lib/utils";
 
 type ScreenerProps = HTMLAttributes<HTMLDivElement>;
 
@@ -173,7 +174,7 @@ export function Screener(props: ScreenerProps) {
   );
 
   return (
-    <div {...props} className={"h-full relative"}>
+    <div {...props} className={cn("h-full relative", props.className)}>
       <AgGridReact
         dataTypeDefinitions={extendedColumnType}
         key={activeScreenId ?? "default"}
@@ -182,7 +183,7 @@ export function Screener(props: ScreenerProps) {
         enableAdvancedFilter={true}
         rowSelection={{ mode: "multiRow" }}
         selectionColumnDef={{ pinned: "left" }}
-        sideBar={true}
+        sideBar={false}
         includeHiddenColumnsInAdvancedFilter={true}
         rowData={rowData}
         autoSizeStrategy={{

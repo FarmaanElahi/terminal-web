@@ -8,6 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 const groupColors: Record<Group, string> = {
   0: "bg-gray-200", // Default light gray
@@ -27,7 +28,11 @@ export const GroupSelector = (props: HTMLAttributes<HTMLDivElement>) => {
   return (
     <Popover {...props}>
       <PopoverTrigger asChild>
-        <Button className={` ${groupColors[currentGroup]}`}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className={cn(groupColors[currentGroup], "size-5")}
+        >
           {currentGroup}
         </Button>
       </PopoverTrigger>
@@ -47,14 +52,11 @@ export const GroupSelectorContent = () => {
       <div key={groupId}>
         <Button
           onClick={() => setGroup(groupId)}
-          className={`
-          ${groupColors[groupId]}
-          w-8 h-8 rounded 
-          flex items-center justify-center
-          text-white font-bold
-          shadow-sm
-          ${currentGroup === groupId ? "ring-2 ring-white" : ""}
-        `}
+          variant="ghost"
+          size="sm"
+          className={cn(groupColors[currentGroup], {
+            "ring-2 ring-white": currentGroup === groupId,
+          })}
         >
           {groupId}
         </Button>

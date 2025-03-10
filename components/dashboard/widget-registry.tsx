@@ -1,24 +1,22 @@
-import { Stats } from "../symbols/stats";
-import { Ideas } from "../symbols/ideas";
 import { ChartApp } from "@/components/dashboard/widgets/chart-app";
 import { WatchlistApp } from "@/components/dashboard/widgets/watchlist-app";
 import { ScreenerApp } from "@/components/dashboard/widgets/screener-app";
 import { ComponentType } from "react";
-import type { LayoutItem, WidgetSettings } from "./use-dashboard";
+import type { LayoutItem } from "./use-dashboard";
+import { WidgetProps } from "@/components/dashboard/widgets/widget-props";
+import { IdeasApp } from "@/components/dashboard/widgets/ideas-app";
+import { StatsApp } from "@/components/dashboard/widgets/stats-app";
 
 export type WidgetType = "screener" | "watchlist" | "stats" | "ideas" | "chart";
 
 export const widgetComponents: Record<
   WidgetType,
-  ComponentType<{
-    layout: LayoutItem;
-    updateSettings: (setting: WidgetSettings) => void;
-  }>
+  ComponentType<WidgetProps>
 > = {
   screener: ScreenerApp,
   watchlist: WatchlistApp,
-  stats: Stats,
-  ideas: Ideas,
+  stats: StatsApp,
+  ideas: IdeasApp,
   chart: ChartApp,
 };
 

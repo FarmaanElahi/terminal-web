@@ -1,31 +1,41 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { WatchlistProvider } from "@/hooks/use-active-watchlist";
 import type { WidgetProps } from "@/components/dashboard/widgets/widget-props";
 import { WatchlistSelector } from "@/components/watchlist/watchlist-selector";
 import { Watchlist } from "@/components/watchlist/watchlist";
+import { GrouperProvider } from "@/lib/state/grouper";
+import { WidgetControl } from "@/components/dashboard/widget-control";
 
-// Define the shape of the settings we'll store in the dashboard
-interface WatchlistSettings {
-  activeWatchlistId: string | null;
-}
+export function WatchlistApp({
+  layout,
+  group,
+  onRemoveWidget,
+  updateSettings,
+}: WidgetProps) {
+  const defaultActiveWatchlistId = layout?.settings?.activeWatchlistId as
+    | string
+    | undefined;
 
-export function WatchlistApp(props: WidgetProps) {
-  // Get settings from dashboard or use default
-  const settings = props.layout?.settings as WatchlistSettings | undefined;
-  const defaultActiveWatchlistId = settings?.activeWatchlistId || null;
-
-  // Handle when the active watchlist changes
-  const handleActiveWatchlistChange = (watchlistId: string | null) => {
-    props.updateSettings({ activeWatchlistId: watchlistId });
-  };
+  const watchlistChanged = useCallback(
+    (watchlistId: string | null) => {
+      updateSettings({ ...layout?.settings, activeWatchlistId: watchlistId });
+    },
+    [updateSettings, layout],
+  );
 
   return (
-    <WatchlistProvider
-      defaultActiveWatchlistId={defaultActiveWatchlistId}
-      onActiveWatchlistIdChange={handleActiveWatchlistChange}
-    >
-      <WatchlistSelector />
-      <Watchlist />
-    </WatchlistProvider>
+    <GrouperProvider group={group}>
+      <WatchlistProvider
+        defaultActiveWatchlistId={defaultActiveWatchlistId}
+        onActiveWatchlistIdChange={watchlistChanged}
+      >
+        <div className={"h-full flex flex-col"}>
+          <WidgetControl layout={layout} onRemove={onRemoveWidget} className={"m-2"}>
+            <WatchlistSelector />
+          </WidgetControl>
+          <Watchlist className="flex-1" />
+        </div>
+      </WatchlistProvider>
+    </GrouperProvider>
   );
 }
