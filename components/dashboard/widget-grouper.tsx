@@ -91,7 +91,7 @@ export const GroupSelectorContent = (props: {
         </Button>
       </div>
     ));
-  }, [currentGroup, setGroup]);
+  }, [props, currentGroup, setGroup]);
 
   return (
     <div className="flex flex-wrap gap-2 w-full justify-center">
