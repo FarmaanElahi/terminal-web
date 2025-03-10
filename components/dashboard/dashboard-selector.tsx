@@ -1,4 +1,3 @@
-// components/dashboard/dashboard-selector.tsx
 import {
   Check,
   ChevronsUpDown,
@@ -150,6 +149,10 @@ export function DashboardSelector({
                         variant="ghost"
                         size="icon"
                         className="opacity-0 group-hover:opacity-100 h-7 w-7"
+                        onClick={(e) => {
+                          // Stop the click from bubbling up to the CommandItem
+                          e.stopPropagation();
+                        }}
                       >
                         <Trash size="3" />
                       </Button>
@@ -265,7 +268,11 @@ function DeleteDashboard({
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             className={buttonVariants({ variant: "destructive" })}
-            onClick={() => onDelete(dashboard.id)}
+            onClick={(e) => {
+              // Stop click from bubbling
+              e.stopPropagation();
+              onDelete(dashboard.id);
+            }}
           >
             Continue
           </AlertDialogAction>
