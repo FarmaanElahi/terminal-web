@@ -2,13 +2,12 @@ import { ScreenerProvider } from "@/hooks/use-active-screener";
 import { Screener } from "@/components/screener/screener";
 import { ScreenSelector } from "@/components/screener/screen-selector";
 import type { WidgetProps } from "@/components/dashboard/widgets/widget-props";
-import { GrouperProvider } from "@/lib/state/grouper";
+import { Group, GrouperProvider } from "@/lib/state/grouper";
 import { useCallback } from "react";
 import { WidgetControl } from "@/components/dashboard/widget-control";
 
 export function ScreenerApp({
   updateSettings,
-  group,
   layout,
   onRemoveWidget,
 }: WidgetProps) {
@@ -23,8 +22,18 @@ export function ScreenerApp({
     [updateSettings, layout],
   );
 
+  const groupChanged = useCallback(
+    (group: Group) => {
+      updateSettings({ ...layout?.settings, group });
+    },
+    [updateSettings, layout],
+  );
+
   return (
-    <GrouperProvider group={group}>
+    <GrouperProvider
+      group={(layout.settings?.group ?? 0) as Group}
+      onChange={groupChanged}
+    >
       <ScreenerProvider
         defaultActiveScreenId={defaultActiveScreenId}
         onActiveScreenIdChange={screenChanged}

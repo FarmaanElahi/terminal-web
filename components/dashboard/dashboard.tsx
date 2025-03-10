@@ -6,7 +6,6 @@ import { WIDGET_SIZES, widgetComponents, WidgetType } from "./widget-registry";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import "./dashboard-module.css";
-import { Group } from "@/lib/state/grouper";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -48,7 +47,7 @@ export function Dashboard({
         className="layout hide-all-resize-handles"
         layouts={{ lg: layouts }}
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-        cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+        cols={{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }}
         rowHeight={50}
         onLayoutChange={handleLayoutChange}
         isDraggable
@@ -71,7 +70,6 @@ export function Dashboard({
                 layout={item}
                 updateSettings={(s) => updateWidgetSettings(item.i, s)}
                 onRemoveWidget={removeWidget}
-                group={(item.settings?.group ?? 0) as Group}
               />
             </div>
           );
