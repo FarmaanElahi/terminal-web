@@ -66,11 +66,11 @@ export function Dashboard({
     <div
       ref={containerRef}
       {...props}
-      className={cn("flex-1 border-blue-600 border")}
+      className={cn("flex-1")}
     >
       <ResponsiveGridLayout
         style={{ height: "100%" }}
-        className="layout hide-all-resize-handles border border-red-700"
+        className="layout hide-all-resize-handles border "
         layouts={{ lg: layouts }}
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
         cols={{ lg: 24, md: 24, sm: 24, xs: 24, xxs: 24 }}
