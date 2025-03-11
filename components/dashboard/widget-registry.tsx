@@ -2,7 +2,6 @@ import { ChartApp } from "@/components/dashboard/widgets/chart-app";
 import { WatchlistApp } from "@/components/dashboard/widgets/watchlist-app";
 import { ScreenerApp } from "@/components/dashboard/widgets/screener-app";
 import { ComponentType } from "react";
-import type { LayoutItem } from "./use-dashboard";
 import { WidgetProps } from "@/components/dashboard/widgets/widget-props";
 import { IdeasApp } from "@/components/dashboard/widgets/ideas-app";
 import { StatsApp } from "@/components/dashboard/widgets/stats-app";
@@ -59,13 +58,6 @@ export const WIDGET_SIZES: Record<
   chart: { w: 4, h: 4, minW: 1, minH: 4 },
   watchlist: { w: 3, h: 6, minW: 1, minH: 4 },
   screener: { w: 3, h: 6, minW: 1, minH: 4 },
-  stats: { w: 3, h: 3, minW: 1, minH: 3 },
-  ideas: { w: 3, h: 6, minW: 1, minH: 3 },
+  stats: { w: 3, h: 3, minW: 1, minH: 4 },
+  ideas: { w: 3, h: 6, minW: 1, minH: 4 },
 };
-
-export const DEFAULT_LAYOUT: LayoutItem[] = [
-  { i: "default-chart", x: 0, y: 0, w: 8, h: 6, type: "chart" },
-  { i: "default-watchlist", x: 8, y: 0, w: 4, h: 6, type: "watchlist" },
-  { i: "default-stats", x: 0, y: 6, w: 6, h: 4, type: "stats" },
-  { i: "default-ideas", x: 6, y: 6, w: 6, h: 4, type: "ideas" },
-];

@@ -47,11 +47,13 @@ export function Dashboard({
         className="layout hide-all-resize-handles"
         layouts={{ lg: layouts }}
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-        cols={{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }}
-        rowHeight={50}
+        cols={{ lg: 24, md: 24, sm: 24, xs: 24, xxs: 24 }}
         onLayoutChange={handleLayoutChange}
+        maxRows={12}
+        preventCollision
         isDraggable
         isResizable
+        isBounded
         draggableHandle=".drag-handle"
         margin={[0, 0]}
         resizeHandles={["sw", "nw", "se", "ne"]}
