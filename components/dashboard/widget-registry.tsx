@@ -56,8 +56,8 @@ export const WIDGET_SIZES: Record<
   { w: number; h: number; minW: number; minH: number }
 > = {
   chart: { w: 6, h: 4, minW: 1, minH: 1 },
-  watchlist: { w: 4, h: 4, minW: 1, minH: 1 },
-  screener: { w: 4, h: 4, minW: 1, minH: 1 },
+  watchlist: { w: 6, h: 4, minW: 1, minH: 1 },
+  screener: { w: 6, h: 4, minW: 1, minH: 1 },
   stats: { w: 6, h: 2, minW: 1, minH: 1 },
-  ideas: { w: 4, h: 4, minW: 1, minH: 1 },
+  ideas: { w: 6, h: 4, minW: 1, minH: 1 },
 };
