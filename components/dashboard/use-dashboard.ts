@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo } from "react";
 import { Layout } from "react-grid-layout";
 import { toast } from "sonner";
 import { WIDGET_SIZES, WidgetType } from "./widget-registry";
@@ -15,7 +15,6 @@ export interface LayoutItem extends Layout {
 export function useDashboard(id: string) {
   const { data: dashboardData, isLoading } = useDashboardData(id);
   const { mutate: updateDashboard } = useUpdatedDashboard();
-  const firstLayoutChange = useRef(true);
 
   // Get the stored layout or handle loading state
   const layouts = useMemo(
@@ -35,20 +34,24 @@ export function useDashboard(id: string) {
 
   const handleLayoutChange = useCallback(
     (newLayout: Layout[]) => {
-      const updatedLayouts = newLayout.map((item) => {
-        const existingWidget = layouts.find((w) => w.i === item.i);
-        return {
-          ...item,
-          type: existingWidget?.type || "screener",
-          settings: existingWidget?.settings || {},
-        };
-      });
+      const updatedLayouts = newLayout
+        .map((item) => {
+          const existingWidget = layouts.find((w) => w.i === item.i);
+          if (!existingWidget?.type) return null;
+          return {
+            ...item,
+            type: existingWidget?.type || "screener",
+            settings: existingWidget?.settings || {},
+          };
+        })
+        .filter((value) => value)
+        .map((value) => value!);
 
       // Save to the database
       console.log("Handle layout", updatedLayouts, newLayout);
       void saveDashboard(updatedLayouts);
     },
-    [layouts, firstLayoutChange, saveDashboard],
+    [layouts, saveDashboard],
   );
 
   const updateWidgetSettings = useCallback(
@@ -163,6 +166,21 @@ export function useDashboard(id: string) {
     [layouts, hasAvailableSpace, findWidgetPosition, saveDashboard],
   );
 
+  const addWidgetWithPlaceholderItem = useCallback(
+    (type: WidgetType, item: LayoutItem, initialSettings?: WidgetSettings) => {
+      const newWidget: LayoutItem = {
+        ...item,
+        i: `widget-${Date.now()}`,
+        type,
+        settings: initialSettings || {},
+      };
+      const updatedLayouts = [...layouts, newWidget];
+      void saveDashboard(updatedLayouts);
+      return true;
+    },
+    [layouts, hasAvailableSpace, findWidgetPosition, saveDashboard],
+  );
+
   const removeWidget = useCallback(
     (widgetId: string) => {
       const updatedLayouts = layouts.filter((item) => item.i !== widgetId);
@@ -183,6 +201,7 @@ export function useDashboard(id: string) {
     isLoading,
     handleLayoutChange,
     addWidget,
+    addWidgetWithPlaceholderItem,
     removeWidget,
     updateWidgetSettings,
   };

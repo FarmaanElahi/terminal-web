@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { WidgetSelector } from "./widget-selector";
-import { useDashboard } from "./use-dashboard";
+import { LayoutItem, useDashboard } from "./use-dashboard";
 import { WIDGET_SIZES, widgetComponents, WidgetType } from "./widget-registry";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
@@ -35,12 +35,17 @@ export function Dashboard({
     isLoading,
     handleLayoutChange,
     addWidget,
+    addWidgetWithPlaceholderItem,
     removeWidget,
     updateWidgetSettings,
   } = useDashboard(id);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [rowHeight, setRowHeight] = useState(75); // Default row height for 10
+  const [activeDragWidget, setActiveDragWidget] = useState<WidgetType | null>(
+    null,
+  );
+
   const onResize = useCallback(() => {
     if (!containerRef.current) return;
     setRowHeight(containerRef.current.clientHeight / TOTAL_ROWS);
@@ -63,21 +68,32 @@ export function Dashboard({
   }
 
   return (
-    <div
-      ref={containerRef}
-      {...props}
-      className={cn("flex-1")}
-    >
+    <div ref={containerRef} {...props} className={cn("flex-1 relative")}>
       <ResponsiveGridLayout
         style={{ height: "100%" }}
-        className="layout hide-all-resize-handles border "
+        className="layout hide-all-resize-handles border"
         layouts={{ lg: layouts }}
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
         cols={{ lg: 24, md: 24, sm: 24, xs: 24, xxs: 24 }}
         onLayoutChange={handleLayoutChange}
+        isDroppable
+        onDrop={(layout, item: LayoutItem) => {
+          if (!activeDragWidget) return;
+          const relevantWidget = WIDGET_SIZES[activeDragWidget];
+          if (!relevantWidget) return;
+          addWidgetWithPlaceholderItem(activeDragWidget,item)
+          setActiveDragWidget(null);
+        }}
+        onDropDragOver={() => {
+          if (!activeDragWidget) return false;
+          const relevantWidget = WIDGET_SIZES[activeDragWidget];
+          if (!relevantWidget) return false;
+          return { w: relevantWidget.w, h: relevantWidget.h };
+        }}
         compactType={null}
         isDraggable
         isResizable
+        preventCollision
         allowOverlap
         draggableHandle=".drag-handle"
         margin={[0, 0]}
@@ -109,6 +125,7 @@ export function Dashboard({
         open={isAddingWidget}
         onClose={() => onAddingWidgetChange(false)}
         onSelect={handleAddWidget}
+        setActiveDragWidget={setActiveDragWidget}
       />
     </div>
   );
