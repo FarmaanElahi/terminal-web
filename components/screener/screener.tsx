@@ -78,15 +78,11 @@ function useGridInitialState(activeScreenId?: string | null) {
       "name",
       "mcap",
       "day_close",
-      "sector",
       "industry",
       "dcr",
       "wcr",
       "relative_vol_10D",
-      "RS_10D_pct",
-      "RS_20D_pct",
-      "RSNH_1M",
-      "gap_pct_D",
+      "relative_vol_20D",
     ]);
 
     const hiddenColIds = colDefs
@@ -94,15 +90,7 @@ function useGridInitialState(activeScreenId?: string | null) {
       .map((c) => c.colId!)
       .filter(Boolean);
 
-    return {
-      columnVisibility: { hiddenColIds },
-      sideBar: {
-        visible: true,
-        position: "right",
-        openToolPanel: null,
-        toolPanels: { columns: { expandedGroupIds: [] } },
-      },
-    } satisfies GridState;
+    return { columnVisibility: { hiddenColIds } } satisfies GridState;
   }, [colDefs]);
 
   return (activeScreen?.state ?? defaultState) as GridState;
@@ -114,6 +102,7 @@ export function Screener(props: ScreenerProps) {
   const switcher = useGroupSymbolSwitcher();
   const handleStateChange = useScreenerChangeCallback(activeScreenId);
   const { data: rowData } = useScreener();
+  const { isLoading } = useScreens();
   const initialState = useGridInitialState(activeScreenId);
 
   const statusBar = useMemo(
@@ -175,57 +164,62 @@ export function Screener(props: ScreenerProps) {
 
   return (
     <div {...props} className={cn("h-full relative", props.className)}>
-      <AgGridReact
-        headerHeight={48}
-        dataTypeDefinitions={extendedColumnType}
-        key={activeScreenId ?? "default"}
-        getContextMenuItems={getContextMenuItems}
-        className="ag-terminal-theme"
-        enableAdvancedFilter={true}
-        rowSelection={{ mode: "multiRow" }}
-        selectionColumnDef={{ pinned: "left", maxWidth: 48 }}
-        sideBar={false}
-        includeHiddenColumnsInAdvancedFilter={true}
-        rowData={rowData}
-        autoSizeStrategy={{
-          type: "fitGridWidth",
-          defaultMinWidth: 120,
-          columnLimits: [
-            {
-              colId: "name",
-              minWidth: 180,
-            },
-          ],
-        }}
-        columnDefs={colDefs}
-        initialState={initialState}
-        getRowId={getRowId}
-        defaultColDef={{
-          wrapHeaderText: true,
-          filter: true,
-          sortable: true,
-          resizable: true,
-          enableRowGroup: true,
-        }}
-        rowGroupPanelShow={"onlyWhenGrouping"}
-        onStateUpdated={handleStateChange}
-        statusBar={statusBar}
-        onCellFocused={(event) => {
-          // If the cell was focus because of selection change, we will ignore
-          // switching the symbol
-          if ((event.column as AgColumn)?.colId === "ag-Grid-SelectionColumn") {
-            return;
-          }
+      {!isLoading && (
+        <AgGridReact
+          headerHeight={48}
+          dataTypeDefinitions={extendedColumnType}
+          key={activeScreenId ?? "default"}
+          getContextMenuItems={getContextMenuItems}
+          className="ag-terminal-theme"
+          enableAdvancedFilter={true}
+          rowSelection={{ mode: "multiRow" }}
+          selectionColumnDef={{ pinned: "left", maxWidth: 48 }}
+          sideBar={false}
+          maintainColumnOrder={true}
+          includeHiddenColumnsInAdvancedFilter={true}
+          rowData={rowData}
+          autoSizeStrategy={{
+            type: "fitGridWidth",
+            defaultMinWidth: 120,
+            columnLimits: [
+              {
+                colId: "name",
+                minWidth: 180,
+              },
+            ],
+          }}
+          columnDefs={colDefs}
+          initialState={initialState}
+          getRowId={getRowId}
+          defaultColDef={{
+            wrapHeaderText: true,
+            filter: true,
+            sortable: true,
+            resizable: true,
+            enableRowGroup: true,
+          }}
+          rowGroupPanelShow={"onlyWhenGrouping"}
+          onStateUpdated={handleStateChange}
+          statusBar={statusBar}
+          onCellFocused={(event) => {
+            // If the cell was focus because of selection change, we will ignore
+            // switching the symbol
+            if (
+              (event.column as AgColumn)?.colId === "ag-Grid-SelectionColumn"
+            ) {
+              return;
+            }
 
-          const { rowIndex } = event;
-          if (rowIndex === undefined || rowIndex === null) return;
-          const symbol = event.api.getDisplayedRowAtIndex(rowIndex)?.data;
-          if (!symbol) return;
-          const { exchange, name } = symbol;
-          if (!exchange || !name) return;
-          switcher([exchange, name].join(":"));
-        }}
-      />
+            const { rowIndex } = event;
+            if (rowIndex === undefined || rowIndex === null) return;
+            const symbol = event.api.getDisplayedRowAtIndex(rowIndex)?.data;
+            if (!symbol) return;
+            const { exchange, name } = symbol;
+            if (!exchange || !name) return;
+            switcher([exchange, name].join(":"));
+          }}
+        />
+      )}
     </div>
   );
 }
