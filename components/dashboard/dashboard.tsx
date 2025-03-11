@@ -1,4 +1,10 @@
-import React from "react";
+import React, {
+  HTMLAttributes,
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { Responsive, WidthProvider } from "react-grid-layout";
 import { WidgetSelector } from "./widget-selector";
 import { useDashboard } from "./use-dashboard";
@@ -6,20 +12,23 @@ import { WIDGET_SIZES, widgetComponents, WidgetType } from "./widget-registry";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import "./dashboard-module.css";
+import { cn } from "@/lib/utils";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
-interface DashboardProps {
+interface DashboardProps extends HTMLAttributes<HTMLDivElement> {
   id: string;
   name: string;
   isAddingWidget: boolean;
   onAddingWidgetChange: (isAdding: boolean) => void;
 }
 
+const TOTAL_ROWS = 10; // Number of rows in the grid
 export function Dashboard({
   id,
   isAddingWidget,
   onAddingWidgetChange,
+  ...props
 }: DashboardProps) {
   const {
     layouts,
@@ -30,6 +39,18 @@ export function Dashboard({
     updateWidgetSettings,
   } = useDashboard(id);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [rowHeight, setRowHeight] = useState(75); // Default row height for 10
+  const onResize = useCallback(() => {
+    if (!containerRef.current) return;
+    setRowHeight(containerRef.current.clientHeight / TOTAL_ROWS);
+  }, [containerRef]);
+
+  useLayoutEffect(() => {
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [onResize]);
+
   const handleAddWidget = (type: WidgetType) => {
     if (addWidget(type)) {
       onAddingWidgetChange(false);
@@ -39,24 +60,29 @@ export function Dashboard({
   if (isLoading) {
     return <div>Loading...</div>;
   }
-  console.log(layouts);
 
   return (
-    <div className="h-full w-full">
+    <div
+      ref={containerRef}
+      {...props}
+      className={cn("flex-1 border-blue-600 border")}
+    >
       <ResponsiveGridLayout
-        className="layout hide-all-resize-handles"
+        style={{ height: "100%" }}
+        className="layout hide-all-resize-handles border border-red-700"
         layouts={{ lg: layouts }}
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
         cols={{ lg: 24, md: 24, sm: 24, xs: 24, xxs: 24 }}
         onLayoutChange={handleLayoutChange}
-        maxRows={12}
-        preventCollision
+        compactType={null}
         isDraggable
         isResizable
-        isBounded
+        allowOverlap
         draggableHandle=".drag-handle"
         margin={[0, 0]}
         resizeHandles={["sw", "nw", "se", "ne"]}
+        maxRows={TOTAL_ROWS}
+        rowHeight={rowHeight}
       >
         {layouts.map((item) => {
           const Widget = widgetComponents[item.type];

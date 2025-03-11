@@ -1,6 +1,5 @@
 // components/dashboard/dashboard-manager.tsx
 import React, { useEffect, useState } from "react";
-import { DashboardSelector } from "./dashboard-selector";
 import { Dashboard } from "./dashboard";
 import { toast } from "sonner";
 import { X } from "lucide-react";
@@ -20,7 +19,6 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import {
   useCreateDashboard,
@@ -29,6 +27,8 @@ import {
 } from "@/lib/state/symbol";
 import { Json } from "@/types/generated/supabase";
 import { LayoutItem } from "@/components/dashboard/use-dashboard";
+import { DashboardSelector } from "@/components/dashboard/dashboard-selector";
+import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
 
 interface TabItemProps {
   id: string;
@@ -222,68 +222,65 @@ export function DashboardManager() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="border-b p-4">
-        <div className="flex flex-col sm:flex-row">
-          <div className="flex items-center flex-shrink-0 mb-2 sm:mb-0">
-            <DashboardSelector
-              dashboards={dashboards}
-              activeDashboard={activeDashboardId}
-              setActiveDashboard={handleDashboardSelect}
-              onCreateDashboard={handleCreateDashboard}
-              onDeleteDashboard={handleDeleteDashboard}
-              onAddWidget={() => setIsAddingWidget(true)}
-              canAddWidget={!!activeDashboard}
-            />
-          </div>
+      <div className="flex">
+        <DashboardSelector
+          dashboards={dashboards}
+          activeDashboard={activeDashboardId}
+          setActiveDashboard={handleDashboardSelect}
+          onCreateDashboard={handleCreateDashboard}
+          onDeleteDashboard={handleDeleteDashboard}
+          onAddWidget={() => setIsAddingWidget(true)}
+          canAddWidget={!!activeDashboard}
+        />
 
-          {/* Tabs beside Add Widget button */}
-          <div className="ml-0 sm:ml-6 overflow-x-auto">
-            {openTabs.length > 0 ? (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-                modifiers={[restrictToHorizontalAxis]}
+        <div className="ml-0 sm:ml-6 overflow-x-auto">
+          {openTabs.length > 0 ? (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+              modifiers={[restrictToHorizontalAxis]}
+            >
+              <SortableContext
+                items={openTabs}
+                strategy={horizontalListSortingStrategy}
               >
-                <SortableContext
-                  items={openTabs}
-                  strategy={horizontalListSortingStrategy}
-                >
-                  <div className="flex h-full items-center">
-                    {openTabs.map((tabId) => {
-                      const dashboard = dashboards.find((d) => d.id === tabId);
-                      if (!dashboard) return null;
+                <div className="flex h-full items-center">
+                  {openTabs.map((tabId) => {
+                    const dashboard = dashboards.find((d) => d.id === tabId);
+                    if (!dashboard) return null;
 
-                      return (
-                        <TabItem
-                          key={dashboard.id}
-                          id={dashboard.id}
-                          name={dashboard.name}
-                          isActive={activeDashboardId === dashboard.id}
-                          onSelect={handleDashboardSelect}
-                          onClose={handleTabClose}
-                        />
-                      );
-                    })}
-                  </div>
-                </SortableContext>
-              </DndContext>
-            ) : null}
-          </div>
+                    return (
+                      <TabItem
+                        key={dashboard.id}
+                        id={dashboard.id}
+                        name={dashboard.name}
+                        isActive={activeDashboardId === dashboard.id}
+                        onSelect={handleDashboardSelect}
+                        onClose={handleTabClose}
+                      />
+                    );
+                  })}
+                </div>
+              </SortableContext>
+            </DndContext>
+          ) : null}
         </div>
       </div>
 
-      <div className="flex-1">
-        {activeDashboard && (
-          <Dashboard
-            key={activeDashboard.id}
-            id={activeDashboard.id}
-            name={activeDashboard.name}
-            isAddingWidget={isAddingWidget}
-            onAddingWidgetChange={setIsAddingWidget}
-          />
-        )}
-      </div>
+      {/* Tabs beside Add Widget button */}
+
+
+      {activeDashboard && (
+        <Dashboard
+          className="flex-1"
+          key={activeDashboard.id}
+          id={activeDashboard.id}
+          name={activeDashboard.name}
+          isAddingWidget={isAddingWidget}
+          onAddingWidgetChange={setIsAddingWidget}
+        />
+      )}
     </div>
   );
 }

@@ -73,7 +73,7 @@ export function DashboardSelector({
   );
 
   return (
-    <div className="flex gap-1">
+    <div className="flex gap-1 p-2">
       <Popover open={open} onOpenChange={setOpen}>
         <div className="rounded-md border">
           <PopoverTrigger asChild className="border-none">
