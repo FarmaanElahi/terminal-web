@@ -104,6 +104,8 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   }
 
   unsubscribeBars(listenerGuid: string) {
+    if (!this.listeners.has(listenerGuid)) return;
+
     const { instrumentKey } = this.listeners.get(listenerGuid)!;
     this.listeners.delete(listenerGuid);
     const isStillSubscribed = this.isSubscribed(instrumentKey);

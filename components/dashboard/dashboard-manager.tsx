@@ -218,7 +218,6 @@ export function DashboardManager() {
       </div>
     );
   }
-  console.log("Dashboard", activeDashboard, dashboards);
 
   return (
     <div className="h-full flex flex-col">
@@ -269,7 +268,6 @@ export function DashboardManager() {
       </div>
 
       {/* Tabs beside Add Widget button */}
-
 
       {activeDashboard && (
         <Dashboard

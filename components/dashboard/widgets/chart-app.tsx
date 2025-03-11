@@ -10,9 +10,20 @@ export function ChartApp({
   onRemoveWidget,
   layout,
 }: WidgetProps) {
+  const defaultLayoutId = layout?.settings?.activeLayoutId as
+    | string
+    | undefined;
+
   const groupChanged = useCallback(
     (group: Group) => {
       updateSettings({ ...layout?.settings, group });
+    },
+    [updateSettings, layout],
+  );
+
+  const onLayoutChange = useCallback(
+    (id: string) => {
+      updateSettings({ ...layout?.settings, activeLayoutId: id });
     },
     [updateSettings, layout],
   );
@@ -26,7 +37,7 @@ export function ChartApp({
         <WidgetControl layout={layout} onRemove={onRemoveWidget} />
         <div className="flex-1 overflow-hidden">
           <SymbolSearch />
-          <Chart />
+          <Chart layoutId={defaultLayoutId} onLayoutChange={onLayoutChange} />
         </div>
       </div>
     </GrouperProvider>

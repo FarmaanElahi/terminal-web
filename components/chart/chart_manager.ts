@@ -1,4 +1,3 @@
-import type { TradingView } from "@/components/chart/charting";
 import type { TradingViewWidgetOptions } from "@/components/chart/types";
 import { ChartStorage } from "@/components/chart/chart_storage";
 import { LogoProvider } from "@/components/chart/logo_provider";
@@ -22,30 +21,46 @@ export class ChartManager {
 
   create(
     container: HTMLElement,
-    symbol: string,
+    symbol: string | undefined,
     theme: "dark" | "light",
-    onReady: () => void,
+    layoutId: string | undefined,
+    options?: {
+      onReady: () => void;
+      onLayoutChange?: (id: string) => void;
+    },
   ) {
     const TradingView = window.TradingView;
     const c = this.getConfig();
-    const tvWidget = new TradingView.widget({
+    const widget = new TradingView.widget({
       ...c,
       container,
       symbol,
       theme,
     });
-    tvWidget.onChartReady(() => {
-      onReady();
-      this.onChartReady(tvWidget);
-    });
-    return tvWidget;
-  }
+    widget.onChartReady(() => {
+      options?.onReady?.();
 
-  private onChartReady = (chart: TradingView.widget) => {
-    chart.subscribe("onAutoSaveNeeded", () =>
-      chart.saveChartToServer(() => console.log("Chart saved to server")),
-    );
-  };
+      // Subscribe to chart saving
+      widget.subscribe("onAutoSaveNeeded", () =>
+        widget.saveChartToServer(() => console.log("Chart saved to server")),
+      );
+
+      if (options?.onLayoutChange) {
+        widget.subscribe("chart_load_requested", (e: unknown) =>
+          options?.onLayoutChange?.((e as { id: string }).id),
+        );
+      }
+
+      if (layoutId) {
+        widget.getSavedCharts((record) => {
+          const layout = record.find((r) => r.id === layoutId);
+          if (!layout) return;
+          widget.loadChartFromServer(layout);
+        });
+      }
+    });
+    return widget;
+  }
 
   private getConfig(): Omit<
     TradingViewWidgetOptions,
@@ -63,9 +78,9 @@ export class ChartManager {
       interval: "1D",
       locale: "en",
       auto_save_delay: 3,
+      load_last_chart: true,
       custom_css_url: "/css/charts/styles.css",
       custom_indicators_getter: getIndicators,
-      load_last_chart: true,
       save_load_adapter: this.chartStorage,
       disabled_features: [
         "order_panel",

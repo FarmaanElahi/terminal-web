@@ -5,9 +5,12 @@ import { useChartManager } from "@/lib/state/charts";
 import { useGroupSymbol } from "@/lib/state/grouper";
 import { useTheme } from "next-themes";
 
-type ChartProps = HTMLAttributes<HTMLDivElement>;
+interface ChartProps extends HTMLAttributes<HTMLDivElement> {
+  layoutId?: string;
+  onLayoutChange?: (id: string) => void;
+}
 
-export function Chart(props: ChartProps) {
+export function Chart({ layoutId, onLayoutChange, ...props }: ChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(
     null,
   ) as RefObject<HTMLDivElement>;
@@ -29,7 +32,11 @@ export function Chart(props: ChartProps) {
       chartContainerRef.current,
       symbol,
       chartTheme,
-      () => (widgetRef.current = widget),
+      layoutId,
+      {
+        onReady: () => (widgetRef.current = widget),
+        onLayoutChange,
+      },
     );
     return () => widget.remove();
     // eslint-disable-next-line react-hooks/exhaustive-deps

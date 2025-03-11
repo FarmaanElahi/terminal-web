@@ -77,10 +77,20 @@ type PlusClickParams = { x: number; y: number; price: number; symbol: string };
 type RangeOptions = { from: number; to: number; resolution: string };
 type UndoRedoState = { canUndo: boolean; canRedo: boolean };
 
+interface SaveLoadChartRecord {
+  id: string | number;
+  image_url: string;
+  interval: string;
+  modified_iso: number;
+  name: string;
+  short_symbol: string;
+}
+
 declare namespace TradingView {
   interface IChartWidgetApi {
     resolution: () => string;
     setSymbol: (symbol: string, tf: string) => void;
+    loadChartTemplate: (template: string) => void;
   }
 
   class widget {
@@ -91,6 +101,8 @@ declare namespace TradingView {
     chart: (index?: number) => IChartWidgetApi;
     chartsCount: () => number;
     activeChart: () => IChartWidgetApi;
+    getSavedCharts: (cb: (record: SaveLoadChartRecord[]) => void) => void;
+    loadChartFromServer: (record: SaveLoadChartRecord) => void;
     activeChartIndex: () => number;
     subscribe: <T = keyof SubscribeEventsMap>(
       scope: T,
