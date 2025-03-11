@@ -47,6 +47,7 @@ export function Dashboard({
   }, [containerRef]);
 
   useLayoutEffect(() => {
+    onResize();
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, [onResize]);
@@ -92,7 +93,7 @@ export function Dashboard({
             <div
               key={item.i}
               data-grid={{ ...item, minW, minH }}
-              className="border"
+              className="border select-none"
             >
               <Widget
                 layout={item}

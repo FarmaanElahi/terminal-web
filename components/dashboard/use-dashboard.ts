@@ -35,11 +35,6 @@ export function useDashboard(id: string) {
 
   const handleLayoutChange = useCallback(
     (newLayout: Layout[]) => {
-      if (firstLayoutChange.current) {
-        firstLayoutChange.current = false;
-        return;
-      }
-
       const updatedLayouts = newLayout.map((item) => {
         const existingWidget = layouts.find((w) => w.i === item.i);
         return {
