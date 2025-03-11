@@ -14,7 +14,7 @@ import {
   SubscribeBarsCallback,
 } from "@/components/chart/types";
 
-import { DateTime, FixedOffsetZone } from "luxon";
+import { DateTime, FixedOffsetZone, IANAZone } from "luxon";
 import { LogoProvider } from "@/components/chart/logo_provider";
 import { MarketDataStreamer } from "@/utils/upstox/market_data_streamer";
 import {
@@ -29,6 +29,8 @@ type UpstoxInterval = "day" | "1minute";
 type UpstoxIntradayInterval = "1d" | "I1";
 
 export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
+  private readonly zone = new IANAZone("Asia/Kolkata");
+
   private readonly upstoxHistoryAPI = new HistoryApi();
   private marketFeed = new MarketDataStreamer();
   private feeds?: Record<string, Feed>;
@@ -172,21 +174,24 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     const candle = ohlc?.ohlc
       ?.toSorted((a, b) => ((b.ts ?? 0) as number) - ((a.ts ?? 0) as number))
       .find((f) => f.interval === upstoxInterval);
+
     if (!candle) return null;
 
     const { ts, open, high, low, close, volume } = candle;
-    const utc = FixedOffsetZone.utcInstance;
 
     // If it is day, it has to be in UTC 12 AM
     if (upstoxInterval === "1d") {
-      const time = DateTime.fromMillis(ts as number, { zone: utc })
+      const time = DateTime.fromMillis(ts as number, { zone: this.zone })
+        .plus({ day: 1 })
         .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
         .toMillis();
       return { time, open, high, low, close, volume } as Bar;
     }
 
     // If it is intraday, it should be just in UTC
-    const time = DateTime.fromMillis(ts as number, { zone: utc }).toMillis();
+    const time = DateTime.fromMillis(ts as number, { zone: this.zone })
+      .toUTC()
+      .toMillis();
     return { time, open, high, low, close, volume } as Bar;
   }
 
