@@ -87,14 +87,12 @@ function useGridInitialState(activeScreenId?: string | null) {
       "mcap",
       "day_close",
       "sector",
-      "industry",
       "dcr",
       "wcr",
       "relative_vol_10D",
+      "relative_vol_20D",
       "RS_10D_pct",
       "RS_20D_pct",
-      "RSNH_1M",
-      "gap_pct_D",
     ]);
 
     const hiddenColIds = colDefs
@@ -104,12 +102,6 @@ function useGridInitialState(activeScreenId?: string | null) {
 
     return {
       columnVisibility: { hiddenColIds },
-      sideBar: {
-        visible: true,
-        position: "right",
-        openToolPanel: null,
-        toolPanels: { columns: { expandedGroupIds: [] } },
-      },
     } satisfies GridState;
   }, [colDefs]);
 
@@ -199,9 +191,9 @@ export function Watchlist(props: WatchlistProps) {
         rowSelection={{ mode: "multiRow" }}
         selectionColumnDef={{ pinned: "left", maxWidth: 48 }}
         getContextMenuItems={getContextMenuItems}
-        sideBar={false}
         rowData={rowData}
         animateRows
+        maintainColumnOrder={true}
         autoSizeStrategy={{
           type: "fitGridWidth",
           defaultMinWidth: 120,
