@@ -3,7 +3,7 @@ import * as MarketV3Proto from "@/utils/upstox/market_v3";
 import { v4 as uuidv4 } from "uuid";
 
 const FeedResponse =
-  MarketV3Proto.com.upstox.marketdatafeeder.rpc.proto.FeedResponse;
+  MarketV3Proto.com.upstox.marketdatafeederv3udapi.rpc.proto.FeedResponse;
 
 export const Mode = Object.freeze({
   LTPC: "ltpc",
@@ -57,6 +57,12 @@ export class MarketDataFeeder extends Feeder {
     this.ws?.addEventListener("open", () => {
       this.emit("open");
       this.sendQueued();
+    });
+
+    //  Unsubscribe from websocket
+    window.addEventListener("beforeunload", () => {
+      this.ws?.close(1000, "Client disconnected");
+      console.log("Socket closed");
     });
   }
 

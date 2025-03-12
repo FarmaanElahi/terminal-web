@@ -23,7 +23,7 @@ import {
   HistoryApi,
 } from "upstox-js-sdk";
 import * as MarketV3 from "@/utils/upstox/market_v3";
-import Feed = MarketV3.com.upstox.marketdatafeeder.rpc.proto.Feed;
+import Feed = MarketV3.com.upstox.marketdatafeederv3udapi.rpc.proto.Feed;
 
 type UpstoxInterval = "day" | "1minute";
 type UpstoxIntradayInterval = "1d" | "I1";
@@ -172,14 +172,15 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     const feed = this.feeds?.[instrumentKey];
     if (!feed) return null;
 
-    const ohlc = feed.ff?.indexFF?.marketOHLC ?? feed.ff?.marketFF?.marketOHLC;
+    const ohlc =
+      feed.fullFeed?.indexFF?.marketOHLC ?? feed.fullFeed?.indexFF?.marketOHLC;
     const candle = ohlc?.ohlc
       ?.toSorted((a, b) => ((b.ts ?? 0) as number) - ((a.ts ?? 0) as number))
       .find((f) => f.interval === upstoxInterval);
 
     if (!candle) return null;
 
-    const { ts, open, high, low, close, volume } = candle;
+    const { ts, open, high, low, close, vol } = candle;
 
     // If it is day, it has to be in UTC 12 AM
     if (upstoxInterval === "1d") {
@@ -187,14 +188,14 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
         .plus({ day: 1 })
         .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
         .toMillis();
-      return { time, open, high, low, close, volume } as Bar;
+      return { time, open, high, low, close, volume: vol } as Bar;
     }
 
     // If it is intraday, it should be just in UTC
     const time = DateTime.fromMillis(ts as number, { zone: this.zone })
       .toUTC()
       .toMillis();
-    return { time, open, high, low, close, volume } as Bar;
+    return { time, open, high, low, close, volume: vol } as Bar;
   }
 
   private async pullDayCandle(

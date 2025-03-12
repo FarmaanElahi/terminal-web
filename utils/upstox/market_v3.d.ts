@@ -6,8 +6,8 @@ import Long from "long";
 export namespace com {
   /** Namespace upstox. */
   namespace upstox {
-    /** Namespace marketdatafeeder. */
-    namespace marketdatafeeder {
+    /** Namespace marketdatafeederv3udapi. */
+    namespace marketdatafeederv3udapi {
       /** Namespace rpc. */
       namespace rpc {
         /** Namespace proto. */
@@ -34,7 +34,7 @@ export namespace com {
              * @param [properties] Properties to set
              */
             constructor(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.ILTPC,
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.ILTPC,
             );
 
             /** LTPC ltp. */
@@ -55,28 +55,28 @@ export namespace com {
              * @returns LTPC instance
              */
             public static create(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.ILTPC,
-            ): com.upstox.marketdatafeeder.rpc.proto.LTPC;
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.ILTPC,
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.LTPC;
 
             /**
-             * Encodes the specified LTPC message. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.LTPC.verify|verify} messages.
+             * Encodes the specified LTPC message. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.LTPC.verify|verify} messages.
              * @param message LTPC message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encode(
-              message: com.upstox.marketdatafeeder.rpc.proto.ILTPC,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.ILTPC,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
             /**
-             * Encodes the specified LTPC message, length delimited. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.LTPC.verify|verify} messages.
+             * Encodes the specified LTPC message, length delimited. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.LTPC.verify|verify} messages.
              * @param message LTPC message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encodeDelimited(
-              message: com.upstox.marketdatafeeder.rpc.proto.ILTPC,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.ILTPC,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
@@ -91,7 +91,7 @@ export namespace com {
             public static decode(
               reader: $protobuf.Reader | Uint8Array,
               length?: number,
-            ): com.upstox.marketdatafeeder.rpc.proto.LTPC;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.LTPC;
 
             /**
              * Decodes a LTPC message from the specified reader or buffer, length delimited.
@@ -102,7 +102,7 @@ export namespace com {
              */
             public static decodeDelimited(
               reader: $protobuf.Reader | Uint8Array,
-            ): com.upstox.marketdatafeeder.rpc.proto.LTPC;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.LTPC;
 
             /**
              * Verifies a LTPC message.
@@ -120,7 +120,7 @@ export namespace com {
              */
             public static fromObject(object: {
               [k: string]: unknown;
-            }): com.upstox.marketdatafeeder.rpc.proto.LTPC;
+            }): com.upstox.marketdatafeederv3udapi.rpc.proto.LTPC;
 
             /**
              * Creates a plain object from a LTPC message. Also converts values to other types if specified.
@@ -129,7 +129,7 @@ export namespace com {
              * @returns Plain object
              */
             public static toObject(
-              message: com.upstox.marketdatafeeder.rpc.proto.LTPC,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.LTPC,
               options?: $protobuf.IConversionOptions,
             ): {
               [k: string]: unknown;
@@ -152,10 +152,9 @@ export namespace com {
           /** Properties of a MarketLevel. */
           interface IMarketLevel {
             /** MarketLevel bidAskQuote */
-            bidAskQuote?: com.upstox.marketdatafeeder.rpc.proto.IQuote[] | null;
-
-            /** MarketLevel lut */
-            lut?: number | Long | null;
+            bidAskQuote?:
+              | com.upstox.marketdatafeederv3udapi.rpc.proto.IQuote[]
+              | null;
           }
 
           /** Represents a MarketLevel. */
@@ -165,14 +164,11 @@ export namespace com {
              * @param [properties] Properties to set
              */
             constructor(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IMarketLevel,
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketLevel,
             );
 
             /** MarketLevel bidAskQuote. */
-            public bidAskQuote: com.upstox.marketdatafeeder.rpc.proto.IQuote[];
-
-            /** MarketLevel lut. */
-            public lut: number | Long;
+            public bidAskQuote: com.upstox.marketdatafeederv3udapi.rpc.proto.IQuote[];
 
             /**
              * Creates a new MarketLevel instance using the specified properties.
@@ -180,28 +176,28 @@ export namespace com {
              * @returns MarketLevel instance
              */
             public static create(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IMarketLevel,
-            ): com.upstox.marketdatafeeder.rpc.proto.MarketLevel;
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketLevel,
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.MarketLevel;
 
             /**
-             * Encodes the specified MarketLevel message. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.MarketLevel.verify|verify} messages.
+             * Encodes the specified MarketLevel message. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.MarketLevel.verify|verify} messages.
              * @param message MarketLevel message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encode(
-              message: com.upstox.marketdatafeeder.rpc.proto.IMarketLevel,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketLevel,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
             /**
-             * Encodes the specified MarketLevel message, length delimited. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.MarketLevel.verify|verify} messages.
+             * Encodes the specified MarketLevel message, length delimited. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.MarketLevel.verify|verify} messages.
              * @param message MarketLevel message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encodeDelimited(
-              message: com.upstox.marketdatafeeder.rpc.proto.IMarketLevel,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketLevel,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
@@ -216,7 +212,7 @@ export namespace com {
             public static decode(
               reader: $protobuf.Reader | Uint8Array,
               length?: number,
-            ): com.upstox.marketdatafeeder.rpc.proto.MarketLevel;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.MarketLevel;
 
             /**
              * Decodes a MarketLevel message from the specified reader or buffer, length delimited.
@@ -227,7 +223,7 @@ export namespace com {
              */
             public static decodeDelimited(
               reader: $protobuf.Reader | Uint8Array,
-            ): com.upstox.marketdatafeeder.rpc.proto.MarketLevel;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.MarketLevel;
 
             /**
              * Verifies a MarketLevel message.
@@ -245,7 +241,7 @@ export namespace com {
              */
             public static fromObject(object: {
               [k: string]: unknown;
-            }): com.upstox.marketdatafeeder.rpc.proto.MarketLevel;
+            }): com.upstox.marketdatafeederv3udapi.rpc.proto.MarketLevel;
 
             /**
              * Creates a plain object from a MarketLevel message. Also converts values to other types if specified.
@@ -254,7 +250,7 @@ export namespace com {
              * @returns Plain object
              */
             public static toObject(
-              message: com.upstox.marketdatafeeder.rpc.proto.MarketLevel,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.MarketLevel,
               options?: $protobuf.IConversionOptions,
             ): {
               [k: string]: unknown;
@@ -277,7 +273,7 @@ export namespace com {
           /** Properties of a MarketOHLC. */
           interface IMarketOHLC {
             /** MarketOHLC ohlc */
-            ohlc?: com.upstox.marketdatafeeder.rpc.proto.IOHLC[] | null;
+            ohlc?: com.upstox.marketdatafeederv3udapi.rpc.proto.IOHLC[] | null;
           }
 
           /** Represents a MarketOHLC. */
@@ -287,11 +283,11 @@ export namespace com {
              * @param [properties] Properties to set
              */
             constructor(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IMarketOHLC,
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketOHLC,
             );
 
             /** MarketOHLC ohlc. */
-            public ohlc: com.upstox.marketdatafeeder.rpc.proto.IOHLC[];
+            public ohlc: com.upstox.marketdatafeederv3udapi.rpc.proto.IOHLC[];
 
             /**
              * Creates a new MarketOHLC instance using the specified properties.
@@ -299,28 +295,28 @@ export namespace com {
              * @returns MarketOHLC instance
              */
             public static create(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IMarketOHLC,
-            ): com.upstox.marketdatafeeder.rpc.proto.MarketOHLC;
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketOHLC,
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.MarketOHLC;
 
             /**
-             * Encodes the specified MarketOHLC message. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.MarketOHLC.verify|verify} messages.
+             * Encodes the specified MarketOHLC message. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.MarketOHLC.verify|verify} messages.
              * @param message MarketOHLC message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encode(
-              message: com.upstox.marketdatafeeder.rpc.proto.IMarketOHLC,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketOHLC,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
             /**
-             * Encodes the specified MarketOHLC message, length delimited. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.MarketOHLC.verify|verify} messages.
+             * Encodes the specified MarketOHLC message, length delimited. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.MarketOHLC.verify|verify} messages.
              * @param message MarketOHLC message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encodeDelimited(
-              message: com.upstox.marketdatafeeder.rpc.proto.IMarketOHLC,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketOHLC,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
@@ -335,7 +331,7 @@ export namespace com {
             public static decode(
               reader: $protobuf.Reader | Uint8Array,
               length?: number,
-            ): com.upstox.marketdatafeeder.rpc.proto.MarketOHLC;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.MarketOHLC;
 
             /**
              * Decodes a MarketOHLC message from the specified reader or buffer, length delimited.
@@ -346,7 +342,7 @@ export namespace com {
              */
             public static decodeDelimited(
               reader: $protobuf.Reader | Uint8Array,
-            ): com.upstox.marketdatafeeder.rpc.proto.MarketOHLC;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.MarketOHLC;
 
             /**
              * Verifies a MarketOHLC message.
@@ -364,7 +360,7 @@ export namespace com {
              */
             public static fromObject(object: {
               [k: string]: unknown;
-            }): com.upstox.marketdatafeeder.rpc.proto.MarketOHLC;
+            }): com.upstox.marketdatafeederv3udapi.rpc.proto.MarketOHLC;
 
             /**
              * Creates a plain object from a MarketOHLC message. Also converts values to other types if specified.
@@ -373,7 +369,7 @@ export namespace com {
              * @returns Plain object
              */
             public static toObject(
-              message: com.upstox.marketdatafeeder.rpc.proto.MarketOHLC,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.MarketOHLC,
               options?: $protobuf.IConversionOptions,
             ): {
               [k: string]: unknown;
@@ -395,29 +391,17 @@ export namespace com {
 
           /** Properties of a Quote. */
           interface IQuote {
-            /** Quote bq */
-            bq?: number | null;
-
-            /** Quote bp */
-            bp?: number | null;
-
-            /** Quote bno */
-            bno?: number | null;
-
-            /** Quote aq */
-            aq?: number | null;
-
-            /** Quote ap */
-            ap?: number | null;
-
-            /** Quote ano */
-            ano?: number | null;
-
             /** Quote bidQ */
             bidQ?: number | Long | null;
 
+            /** Quote bidP */
+            bidP?: number | null;
+
             /** Quote askQ */
             askQ?: number | Long | null;
+
+            /** Quote askP */
+            askP?: number | null;
           }
 
           /** Represents a Quote. */
@@ -427,32 +411,20 @@ export namespace com {
              * @param [properties] Properties to set
              */
             constructor(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IQuote,
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IQuote,
             );
-
-            /** Quote bq. */
-            public bq: number;
-
-            /** Quote bp. */
-            public bp: number;
-
-            /** Quote bno. */
-            public bno: number;
-
-            /** Quote aq. */
-            public aq: number;
-
-            /** Quote ap. */
-            public ap: number;
-
-            /** Quote ano. */
-            public ano: number;
 
             /** Quote bidQ. */
             public bidQ: number | Long;
 
+            /** Quote bidP. */
+            public bidP: number;
+
             /** Quote askQ. */
             public askQ: number | Long;
+
+            /** Quote askP. */
+            public askP: number;
 
             /**
              * Creates a new Quote instance using the specified properties.
@@ -460,28 +432,28 @@ export namespace com {
              * @returns Quote instance
              */
             public static create(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IQuote,
-            ): com.upstox.marketdatafeeder.rpc.proto.Quote;
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IQuote,
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.Quote;
 
             /**
-             * Encodes the specified Quote message. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.Quote.verify|verify} messages.
+             * Encodes the specified Quote message. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.Quote.verify|verify} messages.
              * @param message Quote message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encode(
-              message: com.upstox.marketdatafeeder.rpc.proto.IQuote,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IQuote,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
             /**
-             * Encodes the specified Quote message, length delimited. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.Quote.verify|verify} messages.
+             * Encodes the specified Quote message, length delimited. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.Quote.verify|verify} messages.
              * @param message Quote message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encodeDelimited(
-              message: com.upstox.marketdatafeeder.rpc.proto.IQuote,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IQuote,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
@@ -496,7 +468,7 @@ export namespace com {
             public static decode(
               reader: $protobuf.Reader | Uint8Array,
               length?: number,
-            ): com.upstox.marketdatafeeder.rpc.proto.Quote;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.Quote;
 
             /**
              * Decodes a Quote message from the specified reader or buffer, length delimited.
@@ -507,7 +479,7 @@ export namespace com {
              */
             public static decodeDelimited(
               reader: $protobuf.Reader | Uint8Array,
-            ): com.upstox.marketdatafeeder.rpc.proto.Quote;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.Quote;
 
             /**
              * Verifies a Quote message.
@@ -525,7 +497,7 @@ export namespace com {
              */
             public static fromObject(object: {
               [k: string]: unknown;
-            }): com.upstox.marketdatafeeder.rpc.proto.Quote;
+            }): com.upstox.marketdatafeederv3udapi.rpc.proto.Quote;
 
             /**
              * Creates a plain object from a Quote message. Also converts values to other types if specified.
@@ -534,7 +506,7 @@ export namespace com {
              * @returns Plain object
              */
             public static toObject(
-              message: com.upstox.marketdatafeeder.rpc.proto.Quote,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.Quote,
               options?: $protobuf.IConversionOptions,
             ): {
               [k: string]: unknown;
@@ -556,15 +528,6 @@ export namespace com {
 
           /** Properties of an OptionGreeks. */
           interface IOptionGreeks {
-            /** OptionGreeks op */
-            op?: number | null;
-
-            /** OptionGreeks up */
-            up?: number | null;
-
-            /** OptionGreeks iv */
-            iv?: number | null;
-
             /** OptionGreeks delta */
             delta?: number | null;
 
@@ -588,17 +551,8 @@ export namespace com {
              * @param [properties] Properties to set
              */
             constructor(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IOptionGreeks,
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IOptionGreeks,
             );
-
-            /** OptionGreeks op. */
-            public op: number;
-
-            /** OptionGreeks up. */
-            public up: number;
-
-            /** OptionGreeks iv. */
-            public iv: number;
 
             /** OptionGreeks delta. */
             public delta: number;
@@ -621,28 +575,28 @@ export namespace com {
              * @returns OptionGreeks instance
              */
             public static create(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IOptionGreeks,
-            ): com.upstox.marketdatafeeder.rpc.proto.OptionGreeks;
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IOptionGreeks,
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.OptionGreeks;
 
             /**
-             * Encodes the specified OptionGreeks message. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.OptionGreeks.verify|verify} messages.
+             * Encodes the specified OptionGreeks message. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.OptionGreeks.verify|verify} messages.
              * @param message OptionGreeks message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encode(
-              message: com.upstox.marketdatafeeder.rpc.proto.IOptionGreeks,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IOptionGreeks,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
             /**
-             * Encodes the specified OptionGreeks message, length delimited. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.OptionGreeks.verify|verify} messages.
+             * Encodes the specified OptionGreeks message, length delimited. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.OptionGreeks.verify|verify} messages.
              * @param message OptionGreeks message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encodeDelimited(
-              message: com.upstox.marketdatafeeder.rpc.proto.IOptionGreeks,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IOptionGreeks,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
@@ -657,7 +611,7 @@ export namespace com {
             public static decode(
               reader: $protobuf.Reader | Uint8Array,
               length?: number,
-            ): com.upstox.marketdatafeeder.rpc.proto.OptionGreeks;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.OptionGreeks;
 
             /**
              * Decodes an OptionGreeks message from the specified reader or buffer, length delimited.
@@ -668,7 +622,7 @@ export namespace com {
              */
             public static decodeDelimited(
               reader: $protobuf.Reader | Uint8Array,
-            ): com.upstox.marketdatafeeder.rpc.proto.OptionGreeks;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.OptionGreeks;
 
             /**
              * Verifies an OptionGreeks message.
@@ -686,7 +640,7 @@ export namespace com {
              */
             public static fromObject(object: {
               [k: string]: unknown;
-            }): com.upstox.marketdatafeeder.rpc.proto.OptionGreeks;
+            }): com.upstox.marketdatafeederv3udapi.rpc.proto.OptionGreeks;
 
             /**
              * Creates a plain object from an OptionGreeks message. Also converts values to other types if specified.
@@ -695,7 +649,7 @@ export namespace com {
              * @returns Plain object
              */
             public static toObject(
-              message: com.upstox.marketdatafeeder.rpc.proto.OptionGreeks,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.OptionGreeks,
               options?: $protobuf.IConversionOptions,
             ): {
               [k: string]: unknown;
@@ -709,251 +663,6 @@ export namespace com {
 
             /**
              * Gets the default type url for OptionGreeks
-             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
-             * @returns The default type url
-             */
-            public static getTypeUrl(typeUrlPrefix?: string): string;
-          }
-
-          /** Properties of an ExtendedFeedDetails. */
-          interface IExtendedFeedDetails {
-            /** ExtendedFeedDetails atp */
-            atp?: number | null;
-
-            /** ExtendedFeedDetails cp */
-            cp?: number | null;
-
-            /** ExtendedFeedDetails vtt */
-            vtt?: number | Long | null;
-
-            /** ExtendedFeedDetails oi */
-            oi?: number | null;
-
-            /** ExtendedFeedDetails changeOi */
-            changeOi?: number | null;
-
-            /** ExtendedFeedDetails lastClose */
-            lastClose?: number | null;
-
-            /** ExtendedFeedDetails tbq */
-            tbq?: number | null;
-
-            /** ExtendedFeedDetails tsq */
-            tsq?: number | null;
-
-            /** ExtendedFeedDetails close */
-            close?: number | null;
-
-            /** ExtendedFeedDetails lc */
-            lc?: number | null;
-
-            /** ExtendedFeedDetails uc */
-            uc?: number | null;
-
-            /** ExtendedFeedDetails yh */
-            yh?: number | null;
-
-            /** ExtendedFeedDetails yl */
-            yl?: number | null;
-
-            /** ExtendedFeedDetails fp */
-            fp?: number | null;
-
-            /** ExtendedFeedDetails fv */
-            fv?: number | null;
-
-            /** ExtendedFeedDetails mbpBuy */
-            mbpBuy?: number | Long | null;
-
-            /** ExtendedFeedDetails mbpSell */
-            mbpSell?: number | Long | null;
-
-            /** ExtendedFeedDetails tv */
-            tv?: number | Long | null;
-
-            /** ExtendedFeedDetails dhoi */
-            dhoi?: number | null;
-
-            /** ExtendedFeedDetails dloi */
-            dloi?: number | null;
-
-            /** ExtendedFeedDetails sp */
-            sp?: number | null;
-
-            /** ExtendedFeedDetails poi */
-            poi?: number | null;
-          }
-
-          /** Represents an ExtendedFeedDetails. */
-          class ExtendedFeedDetails implements IExtendedFeedDetails {
-            /**
-             * Constructs a new ExtendedFeedDetails.
-             * @param [properties] Properties to set
-             */
-            constructor(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IExtendedFeedDetails,
-            );
-
-            /** ExtendedFeedDetails atp. */
-            public atp: number;
-
-            /** ExtendedFeedDetails cp. */
-            public cp: number;
-
-            /** ExtendedFeedDetails vtt. */
-            public vtt: number | Long;
-
-            /** ExtendedFeedDetails oi. */
-            public oi: number;
-
-            /** ExtendedFeedDetails changeOi. */
-            public changeOi: number;
-
-            /** ExtendedFeedDetails lastClose. */
-            public lastClose: number;
-
-            /** ExtendedFeedDetails tbq. */
-            public tbq: number;
-
-            /** ExtendedFeedDetails tsq. */
-            public tsq: number;
-
-            /** ExtendedFeedDetails close. */
-            public close: number;
-
-            /** ExtendedFeedDetails lc. */
-            public lc: number;
-
-            /** ExtendedFeedDetails uc. */
-            public uc: number;
-
-            /** ExtendedFeedDetails yh. */
-            public yh: number;
-
-            /** ExtendedFeedDetails yl. */
-            public yl: number;
-
-            /** ExtendedFeedDetails fp. */
-            public fp: number;
-
-            /** ExtendedFeedDetails fv. */
-            public fv: number;
-
-            /** ExtendedFeedDetails mbpBuy. */
-            public mbpBuy: number | Long;
-
-            /** ExtendedFeedDetails mbpSell. */
-            public mbpSell: number | Long;
-
-            /** ExtendedFeedDetails tv. */
-            public tv: number | Long;
-
-            /** ExtendedFeedDetails dhoi. */
-            public dhoi: number;
-
-            /** ExtendedFeedDetails dloi. */
-            public dloi: number;
-
-            /** ExtendedFeedDetails sp. */
-            public sp: number;
-
-            /** ExtendedFeedDetails poi. */
-            public poi: number;
-
-            /**
-             * Creates a new ExtendedFeedDetails instance using the specified properties.
-             * @param [properties] Properties to set
-             * @returns ExtendedFeedDetails instance
-             */
-            public static create(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IExtendedFeedDetails,
-            ): com.upstox.marketdatafeeder.rpc.proto.ExtendedFeedDetails;
-
-            /**
-             * Encodes the specified ExtendedFeedDetails message. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.ExtendedFeedDetails.verify|verify} messages.
-             * @param message ExtendedFeedDetails message or plain object to encode
-             * @param [writer] Writer to encode to
-             * @returns Writer
-             */
-            public static encode(
-              message: com.upstox.marketdatafeeder.rpc.proto.IExtendedFeedDetails,
-              writer?: $protobuf.Writer,
-            ): $protobuf.Writer;
-
-            /**
-             * Encodes the specified ExtendedFeedDetails message, length delimited. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.ExtendedFeedDetails.verify|verify} messages.
-             * @param message ExtendedFeedDetails message or plain object to encode
-             * @param [writer] Writer to encode to
-             * @returns Writer
-             */
-            public static encodeDelimited(
-              message: com.upstox.marketdatafeeder.rpc.proto.IExtendedFeedDetails,
-              writer?: $protobuf.Writer,
-            ): $protobuf.Writer;
-
-            /**
-             * Decodes an ExtendedFeedDetails message from the specified reader or buffer.
-             * @param reader Reader or buffer to decode from
-             * @param [length] Message length if known beforehand
-             * @returns ExtendedFeedDetails
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            public static decode(
-              reader: $protobuf.Reader | Uint8Array,
-              length?: number,
-            ): com.upstox.marketdatafeeder.rpc.proto.ExtendedFeedDetails;
-
-            /**
-             * Decodes an ExtendedFeedDetails message from the specified reader or buffer, length delimited.
-             * @param reader Reader or buffer to decode from
-             * @returns ExtendedFeedDetails
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            public static decodeDelimited(
-              reader: $protobuf.Reader | Uint8Array,
-            ): com.upstox.marketdatafeeder.rpc.proto.ExtendedFeedDetails;
-
-            /**
-             * Verifies an ExtendedFeedDetails message.
-             * @param message Plain object to verify
-             * @returns `null` if valid, otherwise the reason why it is not
-             */
-            public static verify(message: {
-              [k: string]: unknown;
-            }): string | null;
-
-            /**
-             * Creates an ExtendedFeedDetails message from a plain object. Also converts values to their respective internal types.
-             * @param object Plain object
-             * @returns ExtendedFeedDetails
-             */
-            public static fromObject(object: {
-              [k: string]: unknown;
-            }): com.upstox.marketdatafeeder.rpc.proto.ExtendedFeedDetails;
-
-            /**
-             * Creates a plain object from an ExtendedFeedDetails message. Also converts values to other types if specified.
-             * @param message ExtendedFeedDetails
-             * @param [options] Conversion options
-             * @returns Plain object
-             */
-            public static toObject(
-              message: com.upstox.marketdatafeeder.rpc.proto.ExtendedFeedDetails,
-              options?: $protobuf.IConversionOptions,
-            ): {
-              [k: string]: unknown;
-            };
-
-            /**
-             * Converts this ExtendedFeedDetails to JSON.
-             * @returns JSON object
-             */
-            public toJSON(): { [k: string]: unknown };
-
-            /**
-             * Gets the default type url for ExtendedFeedDetails
              * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
              * @returns The default type url
              */
@@ -977,14 +686,11 @@ export namespace com {
             /** OHLC close */
             close?: number | null;
 
-            /** OHLC volume */
-            volume?: number | null;
+            /** OHLC vol */
+            vol?: number | Long | null;
 
             /** OHLC ts */
             ts?: number | Long | null;
-
-            /** OHLC vol */
-            vol?: number | Long | null;
           }
 
           /** Represents a OHLC. */
@@ -994,7 +700,7 @@ export namespace com {
              * @param [properties] Properties to set
              */
             constructor(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IOHLC,
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IOHLC,
             );
 
             /** OHLC interval. */
@@ -1012,14 +718,11 @@ export namespace com {
             /** OHLC close. */
             public close: number;
 
-            /** OHLC volume. */
-            public volume: number;
+            /** OHLC vol. */
+            public vol: number | Long;
 
             /** OHLC ts. */
             public ts: number | Long;
-
-            /** OHLC vol. */
-            public vol: number | Long;
 
             /**
              * Creates a new OHLC instance using the specified properties.
@@ -1027,28 +730,28 @@ export namespace com {
              * @returns OHLC instance
              */
             public static create(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IOHLC,
-            ): com.upstox.marketdatafeeder.rpc.proto.OHLC;
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IOHLC,
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.OHLC;
 
             /**
-             * Encodes the specified OHLC message. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.OHLC.verify|verify} messages.
+             * Encodes the specified OHLC message. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.OHLC.verify|verify} messages.
              * @param message OHLC message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encode(
-              message: com.upstox.marketdatafeeder.rpc.proto.IOHLC,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IOHLC,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
             /**
-             * Encodes the specified OHLC message, length delimited. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.OHLC.verify|verify} messages.
+             * Encodes the specified OHLC message, length delimited. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.OHLC.verify|verify} messages.
              * @param message OHLC message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encodeDelimited(
-              message: com.upstox.marketdatafeeder.rpc.proto.IOHLC,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IOHLC,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
@@ -1063,7 +766,7 @@ export namespace com {
             public static decode(
               reader: $protobuf.Reader | Uint8Array,
               length?: number,
-            ): com.upstox.marketdatafeeder.rpc.proto.OHLC;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.OHLC;
 
             /**
              * Decodes a OHLC message from the specified reader or buffer, length delimited.
@@ -1074,7 +777,7 @@ export namespace com {
              */
             public static decodeDelimited(
               reader: $protobuf.Reader | Uint8Array,
-            ): com.upstox.marketdatafeeder.rpc.proto.OHLC;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.OHLC;
 
             /**
              * Verifies a OHLC message.
@@ -1092,7 +795,7 @@ export namespace com {
              */
             public static fromObject(object: {
               [k: string]: unknown;
-            }): com.upstox.marketdatafeeder.rpc.proto.OHLC;
+            }): com.upstox.marketdatafeederv3udapi.rpc.proto.OHLC;
 
             /**
              * Creates a plain object from a OHLC message. Also converts values to other types if specified.
@@ -1101,7 +804,7 @@ export namespace com {
              * @returns Plain object
              */
             public static toObject(
-              message: com.upstox.marketdatafeeder.rpc.proto.OHLC,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.OHLC,
               options?: $protobuf.IConversionOptions,
             ): {
               [k: string]: unknown;
@@ -1125,24 +828,40 @@ export namespace com {
           enum Type {
             initial_feed = 0,
             live_feed = 1,
+            market_info = 2,
           }
 
           /** Properties of a MarketFullFeed. */
           interface IMarketFullFeed {
             /** MarketFullFeed ltpc */
-            ltpc?: com.upstox.marketdatafeeder.rpc.proto.ILTPC | null;
+            ltpc?: com.upstox.marketdatafeederv3udapi.rpc.proto.ILTPC | null;
 
             /** MarketFullFeed marketLevel */
-            marketLevel?: com.upstox.marketdatafeeder.rpc.proto.IMarketLevel | null;
+            marketLevel?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketLevel | null;
 
             /** MarketFullFeed optionGreeks */
-            optionGreeks?: com.upstox.marketdatafeeder.rpc.proto.IOptionGreeks | null;
+            optionGreeks?: com.upstox.marketdatafeederv3udapi.rpc.proto.IOptionGreeks | null;
 
             /** MarketFullFeed marketOHLC */
-            marketOHLC?: com.upstox.marketdatafeeder.rpc.proto.IMarketOHLC | null;
+            marketOHLC?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketOHLC | null;
 
-            /** MarketFullFeed eFeedDetails */
-            eFeedDetails?: com.upstox.marketdatafeeder.rpc.proto.IExtendedFeedDetails | null;
+            /** MarketFullFeed atp */
+            atp?: number | null;
+
+            /** MarketFullFeed vtt */
+            vtt?: number | Long | null;
+
+            /** MarketFullFeed oi */
+            oi?: number | null;
+
+            /** MarketFullFeed iv */
+            iv?: number | null;
+
+            /** MarketFullFeed tbq */
+            tbq?: number | null;
+
+            /** MarketFullFeed tsq */
+            tsq?: number | null;
           }
 
           /** Represents a MarketFullFeed. */
@@ -1152,23 +871,38 @@ export namespace com {
              * @param [properties] Properties to set
              */
             constructor(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IMarketFullFeed,
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketFullFeed,
             );
 
             /** MarketFullFeed ltpc. */
-            public ltpc?: com.upstox.marketdatafeeder.rpc.proto.ILTPC | null;
+            public ltpc?: com.upstox.marketdatafeederv3udapi.rpc.proto.ILTPC | null;
 
             /** MarketFullFeed marketLevel. */
-            public marketLevel?: com.upstox.marketdatafeeder.rpc.proto.IMarketLevel | null;
+            public marketLevel?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketLevel | null;
 
             /** MarketFullFeed optionGreeks. */
-            public optionGreeks?: com.upstox.marketdatafeeder.rpc.proto.IOptionGreeks | null;
+            public optionGreeks?: com.upstox.marketdatafeederv3udapi.rpc.proto.IOptionGreeks | null;
 
             /** MarketFullFeed marketOHLC. */
-            public marketOHLC?: com.upstox.marketdatafeeder.rpc.proto.IMarketOHLC | null;
+            public marketOHLC?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketOHLC | null;
 
-            /** MarketFullFeed eFeedDetails. */
-            public eFeedDetails?: com.upstox.marketdatafeeder.rpc.proto.IExtendedFeedDetails | null;
+            /** MarketFullFeed atp. */
+            public atp: number;
+
+            /** MarketFullFeed vtt. */
+            public vtt: number | Long;
+
+            /** MarketFullFeed oi. */
+            public oi: number;
+
+            /** MarketFullFeed iv. */
+            public iv: number;
+
+            /** MarketFullFeed tbq. */
+            public tbq: number;
+
+            /** MarketFullFeed tsq. */
+            public tsq: number;
 
             /**
              * Creates a new MarketFullFeed instance using the specified properties.
@@ -1176,28 +910,28 @@ export namespace com {
              * @returns MarketFullFeed instance
              */
             public static create(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IMarketFullFeed,
-            ): com.upstox.marketdatafeeder.rpc.proto.MarketFullFeed;
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketFullFeed,
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.MarketFullFeed;
 
             /**
-             * Encodes the specified MarketFullFeed message. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.MarketFullFeed.verify|verify} messages.
+             * Encodes the specified MarketFullFeed message. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.MarketFullFeed.verify|verify} messages.
              * @param message MarketFullFeed message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encode(
-              message: com.upstox.marketdatafeeder.rpc.proto.IMarketFullFeed,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketFullFeed,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
             /**
-             * Encodes the specified MarketFullFeed message, length delimited. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.MarketFullFeed.verify|verify} messages.
+             * Encodes the specified MarketFullFeed message, length delimited. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.MarketFullFeed.verify|verify} messages.
              * @param message MarketFullFeed message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encodeDelimited(
-              message: com.upstox.marketdatafeeder.rpc.proto.IMarketFullFeed,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketFullFeed,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
@@ -1212,7 +946,7 @@ export namespace com {
             public static decode(
               reader: $protobuf.Reader | Uint8Array,
               length?: number,
-            ): com.upstox.marketdatafeeder.rpc.proto.MarketFullFeed;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.MarketFullFeed;
 
             /**
              * Decodes a MarketFullFeed message from the specified reader or buffer, length delimited.
@@ -1223,7 +957,7 @@ export namespace com {
              */
             public static decodeDelimited(
               reader: $protobuf.Reader | Uint8Array,
-            ): com.upstox.marketdatafeeder.rpc.proto.MarketFullFeed;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.MarketFullFeed;
 
             /**
              * Verifies a MarketFullFeed message.
@@ -1241,7 +975,7 @@ export namespace com {
              */
             public static fromObject(object: {
               [k: string]: unknown;
-            }): com.upstox.marketdatafeeder.rpc.proto.MarketFullFeed;
+            }): com.upstox.marketdatafeederv3udapi.rpc.proto.MarketFullFeed;
 
             /**
              * Creates a plain object from a MarketFullFeed message. Also converts values to other types if specified.
@@ -1250,7 +984,7 @@ export namespace com {
              * @returns Plain object
              */
             public static toObject(
-              message: com.upstox.marketdatafeeder.rpc.proto.MarketFullFeed,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.MarketFullFeed,
               options?: $protobuf.IConversionOptions,
             ): {
               [k: string]: unknown;
@@ -1273,19 +1007,10 @@ export namespace com {
           /** Properties of an IndexFullFeed. */
           interface IIndexFullFeed {
             /** IndexFullFeed ltpc */
-            ltpc?: com.upstox.marketdatafeeder.rpc.proto.ILTPC | null;
+            ltpc?: com.upstox.marketdatafeederv3udapi.rpc.proto.ILTPC | null;
 
             /** IndexFullFeed marketOHLC */
-            marketOHLC?: com.upstox.marketdatafeeder.rpc.proto.IMarketOHLC | null;
-
-            /** IndexFullFeed lastClose */
-            lastClose?: number | null;
-
-            /** IndexFullFeed yh */
-            yh?: number | null;
-
-            /** IndexFullFeed yl */
-            yl?: number | null;
+            marketOHLC?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketOHLC | null;
           }
 
           /** Represents an IndexFullFeed. */
@@ -1295,23 +1020,14 @@ export namespace com {
              * @param [properties] Properties to set
              */
             constructor(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IIndexFullFeed,
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IIndexFullFeed,
             );
 
             /** IndexFullFeed ltpc. */
-            public ltpc?: com.upstox.marketdatafeeder.rpc.proto.ILTPC | null;
+            public ltpc?: com.upstox.marketdatafeederv3udapi.rpc.proto.ILTPC | null;
 
             /** IndexFullFeed marketOHLC. */
-            public marketOHLC?: com.upstox.marketdatafeeder.rpc.proto.IMarketOHLC | null;
-
-            /** IndexFullFeed lastClose. */
-            public lastClose: number;
-
-            /** IndexFullFeed yh. */
-            public yh: number;
-
-            /** IndexFullFeed yl. */
-            public yl: number;
+            public marketOHLC?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketOHLC | null;
 
             /**
              * Creates a new IndexFullFeed instance using the specified properties.
@@ -1319,28 +1035,28 @@ export namespace com {
              * @returns IndexFullFeed instance
              */
             public static create(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IIndexFullFeed,
-            ): com.upstox.marketdatafeeder.rpc.proto.IndexFullFeed;
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IIndexFullFeed,
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.IndexFullFeed;
 
             /**
-             * Encodes the specified IndexFullFeed message. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.IndexFullFeed.verify|verify} messages.
+             * Encodes the specified IndexFullFeed message. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.IndexFullFeed.verify|verify} messages.
              * @param message IndexFullFeed message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encode(
-              message: com.upstox.marketdatafeeder.rpc.proto.IIndexFullFeed,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IIndexFullFeed,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
             /**
-             * Encodes the specified IndexFullFeed message, length delimited. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.IndexFullFeed.verify|verify} messages.
+             * Encodes the specified IndexFullFeed message, length delimited. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.IndexFullFeed.verify|verify} messages.
              * @param message IndexFullFeed message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encodeDelimited(
-              message: com.upstox.marketdatafeeder.rpc.proto.IIndexFullFeed,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IIndexFullFeed,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
@@ -1355,7 +1071,7 @@ export namespace com {
             public static decode(
               reader: $protobuf.Reader | Uint8Array,
               length?: number,
-            ): com.upstox.marketdatafeeder.rpc.proto.IndexFullFeed;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.IndexFullFeed;
 
             /**
              * Decodes an IndexFullFeed message from the specified reader or buffer, length delimited.
@@ -1366,7 +1082,7 @@ export namespace com {
              */
             public static decodeDelimited(
               reader: $protobuf.Reader | Uint8Array,
-            ): com.upstox.marketdatafeeder.rpc.proto.IndexFullFeed;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.IndexFullFeed;
 
             /**
              * Verifies an IndexFullFeed message.
@@ -1384,7 +1100,7 @@ export namespace com {
              */
             public static fromObject(object: {
               [k: string]: unknown;
-            }): com.upstox.marketdatafeeder.rpc.proto.IndexFullFeed;
+            }): com.upstox.marketdatafeederv3udapi.rpc.proto.IndexFullFeed;
 
             /**
              * Creates a plain object from an IndexFullFeed message. Also converts values to other types if specified.
@@ -1393,7 +1109,7 @@ export namespace com {
              * @returns Plain object
              */
             public static toObject(
-              message: com.upstox.marketdatafeeder.rpc.proto.IndexFullFeed,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IndexFullFeed,
               options?: $protobuf.IConversionOptions,
             ): {
               [k: string]: unknown;
@@ -1416,10 +1132,10 @@ export namespace com {
           /** Properties of a FullFeed. */
           interface IFullFeed {
             /** FullFeed marketFF */
-            marketFF?: com.upstox.marketdatafeeder.rpc.proto.IMarketFullFeed | null;
+            marketFF?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketFullFeed | null;
 
             /** FullFeed indexFF */
-            indexFF?: com.upstox.marketdatafeeder.rpc.proto.IIndexFullFeed | null;
+            indexFF?: com.upstox.marketdatafeederv3udapi.rpc.proto.IIndexFullFeed | null;
           }
 
           /** Represents a FullFeed. */
@@ -1429,14 +1145,14 @@ export namespace com {
              * @param [properties] Properties to set
              */
             constructor(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IFullFeed,
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IFullFeed,
             );
 
             /** FullFeed marketFF. */
-            public marketFF?: com.upstox.marketdatafeeder.rpc.proto.IMarketFullFeed | null;
+            public marketFF?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketFullFeed | null;
 
             /** FullFeed indexFF. */
-            public indexFF?: com.upstox.marketdatafeeder.rpc.proto.IIndexFullFeed | null;
+            public indexFF?: com.upstox.marketdatafeederv3udapi.rpc.proto.IIndexFullFeed | null;
 
             /** FullFeed FullFeedUnion. */
             public FullFeedUnion?: "marketFF" | "indexFF";
@@ -1447,28 +1163,28 @@ export namespace com {
              * @returns FullFeed instance
              */
             public static create(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IFullFeed,
-            ): com.upstox.marketdatafeeder.rpc.proto.FullFeed;
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IFullFeed,
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.FullFeed;
 
             /**
-             * Encodes the specified FullFeed message. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.FullFeed.verify|verify} messages.
+             * Encodes the specified FullFeed message. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.FullFeed.verify|verify} messages.
              * @param message FullFeed message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encode(
-              message: com.upstox.marketdatafeeder.rpc.proto.IFullFeed,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IFullFeed,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
             /**
-             * Encodes the specified FullFeed message, length delimited. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.FullFeed.verify|verify} messages.
+             * Encodes the specified FullFeed message, length delimited. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.FullFeed.verify|verify} messages.
              * @param message FullFeed message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encodeDelimited(
-              message: com.upstox.marketdatafeeder.rpc.proto.IFullFeed,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IFullFeed,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
@@ -1483,7 +1199,7 @@ export namespace com {
             public static decode(
               reader: $protobuf.Reader | Uint8Array,
               length?: number,
-            ): com.upstox.marketdatafeeder.rpc.proto.FullFeed;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.FullFeed;
 
             /**
              * Decodes a FullFeed message from the specified reader or buffer, length delimited.
@@ -1494,7 +1210,7 @@ export namespace com {
              */
             public static decodeDelimited(
               reader: $protobuf.Reader | Uint8Array,
-            ): com.upstox.marketdatafeeder.rpc.proto.FullFeed;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.FullFeed;
 
             /**
              * Verifies a FullFeed message.
@@ -1512,7 +1228,7 @@ export namespace com {
              */
             public static fromObject(object: {
               [k: string]: unknown;
-            }): com.upstox.marketdatafeeder.rpc.proto.FullFeed;
+            }): com.upstox.marketdatafeederv3udapi.rpc.proto.FullFeed;
 
             /**
              * Creates a plain object from a FullFeed message. Also converts values to other types if specified.
@@ -1521,7 +1237,7 @@ export namespace com {
              * @returns Plain object
              */
             public static toObject(
-              message: com.upstox.marketdatafeeder.rpc.proto.FullFeed,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.FullFeed,
               options?: $protobuf.IConversionOptions,
             ): {
               [k: string]: unknown;
@@ -1541,100 +1257,112 @@ export namespace com {
             public static getTypeUrl(typeUrlPrefix?: string): string;
           }
 
-          /** Properties of an OptionChain. */
-          interface IOptionChain {
-            /** OptionChain ltpc */
-            ltpc?: com.upstox.marketdatafeeder.rpc.proto.ILTPC | null;
+          /** Properties of a FirstLevelWithGreeks. */
+          interface IFirstLevelWithGreeks {
+            /** FirstLevelWithGreeks ltpc */
+            ltpc?: com.upstox.marketdatafeederv3udapi.rpc.proto.ILTPC | null;
 
-            /** OptionChain bidAskQuote */
-            bidAskQuote?: com.upstox.marketdatafeeder.rpc.proto.IQuote | null;
+            /** FirstLevelWithGreeks firstDepth */
+            firstDepth?: com.upstox.marketdatafeederv3udapi.rpc.proto.IQuote | null;
 
-            /** OptionChain optionGreeks */
-            optionGreeks?: com.upstox.marketdatafeeder.rpc.proto.IOptionGreeks | null;
+            /** FirstLevelWithGreeks optionGreeks */
+            optionGreeks?: com.upstox.marketdatafeederv3udapi.rpc.proto.IOptionGreeks | null;
 
-            /** OptionChain eFeedDetails */
-            eFeedDetails?: com.upstox.marketdatafeeder.rpc.proto.IExtendedFeedDetails | null;
+            /** FirstLevelWithGreeks vtt */
+            vtt?: number | Long | null;
+
+            /** FirstLevelWithGreeks oi */
+            oi?: number | null;
+
+            /** FirstLevelWithGreeks iv */
+            iv?: number | null;
           }
 
-          /** Represents an OptionChain. */
-          class OptionChain implements IOptionChain {
+          /** Represents a FirstLevelWithGreeks. */
+          class FirstLevelWithGreeks implements IFirstLevelWithGreeks {
             /**
-             * Constructs a new OptionChain.
+             * Constructs a new FirstLevelWithGreeks.
              * @param [properties] Properties to set
              */
             constructor(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IOptionChain,
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IFirstLevelWithGreeks,
             );
 
-            /** OptionChain ltpc. */
-            public ltpc?: com.upstox.marketdatafeeder.rpc.proto.ILTPC | null;
+            /** FirstLevelWithGreeks ltpc. */
+            public ltpc?: com.upstox.marketdatafeederv3udapi.rpc.proto.ILTPC | null;
 
-            /** OptionChain bidAskQuote. */
-            public bidAskQuote?: com.upstox.marketdatafeeder.rpc.proto.IQuote | null;
+            /** FirstLevelWithGreeks firstDepth. */
+            public firstDepth?: com.upstox.marketdatafeederv3udapi.rpc.proto.IQuote | null;
 
-            /** OptionChain optionGreeks. */
-            public optionGreeks?: com.upstox.marketdatafeeder.rpc.proto.IOptionGreeks | null;
+            /** FirstLevelWithGreeks optionGreeks. */
+            public optionGreeks?: com.upstox.marketdatafeederv3udapi.rpc.proto.IOptionGreeks | null;
 
-            /** OptionChain eFeedDetails. */
-            public eFeedDetails?: com.upstox.marketdatafeeder.rpc.proto.IExtendedFeedDetails | null;
+            /** FirstLevelWithGreeks vtt. */
+            public vtt: number | Long;
+
+            /** FirstLevelWithGreeks oi. */
+            public oi: number;
+
+            /** FirstLevelWithGreeks iv. */
+            public iv: number;
 
             /**
-             * Creates a new OptionChain instance using the specified properties.
+             * Creates a new FirstLevelWithGreeks instance using the specified properties.
              * @param [properties] Properties to set
-             * @returns OptionChain instance
+             * @returns FirstLevelWithGreeks instance
              */
             public static create(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IOptionChain,
-            ): com.upstox.marketdatafeeder.rpc.proto.OptionChain;
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IFirstLevelWithGreeks,
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.FirstLevelWithGreeks;
 
             /**
-             * Encodes the specified OptionChain message. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.OptionChain.verify|verify} messages.
-             * @param message OptionChain message or plain object to encode
+             * Encodes the specified FirstLevelWithGreeks message. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.FirstLevelWithGreeks.verify|verify} messages.
+             * @param message FirstLevelWithGreeks message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encode(
-              message: com.upstox.marketdatafeeder.rpc.proto.IOptionChain,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IFirstLevelWithGreeks,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
             /**
-             * Encodes the specified OptionChain message, length delimited. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.OptionChain.verify|verify} messages.
-             * @param message OptionChain message or plain object to encode
+             * Encodes the specified FirstLevelWithGreeks message, length delimited. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.FirstLevelWithGreeks.verify|verify} messages.
+             * @param message FirstLevelWithGreeks message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encodeDelimited(
-              message: com.upstox.marketdatafeeder.rpc.proto.IOptionChain,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IFirstLevelWithGreeks,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
             /**
-             * Decodes an OptionChain message from the specified reader or buffer.
+             * Decodes a FirstLevelWithGreeks message from the specified reader or buffer.
              * @param reader Reader or buffer to decode from
              * @param [length] Message length if known beforehand
-             * @returns OptionChain
+             * @returns FirstLevelWithGreeks
              * @throws {Error} If the payload is not a reader or valid buffer
              * @throws {$protobuf.util.ProtocolError} If required fields are missing
              */
             public static decode(
               reader: $protobuf.Reader | Uint8Array,
               length?: number,
-            ): com.upstox.marketdatafeeder.rpc.proto.OptionChain;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.FirstLevelWithGreeks;
 
             /**
-             * Decodes an OptionChain message from the specified reader or buffer, length delimited.
+             * Decodes a FirstLevelWithGreeks message from the specified reader or buffer, length delimited.
              * @param reader Reader or buffer to decode from
-             * @returns OptionChain
+             * @returns FirstLevelWithGreeks
              * @throws {Error} If the payload is not a reader or valid buffer
              * @throws {$protobuf.util.ProtocolError} If required fields are missing
              */
             public static decodeDelimited(
               reader: $protobuf.Reader | Uint8Array,
-            ): com.upstox.marketdatafeeder.rpc.proto.OptionChain;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.FirstLevelWithGreeks;
 
             /**
-             * Verifies an OptionChain message.
+             * Verifies a FirstLevelWithGreeks message.
              * @param message Plain object to verify
              * @returns `null` if valid, otherwise the reason why it is not
              */
@@ -1643,35 +1371,35 @@ export namespace com {
             }): string | null;
 
             /**
-             * Creates an OptionChain message from a plain object. Also converts values to their respective internal types.
+             * Creates a FirstLevelWithGreeks message from a plain object. Also converts values to their respective internal types.
              * @param object Plain object
-             * @returns OptionChain
+             * @returns FirstLevelWithGreeks
              */
             public static fromObject(object: {
               [k: string]: unknown;
-            }): com.upstox.marketdatafeeder.rpc.proto.OptionChain;
+            }): com.upstox.marketdatafeederv3udapi.rpc.proto.FirstLevelWithGreeks;
 
             /**
-             * Creates a plain object from an OptionChain message. Also converts values to other types if specified.
-             * @param message OptionChain
+             * Creates a plain object from a FirstLevelWithGreeks message. Also converts values to other types if specified.
+             * @param message FirstLevelWithGreeks
              * @param [options] Conversion options
              * @returns Plain object
              */
             public static toObject(
-              message: com.upstox.marketdatafeeder.rpc.proto.OptionChain,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.FirstLevelWithGreeks,
               options?: $protobuf.IConversionOptions,
             ): {
               [k: string]: unknown;
             };
 
             /**
-             * Converts this OptionChain to JSON.
+             * Converts this FirstLevelWithGreeks to JSON.
              * @returns JSON object
              */
             public toJSON(): { [k: string]: unknown };
 
             /**
-             * Gets the default type url for OptionChain
+             * Gets the default type url for FirstLevelWithGreeks
              * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
              * @returns The default type url
              */
@@ -1681,13 +1409,16 @@ export namespace com {
           /** Properties of a Feed. */
           interface IFeed {
             /** Feed ltpc */
-            ltpc?: com.upstox.marketdatafeeder.rpc.proto.ILTPC | null;
+            ltpc?: com.upstox.marketdatafeederv3udapi.rpc.proto.ILTPC | null;
 
-            /** Feed ff */
-            ff?: com.upstox.marketdatafeeder.rpc.proto.IFullFeed | null;
+            /** Feed fullFeed */
+            fullFeed?: com.upstox.marketdatafeederv3udapi.rpc.proto.IFullFeed | null;
 
-            /** Feed oc */
-            oc?: com.upstox.marketdatafeeder.rpc.proto.IOptionChain | null;
+            /** Feed firstLevelWithGreeks */
+            firstLevelWithGreeks?: com.upstox.marketdatafeederv3udapi.rpc.proto.IFirstLevelWithGreeks | null;
+
+            /** Feed requestMode */
+            requestMode?: com.upstox.marketdatafeederv3udapi.rpc.proto.RequestMode | null;
           }
 
           /** Represents a Feed. */
@@ -1697,20 +1428,23 @@ export namespace com {
              * @param [properties] Properties to set
              */
             constructor(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IFeed,
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IFeed,
             );
 
             /** Feed ltpc. */
-            public ltpc?: com.upstox.marketdatafeeder.rpc.proto.ILTPC | null;
+            public ltpc?: com.upstox.marketdatafeederv3udapi.rpc.proto.ILTPC | null;
 
-            /** Feed ff. */
-            public ff?: com.upstox.marketdatafeeder.rpc.proto.IFullFeed | null;
+            /** Feed fullFeed. */
+            public fullFeed?: com.upstox.marketdatafeederv3udapi.rpc.proto.IFullFeed | null;
 
-            /** Feed oc. */
-            public oc?: com.upstox.marketdatafeeder.rpc.proto.IOptionChain | null;
+            /** Feed firstLevelWithGreeks. */
+            public firstLevelWithGreeks?: com.upstox.marketdatafeederv3udapi.rpc.proto.IFirstLevelWithGreeks | null;
+
+            /** Feed requestMode. */
+            public requestMode: com.upstox.marketdatafeederv3udapi.rpc.proto.RequestMode;
 
             /** Feed FeedUnion. */
-            public FeedUnion?: "ltpc" | "ff" | "oc";
+            public FeedUnion?: "ltpc" | "fullFeed" | "firstLevelWithGreeks";
 
             /**
              * Creates a new Feed instance using the specified properties.
@@ -1718,28 +1452,28 @@ export namespace com {
              * @returns Feed instance
              */
             public static create(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IFeed,
-            ): com.upstox.marketdatafeeder.rpc.proto.Feed;
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IFeed,
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.Feed;
 
             /**
-             * Encodes the specified Feed message. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.Feed.verify|verify} messages.
+             * Encodes the specified Feed message. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.Feed.verify|verify} messages.
              * @param message Feed message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encode(
-              message: com.upstox.marketdatafeeder.rpc.proto.IFeed,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IFeed,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
             /**
-             * Encodes the specified Feed message, length delimited. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.Feed.verify|verify} messages.
+             * Encodes the specified Feed message, length delimited. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.Feed.verify|verify} messages.
              * @param message Feed message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encodeDelimited(
-              message: com.upstox.marketdatafeeder.rpc.proto.IFeed,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IFeed,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
@@ -1754,7 +1488,7 @@ export namespace com {
             public static decode(
               reader: $protobuf.Reader | Uint8Array,
               length?: number,
-            ): com.upstox.marketdatafeeder.rpc.proto.Feed;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.Feed;
 
             /**
              * Decodes a Feed message from the specified reader or buffer, length delimited.
@@ -1765,7 +1499,7 @@ export namespace com {
              */
             public static decodeDelimited(
               reader: $protobuf.Reader | Uint8Array,
-            ): com.upstox.marketdatafeeder.rpc.proto.Feed;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.Feed;
 
             /**
              * Verifies a Feed message.
@@ -1783,7 +1517,7 @@ export namespace com {
              */
             public static fromObject(object: {
               [k: string]: unknown;
-            }): com.upstox.marketdatafeeder.rpc.proto.Feed;
+            }): com.upstox.marketdatafeederv3udapi.rpc.proto.Feed;
 
             /**
              * Creates a plain object from a Feed message. Also converts values to other types if specified.
@@ -1792,7 +1526,7 @@ export namespace com {
              * @returns Plain object
              */
             public static toObject(
-              message: com.upstox.marketdatafeeder.rpc.proto.Feed,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.Feed,
               options?: $protobuf.IConversionOptions,
             ): {
               [k: string]: unknown;
@@ -1812,18 +1546,166 @@ export namespace com {
             public static getTypeUrl(typeUrlPrefix?: string): string;
           }
 
+          /** RequestMode enum. */
+          enum RequestMode {
+            ltpc = 0,
+            full_d5 = 1,
+            option_greeks = 2,
+            full_d30 = 3,
+          }
+
+          /** MarketStatus enum. */
+          enum MarketStatus {
+            PRE_OPEN_START = 0,
+            PRE_OPEN_END = 1,
+            NORMAL_OPEN = 2,
+            NORMAL_CLOSE = 3,
+            CLOSING_START = 4,
+            CLOSING_END = 5,
+          }
+
+          /** Properties of a MarketInfo. */
+          interface IMarketInfo {
+            /** MarketInfo segmentStatus */
+            segmentStatus?: {
+              [
+                k: string
+              ]: com.upstox.marketdatafeederv3udapi.rpc.proto.MarketStatus;
+            } | null;
+          }
+
+          /** Represents a MarketInfo. */
+          class MarketInfo implements IMarketInfo {
+            /**
+             * Constructs a new MarketInfo.
+             * @param [properties] Properties to set
+             */
+            constructor(
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketInfo,
+            );
+
+            /** MarketInfo segmentStatus. */
+            public segmentStatus: {
+              [
+                k: string
+              ]: com.upstox.marketdatafeederv3udapi.rpc.proto.MarketStatus;
+            };
+
+            /**
+             * Creates a new MarketInfo instance using the specified properties.
+             * @param [properties] Properties to set
+             * @returns MarketInfo instance
+             */
+            public static create(
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketInfo,
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.MarketInfo;
+
+            /**
+             * Encodes the specified MarketInfo message. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.MarketInfo.verify|verify} messages.
+             * @param message MarketInfo message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encode(
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketInfo,
+              writer?: $protobuf.Writer,
+            ): $protobuf.Writer;
+
+            /**
+             * Encodes the specified MarketInfo message, length delimited. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.MarketInfo.verify|verify} messages.
+             * @param message MarketInfo message or plain object to encode
+             * @param [writer] Writer to encode to
+             * @returns Writer
+             */
+            public static encodeDelimited(
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketInfo,
+              writer?: $protobuf.Writer,
+            ): $protobuf.Writer;
+
+            /**
+             * Decodes a MarketInfo message from the specified reader or buffer.
+             * @param reader Reader or buffer to decode from
+             * @param [length] Message length if known beforehand
+             * @returns MarketInfo
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decode(
+              reader: $protobuf.Reader | Uint8Array,
+              length?: number,
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.MarketInfo;
+
+            /**
+             * Decodes a MarketInfo message from the specified reader or buffer, length delimited.
+             * @param reader Reader or buffer to decode from
+             * @returns MarketInfo
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            public static decodeDelimited(
+              reader: $protobuf.Reader | Uint8Array,
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.MarketInfo;
+
+            /**
+             * Verifies a MarketInfo message.
+             * @param message Plain object to verify
+             * @returns `null` if valid, otherwise the reason why it is not
+             */
+            public static verify(message: {
+              [k: string]: unknown;
+            }): string | null;
+
+            /**
+             * Creates a MarketInfo message from a plain object. Also converts values to their respective internal types.
+             * @param object Plain object
+             * @returns MarketInfo
+             */
+            public static fromObject(object: {
+              [k: string]: unknown;
+            }): com.upstox.marketdatafeederv3udapi.rpc.proto.MarketInfo;
+
+            /**
+             * Creates a plain object from a MarketInfo message. Also converts values to other types if specified.
+             * @param message MarketInfo
+             * @param [options] Conversion options
+             * @returns Plain object
+             */
+            public static toObject(
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.MarketInfo,
+              options?: $protobuf.IConversionOptions,
+            ): {
+              [k: string]: unknown;
+            };
+
+            /**
+             * Converts this MarketInfo to JSON.
+             * @returns JSON object
+             */
+            public toJSON(): { [k: string]: unknown };
+
+            /**
+             * Gets the default type url for MarketInfo
+             * @param [typeUrlPrefix] your custom typeUrlPrefix(default "type.googleapis.com")
+             * @returns The default type url
+             */
+            public static getTypeUrl(typeUrlPrefix?: string): string;
+          }
+
           /** Properties of a FeedResponse. */
           interface IFeedResponse {
             /** FeedResponse type */
-            type?: com.upstox.marketdatafeeder.rpc.proto.Type | null;
+            type?: com.upstox.marketdatafeederv3udapi.rpc.proto.Type | null;
 
             /** FeedResponse feeds */
             feeds?: {
-              [k: string]: com.upstox.marketdatafeeder.rpc.proto.IFeed;
+              [k: string]: com.upstox.marketdatafeederv3udapi.rpc.proto.IFeed;
             } | null;
 
             /** FeedResponse currentTs */
             currentTs?: number | Long | null;
+
+            /** FeedResponse marketInfo */
+            marketInfo?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketInfo | null;
           }
 
           /** Represents a FeedResponse. */
@@ -1833,19 +1715,22 @@ export namespace com {
              * @param [properties] Properties to set
              */
             constructor(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IFeedResponse,
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IFeedResponse,
             );
 
             /** FeedResponse type. */
-            public type: com.upstox.marketdatafeeder.rpc.proto.Type;
+            public type: com.upstox.marketdatafeederv3udapi.rpc.proto.Type;
 
             /** FeedResponse feeds. */
             public feeds: {
-              [k: string]: com.upstox.marketdatafeeder.rpc.proto.IFeed;
+              [k: string]: com.upstox.marketdatafeederv3udapi.rpc.proto.IFeed;
             };
 
             /** FeedResponse currentTs. */
             public currentTs: number | Long;
+
+            /** FeedResponse marketInfo. */
+            public marketInfo?: com.upstox.marketdatafeederv3udapi.rpc.proto.IMarketInfo | null;
 
             /**
              * Creates a new FeedResponse instance using the specified properties.
@@ -1853,28 +1738,28 @@ export namespace com {
              * @returns FeedResponse instance
              */
             public static create(
-              properties?: com.upstox.marketdatafeeder.rpc.proto.IFeedResponse,
-            ): com.upstox.marketdatafeeder.rpc.proto.FeedResponse;
+              properties?: com.upstox.marketdatafeederv3udapi.rpc.proto.IFeedResponse,
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.FeedResponse;
 
             /**
-             * Encodes the specified FeedResponse message. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.FeedResponse.verify|verify} messages.
+             * Encodes the specified FeedResponse message. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.FeedResponse.verify|verify} messages.
              * @param message FeedResponse message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encode(
-              message: com.upstox.marketdatafeeder.rpc.proto.IFeedResponse,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IFeedResponse,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
             /**
-             * Encodes the specified FeedResponse message, length delimited. Does not implicitly {@link com.upstox.marketdatafeeder.rpc.proto.FeedResponse.verify|verify} messages.
+             * Encodes the specified FeedResponse message, length delimited. Does not implicitly {@link com.upstox.marketdatafeederv3udapi.rpc.proto.FeedResponse.verify|verify} messages.
              * @param message FeedResponse message or plain object to encode
              * @param [writer] Writer to encode to
              * @returns Writer
              */
             public static encodeDelimited(
-              message: com.upstox.marketdatafeeder.rpc.proto.IFeedResponse,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.IFeedResponse,
               writer?: $protobuf.Writer,
             ): $protobuf.Writer;
 
@@ -1889,7 +1774,7 @@ export namespace com {
             public static decode(
               reader: $protobuf.Reader | Uint8Array,
               length?: number,
-            ): com.upstox.marketdatafeeder.rpc.proto.FeedResponse;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.FeedResponse;
 
             /**
              * Decodes a FeedResponse message from the specified reader or buffer, length delimited.
@@ -1900,7 +1785,7 @@ export namespace com {
              */
             public static decodeDelimited(
               reader: $protobuf.Reader | Uint8Array,
-            ): com.upstox.marketdatafeeder.rpc.proto.FeedResponse;
+            ): com.upstox.marketdatafeederv3udapi.rpc.proto.FeedResponse;
 
             /**
              * Verifies a FeedResponse message.
@@ -1918,7 +1803,7 @@ export namespace com {
              */
             public static fromObject(object: {
               [k: string]: unknown;
-            }): com.upstox.marketdatafeeder.rpc.proto.FeedResponse;
+            }): com.upstox.marketdatafeederv3udapi.rpc.proto.FeedResponse;
 
             /**
              * Creates a plain object from a FeedResponse message. Also converts values to other types if specified.
@@ -1927,7 +1812,7 @@ export namespace com {
              * @returns Plain object
              */
             public static toObject(
-              message: com.upstox.marketdatafeeder.rpc.proto.FeedResponse,
+              message: com.upstox.marketdatafeederv3udapi.rpc.proto.FeedResponse,
               options?: $protobuf.IConversionOptions,
             ): {
               [k: string]: unknown;

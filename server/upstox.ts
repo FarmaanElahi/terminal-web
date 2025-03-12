@@ -29,7 +29,7 @@ export async function getUpstoxMarketFeedUrl(): Promise<string> {
     wsApi.apiClient.authentications.OAUTH2.accessToken = token;
   }
   const response = await new Promise((resolve, reject) => {
-    wsApi.getMarketDataFeedAuthorize("v2", (err, data1) =>
+    wsApi.getMarketDataFeedAuthorizeV3((err, data1) =>
       err ? reject(err) : resolve(data1),
     );
   }).catch((reason) => {

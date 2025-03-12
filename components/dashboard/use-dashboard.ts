@@ -48,7 +48,6 @@ export function useDashboard(id: string) {
         .map((value) => value!);
 
       // Save to the database
-      console.log("Handle layout", updatedLayouts, newLayout);
       void saveDashboard(updatedLayouts);
     },
     [layouts, saveDashboard],
