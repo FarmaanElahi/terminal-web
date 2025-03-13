@@ -52,6 +52,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   constructor(logoProvider: LogoProvider) {
     super(logoProvider);
     this.marketFeed.on("message", (data) => {
+      console.log("FEED", data);
       this.feeds = { ...(this.feeds ?? {}), ...data.feeds };
       this.refreshRealtime();
     });
@@ -162,7 +163,10 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     for (const value of this.listeners.values()) {
       const { instrumentKey, onTick, resolution } = value;
       const bar = this.getTBTLatestBar(instrumentKey, resolution);
-      if (bar) onTick(bar);
+      if (bar) {
+        console.log("New bar", instrumentKey, { ...bar }, bar.close);
+        onTick(bar);
+      }
     }
   }
 
@@ -173,7 +177,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     if (!feed) return null;
 
     const ohlc =
-      feed.fullFeed?.indexFF?.marketOHLC ?? feed.fullFeed?.indexFF?.marketOHLC;
+      feed.fullFeed?.indexFF?.marketOHLC ?? feed.fullFeed?.marketFF?.marketOHLC;
     const candle = ohlc?.ohlc
       ?.toSorted((a, b) => ((b.ts ?? 0) as number) - ((a.ts ?? 0) as number))
       .find((f) => f.interval === upstoxInterval);
@@ -184,7 +188,9 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
 
     // If it is day, it has to be in UTC 12 AM
     if (upstoxInterval === "1d") {
-      const time = DateTime.fromMillis(ts as number, { zone: this.zone })
+      const time = DateTime.fromMillis(ts as number, {
+        zone: FixedOffsetZone.utcInstance,
+      })
         .plus({ day: 1 })
         .set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
         .toMillis();
@@ -192,9 +198,9 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     }
 
     // If it is intraday, it should be just in UTC
-    const time = DateTime.fromMillis(ts as number, { zone: this.zone })
-      .toUTC()
-      .toMillis();
+    const time = DateTime.fromMillis(ts as number, {
+      zone: FixedOffsetZone.utcInstance,
+    }).toMillis();
     return { time, open, high, low, close, volume: vol } as Bar;
   }
 
