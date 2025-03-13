@@ -186,8 +186,8 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.17)
       upstox-js-sdk:
-        specifier: ^2.15.0
-        version: 2.15.0(@babel/core@7.26.7)
+        specifier: ^2.12.0
+        version: 2.12.0(@babel/core@7.26.7)
       uuid:
         specifier: ^11.0.5
         version: 11.0.5
@@ -3596,8 +3596,8 @@ packages:
     peerDependencies:
       browserslist: '>= 4.21.0'
 
-  upstox-js-sdk@2.15.0:
-    resolution: {integrity: sha512-Q8Zcf1sc9yCmtUf9VzXtzQcczXsx8yXfL8KQxO5WBvVWsLdkNmvNFS3LmZ1LgwZZJF+bRcWUxS714aOtpjVarg==}
+  upstox-js-sdk@2.12.0:
+    resolution: {integrity: sha512-MK7t8JmM22EN23QicWSHylIvf26uRyY6CAEuhkCz9PXTr0A44fDPTTTW72AxU+YpGbD+7ElU8y6xZZRtv1bS7Q==}
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
@@ -7376,11 +7376,10 @@ snapshots:
       escalade: 3.2.0
       picocolors: 1.1.1
 
-  upstox-js-sdk@2.15.0(@babel/core@7.26.7):
+  upstox-js-sdk@2.12.0(@babel/core@7.26.7):
     dependencies:
       '@babel/cli': 7.26.4(@babel/core@7.26.7)
       '@babel/traverse': 7.26.7
-      axios: 1.7.9
       minimatch: 3.1.2
       nanoid: 3.3.8
       protobufjs: 7.4.0
@@ -7390,7 +7389,6 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - bufferutil
-      - debug
       - supports-color
       - utf-8-validate
 

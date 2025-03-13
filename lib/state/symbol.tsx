@@ -485,6 +485,7 @@ export function useWatchlistSymbols(watchlist?: Watchlist) {
       const symbols = watchlist?.symbols;
       if (!symbols || (symbols?.length ?? 0) === 0) return [];
 
+      console.log("Query wathclist symbl", watchlist?.name, symbols);
       const inQuery = symbols.map((s) => `'${s}'`).join(",");
       const result = await queryDuckDB("symbols", {
         columns: [], // Will load all columns
