@@ -1,6 +1,7 @@
+// components/data-panel/data-panel-selector.tsx
 "use client";
 
-import { Check, ChevronsUpDown, Copy, Plus, Trash } from "lucide-react";
+import { Check, ChevronsUpDown, Copy, Plus, Trash, Edit } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Command,
@@ -33,15 +34,41 @@ import {
 import { useActiveDataPanelId } from "@/hooks/use-active-data-panel";
 import { useDataPanels, useDeleteDataPanel } from "@/lib/state/symbol";
 import { DataPanelCreator } from "@/components/data-panel/panel-creator";
+import { Section } from "./types";
 
 export function DataPanelSelector() {
   const { activeDataPanelId, setActiveDataPanelId } = useActiveDataPanelId();
   const { data: dataPanels = [] } = useDataPanels();
   const [open, setOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [, setNewDataPanelDefault] =
-    useState<Pick<DataPanel, "name" | "sections">>();
+  const [editMode, setEditMode] = useState(false);
   const activeDataPanel = dataPanels?.find((p) => p.id === activeDataPanelId);
+  const [selectedPanelForAction, setSelectedPanelForAction] =
+    useState<DataPanel | null>(null);
+
+  const handleNewPanel = () => {
+    setEditMode(false);
+    setSelectedPanelForAction(null);
+    setOpenDialog(true);
+  };
+
+  const handleEditPanel = () => {
+    if (activeDataPanel) {
+      setEditMode(true);
+      setSelectedPanelForAction(activeDataPanel);
+      setOpenDialog(true);
+    }
+  };
+
+  const handleClonePanel = (panel: DataPanel, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditMode(false);
+    setSelectedPanelForAction({
+      ...panel,
+      name: `${panel.name} (Copy)`,
+    });
+    setOpenDialog(true);
+  };
 
   return (
     <div className="flex gap-1">
@@ -94,14 +121,7 @@ export function DataPanelSelector() {
                       className="opacity-0 group-hover:opacity-100 h-7 w-7"
                       variant="ghost"
                       size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setNewDataPanelDefault({
-                          name: `${panel.name} (Copy)`,
-                          sections: panel.sections,
-                        });
-                        setOpenDialog(true);
-                      }}
+                      onClick={(e) => handleClonePanel(panel, e)}
                     >
                       <Copy size="3" />
                     </Button>
@@ -123,18 +143,40 @@ export function DataPanelSelector() {
         </PopoverContent>
       </Popover>
 
+      {/* Edit button - only shows when there's an active panel */}
+      {activeDataPanel && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleEditPanel}
+          title="Edit current panel"
+        >
+          <Edit className="size-4" />
+        </Button>
+      )}
+
+      {/* Create new panel button */}
       <Button
         variant="outline"
         size="sm"
-        onClick={() => {
-          setNewDataPanelDefault(undefined);
-          setOpenDialog(true);
-        }}
+        onClick={handleNewPanel}
+        title="Create new panel"
       >
         <Plus className="size-4" />
       </Button>
 
-      <DataPanelCreator open={openDialog} setOpen={setOpenDialog} />
+      {/* The DataPanelCreator with conditionally set props based on mode */}
+      {openDialog && (
+        <DataPanelCreator
+          open={openDialog}
+          setOpen={setOpenDialog}
+          initialSections={
+            (selectedPanelForAction?.sections as Section[]) || []
+          }
+          panelId={editMode ? selectedPanelForAction?.id : undefined}
+          panelName={selectedPanelForAction?.name || ""}
+        />
+      )}
     </div>
   );
 }
