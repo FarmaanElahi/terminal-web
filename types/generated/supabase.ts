@@ -117,6 +117,33 @@ export type Database = {
         }
         Relationships: []
       }
+      data_panels: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          sections: Json
+          udpated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          sections?: Json
+          udpated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          sections?: Json
+          udpated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       screens: {
         Row: {
           created_at: string

@@ -28,20 +28,7 @@ export function DataPanelApp({
           className="mt-2"
         />
         <div className="flex-1 overflow-hidden">
-          <DataPanel
-            symbol={"NSE:RELIANCE"}
-            sections={[
-              {
-                name: "Market Data",
-                columnIds: ["day_close", "price_change_today_pct", "mcap"],
-              },
-              {
-                name: "Performance",
-                columnIds: ["RS_rating_1M", "RS_rating_3M", "RS_rating_12M"],
-              },
-            ]}
-            title={"Panel"}
-          />
+          <DataPanel symbol={"NSE:RELIANCE"} title={"Panel"} />
         </div>
       </div>
     </GrouperProvider>

@@ -611,3 +611,112 @@ export function useDashboardData(id: string) {
     },
   });
 }
+
+//##################### DATA PANELS #####################
+export function useDataPanels() {
+  return useQuery({
+    queryKey: ["data_panels"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("data_panels")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useCreateDataPanel(
+  onComplete?: (dataPanel: DataPanel) => void,
+) {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: (dataPanel: DataPanel) => {
+      void client.invalidateQueries({ queryKey: ["data_panels"] });
+      onComplete?.(dataPanel);
+    },
+    mutationFn: async (dataPanel: InsertDataPanel) => {
+      const { data, error } = await supabase
+        .from("data_panels")
+        .insert({
+          ...dataPanel,
+          udpated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useDeleteDataPanel(onComplete?: () => void) {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["data_panels"] });
+      onComplete?.();
+    },
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase
+        .from("data_panels")
+        .delete()
+        .eq("id", id)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useUpdateDataPanel(
+  onComplete?: (dataPanel: DataPanel) => void,
+) {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: (dataPanel: DataPanel) => {
+      void client.invalidateQueries({ queryKey: ["data_panels"] });
+      onComplete?.(dataPanel);
+    },
+    mutationFn: async ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: UpdateDataPanel;
+    }) => {
+      const { data, error } = await supabase
+        .from("data_panels")
+        .update({
+          ...payload,
+          udpated_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useDataPanelData(id: string) {
+  return useQuery({
+    queryKey: ["data_panels", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("data_panels")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) throw error;
+      return data as DataPanel;
+    },
+  });
+}
