@@ -35,7 +35,7 @@ type Section = {
 function PanelSelector({ title }: { title: string }) {
   return (
     <>
-      <div className="border-b p-2 flex justify-between items-center bg-muted/20">
+      <div className=" p-2 flex justify-between items-center bg-muted/20">
         <div className="text-sm font-medium">{title}</div>
       </div>
       <div className="flex flex-col items-center justify-center h-full p-6">
@@ -99,7 +99,7 @@ function LoadingState({
 }) {
   return (
     <>
-      <div className="border-b p-2 flex justify-between items-center bg-muted/20">
+      <div className="p-2 flex justify-between items-center bg-muted/20">
         <div className="text-sm font-medium">{panelName || title}</div>
         <span className="text-xs text-muted-foreground">{symbol}</span>
       </div>
@@ -365,10 +365,7 @@ export function DataPanel({
   const PanelWrapper = ({ children }: { children: React.ReactNode }) => (
     <div
       {...props}
-      className={cn(
-        "w-full h-full border rounded-none p-0 flex flex-col  border-blue-600",
-        className,
-      )}
+      className={cn("w-full h-full rounded-none p-0 flex flex-col", className)}
     >
       {children}
     </div>
@@ -425,7 +422,7 @@ export function DataPanel({
   // Normal data display state
   return (
     <PanelWrapper>
-      <div className="overflow-auto flex-1">
+      <div className="overflow-auto flex-1 border">
         {sections.map((section) => (
           <PanelSection
             key={section.name}
