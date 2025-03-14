@@ -75,18 +75,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
  */
 function SortableSection({
   section,
-  index,
   onEdit,
   onRemove,
 }: {
   section: Section;
-  index: number;
   onEdit: () => void;
   onRemove: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
-      id: `section-${index}`,
+      id: section.name, // Use section name as the sortable ID
     });
 
   const style = {
@@ -128,7 +126,7 @@ function SortableSection({
 }
 
 /**
- * Sortable column component
+ * Sortable column component for column selection
  */
 function SortableColumn({
   column,
@@ -165,7 +163,6 @@ function SortableColumn({
  */
 function SortableColumnItem({
   column,
-  index,
   onRemove,
   onMoveUp,
   onMoveDown,
@@ -173,7 +170,6 @@ function SortableColumnItem({
   isLast,
 }: {
   column: { id: string; name: string };
-  index: number;
   onRemove: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
@@ -182,7 +178,7 @@ function SortableColumnItem({
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
-      id: `column-${index}`,
+      id: column.id,
     });
 
   const style = {
@@ -270,6 +266,7 @@ export function DataPanelCreator({
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("sections");
+  const [isSectionNameUnique, setIsSectionNameUnique] = useState(true);
 
   const createDataPanel = useCreateDataPanel();
   const updateDataPanel = useUpdateDataPanel();
@@ -299,6 +296,25 @@ export function DataPanelCreator({
       setSelectedCategory("");
     }
   }, [open]);
+
+  // Check if section name is unique
+  useEffect(() => {
+    if (!currentSection.name) {
+      setIsSectionNameUnique(true);
+      return;
+    }
+
+    const isUnique =
+      editingSectionIndex !== null
+        ? sections.every(
+            (section, idx) =>
+              idx === editingSectionIndex ||
+              section.name !== currentSection.name,
+          )
+        : sections.every((section) => section.name !== currentSection.name);
+
+    setIsSectionNameUnique(isUnique);
+  }, [currentSection.name, sections, editingSectionIndex]);
 
   // Group columns by category
   const columnsByCategory = useMemo(() => {
@@ -336,6 +352,11 @@ export function DataPanelCreator({
   const handleSaveSection = () => {
     if (!currentSection.name || currentSection.columnIds.length === 0) {
       toast.error("Section name and at least one column are required");
+      return;
+    }
+
+    if (!isSectionNameUnique) {
+      toast.error("Section name must be unique");
       return;
     }
 
@@ -422,8 +443,10 @@ export function DataPanelCreator({
   /**
    * Remove a section from the panel
    */
-  const handleRemoveSection = (index: number) => {
-    setSections((prev) => prev.filter((_, i) => i !== index));
+  const handleRemoveSection = (sectionName: string) => {
+    setSections((prev) =>
+      prev.filter((section) => section.name !== sectionName),
+    );
   };
 
   /**
@@ -452,12 +475,22 @@ export function DataPanelCreator({
   const handleSectionDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (active.id !== over?.id) {
+    if (over && active.id !== over.id) {
       setSections((sections) => {
-        const oldIndex = parseInt(active.id.toString().split("-")[1]);
-        const newIndex = parseInt(over?.id.toString().split("-")[1] || "0");
+        const activeId = active.id.toString();
+        const overId = over.id.toString();
 
-        return arrayMove(sections, oldIndex, newIndex);
+        const oldIndex = sections.findIndex(
+          (section) => section.name === activeId,
+        );
+        const newIndex = sections.findIndex(
+          (section) => section.name === overId,
+        );
+
+        if (oldIndex !== -1 && newIndex !== -1) {
+          return arrayMove(sections, oldIndex, newIndex);
+        }
+        return sections;
       });
     }
   };
@@ -468,15 +501,21 @@ export function DataPanelCreator({
   const handleColumnDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (active.id !== over?.id) {
+    if (over && active.id !== over.id) {
       setCurrentSection((section) => {
-        const oldIndex = parseInt(active.id.toString().split("-")[1]);
-        const newIndex = parseInt(over?.id.toString().split("-")[1] || "0");
+        const activeId = active.id.toString();
+        const overId = over.id.toString();
 
-        return {
-          ...section,
-          columnIds: arrayMove(section.columnIds, oldIndex, newIndex),
-        };
+        const oldIndex = section.columnIds.findIndex((id) => id === activeId);
+        const newIndex = section.columnIds.findIndex((id) => id === overId);
+
+        if (oldIndex !== -1 && newIndex !== -1) {
+          return {
+            ...section,
+            columnIds: arrayMove(section.columnIds, oldIndex, newIndex),
+          };
+        }
+        return section;
       });
     }
   };
@@ -509,6 +548,19 @@ export function DataPanelCreator({
       ];
       return { ...section, columnIds: newColumnIds };
     });
+  };
+
+  /**
+   * Get column display name by ID
+   */
+  const getColumnNameById = (colId: string) => {
+    const column = defaultColumns.find((col) => col.colId === colId);
+    return column?.headerName || colId;
+  };
+
+  // Find the index of a section by name
+  const findSectionIndexByName = (name: string) => {
+    return sections.findIndex((section) => section.name === name);
   };
 
   return (
@@ -550,7 +602,7 @@ export function DataPanelCreator({
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg">Panel Sections</CardTitle>
                   <CardDescription>
-                    Drag to reorder sections. Click edit to modify a section
+                    Drag to reorder sections. Click edit to modify a sections
                     columns.
                   </CardDescription>
                 </CardHeader>
@@ -562,16 +614,19 @@ export function DataPanelCreator({
                       onDragEnd={handleSectionDragEnd}
                     >
                       <SortableContext
-                        items={sections.map((_, index) => `section-${index}`)}
+                        items={sections.map((section) => section.name)}
                         strategy={verticalListSortingStrategy}
                       >
-                        {sections.map((section, index) => (
+                        {sections.map((section) => (
                           <SortableSection
-                            key={`section-${index}`}
+                            key={section.name}
                             section={section}
-                            index={index}
-                            onEdit={() => handleEditSection(index)}
-                            onRemove={() => handleRemoveSection(index)}
+                            onEdit={() =>
+                              handleEditSection(
+                                findSectionIndexByName(section.name),
+                              )
+                            }
+                            onRemove={() => handleRemoveSection(section.name)}
                           />
                         ))}
                       </SortableContext>
@@ -618,18 +673,27 @@ export function DataPanelCreator({
                     <Label htmlFor="sectionName" className="text-right">
                       Section Name
                     </Label>
-                    <Input
-                      id="sectionName"
-                      value={currentSection.name}
-                      onChange={(e) =>
-                        setCurrentSection((prev) => ({
-                          ...prev,
-                          name: e.target.value,
-                        }))
-                      }
-                      className="col-span-3"
-                      placeholder="e.g. Price Information"
-                    />
+                    <div className="col-span-3">
+                      <Input
+                        id="sectionName"
+                        value={currentSection.name}
+                        onChange={(e) =>
+                          setCurrentSection((prev) => ({
+                            ...prev,
+                            name: e.target.value,
+                          }))
+                        }
+                        className={
+                          !isSectionNameUnique ? "border-destructive" : ""
+                        }
+                        placeholder="e.g. Price Information"
+                      />
+                      {!isSectionNameUnique && (
+                        <p className="text-destructive text-sm mt-1">
+                          Section name must be unique
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -679,68 +743,64 @@ export function DataPanelCreator({
                     </div>
 
                     <div>
-                      <div>
-                        <Label className="mb-2 block">
-                          Selected Columns Order
-                        </Label>
-                        <ScrollArea className="h-[280px] border rounded-md p-2">
-                          {currentSection.columnIds.length > 0 ? (
-                            <DndContext
-                              sensors={sensors}
-                              collisionDetection={closestCenter}
-                              onDragEnd={handleColumnDragEnd}
+                      <Label className="mb-2 block">
+                        Selected Columns Order
+                      </Label>
+                      <ScrollArea className="h-[280px] border rounded-md p-2">
+                        {currentSection.columnIds.length > 0 ? (
+                          <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleColumnDragEnd}
+                          >
+                            <SortableContext
+                              items={currentSection.columnIds}
+                              strategy={verticalListSortingStrategy}
                             >
-                              <SortableContext
-                                items={currentSection.columnIds.map(
-                                  (_, index) => `column-${index}`,
-                                )}
-                                strategy={verticalListSortingStrategy}
-                              >
-                                {currentSection.columnIds.map((colId, idx) => {
-                                  const column = defaultColumns.find(
-                                    (col) => col.colId === colId,
-                                  );
-                                  return (
-                                    <SortableColumnItem
-                                      key={`column-${idx}`}
-                                      column={{
-                                        id: colId,
-                                        name: column?.headerName || colId,
-                                      }}
-                                      index={idx}
-                                      onRemove={() => handleColumnToggle(colId)}
-                                      onMoveUp={() => moveColumnUp(idx)}
-                                      onMoveDown={() => moveColumnDown(idx)}
-                                      isFirst={idx === 0}
-                                      isLast={
-                                        idx ===
-                                        currentSection.columnIds.length - 1
-                                      }
-                                    />
-                                  );
-                                })}
-                              </SortableContext>
-                            </DndContext>
-                          ) : (
-                            <div className="text-center text-muted-foreground p-4">
-                              No columns selected yet. Select columns from the
-                              available columns list.
-                            </div>
-                          )}
-                        </ScrollArea>
-                      </div>
+                              {currentSection.columnIds.map((colId, idx) => (
+                                <SortableColumnItem
+                                  key={colId}
+                                  column={{
+                                    id: colId,
+                                    name: getColumnNameById(colId),
+                                  }}
+                                  onRemove={() => handleColumnToggle(colId)}
+                                  onMoveUp={() => moveColumnUp(idx)}
+                                  onMoveDown={() => moveColumnDown(idx)}
+                                  isFirst={idx === 0}
+                                  isLast={
+                                    idx === currentSection.columnIds.length - 1
+                                  }
+                                />
+                              ))}
+                            </SortableContext>
+                          </DndContext>
+                        ) : (
+                          <div className="text-center text-muted-foreground p-4">
+                            No columns selected yet. Select columns from the
+                            available columns list.
+                          </div>
+                        )}
+                      </ScrollArea>
                     </div>
                   </div>
 
                   <div className="flex justify-end mt-4 gap-2">
-                    <Button variant="outline" onClick={handleCancelEdit}>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        handleCancelEdit();
+                        setActiveTab("sections");
+                      }}
+                    >
                       Cancel
                     </Button>
                     <Button
                       onClick={handleSaveSection}
                       disabled={
                         !currentSection.name ||
-                        currentSection.columnIds.length === 0
+                        currentSection.columnIds.length === 0 ||
+                        !isSectionNameUnique
                       }
                     >
                       <Check className="h-4 w-4 mr-2" />
