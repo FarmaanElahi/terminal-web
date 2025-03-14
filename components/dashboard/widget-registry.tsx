@@ -5,8 +5,15 @@ import { ComponentType } from "react";
 import { WidgetProps } from "@/components/dashboard/widgets/widget-props";
 import { IdeasApp } from "@/components/dashboard/widgets/ideas-app";
 import { StatsApp } from "@/components/dashboard/widgets/stats-app";
+import { DataPanelApp } from "@/components/dashboard/widgets/data-panel-app";
 
-export type WidgetType = "screener" | "watchlist" | "stats" | "ideas" | "chart";
+export type WidgetType =
+  | "screener"
+  | "watchlist"
+  | "stats"
+  | "ideas"
+  | "chart"
+  | "panel";
 
 export const widgetComponents: Record<
   WidgetType,
@@ -17,6 +24,7 @@ export const widgetComponents: Record<
   stats: StatsApp,
   ideas: IdeasApp,
   chart: ChartApp,
+  panel: DataPanelApp,
 };
 
 export const widgets: Array<{
@@ -49,6 +57,11 @@ export const widgets: Array<{
     name: "Chart",
     description: "Chart Widget",
   },
+  {
+    type: "panel",
+    name: "Data Panel",
+    description: "Data Panel",
+  },
 ];
 
 export const WIDGET_SIZES: Record<
@@ -60,4 +73,5 @@ export const WIDGET_SIZES: Record<
   screener: { w: 6, h: 4, minW: 1, minH: 1 },
   stats: { w: 6, h: 2, minW: 1, minH: 1 },
   ideas: { w: 6, h: 4, minW: 1, minH: 1 },
+  panel: { w: 6, h: 4, minW: 1, minH: 1 },
 };
