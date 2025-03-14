@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Check,
-  ChevronsUpDown,
-  Copy,
-  Loader2,
-  Plus,
-  Trash,
-} from "lucide-react";
+import { Check, ChevronsUpDown, Copy, Plus, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Command,
@@ -23,18 +16,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button, buttonVariants } from "@/components/ui/button";
-import React, { ReactNode, useEffect, useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import React, { ReactNode, useState } from "react";
 import { toast } from "sonner";
-import { Json } from "@/types/supabase";
+import { DataPanel } from "@/types/supabase";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,25 +31,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useActiveDataPanelId } from "@/hooks/use-active-data-panel";
-import {
-  useCreateDataPanel,
-  useDataPanels,
-  useDeleteDataPanel,
-} from "@/lib/state/symbol";
-
-// Type definition for DataPanel
-interface DataPanel {
-  id: string;
-  name: string;
-  sections: Json;
-}
+import { useDataPanels, useDeleteDataPanel } from "@/lib/state/symbol";
+import { DataPanelCreator } from "@/components/data-panel/panel-creator";
 
 export function DataPanelSelector() {
   const { activeDataPanelId, setActiveDataPanelId } = useActiveDataPanelId();
   const { data: dataPanels = [] } = useDataPanels();
   const [open, setOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [newDataPanelDefault, setNewDataPanelDefault] =
+  const [, setNewDataPanelDefault] =
     useState<Pick<DataPanel, "name" | "sections">>();
   const activeDataPanel = dataPanels?.find((p) => p.id === activeDataPanelId);
 
@@ -160,73 +134,8 @@ export function DataPanelSelector() {
         <Plus className="size-4" />
       </Button>
 
-      <DataPanelCreatorDialog
-        open={openDialog}
-        setOpen={setOpenDialog}
-        default={newDataPanelDefault}
-      />
+      <DataPanelCreator open={openDialog} setOpen={setOpenDialog} />
     </div>
-  );
-}
-
-interface DataPanelCreatorDialogProps {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  default?: { name: string; sections: Json };
-}
-
-export function DataPanelCreatorDialog({
-  open,
-  setOpen,
-  default: defaultState,
-}: DataPanelCreatorDialogProps) {
-  const { setActiveDataPanelId } = useActiveDataPanelId();
-
-  const { mutate: createDataPanel, isPending } = useCreateDataPanel((panel) => {
-    setOpen(false);
-    toast(`${panel.name} data panel created!`);
-    setActiveDataPanelId(panel.id);
-  });
-  const [panelName, setPanelName] = useState<string>();
-  useEffect(() => setPanelName(defaultState?.name), [defaultState]);
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {defaultState?.name ? "Clone Data Panel" : "Create New Data Panel"}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="name">Data Panel Name</Label>
-            <Input
-              id="name"
-              value={panelName}
-              onChange={(e) => setPanelName(e.target.value)}
-              placeholder="Enter panel name"
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button
-            disabled={!panelName}
-            onClick={(e) => {
-              e.stopPropagation();
-              createDataPanel({
-                name: panelName!,
-                sections: defaultState?.sections || [],
-              });
-              setOpen(false);
-            }}
-          >
-            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {defaultState?.name ? "Clone" : "Create"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }
 
