@@ -13,11 +13,14 @@ import type { StockTwitFeed } from "@/types/stocktwits";
 import { queryDuckDB } from "@/utils/duckdb";
 import {
   Dashboard,
+  DataPanel,
   InsertDashboard,
+  InsertDataPanel,
   InsertScreen,
   InsertWatchlist,
   Screen,
   UpdateDashboard,
+  UpdateDataPanel,
   UpdateScreen,
   UpdateWatchlist,
   Watchlist,
