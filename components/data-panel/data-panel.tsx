@@ -201,6 +201,7 @@ export function DataPanel({
         extendedColumnType[dataType as keyof typeof extendedColumnType];
 
       if (formatter && formatter.valueFormatter) {
+        /* eslint-disable @typescript-eslint/no-explicit-any */
         return formatter.valueFormatter({
           value,
           data: symbolData,
@@ -210,12 +211,13 @@ export function DataPanel({
           columnApi: null,
           context: null,
           node: null,
-        }) as string;
+        } as any) as string;
       }
     }
 
     // Use valueFormatter if available
     if (column.valueFormatter && typeof column.valueFormatter === "function") {
+      /* eslint-disable @typescript-eslint/no-explicit-any */
       return column.valueFormatter({
         value,
         data: symbolData,
@@ -225,7 +227,7 @@ export function DataPanel({
         columnApi: null,
         context: null,
         node: null,
-      }) as string;
+      } as any) as string;
     }
 
     // Default display
