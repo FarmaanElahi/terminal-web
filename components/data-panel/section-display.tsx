@@ -1,18 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import { ColDef } from "ag-grid-community";
+import { ColDef, Column, GridApi } from "ag-grid-community";
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown, X } from "lucide-react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  defaultColumns,
-  extendedColumnType,
-} from "@/components/symbols/columns";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { defaultColumns, extendedColumnType } from "@/components/symbols/columns";
 import type { Section } from "./types";
 import { Symbol } from "@/types/symbol";
 
@@ -117,7 +110,8 @@ export function DataPanelSectionDisplay({
           columnApi: null,
           context: null,
           node: null,
-        }) as string;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any) as string;
       }
     }
 
@@ -127,9 +121,8 @@ export function DataPanelSectionDisplay({
         value,
         data: symbolData,
         colDef: column,
-        api: null,
-        column: null,
-        columnApi: null,
+        api: null as unknown as GridApi,
+        column: null as unknown as  Column,
         context: null,
         node: null,
       }) as string;
