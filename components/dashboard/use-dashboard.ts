@@ -178,7 +178,7 @@ export function useDashboard(id: string) {
       void saveDashboard(updatedLayouts);
       return true;
     },
-    [layouts, hasAvailableSpace, findWidgetPosition, saveDashboard],
+    [layouts, saveDashboard],
   );
 
   const removeWidget = useCallback(

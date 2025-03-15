@@ -30,5 +30,13 @@ export type UpdateWatchlist =
   Database["public"]["Tables"]["watchlists"]["Update"];
 
 export type Dashboard = Database["public"]["Tables"]["dashboards"]["Row"];
-export type InsertDashboard = Database["public"]["Tables"]["dashboards"]["Insert"];
-export type UpdateDashboard = Database["public"]["Tables"]["dashboards"]["Update"];
+export type InsertDashboard =
+  Database["public"]["Tables"]["dashboards"]["Insert"];
+export type UpdateDashboard =
+  Database["public"]["Tables"]["dashboards"]["Update"];
+
+export type DataPanel = Database["public"]["Tables"]["data_panels"]["Row"];
+export type InsertDataPanel =
+  Database["public"]["Tables"]["data_panels"]["Insert"];
+export type UpdateDataPanel =
+  Database["public"]["Tables"]["data_panels"]["Update"];
