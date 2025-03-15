@@ -159,7 +159,6 @@ export function useScreener() {
     queryFn: async () => {
       const result = await queryDuckDB("symbols", {
         columns: [], // Will load all columns
-        where: `type = 'stock'`,
         order: [{ field: "mcap", sort: "DESC" }],
       });
       return result as Symbol[];
