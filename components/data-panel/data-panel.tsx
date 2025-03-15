@@ -218,7 +218,7 @@ function ColumnItem({
       key={column.colId}
       className="flex justify-between items-center px-4 py-1.5 border-t first:border-t-0 text-sm hover:bg-muted/30"
     >
-      <span className="text-muted-foreground">{column.headerName}</span>
+      <span className="font-bold">{column.headerName}</span>
       <span
         className={cn({
           "text-bullish font-medium": isPositive && shouldColorize,
@@ -255,7 +255,7 @@ function PanelSection({
 
   return (
     <Collapsible key={section.name} open={isOpen} onOpenChange={onToggle}>
-      <CollapsibleTrigger className="w-full flex items-center justify-between p-2 bg-muted/50 hover:bg-muted/70 text-xs font-medium text-muted-foreground">
+      <CollapsibleTrigger className="w-full flex items-center justify-between p-2 bg-muted/50 hover:bg-muted/70 text-xs font-bold text-muted-foreground">
         {section.name}
         <ChevronDown
           className={cn("h-4 w-4 transition-transform", {
