@@ -2672,6 +2672,80 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
 
   // ##########################  Technical  ##########################
+
+  // ##########################  Ratings  ##########################
+  {
+    field: "AS_Rating_1D",
+    headerName: "AS Rating 1D",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "AS_Rating_1W",
+    headerName: "AS Rating 1W",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "AS_Rating_1M",
+    headerName: "AS Rating 1M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "AS_Rating_3M",
+    headerName: "AS Rating 3M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "AS_Rating_6M",
+    headerName: "AS Rating 6M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "AS_Rating_9M",
+    headerName: "AS Rating 9M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "AS_Rating_12M",
+    headerName: "AS Rating 12M",
+    context: { category: "Ratings" },
+  },
+
+  {
+    field: "RS_Rating_1D",
+    headerName: "RS Rating 1D",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "RS_Rating_1W",
+    headerName: "RS Rating 1W",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "RS_Rating_1M",
+    headerName: "RS Rating 1M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "RS_Rating_3M",
+    headerName: "RS Rating 3M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "RS_Rating_6M",
+    headerName: "RS Rating 6M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "RS_Rating_9M",
+    headerName: "RS Rating 9M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "RS_Rating_12M",
+    headerName: "RS Rating 12M",
+    context: { category: "Ratings" },
+  }
+  // ##########################  Ratings  ##########################
 ].map((c) => ({ ...c, colId: c.field as keyof Symbol }) as ColDef<Symbol>);
 
 // ##########################  Custom Cell UI  ##########################
