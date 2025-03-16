@@ -2709,7 +2709,6 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "AS Rating 12M",
     context: { category: "Ratings" },
   },
-
   {
     field: "RS_Rating_1D",
     headerName: "RS Rating 1D",
@@ -2744,7 +2743,115 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     field: "RS_Rating_12M",
     headerName: "RS Rating 12M",
     context: { category: "Ratings" },
-  }
+  },
+
+  {
+    field: "sector_rating_1D",
+    headerName: "Sector Rating 1D",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "sector_rating_1W",
+    headerName: "Sector Rating 1W",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "sector_rating_1M",
+    headerName: "Sector Rating 1M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "sector_rating_3M",
+    headerName: "Sector Rating 3M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "sector_rating_6M",
+    headerName: "Sector Rating 6M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "sector_rating_9M",
+    headerName: "Sector Rating 9M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "sector_rating_12M",
+    headerName: "Sector Rating 12M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "industry_rating_1D",
+    headerName: "Industry Rating 1D",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "industry_rating_1W",
+    headerName: "Industry Rating 1W",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "industry_rating_1M",
+    headerName: "Industry Rating 1M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "industry_rating_3M",
+    headerName: "Industry Rating 3M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "industry_rating_6M",
+    headerName: "Industry Rating 6M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "industry_rating_9M",
+    headerName: "Industry Rating 9M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "industry_rating_12M",
+    headerName: "Industry Rating 12M",
+    context: { category: "Ratings" },
+  },
+
+
+  {
+    field: "sub_industry_rating_1D",
+    headerName: "Sub Industry Rating 1D",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "sub_industry_rating_1W",
+    headerName: "Sub Industry Rating 1W",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "sub_industry_rating_1M",
+    headerName: "Sub Industry Rating 1M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "sub_industry_rating_3M",
+    headerName: "Sub Industry Rating 3M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "sub_industry_rating_6M",
+    headerName: "Sub Industry Rating 6M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "sub_industry_rating_9M",
+    headerName: "Sub Industry Rating 9M",
+    context: { category: "Ratings" },
+  },
+  {
+    field: "sub_industry_rating_12M",
+    headerName: "Sub Industry Rating 12M",
+    context: { category: "Ratings" },
+  },
   // ##########################  Ratings  ##########################
 ].map((c) => ({ ...c, colId: c.field as keyof Symbol }) as ColDef<Symbol>);
 
