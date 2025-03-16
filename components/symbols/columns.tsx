@@ -1619,19 +1619,19 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   // TODO: Check this
   {
     field: "highest_vol_since_earning",
-    headerName: "Highest Volume Since Earning",
+    headerName: "HVLE",
     context: { category: "Price & Volume" },
     cellRenderer: BooleanCell,
   },
   {
     field: "highest_vol_in_1_year",
-    headerName: "Highest Volume 1Y",
+    headerName: "HV1",
     context: { category: "Price & Volume" },
     cellRenderer: BooleanCell,
   },
   {
     field: "highest_vol_ever",
-    headerName: "Highest Volume Ever",
+    headerName: "HVE",
     context: { category: "Price & Volume" },
     cellRenderer: BooleanCell,
   },
