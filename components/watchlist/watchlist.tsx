@@ -127,8 +127,6 @@ export function Watchlist(props: WatchlistProps) {
     () => ({
       statusPanels: [
         { statusPanel: "agTotalAndFilteredRowCountComponent" },
-        { statusPanel: "agTotalRowCountComponent" },
-        { statusPanel: "agFilteredRowCountComponent" },
         { statusPanel: "agSelectedRowCountComponent" },
         { statusPanel: "agAggregationComponent" },
       ],
@@ -188,8 +186,9 @@ export function Watchlist(props: WatchlistProps) {
         dataTypeDefinitions={extendedColumnType}
         key={activeWatchlistId ?? "default"}
         className="ag-terminal-theme"
-        rowSelection={{ mode: "multiRow" }}
-        selectionColumnDef={{ pinned: "left", maxWidth: 48 }}
+        selectionColumnDef={{ pinned: "left" }}
+        headerHeight={36}
+        rowHeight={36}
         getContextMenuItems={getContextMenuItems}
         rowData={rowData}
         animateRows
@@ -200,7 +199,7 @@ export function Watchlist(props: WatchlistProps) {
           columnLimits: [
             {
               colId: "name",
-              minWidth: 180,
+              minWidth: 160,
             },
           ],
         }}

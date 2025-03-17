@@ -109,8 +109,6 @@ export function Screener(props: ScreenerProps) {
     () => ({
       statusPanels: [
         { statusPanel: "agTotalAndFilteredRowCountComponent" },
-        { statusPanel: "agTotalRowCountComponent" },
-        { statusPanel: "agFilteredRowCountComponent" },
         { statusPanel: "agSelectedRowCountComponent" },
         { statusPanel: "agAggregationComponent" },
       ],
@@ -166,14 +164,15 @@ export function Screener(props: ScreenerProps) {
     <div {...props} className={cn("h-full relative", props.className)}>
       {!isLoading && (
         <AgGridReact
-          headerHeight={48}
+          headerHeight={36}
           dataTypeDefinitions={extendedColumnType}
           key={activeScreenId ?? "default"}
           getContextMenuItems={getContextMenuItems}
           className="ag-terminal-theme"
           enableAdvancedFilter={true}
           rowSelection={{ mode: "multiRow" }}
-          selectionColumnDef={{ pinned: "left", maxWidth: 48 }}
+          selectionColumnDef={{ pinned: "left" }}
+          rowHeight={36}
           sideBar={false}
           maintainColumnOrder={true}
           includeHiddenColumnsInAdvancedFilter={true}
@@ -184,7 +183,7 @@ export function Screener(props: ScreenerProps) {
             columnLimits: [
               {
                 colId: "name",
-                minWidth: 180,
+                minWidth: 160,
               },
             ],
           }}

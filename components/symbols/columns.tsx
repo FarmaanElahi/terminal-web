@@ -2940,8 +2940,8 @@ export function SymbolCell(props: FormattedValueProps) {
           "/",
         )}
         alt="Logo"
-        width={24}
-        height={24}
+        width={20}
+        height={20}
         className="rounded-full"
       />
       <span className="font-bold">{String(text)}</span>

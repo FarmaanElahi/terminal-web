@@ -24,3 +24,8 @@
 .ag-terminal-theme .ag-header-cell-text {
     @apply font-bold
 }
+
+.ag-terminal-theme .ag-status-bar {
+    max-height: 32px;
+    align-items: center;
+}
