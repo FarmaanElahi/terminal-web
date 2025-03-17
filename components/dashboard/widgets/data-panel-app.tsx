@@ -38,7 +38,7 @@ export function DataPanelApp({
         defaultActiveDataPanelId={defaultActiveDataPanelId}
         onActiveDataPanelIdChange={dataPanelChanged}
       >
-        <div className={"h-full flex flex-col"}>
+        <div className={"h-full flex flex-col overflow-hidden"}>
           <WidgetControl
             layout={layout}
             onRemove={onRemoveWidget}
