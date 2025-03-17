@@ -35,7 +35,7 @@ type Section = {
 function PanelSelector({ title }: { title: string }) {
   return (
     <>
-      <div className=" p-2 flex justify-between items-center bg-muted/20">
+      <div className="p-2 flex justify-between items-center bg-muted/20 rounded-t-md">
         <div className="text-sm font-medium">{title}</div>
       </div>
       <div className="flex flex-col items-center justify-center h-full p-6">
@@ -54,36 +54,30 @@ function PanelSelector({ title }: { title: string }) {
 // Empty panel prompt component
 function EmptyPanelPrompt() {
   return (
-    <>
-      <div className="flex flex-col items-center justify-center h-full p-6">
-        <div className="text-center mb-6">
-          <Edit className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-lg font-medium mb-2">
-            Empty Panel Configuration
-          </h3>
-          <p className="text-sm text-muted-foreground mb-6">
-            This panel has no sections or columns configured
-          </p>
-        </div>
+    <div className="flex flex-col items-center justify-center h-full p-6">
+      <div className="text-center mb-6">
+        <Edit className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+        <h3 className="text-lg font-medium mb-2">Empty Panel Configuration</h3>
+        <p className="text-sm text-muted-foreground mb-6">
+          This panel has no sections or columns configured
+        </p>
       </div>
-    </>
+    </div>
   );
 }
 
 // No symbol selected prompt
 function NoSymbolPrompt() {
   return (
-    <>
-      <div className="flex flex-col items-center justify-center h-full p-6">
-        <div className="text-center mb-6">
-          <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-lg font-medium mb-2">Select a Symbol</h3>
-          <p className="text-sm text-muted-foreground">
-            Use the symbol search or group selector to choose a symbol.
-          </p>
-        </div>
+    <div className="flex flex-col items-center justify-center h-full p-6">
+      <div className="text-center mb-6">
+        <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+        <h3 className="text-lg font-medium mb-2">Select a Symbol</h3>
+        <p className="text-sm text-muted-foreground">
+          Use the symbol search or group selector to choose a symbol.
+        </p>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -99,7 +93,7 @@ function LoadingState({
 }) {
   return (
     <>
-      <div className="p-2 flex justify-between items-center bg-muted/20">
+      <div className="p-2 flex justify-between items-center bg-muted/20 rounded-t-md">
         <div className="text-sm font-medium">{panelName || title}</div>
         <span className="text-xs text-muted-foreground">{symbol}</span>
       </div>
@@ -120,13 +114,11 @@ function LoadingState({
 // Error state component
 function ErrorState({ symbol }: { symbol: string }) {
   return (
-    <>
-      <div className="overflow-auto flex-1 p-4">
-        <div className="text-destructive">
-          Error loading symbol data for {symbol}
-        </div>
+    <div className="overflow-auto flex-1 p-4">
+      <div className="text-destructive">
+        Error loading symbol data for {symbol}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -135,11 +127,13 @@ function ColumnItem({
   column,
   value,
   symbolData,
+  isLast,
 }: {
   column: ColDef<Symbol>;
   value: unknown;
   symbolData: Symbol;
   columnMap: Record<string, ColDef<Symbol>>;
+  isLast?: boolean;
 }) {
   // Format value helper function
   const formatValue = (column: ColDef<Symbol>, value: unknown) => {
@@ -216,14 +210,18 @@ function ColumnItem({
   return (
     <div
       key={column.colId}
-      className="flex justify-between items-center px-4 py-1.5 border-t first:border-t-0 text-sm hover:bg-muted/30"
+      className={cn(
+        "flex justify-between items-center px-4 py-1.5 border-t first:border-t-0 text-sm hover:bg-muted/30",
+        { "rounded-b-md": isLast },
+      )}
     >
-      <span className="font-bold">{column.headerName}</span>
+      <span className="font-bold">
+        {column.headerName}
+      </span>
       <span
-        className={cn({
-          "text-bullish font-medium": isPositive && shouldColorize,
-          "text-bearish font-medium": isNegative && shouldColorize,
-          "font-medium": column.field === "name" || column.colId === "name",
+        className={cn("font-medium", {
+          "text-bullish": isPositive && shouldColorize,
+          "text-bearish": isNegative && shouldColorize,
         })}
       >
         {formatValue(column, value)}
@@ -254,8 +252,21 @@ function PanelSection({
   if (sectionColumns.length === 0) return null;
 
   return (
-    <Collapsible key={section.name} open={isOpen} onOpenChange={onToggle}>
-      <CollapsibleTrigger className="w-full flex items-center justify-between p-2 bg-muted/50 hover:bg-muted/70 text-xs font-bold text-muted-foreground">
+    <Collapsible
+      key={section.name}
+      open={isOpen}
+      onOpenChange={onToggle}
+      className={cn("mb-1", {
+        "border rounded-md shadow-sm": true,
+      })}
+    >
+      <CollapsibleTrigger
+        className={cn(
+          "w-full flex items-center justify-between p-2 text-xs font-bold text-muted-foreground",
+          "rounded-t-md bg-muted/60 hover:bg-muted transition-colors",
+          { "rounded-b-md": !isOpen },
+        )}
+      >
         {section.name}
         <ChevronDown
           className={cn("h-4 w-4 transition-transform", {
@@ -263,10 +274,11 @@ function PanelSection({
           })}
         />
       </CollapsibleTrigger>
-      <CollapsibleContent>
-        {sectionColumns.map((column) => {
+      <CollapsibleContent className="bg-background rounded-b-md overflow-hidden">
+        {sectionColumns.map((column, index) => {
           const field = column.field as keyof Symbol;
           const value = symbolData[field];
+          const isLast = index === sectionColumns.length - 1;
 
           return (
             <ColumnItem
@@ -275,6 +287,7 @@ function PanelSection({
               value={value}
               symbolData={symbolData}
               columnMap={columnMap}
+              isLast={isLast}
             />
           );
         })}
@@ -361,68 +374,107 @@ export function DataPanel({
     }));
   };
 
-  // Wrapper component to maintain consistent styling
-  const PanelWrapper = ({ children }: { children: React.ReactNode }) => (
-    <div
-      {...props}
-      className={cn("w-full h-full rounded-none p-0 flex flex-col", className)}
-    >
-      {children}
-    </div>
-  );
-  // If there's no panel selected, show a selector
+  // Render based on various states
   if (!activeDataPanelId && !isLoadingPanels) {
+    // No panel selected
     return (
-      <PanelWrapper>
+      <div
+        {...props}
+        className={cn(
+          "w-full h-full flex flex-col rounded-md border",
+          className,
+        )}
+      >
         <PanelSelector title={title} />
-      </PanelWrapper>
+      </div>
     );
   }
 
-  // Panel is selected but has no content (empty sections or no columns)
   if (activePanel && !hasPanelContent) {
+    // Panel is selected but has no content
     return (
-      <PanelWrapper>
+      <div
+        {...props}
+        className={cn(
+          "w-full h-full flex flex-col rounded-md border",
+          className,
+        )}
+      >
+        <div className="p-2 flex justify-between items-center bg-muted/20 rounded-t-md">
+          <div className="text-sm font-medium">{activePanel.name || title}</div>
+        </div>
         <EmptyPanelPrompt />
-      </PanelWrapper>
+      </div>
     );
   }
 
-  // If panel is selected but no symbol is selected
   if (!symbol) {
+    // No symbol selected
     return (
-      <PanelWrapper>
+      <div
+        {...props}
+        className={cn(
+          "w-full h-full flex flex-col rounded-md border",
+          className,
+        )}
+      >
+        <div className="p-2 flex justify-between items-center bg-muted/20 rounded-t-md">
+          <div className="text-sm font-medium">
+            {activePanel?.name || title}
+          </div>
+        </div>
         <NoSymbolPrompt />
-      </PanelWrapper>
+      </div>
     );
   }
 
-  // Loading state
   if (isLoading) {
+    // Loading state
     return (
-      <PanelWrapper>
+      <div
+        {...props}
+        className={cn(
+          "w-full h-full flex flex-col rounded-md border",
+          className,
+        )}
+      >
         <LoadingState
           panelName={activePanel?.name}
           title={title}
           symbol={symbol}
         />
-      </PanelWrapper>
+      </div>
     );
   }
 
-  // Error state
   if (error || !symbolData) {
+    // Error state
     return (
-      <PanelWrapper>
+      <div
+        {...props}
+        className={cn(
+          "w-full h-full flex flex-col rounded-md border",
+          className,
+        )}
+      >
+        <div className="p-2 flex justify-between items-center bg-muted/20 rounded-t-md">
+          <div className="text-sm font-medium">
+            {activePanel?.name || title}
+          </div>
+          <span className="text-xs text-muted-foreground">{symbol}</span>
+        </div>
         <ErrorState symbol={symbol} />
-      </PanelWrapper>
+      </div>
     );
   }
 
   // Normal data display state
   return (
-    <PanelWrapper>
-      <div className="overflow-auto flex-1 border">
+    <div
+      {...props}
+      className={cn("w-full h-full flex flex-col rounded-md", className)}
+    >
+      <div className="overflow-auto flex-1 p-1">
         {sections.map((section) => (
           <PanelSection
             key={section.name}
@@ -434,6 +486,6 @@ export function DataPanel({
           />
         ))}
       </div>
-    </PanelWrapper>
+    </div>
   );
 }
