@@ -197,16 +197,18 @@ function ColumnItem({
     }
 
     if (typeof value === "number") {
-      return extendedColumnType["number"].valueFormatter({
-        value,
-        data: symbolData,
-        colDef: column,
-        api: null,
-        column: null,
-        columnApi: null,
-        context: null,
-        node: null,
-      } as any) as string;
+      return (
+        (extendedColumnType["number"]?.valueFormatter?.({
+          value,
+          data: symbolData,
+          colDef: column,
+          api: null,
+          column: null,
+          columnApi: null,
+          context: null,
+          node: null,
+        } as any) as string) ?? "-"
+      );
     }
 
     // Default display
