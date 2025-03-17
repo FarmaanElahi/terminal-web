@@ -7,7 +7,12 @@ import { ReactNode } from "react";
 import { Candlestick } from "@/components/charting/candlestick";
 import Image from "next/image";
 
-type CellDataType = "percentage" | "price" | "fundamental_price" | "date";
+type CellDataType =
+  | "percentage"
+  | "price"
+  | "fundamental_price"
+  | "date"
+  | "number";
 
 function agoCols(
   metric: string,
@@ -74,7 +79,10 @@ function forwardCols(
   return cols;
 }
 
-export const extendedColumnType = {
+export const extendedColumnType: Record<
+  CellDataType,
+  DataTypeDefinition<Symbol>
+> = {
   fundamental_price: {
     extendsDataType: "number",
     baseDataType: "number",
@@ -82,7 +90,8 @@ export const extendedColumnType = {
       const value = params.value;
       if (value === null || value === undefined) return "-";
       // TODO Make it dynamic
-      const currencyCode = "INR";
+      const currencyCode =
+        (params.value as unknown as Symbol).fundamental_currency ?? "INR";
       return new Intl.NumberFormat("en-IN", {
         maximumFractionDigits: value > 1_00_00_000 ? 2 : 0,
         minimumFractionDigits: 0,
@@ -99,7 +108,8 @@ export const extendedColumnType = {
       const value = params.value;
       if (value === null || value === undefined) return "-";
       // TODO Make it dynamic
-      const currencyCode = "INR";
+      const currencyCode =
+        (params.value as unknown as Symbol).currency_code ?? "INR";
       return new Intl.NumberFormat("en-IN", {
         maximumFractionDigits: 2,
         minimumFractionDigits: 0,
@@ -129,18 +139,31 @@ export const extendedColumnType = {
     appendColumnTypes: false,
     valueParser: (params) => {
       const value = params.newValue as unknown;
-      console.log("Da", params);
       if (typeof value === "number")
         return DateTime.fromMillis(value).toJSDate();
       if (typeof value === "string") return DateTime.fromISO(value).toJSDate();
       return null;
     },
-    valueFormatter: (params) =>
-      params.value
-        ? DateTime.fromJSDate(params.value).toFormat("dd/MM/yyyy")
-        : "-",
+    valueFormatter: (params) => {
+      return params.value
+        ? DateTime.fromMillis(params.value as unknown as number).toFormat(
+            "dd-MM-yyyy",
+          )
+        : "-";
+    },
   },
-} satisfies Record<CellDataType, DataTypeDefinition<Symbol>>;
+  number: {
+    extendsDataType: "number",
+    baseDataType: "number",
+    valueFormatter: (params) => {
+      const value = params.value;
+      if (value === null || value === undefined) return "-";
+      return new Intl.NumberFormat("en-IN", {
+        maximumFractionDigits: 2,
+      }).format(value);
+    },
+  },
+};
 
 export const defaultColumns: Array<ColDef<Symbol>> = [
   // #############################  Generals  ################################
@@ -2815,7 +2838,6 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Industry Rating 12M",
     context: { category: "Ratings" },
   },
-
 
   {
     field: "sub_industry_rating_1D",

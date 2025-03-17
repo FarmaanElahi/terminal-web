@@ -196,6 +196,19 @@ function ColumnItem({
       } as any) as string;
     }
 
+    if (typeof value === "number") {
+      return extendedColumnType["number"].valueFormatter({
+        value,
+        data: symbolData,
+        colDef: column,
+        api: null,
+        column: null,
+        columnApi: null,
+        context: null,
+        node: null,
+      } as any) as string;
+    }
+
     // Default display
     return value !== undefined && value !== null ? String(value) : "-";
   };
@@ -215,9 +228,7 @@ function ColumnItem({
         { "rounded-b-md": isLast },
       )}
     >
-      <span className="font-bold">
-        {column.headerName}
-      </span>
+      <span className="font-bold">{column.headerName}</span>
       <span
         className={cn("font-medium", {
           "text-bullish": isPositive && shouldColorize,
