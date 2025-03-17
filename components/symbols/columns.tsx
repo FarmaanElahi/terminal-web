@@ -2173,13 +2173,13 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "launchpad",
-    headerName: "Launchpad",
+    headerName: "Launchpad Daily",
     cellRenderer: BooleanCell,
     context: { category: "Technicals" },
   },
   {
     field: "launchpad_weekly",
-    headerName: "Weekly Launchpad",
+    headerName: "Launchpad Weekly",
     cellRenderer: BooleanCell,
     context: { category: "Technicals" },
   },
