@@ -4,6 +4,7 @@ import {
   Check,
   ChevronsUpDown,
   Copy,
+  Edit,
   Loader2,
   Plus,
   Trash,
@@ -52,12 +53,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useActiveWatchlistId } from "@/hooks/use-active-watchlist";
+import { WatchlistSymbol } from "@/components/watchlist/watchlist-symbol";
 
 export function WatchlistSelector() {
   const { activeWatchlistId, setActiveWatchlistId } = useActiveWatchlistId();
   const { data: watchlist = [] } = useWatchlist();
   const [open, setOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openSymbolDialog, setOpenSymbolDialog] = useState(false);
   const [newWatchlistDefault, setNewWatchlistDefault] =
     useState<Pick<Watchlist, "name" | "state" | "symbols">>();
   const activeWatchlist = watchlist?.find((s) => s.id === activeWatchlistId);
@@ -112,7 +115,20 @@ export function WatchlistSelector() {
                       className="opacity-0 group-hover:opacity-100 h-7 w-7"
                       variant="ghost"
                       size="icon"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveWatchlistId(watchlist.id);
+                        setOpenSymbolDialog(true);
+                      }}
+                    >
+                      <Edit size="3" />
+                    </Button>
+                    <Button
+                      className="opacity-0 group-hover:opacity-100 h-7 w-7"
+                      variant="ghost"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setNewWatchlistDefault({
                           name: `${watchlist.name} (Copy)`,
                           state: watchlist.state,
@@ -128,6 +144,7 @@ export function WatchlistSelector() {
                         variant="ghost"
                         size="icon"
                         className="opacity-0 group-hover:opacity-100 h-7 w-7"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <Trash size="3" />
                       </Button>
@@ -156,6 +173,14 @@ export function WatchlistSelector() {
         setOpen={setOpenDialog}
         default={newWatchlistDefault}
       />
+
+      {activeWatchlist && (
+        <WatchlistSymbol
+          open={openSymbolDialog}
+          setOpen={setOpenSymbolDialog}
+          watchlist={activeWatchlist}
+        />
+      )}
     </div>
   );
 }
