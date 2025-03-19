@@ -171,7 +171,6 @@ export function Screener(props: ScreenerProps) {
           className="ag-terminal-theme"
           enableAdvancedFilter={true}
           rowSelection={{ mode: "multiRow" }}
-          selectionColumnDef={{ pinned: "left" }}
           rowHeight={36}
           sideBar={false}
           maintainColumnOrder={true}
