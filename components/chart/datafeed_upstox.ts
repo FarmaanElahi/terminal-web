@@ -1,3 +1,4 @@
+// components/chart/datafeed_upstox.ts
 import {
   Datafeed,
   LibrarySymbolInfoExtended,
@@ -6,7 +7,6 @@ import {
   Bar,
   DatafeedErrorCallback,
   HistoryCallback,
-  LibrarySymbolInfo,
   OnReadyCallback,
   PeriodParams,
   ResolutionString,
@@ -23,6 +23,7 @@ import {
   HistoryApi,
 } from "upstox-js-sdk";
 import * as MarketV3 from "@/utils/upstox/market_v3";
+import { toUpstoxInstrumentKey } from "@/utils/upstox/upstox_utils";
 import IFeed = MarketV3.com.upstox.marketdatafeeder.rpc.proto.IFeed;
 
 type UpstoxInterval = "day" | "1minute";
@@ -37,7 +38,6 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   private readonly listeners = new Map<
     string,
     {
-      instrumentKey: string;
       symbol: LibrarySymbolInfoExtended;
       resolution: ResolutionString;
       onTick: SubscribeBarsCallback;
@@ -50,14 +50,13 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
 
   constructor(logoProvider: LogoProvider) {
     super(logoProvider);
-    this.marketFeed.on("message", () => {
-      this.feeds = this.marketFeed.feeds;
+    this.marketFeed.on("message", (data) => {
+      this.feeds = data.feeds;
       this.refreshRealtime();
-      console.log("New feed", this.feeds);
     });
     this.marketFeed.on("open", () => console.log("TBT Connected"));
     this.marketFeed.on("error", (e) => console.error("TBT Conn Failed", e));
-    this.marketFeed.on("error", () => console.error("TBT Conn Closed"));
+    this.marketFeed.on("close", () => console.error("TBT Conn Closed"));
   }
 
   async getBars(
@@ -67,7 +66,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     onResult: HistoryCallback,
     onError: DatafeedErrorCallback,
   ) {
-    // Ensure we are subscribe to realtime date
+    // Ensure we are subscribed to realtime data
     this.ensureTBTSubscribe(symbolInfo, periodParams.firstDataRequest);
 
     const interval: UpstoxInterval = resolution === "1D" ? "day" : "1minute";
@@ -90,13 +89,11 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     onTick: SubscribeBarsCallback,
     listenerGuid: string,
   ) {
-    const instrumentKey = this.toUpstoxInstrumentKey(symbolInfo);
-    if (!this.isSubscribed(instrumentKey)) {
-      this.marketFeed.subscribe([instrumentKey], "full");
+    if (!this.isSubscribed(symbolInfo.ticker as string)) {
+      this.marketFeed.subscribe([symbolInfo], "full");
     }
 
     this.listeners.set(listenerGuid, {
-      instrumentKey,
       symbol: symbolInfo,
       resolution,
       onTick: onTick,
@@ -106,68 +103,42 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   unsubscribeBars(listenerGuid: string) {
     if (!this.listeners.has(listenerGuid)) return;
 
-    const { instrumentKey } = this.listeners.get(listenerGuid)!;
+    const { symbol } = this.listeners.get(listenerGuid)!;
     this.listeners.delete(listenerGuid);
-    const isStillSubscribed = this.isSubscribed(instrumentKey);
-    // There are still some listener for this symbol, we won't disconnect it
+
+    // Check if there are still other listeners for this symbol
+    const isStillSubscribed = this.isSubscribed(symbol.ticker as string);
+
+    // There are still some listeners for this symbol, we won't disconnect it
     if (isStillSubscribed) return;
 
     // Unsubscribe from Upstox
-    console.log("UNSUB", instrumentKey);
-    this.marketFeed.unsubscribe([instrumentKey]);
-    if (this.feeds?.[instrumentKey]) {
-      delete this.feeds[instrumentKey];
-    }
+    this.marketFeed.unsubscribe([symbol]);
   }
 
-  private isSubscribed(instrumentKey: string) {
+  private isSubscribed(ticker: string) {
     return Array.from(this.listeners.values()).some(
-      ({ instrumentKey: sKey }) => instrumentKey === sKey,
+      ({ symbol }) => symbol.ticker === ticker,
     );
-  }
-
-  toUpstoxInstrumentKey(symbol: LibrarySymbolInfo) {
-    const { type, exchange, isin, ticker } = symbol;
-    switch (type) {
-      case "index": {
-        const instrumentKey = INDEX_MAPPINGS[ticker as string];
-        if (!instrumentKey) {
-          throw new Error("Unable to generate upstox instrument key");
-        }
-        return instrumentKey;
-      }
-      case "stock": {
-        if (!isin) {
-          throw new Error("Unable to generate upstox instrument key");
-        }
-        return [`${exchange}_EQ`, isin].join("|");
-      }
-
-      case "fund": {
-        if (!isin) {
-          throw new Error("Unable to generate upstox instrument key");
-        }
-        return [`${exchange}_EQ`, isin].join("|");
-      }
-      default:
-        throw new Error("Not supported symbol type");
-    }
   }
 
   private refreshRealtime() {
     if (!this.feeds) return;
 
     for (const value of this.listeners.values()) {
-      const { instrumentKey, onTick, resolution } = value;
-      const bar = this.getTBTLatestBar(instrumentKey, resolution);
-      if (bar) onTick(bar);
+      const { symbol, onTick, resolution } = value;
+      const bar = this.getTBTLatestBar(symbol.ticker as string, resolution);
+      if (bar) {
+        console.log("bar updated", symbol.ticker, this.feeds);
+        onTick(bar);
+      }
     }
   }
 
-  private getTBTLatestBar(instrumentKey: string, resolution: ResolutionString) {
+  private getTBTLatestBar(ticker: string, resolution: ResolutionString) {
     const upstoxInterval: UpstoxIntradayInterval =
       resolution === "1D" ? "1d" : "I1";
-    const feed = this.feeds?.[instrumentKey];
+    const feed = this.feeds?.[ticker];
     if (!feed) return null;
 
     const ohlc = feed.ff?.indexFF?.marketOHLC ?? feed.ff?.marketFF?.marketOHLC;
@@ -208,7 +179,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
       year: Math.max(10, Math.ceil(countBack / 252)),
     });
 
-    const instrumentKey = this.toUpstoxInstrumentKey(symbolInfo);
+    const instrumentKey = toUpstoxInstrumentKey(symbolInfo);
     const historicalCandlePromise = new Promise<GetHistoricalCandleResponse>(
       (resolve, reject) => {
         this.upstoxHistoryAPI.getHistoricalCandleData1(
@@ -291,7 +262,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
       day: Math.max(10, Math.ceil(countBack / 400)),
     });
 
-    const instrumentKey = this.toUpstoxInstrumentKey(symbolInfo);
+    const instrumentKey = toUpstoxInstrumentKey(symbolInfo);
     const historicalCandlePromise = new Promise<GetHistoricalCandleResponse>(
       (resolve, reject) => {
         this.upstoxHistoryAPI.getHistoricalCandleData1(
@@ -348,57 +319,9 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     symbolInfo: LibrarySymbolInfoExtended,
     firstRequest: boolean,
   ) {
-    const instrumentKey = this.toUpstoxInstrumentKey(symbolInfo);
-    // Initiate
-    if (firstRequest && !this.isSubscribed(instrumentKey)) {
-      this.marketFeed.subscribe([instrumentKey], "full");
+    // Initiate subscription if this is the first request and we're not already subscribed
+    if (firstRequest && !this.isSubscribed(symbolInfo.ticker as string)) {
+      this.marketFeed.subscribe([symbolInfo], "full");
     }
   }
 }
-
-const INDEX_MAPPINGS: Record<string, string> = {
-  "BSE:SENSEX": "BSE_INDEX|SENSEX",
-  "NSE:CNXENERGY": "NSE_INDEX|Nifty Energy",
-  "NSE:NIFTY_INDIA_MFG": "NSE_INDEX|Nifty India Mfg",
-  "NSE:CNXINFRA": "NSE_INDEX|Nifty Infra",
-  "NSE:CNXFMCG": "NSE_INDEX|Nifty FMCG",
-  "NSE:CNXAUTO": "NSE_INDEX|Nifty Auto",
-  "NSE:CNXIT": "NSE_INDEX|Nifty IT",
-  "NSE:CNXFINANCE": "NSE_INDEX|Nifty Fin Service",
-  "NSE:BANKNIFTY": "NSE_INDEX|Nifty Bank",
-  "NSE:CNX500": "NSE_INDEX|Nifty 500",
-  "NSE:NIFTY": "NSE_INDEX|Nifty 50",
-  "NSE:NIFTY_LARGEMID250": "NSE_INDEX|NIFTY LARGEMID250",
-  // MISSING
-  "NSE:NIFTY_IND_DIGITAL": "NSE_INDEX|",
-  "NSE:CNXMNC": "NSE_INDEX|Nifty MNC",
-  // MISSING
-  "NSE:CNXSERVICE": "NSE_INDEX|",
-  "NSE:NIFTY_TOTAL_MKT": "NSE_INDEX|NIFTY TOTAL MKT",
-  "NSE:CPSE": "NSE_INDEX|Nifty CPSE",
-  "NSE:NIFTY_MICROCAP250": "NSE_INDEX|NIFTY MICROCAP250",
-  "NSE:CNXCOMMODITIES": "NSE_INDEX|Nifty Commodities",
-  "NSE:NIFTYALPHA50": "NSE_INDEX|NIFTY Alpha 50",
-  "NSE:CNXCONSUMPTION": "NSE_INDEX|Nifty Consumption",
-  "NSE:NIFTYMIDCAP150": "NSE_INDEX|NIFTY MIDCAP 150",
-  "NSE:CNX100": "NSE_INDEX|Nifty 100",
-  // MISSING
-  "NSE:NIFTYMIDSMAL400": "NSE_INDEX|",
-  "NSE:CNXPSE": "NSE_INDEX|Nifty PSE",
-  "NSE:NIFTYSMLCAP250": "NSE_INDEX|NIFTY SMLCAP 250",
-  "NSE:NIFTYMIDCAP50": "NSE_INDEX|Nifty Midcap 50",
-  "NSE:CNXMIDCAP": "NSE_INDEX|NIFTY MIDCAP 100",
-  "NSE:CNXSMALLCAP": "NSE_INDEX|NIFTY SMLCAP 100",
-  "NSE:NIFTY_MID_SELECT": "NSE_INDEX|NIFTY MID SELECT",
-  "NSE:NIFTY_HEALTHCARE": "NSE_INDEX|NIFTY HEALTHCARE",
-  "NSE:NIFTY_CONSR_DURL": "NSE_INDEX|NIFTY CONSR DURBL",
-  "NSE:NIFTY_OIL_AND_GAS": "NSE_INDEX|NIFTY OIL AND GAS",
-  "NSE:NIFTYPVTBANK": "NSE_INDEX|Nifty Pvt Bank",
-  "NSE:CNXMEDIA": "NSE_INDEX|Nifty Media",
-  "NSE:CNXREALTY": "NSE_INDEX|Nifty Realty",
-  "NSE:CNX200": "NSE_INDEX|Nifty 200",
-  "NSE:CNXMETAL": "NSE_INDEX|Nifty Metal",
-  "NSE:CNXPSUBANK": "NSE_INDEX|Nifty PSU Bank",
-  "NSE:CNXPHARMA": "NSE_INDEX|Nifty Pharma",
-  "NSE:NIFTYJR": "NSE_INDEX|Nifty Next 50",
-};

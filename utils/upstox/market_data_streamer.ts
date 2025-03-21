@@ -3,12 +3,15 @@ import { MarketDataFeeder, Mode, ModeCode } from "./market_data_feeder";
 import { Streamer } from "./streamer";
 import { getUpstoxMarketFeedUrl } from "@/server/upstox";
 import * as MarketV3 from "@/utils/upstox/market_v3";
+import { toUpstoxInstrumentKey } from "./upstox_utils";
+import type { Symbol } from "@/types/symbol";
+import { LibrarySymbolInfo } from "@/components/chart/types";
 import IFeed = MarketV3.com.upstox.marketdatafeeder.rpc.proto.IFeed;
 import FeedResponse = MarketV3.com.upstox.marketdatafeeder.rpc.proto.FeedResponse;
 
 type SubscriptionState = {
   isSubscribed: boolean;
-  listeners: Map<string, number>; // instrumentKey -> reference count
+  listeners: Map<string, number>; // system ticker -> reference count
 };
 
 export class MarketDataStreamer extends Streamer {
@@ -20,13 +23,17 @@ export class MarketDataStreamer extends Streamer {
 
   private readonly _marketFeeder: MarketDataFeeder;
   private _url?: string;
-  private pendingSubscriptions: Map<ModeCode, Set<string>> = new Map();
-  private pendingUnsubscriptions: Set<string> = new Set();
+  private pendingSubscriptions: Map<ModeCode, Set<string>> = new Map(); // Upstox instrument keys
+  private pendingUnsubscriptions: Set<string> = new Set(); // Upstox instrument keys
   private _mode: ModeCode;
   private _isConnecting: boolean = false;
 
-  // Store accumulated feed data
+  // Store accumulated feed data - keyed by system ticker
   private _feeds: Record<string, IFeed> = {};
+
+  // Bidirectional mappings between system tickers and upstox instrument keys
+  private tickerToInstrumentKey: Map<string, string> = new Map();
+  private instrumentKeyToTicker: Map<string, string> = new Map();
 
   private static _instance: MarketDataStreamer;
 
@@ -37,23 +44,14 @@ export class MarketDataStreamer extends Streamer {
     return MarketDataStreamer._instance;
   }
 
-  private constructor(instrumentKeys: string[] = [], mode: ModeCode = "ltpc") {
+  private constructor() {
     super();
 
-    if (!Object.values(Mode).includes(mode)) {
-      throw new Error("Invalid mode provided " + mode);
-    }
-
-    this._mode = mode;
+    this._mode = "full";
 
     // Initialize pending subscriptions map for all modes
     Object.values(Mode).forEach((mode) => {
       this.pendingSubscriptions.set(mode as ModeCode, new Set());
-    });
-
-    // Populate initial subscriptions if provided
-    instrumentKeys.forEach((key) => {
-      this.addSubscription(key, mode);
     });
 
     this._marketFeeder = new MarketDataFeeder();
@@ -78,7 +76,11 @@ export class MarketDataStreamer extends Streamer {
     const updatedFeeds = { ...this._feeds };
 
     Object.entries(response.feeds).forEach(([instrumentKey, feed]) => {
-      updatedFeeds[instrumentKey] = feed;
+      // Map the instrument key to the corresponding system ticker
+      const ticker = this.instrumentKeyToTicker.get(instrumentKey);
+      if (ticker) {
+        updatedFeeds[ticker] = feed;
+      }
     });
 
     this._feeds = updatedFeeds;
@@ -123,13 +125,37 @@ export class MarketDataStreamer extends Streamer {
     this.feeder?.disconnect();
     this.clearSubscriptions();
     this._feeds = {}; // Clear accumulated feeds
+    this.tickerToInstrumentKey.clear();
+    this.instrumentKeyToTicker.clear();
     return this; // For method chaining
   }
 
-  private addSubscription(instrumentKey: string, mode: ModeCode) {
+  /**
+   * Convert a system ticker to an Upstox instrument key and maintain the mapping
+   */
+  private getInstrumentKey(symbol: LibrarySymbolInfo | Symbol): string {
+    const ticker = symbol.ticker as string;
+
+    // Check if we already have the mapping
+    let instrumentKey = this.tickerToInstrumentKey.get(ticker);
+
+    if (!instrumentKey) {
+      // Create the mapping if it doesn't exist
+      instrumentKey = toUpstoxInstrumentKey(symbol);
+      this.tickerToInstrumentKey.set(ticker, instrumentKey);
+      this.instrumentKeyToTicker.set(instrumentKey, ticker);
+    }
+
+    return instrumentKey;
+  }
+
+  private addSubscription(symbol: LibrarySymbolInfo | Symbol, mode: ModeCode) {
+    const ticker = symbol.ticker as string;
+    const instrumentKey = this.getInstrumentKey(symbol);
+
     const state = this.subscriptionState[mode];
-    const currentCount = state.listeners.get(instrumentKey) || 0;
-    state.listeners.set(instrumentKey, currentCount + 1);
+    const currentCount = state.listeners.get(ticker) || 0;
+    state.listeners.set(ticker, currentCount + 1);
 
     // If this is the first listener for this instrument in this mode,
     // add it to pending subscriptions
@@ -146,23 +172,26 @@ export class MarketDataStreamer extends Streamer {
     }
   }
 
-  private removeSubscription(instrumentKey: string) {
+  private removeSubscription(symbol: LibrarySymbolInfo | Symbol) {
+    const ticker = symbol.ticker as string;
+    const instrumentKey = this.getInstrumentKey(symbol);
+
     let removedFromAnyMode = false;
 
-    // Check all modes for this instrument
+    // Check all modes for this ticker
     Object.entries(this.subscriptionState).forEach(([, state]) => {
-      const currentCount = state.listeners.get(instrumentKey) || 0;
+      const currentCount = state.listeners.get(ticker) || 0;
 
       if (currentCount > 0) {
         const newCount = currentCount - 1;
 
         if (newCount === 0) {
           // Last listener for this instrument in this mode
-          state.listeners.delete(instrumentKey);
+          state.listeners.delete(ticker);
           this.pendingUnsubscriptions.add(instrumentKey);
           removedFromAnyMode = true;
         } else {
-          state.listeners.set(instrumentKey, newCount);
+          state.listeners.set(ticker, newCount);
         }
       }
     });
@@ -172,9 +201,9 @@ export class MarketDataStreamer extends Streamer {
       this.processPendingUnsubscriptions();
 
       // Remove from accumulated feeds if no longer subscribed
-      if (this._feeds[instrumentKey]) {
+      if (this._feeds[ticker]) {
         const updatedFeeds = { ...this._feeds };
-        delete updatedFeeds[instrumentKey];
+        delete updatedFeeds[ticker];
         this._feeds = updatedFeeds;
 
         // Emit the updated feeds
@@ -210,35 +239,38 @@ export class MarketDataStreamer extends Streamer {
   }
 
   /**
-   * Subscribe to market data for the given instrument keys
-   * @param instrumentKeys Array of instrument keys to subscribe to
+   * Subscribe to market data for the given symbols
+   * @param symbols Array of symbols to subscribe to
    * @param mode The subscription mode (ltpc, full, option_greeks)
    */
-  public subscribe(instrumentKeys: string[], mode: ModeCode) {
-    instrumentKeys.forEach((key) => this.addSubscription(key, mode));
+  public subscribe(symbols: (LibrarySymbolInfo | Symbol)[], mode: ModeCode) {
+    symbols.forEach((symbol) => this.addSubscription(symbol, mode));
     return this; // For method chaining
   }
 
   /**
-   * Unsubscribe from market data for the given instrument keys
-   * @param instrumentKeys Array of instrument keys to unsubscribe from
+   * Unsubscribe from market data for the given symbols
+   * @param symbols Array of symbols to unsubscribe from
    */
-  public unsubscribe(instrumentKeys: string[]) {
-    instrumentKeys.forEach((key) => this.removeSubscription(key));
+  public unsubscribe(symbols: (LibrarySymbolInfo | Symbol)[]) {
+    symbols.forEach((symbol) => this.removeSubscription(symbol));
     return this; // For method chaining
   }
 
   /**
-   * Change the subscription mode for the given instrument keys
-   * @param instrumentKeys Array of instrument keys to change mode for
+   * Change the subscription mode for the given symbols
+   * @param symbols Array of symbols to change mode for
    * @param newMode The new subscription mode
    */
-  public changeMode(instrumentKeys: string[], newMode: ModeCode) {
+  public changeMode(
+    symbols: (LibrarySymbolInfo | Symbol)[],
+    newMode: ModeCode,
+  ) {
     // First remove the subscriptions from any existing modes
-    instrumentKeys.forEach((key) => this.removeSubscription(key));
+    symbols.forEach((symbol) => this.removeSubscription(symbol));
 
     // Then add them to the new mode
-    instrumentKeys.forEach((key) => this.addSubscription(key, newMode));
+    symbols.forEach((symbol) => this.addSubscription(symbol, newMode));
 
     this._mode = newMode;
     return this; // For method chaining
@@ -264,10 +296,19 @@ export class MarketDataStreamer extends Streamer {
   }
 
   /**
-   * Get the current feed data for all subscribed instruments
+   * Get the current feed data for all subscribed symbols, indexed by ticker
    */
   public get feeds(): Record<string, IFeed> {
     return { ...this._feeds };
+  }
+
+  /**
+   * Get feed data for a specific symbol
+   * @param symbol Symbol to get feed data for
+   */
+  public getFeed(symbol: LibrarySymbolInfo | Symbol): IFeed | undefined {
+    const ticker = symbol.ticker as string;
+    return this._feeds[ticker];
   }
 
   /**
