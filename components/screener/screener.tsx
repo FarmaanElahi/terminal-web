@@ -76,13 +76,8 @@ function useGridInitialState(activeScreenId?: string | null) {
   const defaultState = useMemo(() => {
     const defaultVisible = new Set([
       "name",
-      "mcap",
       "day_close",
-      "industry",
-      "dcr",
-      "wcr",
-      "relative_vol_10D",
-      "relative_vol_20D",
+      "price_change_today_pct",
     ]);
 
     const hiddenColIds = colDefs
@@ -170,7 +165,6 @@ export function Screener(props: ScreenerProps) {
           getContextMenuItems={getContextMenuItems}
           className="ag-terminal-theme"
           enableAdvancedFilter={true}
-          rowSelection={{ mode: "multiRow" }}
           rowHeight={36}
           sideBar={false}
           maintainColumnOrder={true}
