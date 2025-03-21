@@ -1390,6 +1390,140 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
       }),
   },
   {
+    field: "price_vs_price_ema_5D",
+    headerName: "Price vs EMA 5D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_ema_10D",
+    headerName: "Price vs EMA 10D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+
+  {
+    field: "price_vs_price_ema_21D",
+    headerName: "Price vs EMA 21D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_ema_30D",
+    headerName: "Price vs EMA 30D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_ema_40D",
+    headerName: "Price vs EMA 40D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_ema_50D",
+    headerName: "Price vs EMA 50D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_ema_65D",
+    headerName: "Price vs EMA 65D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+
+  {
+    field: "price_vs_price_sma_1OW",
+    headerName: "Price vs SMA 1OW",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_sma_20W",
+    headerName: "Price vs SMA 20W",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_sma_30W",
+    headerName: "Price vs SMA 30W",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_sma_40W",
+    headerName: "Price vs SMA 40W",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+  {
+    field: "price_vs_price_sma_50W",
+    headerName: "Price vs SMA 50W",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+  {
     field: "price_vs_price_sma_5D",
     headerName: "Price vs SMA 5D",
     cellDataType: "percentage" satisfies CellDataType,
@@ -1927,6 +2061,126 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
 
   // ##########################  Technical  ##########################
 
+  {
+    field: "price_sma_10W",
+    headerName: "SMA 10W",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_sma_20W",
+    headerName: "SMA 20W",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_sma_30W",
+    headerName: "SMA 30W",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_sma_40W",
+    headerName: "SMA 40W",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_sma_50W",
+    headerName: "SMA 50W",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_sma_5D",
+    headerName: "SMA 5D",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_sma_10D",
+    headerName: "SMA 10D",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_sma_20D",
+    headerName: "SMA 20D",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_sma_30D",
+    headerName: "SMA 30D",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_sma_40D",
+    headerName: "SMA 40D",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_sma_50D",
+    headerName: "SMA 50D",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_sma_100D",
+    headerName: "SMA 100D",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_sma_200D",
+    headerName: "SMA 200D",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_ema_5D",
+    headerName: "EMA 5D",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_ema_10D",
+    headerName: "EMA 10D",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_ema_21D",
+    headerName: "EMA 21D",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_ema_30D",
+    headerName: "EMA 30D",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_ema_40D",
+    headerName: "EMA 40D",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_ema_50D",
+    headerName: "EMA 50D",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
+  {
+    field: "price_ema_65D",
+    headerName: "EMA 65D",
+    cellDataType: "price" satisfies CellDataType,
+    context: { category: "Technicals" },
+  },
   {
     field: "beta_1_year",
     headerName: "Beta 1Y",
