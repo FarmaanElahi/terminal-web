@@ -32,7 +32,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   private readonly zone = new IANAZone("Asia/Kolkata");
 
   private readonly upstoxHistoryAPI = new HistoryApi();
-  private marketFeed = new MarketDataStreamer();
+  private marketFeed = MarketDataStreamer.getInstance();
   private feeds: Record<string, IFeed> = {};
   private readonly listeners = new Map<
     string,
@@ -45,7 +45,6 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   >();
 
   onReady(callback: OnReadyCallback) {
-    void this.marketFeed.connectNow();
     super.onReady(callback);
   }
 
@@ -54,6 +53,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     this.marketFeed.on("message", () => {
       this.feeds = this.marketFeed.feeds;
       this.refreshRealtime();
+      console.log("New feed", this.feeds);
     });
     this.marketFeed.on("open", () => console.log("TBT Connected"));
     this.marketFeed.on("error", (e) => console.error("TBT Conn Failed", e));

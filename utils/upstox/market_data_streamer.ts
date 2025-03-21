@@ -28,7 +28,16 @@ export class MarketDataStreamer extends Streamer {
   // Store accumulated feed data
   private _feeds: Record<string, IFeed> = {};
 
-  constructor(instrumentKeys: string[] = [], mode: ModeCode = "ltpc") {
+  private static _instance: MarketDataStreamer;
+
+  public static getInstance() {
+    if (!MarketDataStreamer._instance) {
+      MarketDataStreamer._instance = new MarketDataStreamer();
+    }
+    return MarketDataStreamer._instance;
+  }
+
+  private constructor(instrumentKeys: string[] = [], mode: ModeCode = "ltpc") {
     super();
 
     if (!Object.values(Mode).includes(mode)) {
@@ -53,6 +62,9 @@ export class MarketDataStreamer extends Streamer {
     this._marketFeeder.on("data", (response: FeedResponse) => {
       this.accumulateFeeds(response);
     });
+
+    // Connect
+    setTimeout(() => this.connectNow(), 0);
   }
 
   /**
@@ -312,11 +324,14 @@ export class MarketDataStreamer extends Streamer {
       instruments: string[];
     }
   > {
-    const status: Record<string, {
-      isSubscribed: boolean;
-      instrumentCount: number;
-      instruments: string[];
-    }> = {};
+    const status: Record<
+      string,
+      {
+        isSubscribed: boolean;
+        instrumentCount: number;
+        instruments: string[];
+      }
+    > = {};
 
     Object.entries(this.subscriptionState).forEach(([mode, state]) => {
       status[mode as ModeCode] = {

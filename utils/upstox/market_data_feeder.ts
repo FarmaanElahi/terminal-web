@@ -1,9 +1,9 @@
 import Feeder from "./feeder";
-import * as MarketV3Proto from "@/utils/upstox/market_v3";
+import * as MarketV2 from "@/utils/upstox/market_v3";
 import { v4 as uuidv4 } from "uuid";
 
-const FeedResponse =
-  MarketV3Proto.com.upstox.marketdatafeeder.rpc.proto.FeedResponse;
+const FeedResponseV2 =
+  MarketV2.com.upstox.marketdatafeeder.rpc.proto.FeedResponse;
 
 export const Mode = Object.freeze({
   LTPC: "ltpc",
@@ -131,7 +131,7 @@ export class MarketDataFeeder extends Feeder {
   async decodeProtobuf(blob: unknown) {
     const arrayBuffer = await blobToArrayBuffer(blob);
     const buffer = Buffer.from(arrayBuffer);
-    return FeedResponse.decode(buffer);
+    return FeedResponseV2.decode(buffer);
   }
 
   buildRequest(instrumentKeys: string[], method: MethodCode, mode?: ModeCode) {
