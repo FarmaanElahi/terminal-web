@@ -23,7 +23,7 @@ import {
   HistoryApi,
 } from "upstox-js-sdk";
 import * as MarketV3 from "@/utils/upstox/market_v3";
-import Feed = MarketV3.com.upstox.marketdatafeeder.rpc.proto.Feed;
+import IFeed = MarketV3.com.upstox.marketdatafeeder.rpc.proto.IFeed;
 
 type UpstoxInterval = "day" | "1minute";
 type UpstoxIntradayInterval = "1d" | "I1";
@@ -33,7 +33,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
 
   private readonly upstoxHistoryAPI = new HistoryApi();
   private marketFeed = new MarketDataStreamer();
-  private feeds?: Record<string, Feed>;
+  private feeds: Record<string, IFeed> = {};
   private readonly listeners = new Map<
     string,
     {
@@ -51,8 +51,8 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
 
   constructor(logoProvider: LogoProvider) {
     super(logoProvider);
-    this.marketFeed.on("message", (data) => {
-      this.feeds = { ...(this.feeds ?? {}), ...data.feeds };
+    this.marketFeed.on("message", () => {
+      this.feeds = this.marketFeed.feeds;
       this.refreshRealtime();
     });
     this.marketFeed.on("open", () => console.log("TBT Connected"));
@@ -113,6 +113,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     if (isStillSubscribed) return;
 
     // Unsubscribe from Upstox
+    console.log("UNSUB", instrumentKey);
     this.marketFeed.unsubscribe([instrumentKey]);
     if (this.feeds?.[instrumentKey]) {
       delete this.feeds[instrumentKey];

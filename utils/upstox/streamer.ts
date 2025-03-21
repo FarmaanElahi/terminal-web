@@ -32,9 +32,6 @@ export abstract class Streamer extends EventEmitter {
 
   setupEventListeners() {
     this.feeder.on("open", () => this.emit(this.Event.OPEN));
-    this.feeder.on("data", (data) => {
-      this.emit(this.Event.MESSAGE, data);
-    });
     this.feeder.on("error", (error) => this.emit(this.Event.ERROR, error));
     this.feeder.on("close", () => this.emit(this.Event.CLOSE));
   }
