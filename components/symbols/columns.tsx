@@ -1467,7 +1467,6 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
         "text-bearish": value !== null && value < 0,
       }),
   },
-
   {
     field: "price_vs_price_sma_1OW",
     headerName: "Price vs SMA 1OW",
@@ -1603,61 +1602,6 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   {
     field: "price_vs_price_sma_200D",
     headerName: "Price vs SMA 200D",
-    cellDataType: "percentage" satisfies CellDataType,
-    context: { category: "Price & Volume" },
-    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
-      cn("font-bold", {
-        "text-bullish": value !== null && value > 0,
-        "text-bearish": value !== null && value < 0,
-      }),
-  },
-  {
-    field: "price_vs_price_sma_10W",
-    headerName: "Price vs SMA 10W",
-    cellDataType: "percentage" satisfies CellDataType,
-    context: { category: "Price & Volume" },
-    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
-      cn("font-bold", {
-        "text-bullish": value !== null && value > 0,
-        "text-bearish": value !== null && value < 0,
-      }),
-  },
-  {
-    field: "price_vs_price_sma_20W",
-    headerName: "Price vs SMA 20W",
-    cellDataType: "percentage" satisfies CellDataType,
-    context: { category: "Price & Volume" },
-    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
-      cn("font-bold", {
-        "text-bullish": value !== null && value > 0,
-        "text-bearish": value !== null && value < 0,
-      }),
-  },
-  {
-    field: "price_vs_price_sma_30W",
-    headerName: "Price vs SMA 30W",
-    cellDataType: "percentage" satisfies CellDataType,
-    context: { category: "Price & Volume" },
-    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
-      cn("font-bold", {
-        "text-bullish": value !== null && value > 0,
-        "text-bearish": value !== null && value < 0,
-      }),
-  },
-  {
-    field: "price_vs_price_sma_40W",
-    headerName: "Price vs SMA 40W",
-    cellDataType: "percentage" satisfies CellDataType,
-    context: { category: "Price & Volume" },
-    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
-      cn("font-bold", {
-        "text-bullish": value !== null && value > 0,
-        "text-bearish": value !== null && value < 0,
-      }),
-  },
-  {
-    field: "price_vs_price_sma_50W",
-    headerName: "Price vs SMA 50W",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
