@@ -4,7 +4,9 @@ import React, {
   HTMLAttributes,
   JSX,
   useCallback,
+  useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -17,6 +19,8 @@ import {
   GetContextMenuItems,
   GetRowIdFunc,
   GetRowIdParams,
+  GridApi,
+  GridReadyEvent,
   GridState,
   StateUpdatedEvent,
 } from "ag-grid-community";
@@ -37,6 +41,7 @@ import { Button } from "@/components/ui/button";
 import { WatchlistCreatorDialog } from "./watchlist-selector";
 import { WatchlistSymbol } from "@/components/watchlist/watchlist-symbol";
 import { cn } from "@/lib/utils";
+import { useRealtimeSymbol } from "@/hooks/use-realtime-symbol";
 
 type WatchlistProps = HTMLAttributes<HTMLDivElement>;
 
@@ -174,6 +179,22 @@ export function Watchlist(props: WatchlistProps) {
     [allWatchlist, updateWatchlist],
   );
 
+  // Add a ref to store the grid API
+  const gridApiRef = useRef<GridApi<Symbol>>(null);
+
+  // Use our market data grid hook
+  const { isConnected, updatedSymbols } = useRealtimeSymbol(rowData);
+  // Add an onGridReady handler to store the grid API
+  const onGridReady = useCallback((params: GridReadyEvent) => {
+    gridApiRef.current = params.api;
+  }, []);
+
+  // Notify the grid about the realtime changes as a transaction
+  useEffect(() => {
+    if (!gridApiRef.current) return;
+    gridApiRef.current.applyTransactionAsync({ update: updatedSymbols });
+  }, [updatedSymbols]);
+
   let node: JSX.Element | null = null;
 
   if (!activeWatchlistId || !allWatchlist || allWatchlist.length === 0) {
@@ -183,6 +204,7 @@ export function Watchlist(props: WatchlistProps) {
   } else if (rowData && rowData.length > 0)
     node = (
       <AgGridReact
+        onGridReady={onGridReady}
         dataTypeDefinitions={extendedColumnType}
         key={activeWatchlistId ?? "default"}
         className="ag-terminal-theme"
@@ -261,6 +283,7 @@ export function Watchlist(props: WatchlistProps) {
         open={openWatchlistCreator}
         setOpen={setOpenWatchlistCreator}
       />
+      {isConnected}
       {node}
     </div>
   );
