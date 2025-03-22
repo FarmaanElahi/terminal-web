@@ -128,10 +128,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     for (const value of this.listeners.values()) {
       const { symbol, onTick, resolution } = value;
       const bar = this.getTBTLatestBar(symbol.ticker as string, resolution);
-      if (bar) {
-        console.log("bar updated", symbol.ticker, this.feeds);
-        onTick(bar);
-      }
+      if (bar) onTick(bar);
     }
   }
 
