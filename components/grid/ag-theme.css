@@ -22,10 +22,13 @@
 }
 
 .ag-terminal-theme .ag-header-cell-text {
-    @apply font-bold
 }
 
 .ag-terminal-theme .ag-status-bar {
     max-height: 32px;
     align-items: center;
+}
+
+.ag-terminal-theme .ag-header {
+    @apply w-full flex items-center p-0 justify-between text-xs font-bold text-muted-foreground rounded-t-md bg-muted/60 hover:bg-muted transition-colors
 }

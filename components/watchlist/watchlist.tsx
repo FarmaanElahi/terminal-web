@@ -210,20 +210,13 @@ export function Watchlist(props: WatchlistProps) {
         className="ag-terminal-theme"
         selectionColumnDef={{ pinned: "left" }}
         headerHeight={36}
-        rowHeight={36}
+        rowHeight={32}
         getContextMenuItems={getContextMenuItems}
         rowData={rowData}
         animateRows
         maintainColumnOrder={true}
         autoSizeStrategy={{
-          type: "fitGridWidth",
-          defaultMinWidth: 120,
-          columnLimits: [
-            {
-              colId: "name",
-              minWidth: 160,
-            },
-          ],
+          type: "fitCellContents",
         }}
         columnDefs={colDefs}
         initialState={initialState}

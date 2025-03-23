@@ -786,7 +786,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_today_pct",
-    headerName: "Price % Change Today",
+    headerName: "Price Change %  Today",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -797,7 +797,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_from_open_pct",
-    headerName: "Price % Change from Open",
+    headerName: "Price Change % from Open",
     cellDataType: "percentage" satisfies CellDataType,
     // TODO Colorize
     context: { category: "Price & Volume" },
@@ -809,7 +809,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_from_high_pct",
-    headerName: "Price % Change from High",
+    headerName: "Price Change % from High",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1172,7 +1172,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_1W",
-    headerName: "Price Change % Current Week",
+    headerName: "Price Change % Week",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1183,7 +1183,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_curr_week_open_pct",
-    headerName: "Price Change % Current Week Open",
+    headerName: "Price Change % Week Open",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -3161,8 +3161,8 @@ export function SymbolCell(props: FormattedValueProps) {
           "/",
         )}
         alt="Logo"
-        width={20}
-        height={20}
+        width={16}
+        height={16}
         className="rounded-full"
       />
       <span className="font-bold">{String(text)}</span>

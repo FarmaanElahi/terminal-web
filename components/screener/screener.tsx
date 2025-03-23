@@ -159,26 +159,19 @@ export function Screener(props: ScreenerProps) {
     <div {...props} className={cn("h-full relative", props.className)}>
       {!isLoading && (
         <AgGridReact
-          headerHeight={36}
           dataTypeDefinitions={extendedColumnType}
           key={activeScreenId ?? "default"}
           getContextMenuItems={getContextMenuItems}
           className="ag-terminal-theme"
           enableAdvancedFilter={true}
-          rowHeight={36}
+          headerHeight={36}
+          rowHeight={32}
           sideBar={false}
           maintainColumnOrder={true}
           includeHiddenColumnsInAdvancedFilter={true}
           rowData={rowData}
           autoSizeStrategy={{
-            type: "fitGridWidth",
-            defaultMinWidth: 120,
-            columnLimits: [
-              {
-                colId: "name",
-                minWidth: 160,
-              },
-            ],
+            type: "fitCellContents",
           }}
           columnDefs={colDefs}
           initialState={initialState}
