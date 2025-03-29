@@ -66,10 +66,10 @@ export function MarketCycleCount(
         trend_color_palette: {
           colors: {
             0: {
-              name: "Uptrend",
+              name: "Up Cycle",
             },
             1: {
-              name: "Downtrend",
+              name: "Down Cycle",
             },
           },
         },
@@ -91,7 +91,7 @@ export function MarketCycleCount(
           histogramBase: 0,
           isHidden: false,
           joinPoints: false,
-          title: "Cycle Days",
+          title: "Cycle Count",
         },
       },
       shortDescription: "TM-Market Cycle",
