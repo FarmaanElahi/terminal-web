@@ -148,7 +148,9 @@ export function EnhancedVolume(
         // Volume Average Calculation
         const volumeMA = PineJS.Std.sma(
           volumeSeries,
-          this.dailyAverage,
+          PineJS.Std.isweekly(this._context)
+            ? this.weeklyAverage
+            : this.dailyAverage,
           this._context,
         );
 
