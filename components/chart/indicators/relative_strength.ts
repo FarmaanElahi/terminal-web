@@ -22,7 +22,7 @@ export function RelativeStrength(
   PineJS: PineJS,
 ): CustomIndicator<RelativeStrengthProps> {
   return {
-    name: "TM-RS",
+    name: "TM-Relative Strength",
     metainfo: {
       isCustomIndicator: true,
       _metainfoVersion: 53,
@@ -180,7 +180,7 @@ export function RelativeStrength(
           },
         },
       },
-      description: "Relative Strength",
+      description: "TM-Relative Strength",
       format: { type: "inherit" },
       id: "TM-RelativeStrenght@tv-basicstudies-1",
       inputs: [
@@ -485,7 +485,7 @@ export function RelativeStrength(
           type: "colorer",
         },
       ],
-      shortDescription: "Relative Strength",
+      shortDescription: "TM-Relative Strength",
       styles: {
         plot_0: {
           histogramBase: 0,

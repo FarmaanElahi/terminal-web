@@ -1602,7 +1602,7 @@ interface StudyTextInputInfo {
   /**
    * Default value for the input.
    */
-  readonly defval: string;
+  readonly defval?: string;
 
   /**
    * An array of plot IDs; if these plots are hidden, this input should also be hidden within the legend.
@@ -1761,7 +1761,7 @@ interface StudySessionInputInfo {
   /**
    * Default value for the session input.
    */
-  readonly defval: string;
+  readonly defval?: string;
 
   /**
    * An array of plot IDs; if these plots are hidden, this input should also be hidden within the legend.
@@ -1814,7 +1814,7 @@ interface StudySourceInputInfo {
   /**
    * Default value for the source input.
    */
-  readonly defval: string;
+  readonly defval?: string;
 
   /**
    * An array of plot IDs; if these plots are hidden, this input should also be hidden within the legend.
@@ -1867,7 +1867,7 @@ interface StudyNumericInputInfo {
   /**
    * Default value for the numeric input.
    */
-  readonly defval: number;
+  readonly defval?: number;
 
   /**
    * An array of plot IDs; if these plots are hidden, this input should also be hidden within the legend.
@@ -1983,7 +1983,7 @@ interface StudyColorInputInfo {
   /**
    * Default color value for the input (e.g., a HEX color code like "#FF0000").
    */
-  readonly defval: string;
+  readonly defval?: string;
 
   /**
    * An array of plot IDs; if these plots are hidden, this input should also be hidden within the legend.
@@ -2132,7 +2132,7 @@ interface StudyTextareaInputInfo {
   /**
    * Default text value for the textarea input.
    */
-  readonly defval: string;
+  readonly defval?: string;
 
   /**
    * An array of plot IDs; if these plots are hidden, this input should also be hidden within the legend.
@@ -2247,7 +2247,7 @@ interface StudyLinePlotPreferences {
   /**
    * Line color in any valid CSS color format (e.g., "#FF0000" for red).
    */
-  color: string;
+  color?: string;
 
   /**
    * Display mode of the plot. Determines how the plot is displayed on the chart.
@@ -2278,12 +2278,12 @@ interface StudyLinePlotPreferences {
   /**
    * Whether to display the price line associated with this plot.
    */
-  trackPrice: boolean;
+  trackPrice?: boolean;
 
   /**
    * Transparency of the line. A value between 1 (completely opaque) and 100 (completely transparent).
    */
-  transparency: number;
+  transparency?: number;
 
   /**
    * Determines if the plot is visible.
