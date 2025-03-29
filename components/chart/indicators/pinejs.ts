@@ -1491,6 +1491,7 @@ interface PineJSStd {
 interface StudyMetaInfo {
   _metainfoVersion: 53;
   isCustomIndicator: boolean;
+  canExtendTimeScale?: boolean;
   id: string;
   description: string;
   shortDescription: string;

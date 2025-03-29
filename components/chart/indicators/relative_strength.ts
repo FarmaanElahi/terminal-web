@@ -27,6 +27,7 @@ export function RelativeStrength(
       isCustomIndicator: true,
       _metainfoVersion: 53,
       behind_chart: true,
+      canExtendTimeScale: true,
       defaults: {
         inputs: {
           in_0: "close",
@@ -551,17 +552,13 @@ export function RelativeStrength(
         this._context.select_sym(0);
         const mainValue = PineJS.Std[this.source](this._context);
         const main = this._context.new_var(mainValue);
-        const mainTime = this._context.new_var(
-          this._context.symbol.time,
-        );
+        const mainTime = this._context.new_var(this._context.symbol.time);
 
         // Switch to comparative symbol
         this._context.select_sym(1);
         const compV = PineJS.Std[this.source](this._context);
         const comp = this._context.new_var(compV);
-        const compTime = this._context.new_var(
-          this._context.symbol.time,
-        );
+        const compTime = this._context.new_var(this._context.symbol.time);
 
         // Switch back to main symbol and align the series
         this._context.select_sym(0);

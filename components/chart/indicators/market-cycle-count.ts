@@ -14,7 +14,8 @@ export function MarketCycleCount(
     metainfo: {
       isCustomIndicator: true,
       _metainfoVersion: 53,
-      behind_chart: true,
+      shortDescription: "TM-Market Cycle",
+      canExtendTimeScale: true,
       defaults: {
         inputs: {
           market: "NSE:NIFTY",
@@ -94,7 +95,6 @@ export function MarketCycleCount(
           title: "Cycle Count",
         },
       },
-      shortDescription: "TM-Market Cycle",
     },
     constructor: function (this) {
       this.init = function (ctx, inputs) {
