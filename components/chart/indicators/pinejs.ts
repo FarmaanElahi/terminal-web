@@ -1560,7 +1560,7 @@ interface StudyBooleanInputInfo {
   /**
    * Default value for the input.
    */
-  readonly defval: boolean;
+  readonly defval?: boolean;
 
   /**
    * An array of plot IDs; if these plots are hidden, this input should also be hidden within the legend.
