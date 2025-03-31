@@ -27,7 +27,6 @@ export function RelativeStrength(
       isCustomIndicator: true,
       _metainfoVersion: 53,
       behind_chart: true,
-      canExtendTimeScale: true,
       defaults: {
         inputs: {
           in_0: "close",
