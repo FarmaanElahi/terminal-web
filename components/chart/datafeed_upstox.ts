@@ -321,4 +321,8 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
       this.marketFeed.subscribe([symbolInfo], "full");
     }
   }
+
+  getVolumeProfileResolutionForPeriod() {
+    return "1" as ResolutionString;
+  }
 }
