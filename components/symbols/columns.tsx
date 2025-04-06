@@ -3145,7 +3145,7 @@ export function SymbolCell(props: FormattedValueProps) {
   const logo = symbol.logo;
 
   const days = symbol.earnings_release_next_date
-    ? DateTime.fromISO(symbol.earnings_release_next_date).diffNow("day").days
+    ? DateTime.fromMillis(symbol.earnings_release_next_date).diffNow("day").days
     : undefined;
   const earningFlag = days !== undefined && days <= 14 && days >= 0;
 
@@ -3153,7 +3153,7 @@ export function SymbolCell(props: FormattedValueProps) {
 
   const earningFlagGrey = earningFlag && days > 7 && days <= 14;
 
-  const showEarningFlag = earningFlag || earningFlag;
+  const showEarningFlag = earningFlagRed || earningFlagGrey;
   return (
     <div className="inline-flex justify-start items-center gap-2 align-middle">
       <Image
