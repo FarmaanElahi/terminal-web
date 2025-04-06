@@ -1,12 +1,10 @@
 // components/chart/datafeed_upstox.ts
-import {
-  Datafeed,
-  LibrarySymbolInfoExtended,
-} from "@/components/chart/datafeed";
+import { Datafeed } from "@/components/chart/datafeed";
 import {
   Bar,
   DatafeedErrorCallback,
   HistoryCallback,
+  LibrarySymbolInfo,
   OnReadyCallback,
   PeriodParams,
   ResolutionString,
@@ -38,7 +36,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   private readonly listeners = new Map<
     string,
     {
-      symbol: LibrarySymbolInfoExtended;
+      symbol: LibrarySymbolInfo;
       resolution: ResolutionString;
       onTick: SubscribeBarsCallback;
     }
@@ -60,7 +58,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   }
 
   async getBars(
-    symbolInfo: LibrarySymbolInfoExtended,
+    symbolInfo: LibrarySymbolInfo,
     resolution: ResolutionString,
     periodParams: PeriodParams,
     onResult: HistoryCallback,
@@ -84,7 +82,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
    * Subscribe to real-time updates for a specific symbol.
    */
   subscribeBars(
-    symbolInfo: LibrarySymbolInfoExtended,
+    symbolInfo: LibrarySymbolInfo,
     resolution: ResolutionString,
     onTick: SubscribeBarsCallback,
     listenerGuid: string,
@@ -164,7 +162,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   }
 
   private async pullDayCandle(
-    symbolInfo: LibrarySymbolInfoExtended,
+    symbolInfo: LibrarySymbolInfo,
     period: PeriodParams,
     interval: UpstoxInterval,
   ) {
@@ -247,7 +245,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   }
 
   private async pullMinutesCandles(
-    symbolInfo: LibrarySymbolInfoExtended,
+    symbolInfo: LibrarySymbolInfo,
     period: PeriodParams,
     interval: UpstoxInterval,
   ) {
@@ -313,7 +311,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   }
 
   private ensureTBTSubscribe(
-    symbolInfo: LibrarySymbolInfoExtended,
+    symbolInfo: LibrarySymbolInfo,
     firstRequest: boolean,
   ) {
     // Initiate subscription if this is the first request and we're not already subscribed

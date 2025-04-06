@@ -10,13 +10,8 @@ import {
   TimescaleMark,
 } from "@/components/chart/types";
 import { LogoProvider } from "@/components/chart/logo_provider";
-import { symbolResolve, symbolSearch } from "@/lib/state/symbol";
-import type { Symbol } from "@/types/symbol";
+import { symbolQuote, symbolResolve, symbolSearch } from "@/lib/state/symbol";
 import { Subsession } from "@/types/supabase";
-
-export interface LibrarySymbolInfoExtended extends LibrarySymbolInfo {
-  quote: Symbol;
-}
 
 export abstract class Datafeed {
   protected constructor(private readonly logoProvider: LogoProvider) {}
@@ -124,18 +119,22 @@ export abstract class Datafeed {
       data_status: "streaming",
       has_daily: true,
       isin: data.isin,
-    } as LibrarySymbolInfoExtended;
+    } as LibrarySymbolInfo;
     onResolve(symbol);
   }
 
   async getTimescaleMarks(
-    symbolInfo: LibrarySymbolInfoExtended,
+    symbolInfo: LibrarySymbolInfo,
     from: number,
     to: number,
     onDataCallback: GetMarksCallback<TimescaleMark>,
   ) {
-    const { earnings_release_date_fq_h, earnings_release_next_date } =
-      symbolInfo.quote ?? {};
+    if (!symbolInfo.ticker) return onDataCallback([]);
+
+    const quote = await symbolQuote(symbolInfo.ticker);
+    if (!quote) return onDataCallback([]);
+
+    const { earnings_release_date_fq_h, earnings_release_next_date } = quote;
     const marks = [] as TimescaleMark[];
     let currIndex = 0;
 
@@ -144,8 +143,8 @@ export abstract class Datafeed {
     earnings.forEach((time, index) => {
       marks.push({
         id: `${currIndex + index}`,
-        time: time,
-        color: "grey",
+        time: new Date(time).setUTCHours(0, 0, 0, 0) / 1000,
+        color: "green",
         shape: "earning",
         label: "E",
       });
@@ -157,7 +156,7 @@ export abstract class Datafeed {
       marks.push({
         id: `${currIndex + 1}`,
         time,
-        color: "red",
+        color: "purple",
         shape: "earning",
         label: "E",
       });
