@@ -8,6 +8,7 @@ import {
 
 interface MarketCycleCountProps {
   insideBar: boolean;
+  oopsReversal: boolean;
 }
 
 interface OHLCVSeries {
@@ -30,9 +31,14 @@ export function TechnicalPatterns(
       defaults: {
         inputs: {
           insideBar: false,
+          oopsReversal: false,
         },
         styles: {
           insideBar: {
+            location: MarkLocation.BelowBar,
+            plottype: PlotShapeId.shape_arrow_up,
+          },
+          oopsReversal: {
             location: MarkLocation.BelowBar,
             plottype: PlotShapeId.shape_arrow_up,
           },
@@ -48,6 +54,11 @@ export function TechnicalPatterns(
           name: "Inside Bar",
           type: "bool",
         },
+        {
+          id: "oopsReversal",
+          name: "Oops Reversal",
+          type: "bool",
+        },
       ],
       is_hidden_study: false,
       is_price_study: true,
@@ -57,10 +68,17 @@ export function TechnicalPatterns(
           id: "insideBar",
           type: "shapes",
         },
+        {
+          id: "oopsReversal",
+          type: "shapes",
+        },
       ],
       styles: {
         insideBar: {
           title: "Inside Bar",
+        },
+        oopsReversal: {
+          title: "Oops Reversal",
         },
       },
     },
@@ -69,6 +87,7 @@ export function TechnicalPatterns(
         this._context = ctx;
         this._input = inputs;
         this.insideBar = this._input(0);
+        this.oopsReversal = this._input(1);
       };
       this.main = function (ctx) {
         this._context = ctx;
@@ -89,7 +108,11 @@ export function TechnicalPatterns(
         );
         const ohlcv = { o, h, l, c, v };
         const insideBar = this.insideBar ? isInsideBar(PineJS, ohlcv) : NaN;
-        return [insideBar];
+        const oopsReversal = this.oopsReversal
+          ? isOopsReversal(PineJS, ohlcv)
+          : NaN;
+
+        return [insideBar, oopsReversal];
       };
     },
   };
@@ -105,5 +128,16 @@ function isInsideBar(PineJS: PineJS, { h, l }: OHLCVSeries) {
   return PineJS.Std.and(
     PineJS.Std.le(currentHigh, previousHigh),
     PineJS.Std.gt(currentLow, previousLow),
+  );
+}
+
+function isOopsReversal(PineJS: PineJS, { c, o, l }: OHLCVSeries) {
+  const previousLow = l.get(1);
+  const currentOpen = o.get();
+  const currentClose = c.get();
+
+  return PineJS.Std.and(
+    PineJS.Std.le(currentOpen, previousLow),
+    PineJS.Std.ge(currentClose, previousLow),
   );
 }
