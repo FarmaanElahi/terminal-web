@@ -2,6 +2,7 @@ import { CustomIndicator, PineJS } from "./pinejs";
 import { RelativeStrength } from "@/components/chart/indicators/relative_strength";
 import { MarketCycleCount } from "@/components/chart/indicators/market-cycle-count";
 import { EnhancedVolume } from "@/components/chart/indicators/enhanced-volume";
+import { TechnicalPatterns } from "@/components/chart/indicators/technical-patterns";
 
 export function getIndicators(PineJS: PineJS): Promise<CustomIndicator[]> {
   // eslint-disable-next-line
@@ -10,5 +11,6 @@ export function getIndicators(PineJS: PineJS): Promise<CustomIndicator[]> {
     RelativeStrength(PineJS),
     MarketCycleCount(PineJS),
     EnhancedVolume(PineJS),
+    TechnicalPatterns(PineJS),
   ]);
 }

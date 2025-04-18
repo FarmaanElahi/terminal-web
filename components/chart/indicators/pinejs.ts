@@ -2292,7 +2292,7 @@ interface StudyLinePlotPreferences {
   visible?: boolean;
 }
 
-enum MarkLocation {
+export enum MarkLocation {
   /**
    * Position above the bar.
    */
@@ -2339,25 +2339,26 @@ enum MarkLocation {
   Top = "Top",
 }
 
-type PlotShapeId =
-  | "shape_arrow_down"
-  | "shape_arrow_up"
-  | "shape_circle"
-  | "shape_cross"
-  | "shape_xcross"
-  | "shape_diamond"
-  | "shape_flag"
-  | "shape_square"
-  | "shape_label_down"
-  | "shape_label_up"
-  | "shape_triangle_down"
-  | "shape_triangle_up";
+export enum PlotShapeId {
+  shape_arrow_down = "shape_arrow_down",
+  shape_arrow_up = "shape_arrow_up",
+  shape_circle = "shape_circle",
+  shape_cross = "shape_cross",
+  shape_xcross = "shape_xcross",
+  shape_diamond = "shape_diamond",
+  shape_flag = "shape_flag",
+  shape_square = "shape_square",
+  shape_label_down = "shape_label_down",
+  shape_label_up = "shape_label_up",
+  shape_triangle_down = "shape_triangle_down",
+  shape_triangle_up = "shape_triangle_up",
+}
 
 interface StudyShapesPlotPreferences {
   /**
    * The color of the shape in any valid CSS color format (e.g., "#FF0000" for red).
    */
-  color: string;
+  color?: string;
 
   /**
    * Display mode of the shape plot, determining how it is displayed on the chart.
@@ -2380,13 +2381,13 @@ interface StudyShapesPlotPreferences {
   /**
    * The color of any associated text in the shape.
    */
-  textColor: string;
+  textColor?: string;
 
   /**
    * Transparency of the shape, ranging from 1 (fully opaque) to 100 (fully transparent).
    * Example: `80` for high transparency.
    */
-  transparency: number;
+  transparency?: number;
 
   /**
    * Determines whether the shape plot is visible.
@@ -2447,7 +2448,7 @@ interface StudyCharsPlotPreferences {
   /**
    * Color of the character or marker, specified in any valid CSS color format.
    */
-  color: string;
+  color?: string;
 
   /**
    * Display mode for the character plot.
@@ -2465,13 +2466,13 @@ interface StudyCharsPlotPreferences {
   /**
    * Color of any associated text, specified in CSS color format.
    */
-  textColor: string;
+  textColor?: string;
 
   /**
    * Transparency level for the character or marker, ranging from 1 (fully opaque) to 100 (fully transparent).
    * Example: `80` for high transparency.
    */
-  transparency: number;
+  transparency?: number;
 
   /**
    * Visibility of the character plot.
