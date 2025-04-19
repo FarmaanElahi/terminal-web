@@ -2259,12 +2259,12 @@ interface StudyLinePlotPreferences {
   /**
    * Line style for the plot, e.g., solid, dashed, dotted.
    */
-  linestyle: LineStyle;
+  linestyle?: LineStyle;
 
   /**
    * Line width in pixels.
    */
-  linewidth: number;
+  linewidth?: number;
 
   /**
    * Plot style, defining the type of line study.
