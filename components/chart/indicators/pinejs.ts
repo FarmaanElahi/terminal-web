@@ -130,7 +130,7 @@ interface ISymbolInstrument {
   isdwm(): boolean;
 }
 
-interface IContext {
+export interface IContext {
   /**
    * The current symbol instrument.
    */

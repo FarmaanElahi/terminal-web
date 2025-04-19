@@ -1,5 +1,6 @@
 import {
   CustomIndicator,
+  IContext,
   IPineSeries,
   MarkLocation,
   PineJS,
@@ -9,6 +10,7 @@ import {
 interface MarketCycleCountProps {
   insideBar: boolean;
   oopsReversal: boolean;
+  keyReversal: boolean;
 }
 
 interface OHLCVSeries {
@@ -18,6 +20,16 @@ interface OHLCVSeries {
   c: IPineSeries;
   v: IPineSeries;
 }
+
+/**
+ * Creates a custom indicator for identifying specific technical patterns, including "Inside Bar" and "Oops Reversal."
+ *
+ * @param {PineJS} PineJS - The PineJS library instance for indicator calculations and context management.
+ * @return {CustomIndicator<MarketCycleCountProps>} A custom indicator configuration object with metadata, inputs, styles, and plotting logic.
+ *
+ * TODO:
+ *  1. Key Reversal Bar
+ */
 
 export function TechnicalPatterns(
   PineJS: PineJS,
@@ -32,15 +44,28 @@ export function TechnicalPatterns(
         inputs: {
           insideBar: false,
           oopsReversal: false,
+          keyReversal: false,
         },
         styles: {
           insideBar: {
             location: MarkLocation.BelowBar,
             plottype: PlotShapeId.shape_arrow_up,
+            color: "green",
           },
           oopsReversal: {
             location: MarkLocation.BelowBar,
             plottype: PlotShapeId.shape_arrow_up,
+            color: "green",
+          },
+          bullishKeyReversal: {
+            location: MarkLocation.BelowBar,
+            plottype: PlotShapeId.shape_arrow_up,
+            color: "green",
+          },
+          bearishKeyReversal: {
+            location: MarkLocation.AboveBar,
+            plottype: PlotShapeId.shape_arrow_down,
+            color: "red",
           },
         },
         palettes: {},
@@ -59,6 +84,11 @@ export function TechnicalPatterns(
           name: "Oops Reversal",
           type: "bool",
         },
+        {
+          id: "keyReversal",
+          name: "Key Reversal",
+          type: "bool",
+        },
       ],
       is_hidden_study: false,
       is_price_study: true,
@@ -72,14 +102,20 @@ export function TechnicalPatterns(
           id: "oopsReversal",
           type: "shapes",
         },
+        {
+          id: "bullishKeyReversal",
+          type: "shapes",
+        },
+        {
+          id: "bearishKeyReversal",
+          type: "shapes",
+        },
       ],
       styles: {
-        insideBar: {
-          title: "Inside Bar",
-        },
-        oopsReversal: {
-          title: "Oops Reversal",
-        },
+        insideBar: { title: "Inside Bar" },
+        oopsReversal: { title: "Oops Reversal" },
+        bullishKeyReversal: { title: "Bullish Key Reversal" },
+        bearishKeyReversal: { title: "Bearish Key Reversal" },
       },
     },
     constructor: function (this) {
@@ -88,6 +124,7 @@ export function TechnicalPatterns(
         this._input = inputs;
         this.insideBar = this._input(0);
         this.oopsReversal = this._input(1);
+        this.keyReversal = this._input(2);
       };
       this.main = function (ctx) {
         this._context = ctx;
@@ -112,7 +149,11 @@ export function TechnicalPatterns(
           ? isOopsReversal(PineJS, ohlcv)
           : NaN;
 
-        return [insideBar, oopsReversal];
+        const keyReversal = this.keyReversal
+          ? isKeyReversal(this._context, PineJS, ohlcv)
+          : [NaN, NaN];
+
+        return [insideBar, oopsReversal, ...keyReversal];
       };
     },
   };
@@ -140,4 +181,60 @@ function isOopsReversal(PineJS: PineJS, { c, o, l }: OHLCVSeries) {
     PineJS.Std.le(currentOpen, previousLow),
     PineJS.Std.ge(currentClose, previousLow),
   );
+}
+
+function isKeyReversal(context: IContext, PineJS: PineJS, s: OHLCVSeries) {
+  return [
+    isBullishKeyReversal(context, PineJS, s),
+    isBearishKeyReversal(context, PineJS, s),
+  ] as const;
+}
+
+function isBullishKeyReversal(
+  context: IContext,
+  PineJS: PineJS,
+  { c, o, l, h }: OHLCVSeries,
+) {
+  const downtrend = PineJS.Std.sma(c, 50, context) > c.get();
+  if (!downtrend) return NaN;
+
+  const previousClose = c.get(1);
+  const previousLow = l.get(1);
+  const previousHigh = h.get(1);
+
+  const currentOpen = o.get();
+  const currentClose = c.get();
+  const currentLow = l.get();
+
+  const result =
+    currentOpen < previousClose &&
+    currentLow < previousLow &&
+    currentClose > previousHigh;
+
+  return result ? 1 : NaN;
+}
+
+function isBearishKeyReversal(
+  context: IContext,
+  PineJS: PineJS,
+  { c, o, h }: OHLCVSeries,
+) {
+  const uptrend = PineJS.Std.sma(c, 50, context) < c.get();
+  if (!uptrend) return NaN;
+
+  const previousClose = c.get(1);
+  const previousHigh = h.get(1);
+
+  const currentOpen = o.get();
+  const currentHigh = h.get();
+  const currentClose = c.get();
+
+  // Highest bar in the lookup
+
+  const result =
+    currentOpen > previousClose &&
+    currentHigh > previousHigh &&
+    currentClose < previousClose;
+
+  return result ? 1 : NaN;
 }
