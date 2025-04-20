@@ -18,7 +18,9 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useActiveDataPanelId } from "@/hooks/use-active-data-panel";
-import { useGroupSymbol } from "@/lib/state/grouper";
+import { useGroupSymbol, useGroupSymbolSwitcher } from "@/lib/state/grouper";
+import Image from "next/image";
+import { queryDuckDB } from "@/utils/duckdb";
 
 interface DataPanelProps {
   panelId?: string;
@@ -122,6 +124,138 @@ function ErrorState({ symbol }: { symbol: string }) {
   );
 }
 
+// Rating details list component for expandable ratings
+function RatingDetailsList({
+  category,
+  symbolData,
+  limit,
+}: {
+  category: "sector" | "industry" | "sub_industry";
+  symbolData: Symbol;
+  limit?: number;
+}) {
+  const [relatedSymbols, setRelatedSymbols] = useState<Symbol[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Get the category value (e.g., "Technology" for sector)
+  const categoryValue = symbolData[category];
+  const switcher = useGroupSymbolSwitcher();
+
+  useEffect(() => {
+    async function fetchRelatedSymbols() {
+      try {
+        setIsLoading(true);
+
+        // Always use 3M timeframe for consistency
+        // Get all symbols for ratings columns or limit to 10 for other columns
+        const result = await queryDuckDB<Symbol>("symbols", {
+          columns: [
+            "ticker",
+            "logo",
+            "name",
+            "RS_Rating_3M",
+            "price_change_today_pct",
+          ],
+          where: `${category} = '${categoryValue}'`,
+          order: [{ field: "RS_Rating_3M", sort: "DESC" }],
+          limit,
+        });
+
+        setRelatedSymbols(result);
+      } catch (error) {
+        console.error("Error fetching related symbols:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    if (categoryValue) {
+      fetchRelatedSymbols();
+    }
+  }, [category, categoryValue]);
+
+  if (isLoading) {
+    return (
+      <div className="py-2 px-4">
+        <Skeleton className="h-4 w-full mb-2" />
+        <Skeleton className="h-4 w-full mb-2" />
+        <Skeleton className="h-4 w-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-4 text-sm bg-muted/5 max-h-96 overflow-auto">
+      <table className="w-full">
+        <thead className="sticky top-0 bg-background z-10">
+          <tr className="text-xs font-semibold text-muted-foreground py-2">
+            <th className="text-left py-2">Symbol</th>
+            <th className="text-right py-2">% Change</th>
+            <th className="text-right py-2">RS 3M</th>
+          </tr>
+        </thead>
+        <tbody>
+          {relatedSymbols.map((symbol, index) => (
+            <tr
+              key={symbol.ticker}
+              className={cn(
+                "hover:bg-muted/20 transition-colors",
+                index !== 0 && "border-t border-border/30",
+              )}
+            >
+              <td className="py-1.5">
+                <div className="flex items-center gap-2 font-bold">
+                  <Image
+                    src={[
+                      `${process.env.NEXT_PUBLIC_LOGO_BASE_URL}`,
+                      `${symbol.logo}.svg`,
+                    ].join("/")}
+                    alt={symbol.ticker || ""}
+                    width={16}
+                    height={16}
+                    className="rounded-full"
+                  />
+                  <span
+                    className="hover:underline cursor-pointer"
+                    onClick={() => switcher(symbol.ticker as string)}
+                  >
+                    {symbol.name}
+                  </span>
+                </div>
+              </td>
+              <td className="text-right">
+                <span
+                  className={cn({
+                    "text-bullish":
+                      (symbol.price_change_today_pct as number) > 0,
+                    "text-bearish":
+                      (symbol.price_change_today_pct as number) < 0,
+                  })}
+                >
+                  {formatPercentage(symbol.price_change_today_pct as number)}
+                </span>
+              </td>
+              <td className="text-right">
+                {symbol.RS_Rating_3M as unknown as string}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// Helper function to format percentage
+function formatPercentage(value: number | undefined): string {
+  if (value === undefined || value === null) return "-";
+  return new Intl.NumberFormat("en-US", {
+    style: "percent",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value / 100);
+}
+
 // Section column item component
 function ColumnItem({
   column,
@@ -135,6 +269,42 @@ function ColumnItem({
   columnMap: Record<string, ColDef<Symbol>>;
   isLast?: boolean;
 }) {
+  const [showingRating, setShowingRating] = useState(false);
+
+  // Check if this is a rating column that should have expandable details
+  const isRatingColumn =
+    column.field &&
+    (column.field.startsWith("sector_rating_") ||
+      column.field.startsWith("industry_rating_") ||
+      column.field.startsWith("sub_industry_rating_"));
+
+  const isSectorIndustryColumn = [
+    "sector",
+    "industry",
+    "sub_industry",
+  ].includes(column.field as unknown as string);
+
+  const canShowRating = isRatingColumn || isSectorIndustryColumn;
+
+  // Extract the category type
+  const getRatingCategory = () => {
+    if (!isRatingColumn || !column.field) return null;
+
+    let category: "sector" | "industry" | "sub_industry" | null = null;
+
+    if (column.field.startsWith("sector_rating_")) {
+      category = "sector";
+    } else if (column.field.startsWith("industry_rating_")) {
+      category = "industry";
+    } else if (column.field.startsWith("sub_industry_rating_")) {
+      category = "sub_industry";
+    }
+
+    return category;
+  };
+
+  const ratingCategory = getRatingCategory();
+
   // Format value helper function
   const formatValue = (column: ColDef<Symbol>, value: unknown) => {
     if (!symbolData) return "-";
@@ -223,22 +393,55 @@ function ColumnItem({
     column.cellClass && typeof column.cellClass === "function";
 
   return (
-    <div
-      key={column.colId}
-      className={cn(
-        "flex justify-between items-center px-4 py-1.5 border-t first:border-t-0 text-sm hover:bg-muted/30",
-        { "rounded-b-md": isLast },
-      )}
-    >
-      <span className="font-bold">{column.headerName}</span>
-      <span
-        className={cn("font-medium", {
-          "text-bullish": isPositive && shouldColorize,
-          "text-bearish": isNegative && shouldColorize,
-        })}
+    <div className="border-b">
+      <div
+        onClick={() => canShowRating && setShowingRating((prev) => !prev)}
+        className={cn(
+          "flex justify-between items-center px-4 py-1.5 border-t first:border-t-0 text-sm hover:bg-muted/30",
+          {
+            "rounded-b-md": isLast && !showingRating,
+            "cursor-pointer": canShowRating,
+          },
+        )}
       >
-        {formatValue(column, value)}
-      </span>
+        <span className="font-bold flex items-center gap-2">
+          {column.headerName}
+          {canShowRating && (
+            <ChevronDown
+              className={cn("h-3 w-3 transition-transform", {
+                "transform rotate-180": showingRating,
+              })}
+            />
+          )}
+        </span>
+        <span
+          className={cn("font-medium", {
+            "text-bullish": isPositive && shouldColorize,
+            "text-bearish": isNegative && shouldColorize,
+          })}
+        >
+          {formatValue(column, value)}
+        </span>
+      </div>
+
+      {isRatingColumn && showingRating && ratingCategory && (
+        <div className="border-t border-dashed">
+          <RatingDetailsList
+            category={ratingCategory}
+            symbolData={symbolData}
+          />
+        </div>
+      )}
+
+      {isSectorIndustryColumn && showingRating && (
+        <div className="border-t border-dashed">
+          <RatingDetailsList
+            category={column.field as "sector" | "industry" | "sub_industry"}
+            symbolData={symbolData}
+            limit={10}
+          />
+        </div>
+      )}
     </div>
   );
 }

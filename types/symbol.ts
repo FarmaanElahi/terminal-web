@@ -906,6 +906,19 @@ export interface Symbol {
   ATR_10D?: number;
   ATR_14D?: number;
   ATR_20D?: number;
+
+  // Rating
+  RS_Rating_1W?:number;
+  RS_Rating_1M?:number;
+  RS_Rating_3M?:number;
+  RS_Rating_6M?:number;
+  RS_Rating_12M?:number;
+
+  AS_Rating_1W?:number;
+  AS_Rating_1M?:number;
+  AS_Rating_3M?:number;
+  AS_Rating_6M?:number;
+  AS_Rating_12M?:number;
 }
 
 export interface Subsession {
