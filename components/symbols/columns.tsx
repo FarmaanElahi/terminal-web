@@ -1104,7 +1104,6 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   {
     field: "high_52_week_today",
     headerName: "High 52W Today",
-    cellDataType: "price" satisfies CellDataType,
     context: { category: "Price & Volume" },
   },
   {
