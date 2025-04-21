@@ -158,7 +158,10 @@ function RatingDetailsList({
             "price_change_today_pct",
           ],
           where: `${category} = '${categoryValue}'`,
-          order: [{ field: "RS_Rating_1M", sort: "DESC" }],
+          order: [
+            { field: "RS_Rating_1M", sort: "DESC" },
+            { field: "RS_Rating_3M", sort: "DESC" },
+          ],
           limit,
         });
 
@@ -238,10 +241,10 @@ function RatingDetailsList({
                 </span>
               </td>
               <td className="text-right">
-                {symbol.RS_Rating_3M as unknown as string}
+                {symbol.RS_Rating_1M as unknown as string}
               </td>
               <td className="text-right">
-                {symbol.RS_Rating_1M as unknown as string}
+                {symbol.RS_Rating_3M as unknown as string}
               </td>
             </tr>
           ))}
