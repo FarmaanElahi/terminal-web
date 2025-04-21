@@ -153,11 +153,12 @@ function RatingDetailsList({
             "ticker",
             "logo",
             "name",
+            "RS_Rating_1M",
             "RS_Rating_3M",
             "price_change_today_pct",
           ],
           where: `${category} = '${categoryValue}'`,
-          order: [{ field: "RS_Rating_3M", sort: "DESC" }],
+          order: [{ field: "RS_Rating_1M", sort: "DESC" }],
           limit,
         });
 
@@ -191,6 +192,7 @@ function RatingDetailsList({
           <tr className="text-xs font-semibold text-muted-foreground py-2">
             <th className="text-left py-2">Symbol</th>
             <th className="text-right py-2">% Change</th>
+            <th className="text-right py-2">RS 1M</th>
             <th className="text-right py-2">RS 3M</th>
           </tr>
         </thead>
@@ -237,6 +239,9 @@ function RatingDetailsList({
               </td>
               <td className="text-right">
                 {symbol.RS_Rating_3M as unknown as string}
+              </td>
+              <td className="text-right">
+                {symbol.RS_Rating_1M as unknown as string}
               </td>
             </tr>
           ))}
