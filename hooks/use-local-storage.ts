@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export function useLocalStorage<T>(key: string, initialValue: T) {
+export function useLocalStorage<T>(key: string, initialValue: T, sync = false) {
   // State to store our value
   // Pass initial state function to useState so logic is only executed once
   const [storedValue, setStoredValue] = useState<T>(() => {
@@ -42,7 +42,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
   // Subscribe to changes in other tabs/windows
   useEffect(() => {
     function handleStorageChange(e: StorageEvent) {
-      if (e.key === key && e.newValue) {
+      if (sync && e.key === key && e.newValue) {
         setStoredValue(JSON.parse(e.newValue));
       }
     }
@@ -51,7 +51,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       window.addEventListener("storage", handleStorageChange);
       return () => window.removeEventListener("storage", handleStorageChange);
     }
-  }, [key]);
+  }, [key, sync]);
 
   return [storedValue, setValue] as const;
 }
