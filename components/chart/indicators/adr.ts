@@ -45,16 +45,10 @@ export function ADR(PineJS: PineJS): CustomIndicator<MarketCycleCountProps> {
       this.main = function (ctx) {
         this._context = ctx;
         const close = PineJS.Std.close(this._context);
-        const h = this._context.new_unlimited_var(
-          PineJS.Std.high(this._context),
-        );
-        const hSMA = PineJS.Std.sma(h, this.length, this._context);
-        const l = this._context.new_unlimited_var(
-          PineJS.Std.low(this._context),
-        );
-        const lSMA = PineJS.Std.sma(l, this.length, this._context);
-
-        const adr = hSMA - lSMA;
+        const h = PineJS.Std.high(this._context);
+        const l = PineJS.Std.low(this._context);
+        const range = this._context.new_unlimited_var(h - l);
+        const adr = PineJS.Std.sma(range, this.length, this._context);
         const adrp = (adr / close) * 100;
         const value = this.adr_option === "Percent" ? adrp : adr;
         return [value];
