@@ -140,7 +140,7 @@ export function EnhancedVolume(
         let volumeColor = upDay ? 0 : 1;
         const range = (close - low) / (high - low);
         const strongCR = range > 0.5;
-        const pocketPivot = strongCR && volume > historicalDownDayVolume;
+        const pocketPivot = upDay && strongCR && volume > historicalDownDayVolume;
         const reversePocketPivot = downDay && volume <= historicalDownDayVolume;
         if (pocketPivot) volumeColor = 2;
         if (reversePocketPivot) volumeColor = 3;
