@@ -2170,7 +2170,8 @@ type StudyPlotPreferences =
   | StudyLinePlotPreferences
   | StudyShapesPlotPreferences
   | StudyArrowsPlotPreferences
-  | StudyCharsPlotPreferences;
+  | StudyCharsPlotPreferences
+  | StudyBgColorerPlotPrefereces;
 
 export enum StudyPlotDisplayMode {
   None = 0,
@@ -2393,6 +2394,15 @@ interface StudyShapesPlotPreferences {
    * Determines whether the shape plot is visible.
    */
   visible?: boolean;
+}
+
+interface StudyBgColorerPlotPrefereces {
+  /**
+   * Display mode for the arrows plot.
+   * Use `StudyPlotDisplayMode` to control visibility or display properties.
+   * Example: `StudyPlotDisplayTarget.None` to hide the plot.
+   */
+  display?: StudyPlotDisplayMode;
 }
 
 interface StudyArrowsPlotPreferences {

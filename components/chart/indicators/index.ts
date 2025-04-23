@@ -4,6 +4,7 @@ import { MarketCycleCount } from "@/components/chart/indicators/market-cycle-cou
 import { EnhancedVolume } from "@/components/chart/indicators/enhanced-volume";
 import { TechnicalPatterns } from "@/components/chart/indicators/technical-patterns";
 import { ADR } from "@/components/chart/indicators/adr";
+import { RMV } from "@/components/chart/indicators/rmv";
 
 export function getIndicators(PineJS: PineJS): Promise<CustomIndicator[]> {
   // eslint-disable-next-line
@@ -14,5 +15,6 @@ export function getIndicators(PineJS: PineJS): Promise<CustomIndicator[]> {
     EnhancedVolume(PineJS),
     TechnicalPatterns(PineJS),
     ADR(PineJS),
+    RMV(PineJS),
   ]);
 }
