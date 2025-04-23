@@ -73,8 +73,8 @@ export function RMV(PineJS: PineJS): CustomIndicator<MarketCycleCountProps> {
         palettes: {
           bg_color_palette: {
             colors: {
-              10: { color: "#fefffe", width: 1, style: 0 },
-              20: { color: "#4994ED", width: 1, style: 0 },
+              10: { color: "green", width: 1, style: 0 },
+              20: { color: "orange", width: 1, style: 0 },
             },
           },
           rmv_histogram_color_palette: {
