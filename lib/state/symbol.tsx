@@ -226,10 +226,8 @@ export function chartTemplateContent(name: string) {
         .eq("name", name)
         .abortSignal(signal)
         .maybeSingle();
-      if (error || !data) {
-        throw new Error("Cannot fetch chart template content");
-      }
-      return data;
+      if (error) throw new Error("Cannot fetch chart template content");
+      return data?.content;
     },
   });
 }
