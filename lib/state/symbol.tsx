@@ -216,18 +216,18 @@ export function allChartTemplates() {
   });
 }
 
-export function chartTemplateContent(name: string) {
+export function chartTemplate(name: string) {
   return queryClient.fetchQuery({
-    queryKey: ["chart_templates_content", name],
+    queryKey: ["chart_templates", name],
     queryFn: async ({ signal }) => {
       const { data, error } = await supabase
         .from("chart_templates")
-        .select(`content`)
+        .select()
         .eq("name", name)
         .abortSignal(signal)
         .maybeSingle();
       if (error) throw new Error("Cannot fetch chart template content");
-      return data?.content;
+      return data;
     },
   });
 }

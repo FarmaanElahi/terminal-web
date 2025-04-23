@@ -19,7 +19,7 @@ import {
   allStudyTemplates,
   chartContent,
   chartDrawings,
-  chartTemplateContent,
+  chartTemplate,
   studyTemplateContent,
 } from "@/lib/state/symbol";
 import { isEqual } from "es-toolkit";
@@ -103,7 +103,10 @@ export class ChartStorage implements IExternalSaveLoadAdapter {
   }
 
   async getChartTemplateContent(name: string): Promise<ChartTemplate> {
-    return (await chartTemplateContent(name)) as ChartTemplate;
+    const template = await chartTemplate(name);
+    if (!template) return {};
+
+    return template as ChartTemplate;
   }
 
   async removeChartTemplate(name: string) {
