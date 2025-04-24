@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
   console.log("Token received: ", body);
   const profile = await new UpstoxClient(body.access_token).profile();
   await saveIntegration("upstox", body.access_token, {
-    id: profile.data.userId,
+    id: profile.data.user_id,
     profile: profile.data as unknown as Record<string, unknown>,
   });
   return NextResponse.json({ status: "ok" });
