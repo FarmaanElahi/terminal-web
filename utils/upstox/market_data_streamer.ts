@@ -1,11 +1,11 @@
 // utils/upstox/market_data_streamer.ts
 import { MarketDataFeeder, Mode, ModeCode } from "./market_data_feeder";
 import { Streamer } from "./streamer";
-import { getUpstoxMarketFeedUrl } from "@/server/upstox";
 import * as MarketV3 from "@/utils/upstox/market_v3";
 import { toUpstoxInstrumentKey } from "./upstox_utils";
 import type { Symbol } from "@/types/symbol";
 import { LibrarySymbolInfo } from "@/components/chart/types";
+import { UpstoxClient } from "@/utils/upstox/client";
 import IFeed = MarketV3.com.upstox.marketdatafeeder.rpc.proto.IFeed;
 import FeedResponse = MarketV3.com.upstox.marketdatafeeder.rpc.proto.FeedResponse;
 
@@ -38,6 +38,7 @@ export class MarketDataStreamer extends Streamer {
   private static _instance: MarketDataStreamer;
 
   public static getInstance() {
+    console.log("MS  Get");
     if (!MarketDataStreamer._instance) {
       MarketDataStreamer._instance = new MarketDataStreamer();
     }
@@ -60,9 +61,6 @@ export class MarketDataStreamer extends Streamer {
     this._marketFeeder.on("data", (response: FeedResponse) => {
       this.accumulateFeeds(response);
     });
-
-    // Connect
-    setTimeout(() => this.connectNow(), 0);
   }
 
   /**
@@ -101,9 +99,9 @@ export class MarketDataStreamer extends Streamer {
   /**
    * Connect to the Upstox market feed using the authentication URL
    */
-  public async connectNow() {
-    const url = await getUpstoxMarketFeedUrl();
-    return this.connect(url);
+  public async connectNow(token: string) {
+    const response = await new UpstoxClient(token).marketDataWebsocketUrl();
+    return this.connect(response.data.authorizedRedirectUri);
   }
 
   /**

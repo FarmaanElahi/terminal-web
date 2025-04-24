@@ -23,6 +23,7 @@ interface ProfileData {
   email: string;
   user_name: string;
   user_id: string;
+  broker:string;
 }
 
 export class UpstoxClient {

@@ -7,10 +7,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Check, X } from "lucide-react";
-import { getAllLiveIntegration } from "@/server/integration";
+import { getAllTradingAccounts } from "@/server/integration";
 
 export default async function IntegrationsPage() {
-  const integrations = await getAllLiveIntegration();
+  const integrations = await getAllTradingAccounts();
 
   // Group integrations by type
   const groupedIntegrations = {

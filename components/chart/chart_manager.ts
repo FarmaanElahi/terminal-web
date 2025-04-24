@@ -4,6 +4,7 @@ import { LogoProvider } from "@/components/chart/logo_provider";
 import { getIndicators } from "@/components/chart/indicators";
 import { Client } from "@/utils/supabase/client";
 import { DatafeedUpstox } from "@/components/chart/datafeed_upstox";
+import type { TradingAccount } from "@/server/integration";
 
 export class ChartManager {
   private readonly chartStorage: ChartStorage;
@@ -13,6 +14,7 @@ export class ChartManager {
   constructor(
     private readonly client: Client,
     logoBaseUrl: string,
+    private readonly accounts: TradingAccount[],
   ) {
     this.logoProvider = new LogoProvider(logoBaseUrl);
     this.datafeed = new DatafeedUpstox(this.logoProvider);

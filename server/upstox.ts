@@ -24,12 +24,11 @@ export async function getUpstoxMarketFeedUrl(): Promise<string> {
     throw new Error("Unable to decrypt token");
   }
 
-  const websocketUrl = await new UpstoxClient(token)
-    .marketDataWebsocketUrl()
-    .catch((reason) => {
-      console.error("Failed to get feed url", reason, token);
-      throw new Error("Failed to get feed url");
-    });
+  const upstox = new UpstoxClient(token);
+  const websocketUrl = await upstox.marketDataWebsocketUrl().catch((reason) => {
+    console.error("Failed to get feed url", reason, token);
+    throw new Error("Failed to get feed url");
+  });
 
   return websocketUrl.data.authorizedRedirectUri;
 }

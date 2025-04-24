@@ -6,6 +6,14 @@ import { UpstoxClient } from "@/utils/upstox/client";
 
 export type Integrations = "upstox" | "kite";
 
+export interface TradingAccount {
+  type: Integrations;
+  active: boolean;
+  name: string;
+  token?: string;
+  broker: string;
+}
+
 export async function saveIntegration(
   type: Integrations,
   access_token: string,
@@ -24,26 +32,26 @@ export async function saveIntegration(
   }
 }
 
-export async function getAllLiveIntegration() {
+export async function getAllTradingAccounts() {
   const client = await createClient();
   const integration = await client.from("user_integrations").select();
   const statusPromise =
     integration.data?.map(async (value) => {
       const type = value.type as Integrations;
       const token = value.access_token;
-      return await checkIntegrationStatus(type, token ? decrypt(token) : null);
+      return await getTradingAccount(type, token ? decrypt(token) : null);
     }) ?? [];
 
   return Promise.all(statusPromise);
 }
 
-async function checkIntegrationStatus(
+async function getTradingAccount(
   type: Integrations,
   access_token: string | null,
-) {
+): Promise<TradingAccount> {
   {
     if (!access_token) {
-      return { type, active: false, name: "" };
+      return { type, active: false, name: "", broker: "" };
     }
 
     try {
@@ -53,7 +61,8 @@ async function checkIntegrationStatus(
           type,
           active: true,
           name: profile.user_name,
-          integrationName: "Kite Zerodha",
+          broker: profile.broker,
+          token: access_token,
         };
       }
 
@@ -63,12 +72,13 @@ async function checkIntegrationStatus(
           type,
           active: true,
           name: profile.data.user_name,
-          integrationName: "Upstox",
+          broker: profile.data.broker,
+          token: access_token,
         };
       }
       throw new Error("Invalid Integration");
     } catch {
-      return { type, active: false, name: "" };
+      return { type, active: false, name: "", broker: "" };
     }
   }
 }
