@@ -2,7 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { decrypt } from "@/utils/encryption";
-import { WebsocketApi } from "upstox-js-sdk";
+import { UpstoxClient } from "@/utils/upstox/client";
 
 export async function getUpstoxMarketFeedUrl(): Promise<string> {
   const client = await createClient();
@@ -24,19 +24,12 @@ export async function getUpstoxMarketFeedUrl(): Promise<string> {
     throw new Error("Unable to decrypt token");
   }
 
-  const wsApi = new WebsocketApi();
-  if (wsApi.apiClient) {
-    wsApi.apiClient.authentications.OAUTH2.accessToken = token;
-  }
-  const response = await new Promise((resolve, reject) => {
-    wsApi.getMarketDataFeedAuthorize("v2", (err, data1) =>
-      err ? reject(err) : resolve(data1),
-    );
-  }).catch((reason) => {
-    console.error("Failed to get feed url", reason, token);
-    throw new Error("Failed to get feed url");
-  });
-  // eslint-disable-next-line
-  // @ts-ignore
-  return response.data.authorizedRedirectUri;
+  const websocketUrl = await new UpstoxClient(token)
+    .marketDataWebsocketUrl()
+    .catch((reason) => {
+      console.error("Failed to get feed url", reason, token);
+      throw new Error("Failed to get feed url");
+    });
+
+  return websocketUrl.data.authorizedRedirectUri;
 }

@@ -22,6 +22,7 @@ import {
 } from "upstox-js-sdk";
 import * as MarketV3 from "@/utils/upstox/market_v3";
 import { toUpstoxInstrumentKey } from "@/utils/upstox/upstox_utils";
+import { UpstoxClient } from "@/utils/upstox/client";
 import IFeed = MarketV3.com.upstox.marketdatafeeder.rpc.proto.IFeed;
 
 type UpstoxInterval = "day" | "1minute";
@@ -29,6 +30,7 @@ type UpstoxIntradayInterval = "1d" | "I1";
 
 export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   private readonly zone = new IANAZone("Asia/Kolkata");
+  private readonly upstox = new UpstoxClient();
 
   private readonly upstoxHistoryAPI = new HistoryApi();
   private marketFeed = MarketDataStreamer.getInstance();
@@ -175,48 +177,36 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     });
 
     const instrumentKey = toUpstoxInstrumentKey(symbolInfo);
-    const historicalCandlePromise = new Promise<GetHistoricalCandleResponse>(
-      (resolve, reject) => {
-        this.upstoxHistoryAPI.getHistoricalCandleData1(
-          instrumentKey,
-          interval,
-          toDate.toFormat("yyyy-MM-dd"),
-          fromDate.toFormat("yyyy-MM-dd"),
-          "v2",
-          (error, data) => {
-            if (error) return reject(error);
-            return resolve(data);
-          },
-        );
-      },
-    ).then((h) => h.data.candles);
+    const historicalCandlePromise = this.upstox
+      .getHistoricalCandleData({
+        instrumentKey,
+        interval,
+        toDate: toDate.toFormat("yyyy-MM-dd"),
+        fromDate: fromDate.toFormat("yyyy-MM-dd"),
+      })
+      .then((h) => h.data.candles);
 
     const intradayCandlePromise = period.firstDataRequest
-      ? new Promise<GetIntraDayCandleResponse>((resolve, reject) => {
-          this.upstoxHistoryAPI.getIntraDayCandleData(
+      ? this.upstox
+          .getIntraDayCandleData({
             instrumentKey,
-            "30minute",
-            "v2",
-            (error, data) => {
-              if (error) return reject(error);
-              return resolve(data);
-            },
-          );
-        }).then((h) => {
-          if (h.data.candles.length === 0) return [];
+            interval: "30minute",
+          })
+          .then((h) => {
+            if (h.data.candles.length === 0) return [];
 
-          const first = h.data.candles[h.data.candles.length - 1];
-          const last = h.data.candles[0];
-          const candle = [
-            first[0], // timestamp,
-            first[1], // open,
-            Math.max(...h.data.candles.map((c) => c[2])), // High
-            Math.min(...h.data.candles.map((c) => c[3])), // Low
-            last[4], // Close
-            h.data.candles.map((c) => c[5]).reduce((a, b) => a + b, 0), // Volume
-          ] as const;
-          return [candle];
-        })
+            const first = h.data.candles[h.data.candles.length - 1];
+            const last = h.data.candles[0];
+            const candle = [
+              first[0], // timestamp,
+              first[1], // open,
+              Math.max(...h.data.candles.map((c) => c[2])), // High
+              Math.min(...h.data.candles.map((c) => c[3])), // Low
+              last[4], // Close
+              h.data.candles.map((c) => c[5]).reduce((a, b) => a + b, 0), // Volume
+            ] as const;
+            return [candle];
+          })
       : [];
 
     const [historical, intraday] = await Promise.all([

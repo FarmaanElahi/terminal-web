@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { TokenResponse } from "@/types/upstox";
 import { saveIntegration } from "@/server/integration";
-import { upstoxProfile } from "@/utils/upstox/upstox_utils";
+import { UpstoxClient } from "@/utils/upstox/client";
 
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as TokenResponse;
   console.log("Token received: ", body);
-  const profile = await upstoxProfile(body.access_token);
+  const profile = await new UpstoxClient(body.access_token).profile();
   await saveIntegration("upstox", body.access_token, {
-    id: profile.userId as string,
-    profile: profile,
+    id: profile.data.userId,
+    profile: profile.data as unknown as Record<string, unknown>,
   });
   return NextResponse.json({ status: "ok" });
 }
