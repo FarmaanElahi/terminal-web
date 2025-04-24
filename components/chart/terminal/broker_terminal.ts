@@ -5,21 +5,14 @@ import {
   IBrokerTerminal,
 } from "@/components/chart/terminal/ibroker_terminal";
 import { TradingAccount } from "@/server/integration";
-import { KiteConnect } from "kiteconnect";
-import { createKiteConnect } from "@/utils/kite/client";
 
 export class TerminalBroker implements IBrokerTerminal {
   private activeAccount!: string;
-  private readonly kite: KiteConnect;
 
   constructor(
     private host: IBrokerConnectionAdapterHost,
     private readonly tradingAccount: TradingAccount[],
-  ) {
-    const token = tradingAccount.find((value) => value?.type === "kite")
-      ?.token as string;
-    this.kite = createKiteConnect(token);
-  }
+  ) {}
 
   async accountsMetainfo(): Promise<AccountMetainfo[]> {
     return this.tradingAccount.map((value) => ({
