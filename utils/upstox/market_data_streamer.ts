@@ -38,7 +38,6 @@ export class MarketDataStreamer extends Streamer {
   private static _instance: MarketDataStreamer;
 
   public static getInstance() {
-    console.log("MS  Get");
     if (!MarketDataStreamer._instance) {
       MarketDataStreamer._instance = new MarketDataStreamer();
     }
