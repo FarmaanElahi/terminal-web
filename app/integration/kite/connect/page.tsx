@@ -26,9 +26,11 @@ export default async function Page({
 
   if (request_token) {
     const session = await kiteGenerateSession(request_token);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { access_token, public_token, refresh_token, ...profile } = session;
     await saveIntegration("kite", session.access_token, {
       id: session.user_id,
-      profile: session,
+      profile,
     });
     redirect("/integration");
   }
