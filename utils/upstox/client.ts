@@ -22,7 +22,7 @@ interface GetTokenData {
 interface ProfileData {
   email: string;
   user_name: string;
-  userId: string;
+  user_id: string;
 }
 
 export class UpstoxClient {

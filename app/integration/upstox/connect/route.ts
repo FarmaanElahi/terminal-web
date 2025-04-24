@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
   const token = await UpstoxClient.getToken(code);
   const profile = await new UpstoxClient(token).profile();
   await saveIntegration("upstox", token, {
-    id: profile.data.userId,
+    id: profile.data.user_id,
     profile: profile.data as unknown as Record<string, unknown>,
   });
 
