@@ -4,6 +4,10 @@
  * ===============================================================
  */
 import { CustomIndicator, PineJS } from "@/components/chart/indicators/pinejs";
+import {
+  IBrokerConnectionAdapterHost,
+  IBrokerTerminal,
+} from "@/components/chart/terminal/ibroker_terminal";
 
 export interface LibrarySymbolInfo {
   /**
@@ -961,25 +965,27 @@ export interface QuoteData {
    * The quote values associated with the symbol.
    */
   v: {
-    ch: number
-    chp: number
-    short_name?: string
-    exchange?: string
-    original_name?: string
-    description?: string
-    lp: number
-    ask: number
-    bid: number
-    spread:number,
-    open_price: number
-    high_price: number
-    low_price: number
-    prev_close_price?: number
-    volume: number
+    ch: number;
+    chp: number;
+    short_name?: string;
+    exchange?: string;
+    original_name?: string;
+    description?: string;
+    lp: number;
+    ask: number;
+    bid: number;
+    spread: number;
+    open_price: number;
+    high_price: number;
+    low_price: number;
+    prev_close_price?: number;
+    volume: number;
   };
 }
 
-export type StreamingDataFeed = IDatafeedChartApi & IExternalDatafeed & IDatafeedQuotesApi;
+export type StreamingDataFeed = IDatafeedChartApi &
+  IExternalDatafeed &
+  IDatafeedQuotesApi;
 
 /**
  * ===============================================================
@@ -1361,6 +1367,7 @@ export interface WidgetbarOptions {
 }
 
 export interface TradingViewWidgetOptions {
+  broker_factory?: (host: IBrokerConnectionAdapterHost) => IBrokerTerminal;
   additional_symbol_info_fields?: { propertyName: string; title: string }[];
   auto_save_delay?: number;
   autosize?: boolean;

@@ -485,6 +485,7 @@ export async function querySymbols(symbols: string[]) {
   return (await queryDuckDB("symbols", {
     columns: [], // Will load all columns
     where: `ticker IN (${inQuery})`,
+    limit: symbols.length,
   })) as Symbol[];
 }
 
