@@ -4,7 +4,7 @@ const api_key = process.env.NEXT_KITE_API_KEY as string;
 const api_secret = process.env.NEXT_KITE_API_SECRET as string;
 
 export function createKiteConnect(access_token: string) {
-  return KiteConnect({ api_key, access_token });
+  return new KiteConnect({ api_key, access_token });
 }
 
 export function kiteLoginUrl() {
