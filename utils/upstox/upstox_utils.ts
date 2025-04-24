@@ -1,5 +1,6 @@
 import { LibrarySymbolInfo } from "@/components/chart/types";
 import type { Symbol } from "@/types/symbol";
+import { UserApi, GetProfileResponse } from "upstox-js-sdk";
 
 export function toUpstoxInstrumentKey(symbol: LibrarySymbolInfo | Symbol) {
   const { type, exchange, isin, ticker } = symbol;
@@ -76,3 +77,19 @@ const INDEX_MAPPINGS: Record<string, string> = {
   "NSE:CNXPHARMA": "NSE_INDEX|Nifty Pharma",
   "NSE:NIFTYJR": "NSE_INDEX|Nifty Next 50",
 };
+
+export function upstoxProfile(access_token: string) {
+  const api = new UserApi();
+  if (api.apiClient) {
+    api.apiClient.authentications.OAUTH2.accessToken = access_token;
+  }
+
+  return (
+    new Promise<GetProfileResponse>((resolve, reject) =>
+      api.getProfile("v2", (err, data) => (err ? reject(err) : resolve(data))),
+    )
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      .then((value) => value.data as Record<string, unknown>)
+  );
+}

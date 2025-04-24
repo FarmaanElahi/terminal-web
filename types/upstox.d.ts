@@ -15,6 +15,11 @@ interface WebsocketAuthRedirectResponseData {
   authorizedRedirectUri: string;
 }
 
+interface ProfileData {
+  email: string;
+  name: string;
+}
+
 type OnComplete<RES> = (error: unknown | undefined, data: RES) => void;
 
 declare module "upstox-js-sdk" {
@@ -55,6 +60,18 @@ declare module "upstox-js-sdk" {
       apiVersion: "v2" | "v3",
       onComplete: OnComplete<WebsocketAuthRedirectResponse>
     );
+  }
+
+  declare class GetProfileResponse
+    implements UpstoxAPIResponse<ProfileData> {
+  }
+
+  declare class UserApi {
+    readonly apiClient: ApiClient;
+
+    constructor(apiClient?: ApiClient)
+
+    getProfile(apiVersion: "v2", onComplete: OnComplete<GetProfileResponse>)
   }
 
   declare class HistoryApi {
