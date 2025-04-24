@@ -1,15 +1,10 @@
 "use client";
 import { ChartManager } from "@/components/chart/chart_manager";
 import { supabase } from "@/utils/client";
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 import { useAppInfo } from "@/hooks/use-app-info";
 import { MarketDataStreamer } from "@/utils/upstox/market_data_streamer";
+import { UpstoxClient } from "@/utils/upstox/client";
 
 interface Charts {
   manager: ChartManager;
@@ -19,25 +14,20 @@ const ChartContext = createContext<Charts | null>(null);
 
 export function ChartProvider({ children }: { children: ReactNode }) {
   const appInfo = useAppInfo();
-  const [manager] = useState(
-    () =>
-      new ChartManager(
-        supabase,
-        process.env.NEXT_PUBLIC_LOGO_BASE_URL as string,
-        appInfo.tradingAccounts,
-      ),
-  );
 
-  // Just globally initialize market data streamer
-  // Best place to initialize now before the chart is even ready
-  useEffect(() => {
-    const upstoxToken = appInfo.tradingAccounts.find(
-      (value) => value.type === "upstox",
-    )?.token;
+  // Used to fetch market data
+  const upstoxToken = appInfo.tradingAccounts.find(
+    (value) => value.type === "upstox",
+  )?.token;
 
-    if (!upstoxToken) return;
-    void MarketDataStreamer.getInstance().connectNow(upstoxToken);
-  }, [appInfo.tradingAccounts]);
+  const [upstoxClient] = useState(() => new UpstoxClient(upstoxToken));
+
+  const [manager] = useState(() => {
+    if (upstoxToken) {
+      void MarketDataStreamer.getInstance().connectNow(upstoxClient);
+    }
+    return new ChartManager(supabase, upstoxClient, appInfo.tradingAccounts);
+  });
 
   return (
     <ChartContext.Provider value={{ manager }}>

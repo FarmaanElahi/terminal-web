@@ -23,7 +23,56 @@ interface ProfileData {
   email: string;
   user_name: string;
   user_id: string;
-  broker:string;
+  broker: string;
+}
+
+export interface FullMarketQuote {
+  status: string;
+  data: Record<string, MarketQuote>;
+}
+
+export interface MarketQuote {
+  ohlc: Ohlc;
+  depth: Depth;
+  timestamp: string;
+  instrument_token: string;
+  symbol: string;
+  last_price: number;
+  volume: number;
+  average_price: number;
+  oi: number;
+  net_change: number;
+  total_buy_quantity: number;
+  total_sell_quantity: number;
+  lower_circuit_limit: number;
+  upper_circuit_limit: number;
+  last_trade_time: string;
+  oi_day_high: number;
+  oi_day_low: number;
+}
+
+export interface Ohlc {
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+}
+
+export interface Depth {
+  buy: Buy[];
+  sell: Sell[];
+}
+
+export interface Buy {
+  quantity: number;
+  price: number;
+  orders: number;
+}
+
+export interface Sell {
+  quantity: number;
+  price: number;
+  orders: number;
 }
 
 export class UpstoxClient {
@@ -74,6 +123,14 @@ export class UpstoxClient {
     return fetch("https://api.upstox.com/v2/feed/market-data-feed/authorize", {
       headers: this.headers,
     }).then((r) => r.json());
+  }
+
+  async fullMarketQuotes(instrumentKey: string[]) {
+    return fetch(
+      "https://api.upstox.com/v2/market-quote/quotes?instrument_key=" +
+        instrumentKey.join(","),
+      { headers: this.headers },
+    ).then((r) => r.json() as Promise<FullMarketQuote>);
   }
 
   public static loginUrl() {

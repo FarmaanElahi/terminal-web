@@ -5,6 +5,7 @@ import { getIndicators } from "@/components/chart/indicators";
 import { Client } from "@/utils/supabase/client";
 import { DatafeedUpstox } from "@/components/chart/datafeed_upstox";
 import type { TradingAccount } from "@/server/integration";
+import { UpstoxClient } from "@/utils/upstox/client";
 
 export class ChartManager {
   private readonly chartStorage: ChartStorage;
@@ -13,11 +14,11 @@ export class ChartManager {
 
   constructor(
     private readonly client: Client,
-    logoBaseUrl: string,
+    private readonly upstox: UpstoxClient,
     private readonly accounts: TradingAccount[],
   ) {
-    this.logoProvider = new LogoProvider(logoBaseUrl);
-    this.datafeed = new DatafeedUpstox(this.logoProvider);
+    this.logoProvider = new LogoProvider();
+    this.datafeed = new DatafeedUpstox(this.logoProvider, upstox);
     this.chartStorage = new ChartStorage(this.client);
   }
 
@@ -84,6 +85,12 @@ export class ChartManager {
       custom_css_url: "/css/charts/styles.css",
       custom_indicators_getter: getIndicators,
       save_load_adapter: this.chartStorage,
+      widgetbar: {
+        watchlist: true,
+        watchlist_settings: {
+          default_symbols: [],
+        },
+      },
       disabled_features: [
         "order_panel",
         "trading_account_manager",

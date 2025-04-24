@@ -7,6 +7,8 @@ import {
   LibrarySymbolInfo,
   OnReadyCallback,
   PeriodParams,
+  QuoteData,
+  QuotesCallback,
   ResolutionString,
   StreamingDataFeed,
   SubscribeBarsCallback,
@@ -23,6 +25,8 @@ import {
 import * as MarketV3 from "@/utils/upstox/market_v3";
 import { toUpstoxInstrumentKey } from "@/utils/upstox/upstox_utils";
 import { UpstoxClient } from "@/utils/upstox/client";
+import type { Symbol } from "@/types/symbol";
+import { querySymbols } from "@/lib/state/symbol";
 import IFeed = MarketV3.com.upstox.marketdatafeeder.rpc.proto.IFeed;
 
 type UpstoxInterval = "day" | "1minute";
@@ -30,7 +34,6 @@ type UpstoxIntradayInterval = "1d" | "I1";
 
 export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   private readonly zone = new IANAZone("Asia/Kolkata");
-  private readonly upstox = new UpstoxClient();
 
   private readonly upstoxHistoryAPI = new HistoryApi();
   private marketFeed = MarketDataStreamer.getInstance();
@@ -44,15 +47,29 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     }
   >();
 
+  private readonly quoteListeners = new Map<
+    string,
+    {
+      symbols: string[];
+      onQuote: QuotesCallback;
+    }
+  >();
+
+  private instrumentKeyToTicker = new Map<string, string>();
+
   onReady(callback: OnReadyCallback) {
     super.onReady(callback);
   }
 
-  constructor(logoProvider: LogoProvider) {
+  constructor(
+    logoProvider: LogoProvider,
+    private readonly upstox: UpstoxClient,
+  ) {
     super(logoProvider);
     this.marketFeed.on("message", (data) => {
       this.feeds = data.feeds;
-      this.refreshRealtime();
+      this.refreshBar();
+      this.refreshQuotes();
     });
     this.marketFeed.on("open", () => console.log("TBT Connected"));
     this.marketFeed.on("error", (e) => console.error("TBT Conn Failed", e));
@@ -122,7 +139,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     );
   }
 
-  private refreshRealtime() {
+  private refreshBar() {
     if (!this.feeds) return;
 
     for (const value of this.listeners.values()) {
@@ -176,7 +193,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
       year: Math.max(10, Math.ceil(countBack / 252)),
     });
 
-    const instrumentKey = toUpstoxInstrumentKey(symbolInfo);
+    const instrumentKey = this.resolveSymbolToInstrumentKey(symbolInfo);
     const historicalCandlePromise = this.upstox
       .getHistoricalCandleData({
         instrumentKey,
@@ -247,7 +264,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
       day: Math.max(10, Math.ceil(countBack / 400)),
     });
 
-    const instrumentKey = toUpstoxInstrumentKey(symbolInfo);
+    const instrumentKey = this.resolveSymbolToInstrumentKey(symbolInfo);
     const historicalCandlePromise = new Promise<GetHistoricalCandleResponse>(
       (resolve, reject) => {
         this.upstoxHistoryAPI.getHistoricalCandleData1(
@@ -312,5 +329,171 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
 
   getVolumeProfileResolutionForPeriod() {
     return "1" as ResolutionString;
+  }
+
+  private prevDayClose = new Map<string, number>();
+
+  async getQuotes(symbols: string[], onDataCallback: QuotesCallback) {
+    if (symbols.length === 0) return onDataCallback([]);
+
+    const s = await querySymbols(symbols);
+    const mapping = s.map((sy) => ({
+      symbol: sy,
+      instrumentKey: this.resolveSymbolToInstrumentKey(sy),
+    }));
+    const instrumentKeys = mapping.map((m) => m.instrumentKey);
+    const marketQuotes = await this.upstox.fullMarketQuotes(instrumentKeys);
+
+    const data = mapping.map(({ symbol, instrumentKey }) => {
+      const q = Object.values(marketQuotes.data).find(
+        (v) => v.instrument_token === instrumentKey,
+      );
+      if (!q) {
+        return {
+          s: "error",
+          n: symbol.ticker as string,
+          v: {},
+        } as QuoteData;
+      }
+
+      const lp = q.last_price;
+      const ch = q.net_change;
+      const prevClose = lp - ch;
+      // Not available in websocket
+      this.prevDayClose.set(symbol.ticker as string, prevClose);
+      const chp = (q.net_change / prevClose) * 100;
+      const ask = Math.min(...q.depth.sell.map((s) => s.price));
+      const bid = Math.max(...q.depth.buy.map((s) => s.price));
+      return {
+        s: "ok",
+        n: symbol.ticker as string,
+        v: {
+          volume: q.volume,
+          lp,
+          ch,
+          chp,
+          exchange: symbol.exchange,
+          prev_close_price: prevClose,
+          open_price: q.ohlc.open,
+          low_price: q.oi_day_low,
+          high_price: q.oi_day_high,
+          description: symbol.description,
+          short_name: symbol.name,
+          original_name: symbol.name,
+          ask,
+          bid,
+          spread: ask - bid,
+        },
+      } as QuoteData;
+    });
+    onDataCallback(data);
+  }
+
+  async subscribeQuotes(
+    symbols: string[],
+    fastSymbols: string[],
+    onRealtimeCallback: QuotesCallback,
+    listenerGUID: string,
+  ) {
+    const merged = [...new Set([...symbols, ...fastSymbols])];
+    if (merged.length === 0) return;
+
+    const s = await querySymbols(merged);
+    this.marketFeed.subscribe(s, "full");
+    this.quoteListeners.set(listenerGUID, {
+      symbols: merged,
+      onQuote: onRealtimeCallback,
+    });
+  }
+
+  async unsubscribeQuotes(listenerGUID: string) {
+    const q = this.quoteListeners.get(listenerGUID);
+    if (!q) return;
+    const { symbols } = q;
+    const s = await querySymbols(symbols);
+    this.marketFeed.unsubscribe(s);
+    this.quoteListeners.delete(listenerGUID);
+  }
+
+  async refreshQuotes() {
+    if (!this.feeds) return;
+
+    for (const value of this.quoteListeners.values()) {
+      const { symbols, onQuote } = value;
+      const s = await querySymbols(symbols);
+
+      const quotes = s
+        .map((symbol) => {
+          const { ticker, exchange, description, name } = symbol;
+          const feed = this.feeds[ticker as string];
+          const ff = feed?.ff?.marketFF ?? feed?.ff?.indexFF;
+          if (!ff) return;
+
+          const day = ff?.marketOHLC?.ohlc
+            ?.toSorted(
+              (a, b) => ((b.ts ?? 0) as number) - ((a.ts ?? 0) as number),
+            )
+            .find((f) => f.interval === "1d");
+          if (!day) return;
+
+          const prevClose = this.prevDayClose.get(ticker as string) ?? 0;
+          const ch = (ff.ltpc?.ltp ?? 0) - prevClose;
+          const chp = (ch / prevClose) * 100;
+          const bid = Math.max(
+            ...(
+              feed.ff?.marketFF?.marketLevel?.bidAskQuote?.map(
+                (value1) => value1.bp,
+              ) ?? []
+            )
+              .filter((v) => v)
+              .map((v) => v!),
+          );
+
+          const ask = Math.min(
+            ...(
+              feed.ff?.marketFF?.marketLevel?.bidAskQuote?.map(
+                (value1) => value1.ap,
+              ) ?? []
+            )
+              .filter((v) => v)
+              .map((v) => v!),
+          );
+          return {
+            s: "ok",
+            n: ticker as string,
+            v: {
+              volume: day.volume,
+              lp: ff.ltpc?.ltp,
+              ch,
+              chp,
+              exchange,
+              prev_close_price: prevClose,
+              open_price: day.open,
+              low_price: day.low,
+              high_price: day.high,
+              description,
+              short_name: name,
+              original_name: name,
+              ask,
+              bid,
+              spread: ask - bid,
+            },
+          } as QuoteData;
+        })
+        .filter((v) => v)
+        .map((v) => v!);
+      onQuote(quotes);
+    }
+  }
+
+  private resolveSymbolToInstrumentKey(symbol: Symbol | LibrarySymbolInfo) {
+    const ticker = symbol.ticker as string;
+    const instrumentKey = toUpstoxInstrumentKey(symbol);
+    this.instrumentKeyToTicker.set(instrumentKey, ticker);
+    return instrumentKey;
+  }
+
+  private resolveInstrumentKeyToTicker(instrumentKey: string) {
+    return this.instrumentKeyToTicker.get(instrumentKey);
   }
 }

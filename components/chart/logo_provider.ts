@@ -1,5 +1,8 @@
 export class LogoProvider {
-  constructor(private readonly logoBaseUrl: string) {}
+  constructor(
+    private readonly logoBaseUrl = process.env
+      .NEXT_PUBLIC_LOGO_BASE_URL as string,
+  ) {}
 
   forLogo(key: unknown, defaultValue?: string | string[]) {
     if (Array.isArray(defaultValue)) {

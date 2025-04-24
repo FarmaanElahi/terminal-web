@@ -98,8 +98,8 @@ export class MarketDataStreamer extends Streamer {
   /**
    * Connect to the Upstox market feed using the authentication URL
    */
-  public async connectNow(token: string) {
-    const response = await new UpstoxClient(token).marketDataWebsocketUrl();
+  public async connectNow(client: UpstoxClient) {
+    const response = await client.marketDataWebsocketUrl();
     return this.connect(response.data.authorizedRedirectUri);
   }
 

@@ -960,10 +960,26 @@ export interface QuoteData {
   /**
    * The quote values associated with the symbol.
    */
-  v: Record<string, unknown>;
+  v: {
+    ch: number
+    chp: number
+    short_name?: string
+    exchange?: string
+    original_name?: string
+    description?: string
+    lp: number
+    ask: number
+    bid: number
+    spread:number,
+    open_price: number
+    high_price: number
+    low_price: number
+    prev_close_price?: number
+    volume: number
+  };
 }
 
-export type StreamingDataFeed = IDatafeedChartApi & IExternalDatafeed;
+export type StreamingDataFeed = IDatafeedChartApi & IExternalDatafeed & IDatafeedQuotesApi;
 
 /**
  * ===============================================================
