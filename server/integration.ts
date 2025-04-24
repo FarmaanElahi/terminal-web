@@ -1,8 +1,8 @@
 import { createClient } from "@/utils/supabase/server";
 import { decrypt, encrypt } from "@/utils/encryption";
 import { kiteProfile } from "@/utils/kite/client";
-import { upstoxProfile } from "@/utils/upstox/upstox_utils";
 import { Json } from "@/types/generated/supabase";
+import { UpstoxClient } from "@/utils/upstox/client";
 
 export type Integrations = "upstox" | "kite";
 
@@ -58,11 +58,11 @@ async function checkIntegrationStatus(
       }
 
       if (type === "upstox") {
-        const profile = await upstoxProfile(access_token);
+        const profile = await new UpstoxClient(access_token).profile();
         return {
           type,
           active: true,
-          name: profile.user_name as string,
+          name: profile.data.user_name,
           integrationName: "Upstox",
         };
       }

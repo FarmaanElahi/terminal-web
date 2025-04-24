@@ -1,27 +1,14 @@
-import { redirect } from "next/navigation";
 import { kiteGenerateSession, kiteLoginUrl } from "@/utils/kite/client";
 import { saveIntegration } from "@/server/integration";
-import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 
-interface SearchParams {
-  request_token?: string;
-  checksum?: string;
-  action?: string;
-  status?: "success";
-}
-
-export default async function Page({
-  searchParams,
-}: {
-  searchParams: Promise<SearchParams>;
-}) {
-  const c = await cookies();
-  c.get("check");
-
-  const { request_token, action } = await searchParams;
+export async function GET(request: NextRequest) {
+  const url = new URL(request.url);
+  const request_token = url.searchParams.get("request_token");
+  const action = url.searchParams.get("action");
   // This is a login initiate request
   if (action !== "login" && !request_token) {
-    redirect(kiteLoginUrl());
+    return NextResponse.redirect(kiteLoginUrl());
   }
 
   if (request_token) {
@@ -32,9 +19,8 @@ export default async function Page({
       id: session.user_id,
       profile,
     });
-    redirect("/integration");
-  }
 
-  // Verify the token
-  return <h1>Invalid Request</h1>;
+    return NextResponse.redirect(new URL("/integration", request.url));
+  }
+  return NextResponse.json({ status: "failed" }, { status: 400 });
 }

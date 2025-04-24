@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import Link from "next/link";
 import { Check, X } from "lucide-react";
 import { getAllLiveIntegration } from "@/server/integration";
 
@@ -25,10 +24,10 @@ export default async function IntegrationsPage() {
         <h1 className="text-3xl font-bold">Trading Integrations</h1>
         <div className="space-x-4">
           <Button asChild>
-            <Link href="/integration/kite/connect">Add Kite Account</Link>
+            <a href="/integration/kite/connect">Add Kite Account</a>
           </Button>
           <Button asChild>
-            <Link href="/integration/upstox/connect">Add Upstox Account</Link>
+            <a href="/integration/upstox/connect">Add Upstox Account</a>
           </Button>
         </div>
       </div>
