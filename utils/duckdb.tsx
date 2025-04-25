@@ -99,7 +99,7 @@ async function init() {
     },
     filesystem: {
       allowFullHTTPReads: true,
-      reliableHeadRequests: true,
+      reliableHeadRequests: false,
     },
   };
   const db = await initializeDuckDb({ config, debug: true });
