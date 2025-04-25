@@ -65,8 +65,9 @@ export class TerminalBroker implements IBrokerTerminal {
               columns: [
                 {
                   label: "Symbol",
-                  formatter: "text",
-                  id: "name",
+                  id: "symbol",
+                  // Make this look like a symbol
+                  formatter:"symbol",
                   dataFields: ["ticker"],
                 },
                 {
