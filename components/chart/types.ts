@@ -1368,6 +1368,18 @@ export interface WidgetbarOptions {
 
 export interface TradingViewWidgetOptions {
   broker_factory?: (host: IBrokerConnectionAdapterHost) => IBrokerTerminal;
+  broker_config: {
+    configFlags: {
+      supportNativeReversePosition?: true;
+      supportClosePosition?: true;
+      supportPLUpdate?: true;
+      showQuantityInsteadOfAmount?: true;
+      supportEditAmount?: false;
+      supportOrderBrackets?: true;
+      supportMarketBrackets?: true;
+      supportPositionBrackets?: true;
+    };
+  };
   additional_symbol_info_fields?: { propertyName: string; title: string }[];
   auto_save_delay?: number;
   autosize?: boolean;

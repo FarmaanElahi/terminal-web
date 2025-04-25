@@ -333,7 +333,11 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   }
 
   async getQuotes(symbols: string[], onDataCallback: QuotesCallback) {
-    if (symbols.length === 0) return onDataCallback([]);
+    console.log("Get quotes", symbols);
+    if (symbols.length === 0) {
+      console.log("Returning empty");
+      return onDataCallback([]);
+    }
 
     // Get all symbols that we have cache for it
     const cachedSymbols = symbols
@@ -350,6 +354,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
       s.map((symbol) => this.symbolCache.set(symbol.ticker as string, symbol));
       cachedSymbols.push(...s);
     }
+    console.log("result", cachedSymbols);
 
     const mapping = cachedSymbols.map((sy) => ({
       symbol: sy,

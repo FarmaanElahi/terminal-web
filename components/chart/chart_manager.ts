@@ -6,6 +6,7 @@ import { Client } from "@/utils/supabase/client";
 import { DatafeedUpstox } from "@/components/chart/datafeed_upstox";
 import type { TradingAccount } from "@/server/integration";
 import { UpstoxClient } from "@/utils/upstox/client";
+import { TerminalBroker } from "@/components/chart/terminal/broker_terminal";
 
 export class ChartManager {
   private readonly chartStorage: ChartStorage;
@@ -85,15 +86,29 @@ export class ChartManager {
       custom_css_url: "/css/charts/styles.css",
       custom_indicators_getter: getIndicators,
       save_load_adapter: this.chartStorage,
+      broker_factory: (host) => new TerminalBroker(host, this.accounts),
+      broker_config: {
+        configFlags: {
+          supportNativeReversePosition: true,
+          supportClosePosition: true,
+          supportPLUpdate: true,
+          showQuantityInsteadOfAmount: true,
+          supportEditAmount: false,
+          supportOrderBrackets: true,
+          supportMarketBrackets: true,
+          supportPositionBrackets: true,
+        },
+      },
       widgetbar: {
         watchlist: true,
         watchlist_settings: {
           default_symbols: [],
         },
       },
+
       disabled_features: [
-        "order_panel",
-        "trading_account_manager",
+        // "order_panel",
+        // "trading_account_manager",
         "symbol_search_hot_key",
         "header_symbol_search",
         "allow_arbitrary_symbol_search_input",
