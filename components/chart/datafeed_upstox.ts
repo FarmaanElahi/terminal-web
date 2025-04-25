@@ -56,6 +56,8 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   >();
 
   private instrumentKeyToTicker = new Map<string, string>();
+  private prevDayClose = new Map<string, number>();
+  private quoteSymbolCache = new Map<string, QuoteData>();
 
   onReady(callback: OnReadyCallback) {
     super.onReady(callback);
@@ -69,7 +71,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     this.marketFeed.on("message", (data) => {
       this.feeds = data.feeds;
       this.refreshBar();
-      this.refreshQuotes();
+      void this.refreshQuotes();
     });
     this.marketFeed.on("open", () => console.log("TBT Connected"));
     this.marketFeed.on("error", (e) => console.error("TBT Conn Failed", e));
@@ -331,8 +333,6 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     return "1" as ResolutionString;
   }
 
-  private prevDayClose = new Map<string, number>();
-
   async getQuotes(symbols: string[], onDataCallback: QuotesCallback) {
     if (symbols.length === 0) return onDataCallback([]);
 
@@ -386,6 +386,9 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
         },
       } as QuoteData;
     });
+
+    // Cache it here so that we don't have to pull the data in refresh quote
+    data.forEach((d) => this.quoteSymbolCache.set(d.n, d));
     onDataCallback(data);
   }
 
@@ -416,16 +419,16 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   }
 
   async refreshQuotes() {
+    console.log("Refresh Quotes");
     if (!this.feeds) return;
 
     for (const value of this.quoteListeners.values()) {
       const { symbols, onQuote } = value;
-      const s = await querySymbols(symbols);
 
-      const quotes = s
-        .map((symbol) => {
-          const { ticker, exchange, description, name } = symbol;
-          const feed = this.feeds[ticker as string];
+      const quotes = symbols
+        .map((s) => {
+          const cacheQuote = this.quoteSymbolCache.get(s);
+          const feed = this.feeds[s];
           const ff = feed?.ff?.marketFF ?? feed?.ff?.indexFF;
           if (!ff) return;
 
@@ -436,14 +439,13 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
             .find((f) => f.interval === "1d");
           if (!day) return;
 
-          const prevClose = this.prevDayClose.get(ticker as string) ?? 0;
+          const prevClose = this.prevDayClose.get(s) ?? 0;
           const ch = (ff.ltpc?.ltp ?? 0) - prevClose;
           const chp = (ch / prevClose) * 100;
           const bid = Math.max(
             ...(
-              feed.ff?.marketFF?.marketLevel?.bidAskQuote?.map(
-                (value1) => value1.bp,
-              ) ?? []
+              feed.ff?.marketFF?.marketLevel?.bidAskQuote?.map((v) => v.bp) ??
+              []
             )
               .filter((v) => v)
               .map((v) => v!),
@@ -451,29 +453,28 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
 
           const ask = Math.min(
             ...(
-              feed.ff?.marketFF?.marketLevel?.bidAskQuote?.map(
-                (value1) => value1.ap,
-              ) ?? []
+              feed.ff?.marketFF?.marketLevel?.bidAskQuote?.map((v) => v.ap) ??
+              []
             )
               .filter((v) => v)
               .map((v) => v!),
           );
           return {
             s: "ok",
-            n: ticker as string,
+            n: s,
             v: {
               volume: day.volume,
               lp: ff.ltpc?.ltp,
               ch,
               chp,
-              exchange,
+              exchange: cacheQuote?.v?.exchange,
               prev_close_price: prevClose,
               open_price: day.open,
               low_price: day.low,
               high_price: day.high,
-              description,
-              short_name: name,
-              original_name: name,
+              description: cacheQuote?.v?.description,
+              short_name: cacheQuote?.v?.short_name,
+              original_name: cacheQuote?.v?.original_name,
               ask,
               bid,
               spread: ask - bid,
@@ -491,9 +492,5 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     const instrumentKey = toUpstoxInstrumentKey(symbol);
     this.instrumentKeyToTicker.set(instrumentKey, ticker);
     return instrumentKey;
-  }
-
-  private resolveInstrumentKeyToTicker(instrumentKey: string) {
-    return this.instrumentKeyToTicker.get(instrumentKey);
   }
 }
