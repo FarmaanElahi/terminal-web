@@ -57,7 +57,6 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
 
   private instrumentKeyToTicker = new Map<string, string>();
   private prevDayClose = new Map<string, number>();
-  private quoteSymbolCache = new Map<string, QuoteData>();
 
   onReady(callback: OnReadyCallback) {
     super.onReady(callback);
@@ -336,15 +335,34 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   async getQuotes(symbols: string[], onDataCallback: QuotesCallback) {
     if (symbols.length === 0) return onDataCallback([]);
 
-    const s = await querySymbols(symbols);
-    const mapping = s.map((sy) => ({
+    // Get all symbols that we have cache for it
+    const cachedSymbols = symbols
+      .map((v) => this.symbolCache.get(v))
+      .filter((v) => v)
+      .map((v) => v!);
+
+    // Get all symbols that we don't have cache for it
+    const symbolsToQuery = symbols.filter((s) => !this.symbolCache.has(s));
+    if (symbolsToQuery.length > 0) {
+      // Query symbols that we don't have cache for it
+      const s = await querySymbols(symbolsToQuery);
+      // Merge all symbols into one
+      s.map((symbol) => this.symbolCache.set(symbol.ticker as string, symbol));
+      cachedSymbols.push(...s);
+    }
+
+    const mapping = cachedSymbols.map((sy) => ({
       symbol: sy,
       instrumentKey: this.resolveSymbolToInstrumentKey(sy),
     }));
+
     const instrumentKeys = mapping.map((m) => m.instrumentKey);
     const marketQuotes = await this.upstox.fullMarketQuotes(instrumentKeys);
 
     const data = mapping.map(({ symbol, instrumentKey }) => {
+      // Cache it here so that we don't have to pull the data in refresh quote
+      this.symbolCache.set(symbol.ticker as string, symbol);
+
       const q = Object.values(marketQuotes.data).find(
         (v) => v.instrument_token === instrumentKey,
       );
@@ -387,21 +405,23 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
       } as QuoteData;
     });
 
-    // Cache it here so that we don't have to pull the data in refresh quote
-    data.forEach((d) => this.quoteSymbolCache.set(d.n, d));
     onDataCallback(data);
   }
 
   async subscribeQuotes(
-    symbols: string[],
-    fastSymbols: string[],
+    tickers: string[],
+    fastTickers: string[],
     onRealtimeCallback: QuotesCallback,
     listenerGUID: string,
   ) {
-    const merged = [...new Set([...symbols, ...fastSymbols])];
+    const merged = [...new Set([...tickers, ...fastTickers])];
     if (merged.length === 0) return;
 
-    const s = await querySymbols(merged);
+    const s = merged
+      .map((s) => this.symbolCache.get(s))
+      .filter((s) => s)
+      .map((s) => s!);
+
     this.marketFeed.subscribe(s, "full");
     this.quoteListeners.set(listenerGUID, {
       symbols: merged,
@@ -413,21 +433,23 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     const q = this.quoteListeners.get(listenerGUID);
     if (!q) return;
     const { symbols } = q;
-    const s = await querySymbols(symbols);
+    const s = symbols
+      .map((s) => this.symbolCache.get(s))
+      .filter((s) => s)
+      .map((s) => s!);
     this.marketFeed.unsubscribe(s);
     this.quoteListeners.delete(listenerGUID);
   }
 
   async refreshQuotes() {
-    console.log("Refresh Quotes");
     if (!this.feeds) return;
 
     for (const value of this.quoteListeners.values()) {
-      const { symbols, onQuote } = value;
+      const { symbols: tickers, onQuote } = value;
 
-      const quotes = symbols
+      const quotes = tickers
         .map((s) => {
-          const cacheQuote = this.quoteSymbolCache.get(s);
+          const symbol = this.symbolCache.get(s);
           const feed = this.feeds[s];
           const ff = feed?.ff?.marketFF ?? feed?.ff?.indexFF;
           if (!ff) return;
@@ -467,14 +489,14 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
               lp: ff.ltpc?.ltp,
               ch,
               chp,
-              exchange: cacheQuote?.v?.exchange,
+              exchange: symbol?.exchange,
               prev_close_price: prevClose,
               open_price: day.open,
               low_price: day.low,
               high_price: day.high,
-              description: cacheQuote?.v?.description,
-              short_name: cacheQuote?.v?.short_name,
-              original_name: cacheQuote?.v?.original_name,
+              description: symbol?.description,
+              short_name: symbol?.name,
+              original_name: symbol?.name,
               ask,
               bid,
               spread: ask - bid,

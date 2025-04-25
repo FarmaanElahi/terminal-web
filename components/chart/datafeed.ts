@@ -12,8 +12,11 @@ import {
 import { LogoProvider } from "@/components/chart/logo_provider";
 import { symbolQuote, symbolResolve, symbolSearch } from "@/lib/state/symbol";
 import { Subsession } from "@/types/supabase";
+import type { Symbol } from "@/types/symbol";
 
 export abstract class Datafeed {
+  protected symbolCache = new Map<string, Symbol>();
+
   protected constructor(private readonly logoProvider: LogoProvider) {}
 
   onReady(callback: OnReadyCallback) {
@@ -81,6 +84,9 @@ export abstract class Datafeed {
   ) {
     const data = await symbolResolve(symbolName).catch(onError);
     if (!data) return;
+
+    // Cache the symbol
+    this.symbolCache.set(data.ticker as string, data);
 
     // Map it
     const subsession_id = "regular";

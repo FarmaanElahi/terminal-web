@@ -15,7 +15,8 @@ import {
 } from "@duckdb/duckdb-wasm";
 
 const TABLES = {
-  symbols: "https://objectstorage.ap-hyderabad-1.oraclecloud.com/n/axbaetdfzydd/b/terminal-files/o/symbols-full.parquet",
+  symbols:
+    "https://objectstorage.ap-hyderabad-1.oraclecloud.com/n/axbaetdfzydd/b/terminal-files/o/symbols-full.parquet",
   columns:
     "https://raw.githubusercontent.com/FarmaanElahi/terminal-data/refs/heads/main/data/scan/cols.parquet",
 };
