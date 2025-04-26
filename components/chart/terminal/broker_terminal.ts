@@ -10,6 +10,7 @@ import {
   Order,
   Position,
   Side,
+  TradeContext,
 } from "@/components/chart/terminal/ibroker_terminal";
 import { TradingAccount } from "@/server/integration";
 import { kiteHolding, kiteMargin, kitePosition } from "@/server/terminal";
@@ -93,14 +94,14 @@ export class TerminalBroker implements IBrokerTerminal {
                   label: "Investment",
                   id: "investment",
                   dataFields: ["invested"],
-                  formatter: "formatPrice",
+                  formatter: "fixedInCurrency",
                 },
                 // Custom
                 {
                   label: "Current Value",
                   id: "currValue",
                   dataFields: ["currValue"],
-                  formatter: "formatPrice",
+                  formatter: "fixedInCurrency",
                 },
                 {
                   label: "Day P&L",
@@ -151,13 +152,13 @@ export class TerminalBroker implements IBrokerTerminal {
           text: "Balance",
           wValue: this.balance,
           isDefault: true,
-          formatter: "fixed",
+          formatter: "fixedInCurrency",
         },
         {
           text: "Equity",
           wValue: this.equity,
           isDefault: true,
-          formatter: "fixed",
+          formatter: "fixedInCurrency",
         },
       ],
       orderColumns: [],
@@ -209,16 +210,16 @@ export class TerminalBroker implements IBrokerTerminal {
           label: "Realised P&L",
           id: "realisedPnl",
           dataFields: ["realisedPnl"],
-          formatter: "formatPrice",
+          formatter: "fixedInCurrency",
         },
         {
           label: "Unrealised P&L",
           id: "unrealisedPnl",
           dataFields: ["unrealisedPnl"],
-          formatter: "formatPrice",
+          formatter: "fixedInCurrency",
         },
       ],
-      contextMenuActions: () => Promise.resolve(),
+      contextMenuActions: () => Promise.resolve([]),
     };
   }
 
@@ -263,6 +264,10 @@ export class TerminalBroker implements IBrokerTerminal {
     return this.activeAccount.accountId;
   }
 
+  chartContextMenuActions(t: TradeContext) {
+    return this.host.defaultContextMenuActions(t);
+  }
+
   async isTradable() {
     return true;
   }
@@ -279,7 +284,7 @@ export class TerminalBroker implements IBrokerTerminal {
       overallPnlPct: (h.pnl / (h.average_price * h.quantity)) * 100,
     }));
     this.holding.forEach((h) => this.holdingChangeDelegate.fire(h));
-    setTimeout(() => this.refreshHolding(), 10000);
+    setTimeout(() => this.refreshHolding(), 30000);
   }
 
   async refreshAccount() {
@@ -287,6 +292,6 @@ export class TerminalBroker implements IBrokerTerminal {
     console.log(margin);
     this.balance.setValue(margin?.available?.live_balance ?? 0);
     this.equity.setValue(margin?.utilised.exposure ?? 0);
-    setTimeout(() => this.refreshAccount(), 10000);
+    setTimeout(() => this.refreshAccount(), 30000);
   }
 }

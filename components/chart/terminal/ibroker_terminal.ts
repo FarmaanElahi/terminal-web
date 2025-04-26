@@ -46,7 +46,7 @@ export interface AccountManagerInfo {
   orderColumns: PageColumn[];
   positionColumns: PageColumn[];
   pages: AccountManagerPage[];
-  contextMenuActions: () => Promise<void>;
+  contextMenuActions?: () => Promise<[]>;
 }
 
 export interface AccountMetainfo {
@@ -135,6 +135,13 @@ export interface InstrumentInfo {
   };
 }
 
+export interface TradeContext {
+  displaySymbol: string;
+  last: number;
+  symbol: string;
+  value: number;
+}
+
 export interface IWatchedValue<T = any> {
   value: T;
   setValue: (value: T, forceUpdate?: boolean) => void;
@@ -146,6 +153,8 @@ export interface IBrokerTerminal {
   accountsMetainfo: () => Promise<AccountMetainfo[]>;
 
   currentAccount?(): string;
+
+  chartContextMenuActions: (t: TradeContext) => Promise<[]>;
 
   isTradable(symbol: string): Promise<boolean>;
 
@@ -168,4 +177,6 @@ export interface IBrokerConnectionAdapterHost {
   getQty(symbol: string): Promise<number>;
 
   factory: IBrokerConnectionAdapterFactory;
+
+  defaultContextMenuActions(t: TradeContext): Promise<[]>;
 }
