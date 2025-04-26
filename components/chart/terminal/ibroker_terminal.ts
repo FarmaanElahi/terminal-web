@@ -100,11 +100,13 @@ export interface BracketOrder {
 export type Order = PlacedOrder | BracketOrder;
 
 export interface Position {
-  avgPrice: number;
   id: string;
-  qty: number;
+  ticker: string;
+  exchange: string;
   side: Side;
-  symbol: string;
+  product: string;
+  avgPrice: number;
+  qty: number;
 }
 
 export interface Execution {

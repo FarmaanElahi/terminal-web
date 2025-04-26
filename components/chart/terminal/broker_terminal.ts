@@ -67,7 +67,7 @@ export class TerminalBroker implements IBrokerTerminal {
                   label: "Symbol",
                   id: "symbol",
                   // Make this look like a symbol
-                  formatter:"symbol",
+                  formatter: "symbol",
                   dataFields: ["ticker"],
                 },
                 {
@@ -140,10 +140,7 @@ export class TerminalBroker implements IBrokerTerminal {
                   formatter: "formatQuantity",
                 },
               ],
-              getData: (p) => {
-                console.log("Get data....", p);
-                return Promise.resolve(this.holding);
-              },
+              getData: () => Promise.resolve(this.holding),
               changeDelegate: this.holdingChangeDelegate,
             },
           ],
@@ -164,7 +161,63 @@ export class TerminalBroker implements IBrokerTerminal {
         },
       ],
       orderColumns: [],
-      positionColumns: [{ id: "sy", label: "Symbol", dataFields: ["id"] }],
+      positionColumns: [
+        {
+          label: "Symbol",
+          id: "symbol",
+          // Make this look like a symbol
+          formatter: "symbol",
+          dataFields: ["ticker"],
+        },
+        {
+          label: "Exchange",
+          id: "exchange",
+          dataFields: ["exchange"],
+          formatter: "fixed",
+        },
+        {
+          label: "Side",
+          id: "side",
+          dataFields: ["side"],
+          formatter: "fixed",
+        },
+        {
+          label: "Product",
+          id: "product",
+          dataFields: ["product"],
+          formatter: "fixed",
+        },
+        {
+          label: "Net Qty",
+          id: "qty",
+          dataFields: ["qty"],
+          formatter: "formatQuantity",
+        },
+        {
+          label: "Avg Traded Price",
+          id: "avgPrice",
+          dataFields: ["avgPrice"],
+          formatter: "formatPrice",
+        },
+        {
+          label: "LTP",
+          id: "ltp",
+          dataFields: ["ltp"],
+          formatter: "formatPrice",
+        },
+        {
+          label: "Realised P&L",
+          id: "realisedPnl",
+          dataFields: ["realisedPnl"],
+          formatter: "formatPrice",
+        },
+        {
+          label: "Unrealised P&L",
+          id: "unrealisedPnl",
+          dataFields: ["unrealisedPnl"],
+          formatter: "formatPrice",
+        },
+      ],
       contextMenuActions: () => Promise.resolve(),
     };
   }
@@ -175,13 +228,17 @@ export class TerminalBroker implements IBrokerTerminal {
 
   async positions(): Promise<Position[]> {
     const positions = await kitePosition(this.currentAccount());
-    console.log(positions);
-    return positions.net.map((value) => ({
-      avgPrice: value.average_price,
-      qty: value.quantity,
-      symbol: value.tradingsymbol,
-      id: value.tradingsymbol,
+    return positions.net.map((p) => ({
+      id: [p.exchange, p.tradingsymbol].join(":"),
+      ticker: [p.exchange, p.tradingsymbol].join(":"),
+      exchange: p.exchange,
       side: Side.BUY,
+      product: p.product,
+      avgPrice: p.average_price,
+      qty: p.quantity,
+      ltp: p.last_price,
+      realisedPnl: p.realised,
+      unrealisedPnl: p.unrealised,
     }));
   }
 
@@ -216,7 +273,7 @@ export class TerminalBroker implements IBrokerTerminal {
       ...h,
       id: h.isin,
       // Hardcoded NSE since we don't have BSE Data
-      ticker: ["NSE", h.tradingsymbol].join(":"),
+      ticker: [h.exchange, h.tradingsymbol].join(":"),
       invested: h.average_price * h.quantity,
       currValue: h.last_price * h.quantity,
       overallPnlPct: (h.pnl / (h.average_price * h.quantity)) * 100,
