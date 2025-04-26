@@ -209,6 +209,8 @@ export function Watchlist(props: WatchlistProps) {
         key={activeWatchlistId ?? "default"}
         className="ag-terminal-theme"
         selectionColumnDef={{ pinned: "left" }}
+        enableAdvancedFilter={true}
+        includeHiddenColumnsInAdvancedFilter={true}
         headerHeight={36}
         rowHeight={32}
         getContextMenuItems={getContextMenuItems}
