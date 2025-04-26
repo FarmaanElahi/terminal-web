@@ -22,12 +22,15 @@ export async function saveIntegration(
 ) {
   const client = await createClient();
   const encryptedToken = encrypt(access_token);
-  const { error } = await client.from("user_integrations").upsert({
-    type,
-    access_token: encryptedToken,
-    provider_id: provider.id,
-    provider_profile: (provider.profile ?? {}) as Json,
-  });
+  const { error } = await client.from("user_integrations").upsert(
+    {
+      type,
+      access_token: encryptedToken,
+      provider_id: provider.id,
+      provider_profile: (provider.profile ?? {}) as Json,
+    },
+    { onConflict: "provider_id" },
+  );
   if (error) {
     return new Error(`Failed to save integration for ${type}`);
   }
