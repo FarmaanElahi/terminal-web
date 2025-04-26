@@ -34,6 +34,7 @@ export async function saveIntegration(
   if (error) {
     return new Error(`Failed to save integration for ${type}`);
   }
+  console.log("Integration saved successfully");
 }
 
 export async function getIntegrationToken(
