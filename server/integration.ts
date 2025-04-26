@@ -32,6 +32,7 @@ export async function saveIntegration(
     { onConflict: "provider_id" },
   );
   if (error) {
+    console.error(error)
     return new Error(`Failed to save integration for ${type}`);
   }
   console.log("Integration saved successfully");
