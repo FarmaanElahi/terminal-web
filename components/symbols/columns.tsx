@@ -2707,28 +2707,9 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     context: { category: "Technicals" },
   },
   {
-    field: "RS_Value_1M",
-    headerName: "RS Value 1M",
-    context: { category: "Technicals" },
-  },
-  {
-    field: "RS_Value_3M",
-    headerName: "RS Value 3M",
-    context: { category: "Technicals" },
-  },
-  {
-    field: "RS_Value_6M",
-    headerName: "RS Value 6M",
-    context: { category: "Technicals" },
-  },
-  {
-    field: "RS_Value_9M",
-    headerName: "RS Value 9M",
-    context: { category: "Technicals" },
-  },
-  {
-    field: "RS_Value_12M",
-    headerName: "RS Value 12M",
+    field: "RS_Phase",
+    headerName: "RS Phase",
+    cellRenderer: BooleanCell,
     context: { category: "Technicals" },
   },
   {
