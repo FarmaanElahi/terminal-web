@@ -91,7 +91,7 @@ export function RSLine(PineJS: PineJS): CustomIndicator<MarketCycleCountProps> {
         },
       ],
       is_hidden_study: false,
-      is_price_study: false,
+      is_price_study: true,
       palettes: {
         rsLineColorPalette: {
           valToIndex: { 0: 0, 1: 1 },
