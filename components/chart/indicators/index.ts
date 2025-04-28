@@ -5,6 +5,7 @@ import { EnhancedVolume } from "@/components/chart/indicators/enhanced-volume";
 import { TechnicalPatterns } from "@/components/chart/indicators/technical-patterns";
 import { ADR } from "@/components/chart/indicators/adr";
 import { RMV } from "@/components/chart/indicators/rmv";
+import { RSLine } from "@/components/chart/indicators/rs_line";
 
 export function getIndicators(PineJS: PineJS): Promise<CustomIndicator[]> {
   // eslint-disable-next-line
@@ -16,5 +17,6 @@ export function getIndicators(PineJS: PineJS): Promise<CustomIndicator[]> {
     TechnicalPatterns(PineJS),
     ADR(PineJS),
     RMV(PineJS),
+    RSLine(PineJS),
   ]);
 }

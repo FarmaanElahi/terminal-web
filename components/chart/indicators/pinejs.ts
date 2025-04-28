@@ -1507,6 +1507,7 @@ interface StudyMetaInfo {
   name?: string;
   palettes?: Record<string, StudyPalettesInfo>;
   plots: Array<StudyPlotInformation>;
+  filledAreas?: Array<StudyFilledAreaInfo>;
   priceScale?: StudyTargetPriceScale;
   // Can't be changed from UI, Any additional value that can be changed will be in defaults
   styles?: Record<string, StudyStylesInfo>;
@@ -1519,6 +1520,7 @@ interface StudyMetaInfoDefaults {
   precision: string | number;
   styles: Record<string, StudyPlotPreferences>;
   palettes: Record<string, StudyPaletteStyle>;
+  filledAreasStyle?: Record<string, StudyFilledAreaStyle>;
 }
 
 type StudyInputInfo = (
@@ -2491,6 +2493,30 @@ interface StudyCharsPlotPreferences {
   visible?: boolean;
 }
 
+interface StudyFilledAreaSolidColorStyle {
+  color: string; // Hex color code, e.g., '#ffffff'
+  fillType?: undefined;
+  transparency?: number; // Optional; 0 (opaque) to 100 (fully transparent)
+  visible: boolean; // Whether the fill is visible
+}
+
+interface StudyFilledAreaStyleBase {
+  transparency?: number; // 0 (opaque) to 100 (fully transparent)
+  visible: boolean; // Whether the filled area is visible
+}
+
+interface StudyFilledAreaGradientColorStyle extends StudyFilledAreaStyleBase {
+  fillType: "gradient"; // Always "gradient" for this style
+  topColor?: string; // Optional top color (hex code like '#ffffff')
+  topValue?: number; // Optional price/value where the top color is drawn
+  bottomColor?: string; // Optional bottom color
+  bottomValue?: number; // Optional price/value where the bottom color is drawn
+}
+
+export type StudyFilledAreaStyle =
+  | StudyFilledAreaSolidColorStyle
+  | StudyFilledAreaGradientColorStyle;
+
 type StudyPaletteStyle = {
   colors: Record<string, StudyPaletteColor> | StudyPaletteColor[];
 };
@@ -3222,4 +3248,48 @@ interface SymbolInputSymbolSource {
    * Type of input. For this interface, it is always "symbolInputSymbolSource".
    */
   type: "symbolInputSymbolSource";
+}
+
+export interface StudyFilledAreaInfo {
+  /** Study ID */
+  readonly id: string;
+
+  /** Study band ID for the first object */
+  readonly objAId: string;
+
+  /** Study band ID for the second object */
+  readonly objBId: string;
+
+  /** Title that will appear in the styles tab of the study settings dialog */
+  readonly title: string;
+
+  /** Filled area type */
+  readonly type: "hline_hline" | "plot_plot";
+
+  /** Optional: Color for the bottom of the filled area */
+  readonly bottomColor?: string;
+
+  /** Optional: Value at which the bottom of the filled area is drawn */
+  readonly bottomValue?: number;
+
+  /** Optional: Should the area be filled up to the point that two plots intersect */
+  readonly fillToIntersection?: boolean;
+
+  /** Optional: Should gaps in the area be filled */
+  readonly fillgaps?: boolean;
+
+  /** Optional: Visibility flag for the filled area's style inputs */
+  readonly isHidden?: boolean;
+
+  /** Optional: Color palette ID */
+  readonly palette?: string;
+
+  /** Optional: Color for the top of the filled area */
+  readonly topColor?: string;
+
+  /** Optional: Value at which the top of the filled area is drawn */
+  readonly topValue?: number;
+
+  /** Optional: Filled area z-order */
+  readonly zorder?: number;
 }
