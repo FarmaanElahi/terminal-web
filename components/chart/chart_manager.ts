@@ -103,6 +103,7 @@ export class ChartManager {
       disabled_features: [
         // "order_panel",
         // "trading_account_manager",
+        "open_account_manager",
         "symbol_search_hot_key",
         "header_symbol_search",
         "allow_arbitrary_symbol_search_input",
@@ -118,6 +119,7 @@ export class ChartManager {
       ],
 
       enabled_features: [
+        "hide_right_toolbar",
         "hide_left_toolbar_by_default",
         "border_around_the_chart",
         "create_volume_indicator_by_default",
