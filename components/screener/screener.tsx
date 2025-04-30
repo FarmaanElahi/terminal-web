@@ -76,6 +76,7 @@ function useGridInitialState(activeScreenId?: string | null) {
   const defaultState = useMemo(() => {
     const defaultVisible = new Set([
       "name",
+      "mcap",
       "day_close",
       "price_change_today_pct",
     ]);

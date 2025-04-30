@@ -89,15 +89,8 @@ function useGridInitialState(activeScreenId?: string | null) {
   const defaultState = useMemo(() => {
     const defaultVisible = new Set([
       "name",
-      "mcap",
       "day_close",
-      "sector",
-      "dcr",
-      "wcr",
-      "relative_vol_10D",
-      "relative_vol_20D",
-      "RS_10D_pct",
-      "RS_20D_pct",
+      "price_change_today_pct"
     ]);
 
     const hiddenColIds = colDefs
