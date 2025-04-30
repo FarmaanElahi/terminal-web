@@ -761,31 +761,31 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   // ######################  Price and Volume  #######################
   {
     field: "price_change_today_abs",
-    headerName: "Price Change Today",
+    headerName: "Change",
     cellDataType: "price" satisfies CellDataType,
     context: { category: "Price & Volume" },
   },
   {
     field: "price_change_from_open_abs",
-    headerName: "Price Change from Open",
+    headerName: "Change from Open",
     cellDataType: "price" satisfies CellDataType,
     context: { category: "Price & Volume" },
   },
   {
     field: "price_change_from_high_abs",
-    headerName: "Price Change from High",
+    headerName: "Change from High",
     cellDataType: "price" satisfies CellDataType,
     context: { category: "Price & Volume" },
   },
   {
     field: "price_change_from_low_abs",
-    headerName: "Price Change from Low",
+    headerName: "Change from Low",
     cellDataType: "price" satisfies CellDataType,
     context: { category: "Price & Volume" },
   },
   {
     field: "price_change_today_pct",
-    headerName: "Price Change %  Today",
+    headerName: "Change %",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -796,7 +796,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_from_open_pct",
-    headerName: "Price Change % from Open",
+    headerName: "Change % from Open",
     cellDataType: "percentage" satisfies CellDataType,
     // TODO Colorize
     context: { category: "Price & Volume" },
@@ -808,7 +808,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_from_high_pct",
-    headerName: "Price Change % from High",
+    headerName: "Change % from High",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1159,7 +1159,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_since_earning_pct",
-    headerName: "Price Change % Last Earning",
+    headerName: "Change % Last Earning",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1170,7 +1170,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_1W",
-    headerName: "Price Change % Week",
+    headerName: "Change % Week",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1181,7 +1181,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_curr_week_open_pct",
-    headerName: "Price Change % Week Open",
+    headerName: "Change % Week Open",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1192,7 +1192,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_2D",
-    headerName: "Price Change % 2D",
+    headerName: "Change % 2D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1203,7 +1203,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_3D",
-    headerName: "Price Change % 3D",
+    headerName: "Change % 3D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1214,7 +1214,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_4D",
-    headerName: "Price Change % 4D",
+    headerName: "Change % 4D",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1225,7 +1225,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_1M",
-    headerName: "Price Change % MTD",
+    headerName: "Change % MTD",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1236,7 +1236,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_2M",
-    headerName: "Price Change % 2M",
+    headerName: "Change % 2M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1247,7 +1247,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_3M",
-    headerName: "Price Change % 3M",
+    headerName: "Change % 3M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1258,7 +1258,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_4M",
-    headerName: "Price Change % 4M",
+    headerName: "Change % 4M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1269,7 +1269,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_5M",
-    headerName: "Price Change % 5M",
+    headerName: "Change % 5M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1280,7 +1280,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_6M",
-    headerName: "Price Change % 6M",
+    headerName: "Change % 6M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1291,7 +1291,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_7M",
-    headerName: "Price Change % 7M",
+    headerName: "Change % 7M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1302,7 +1302,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_8M",
-    headerName: "Price Change % 8M",
+    headerName: "Change % 8M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1313,7 +1313,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_9M",
-    headerName: "Price Change % 9M",
+    headerName: "Change % 9M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1324,7 +1324,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_10M",
-    headerName: "Price Change % 10M",
+    headerName: "Change % 10M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1335,7 +1335,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_11M",
-    headerName: "Price Change % 11M",
+    headerName: "Change % 11M",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1346,7 +1346,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_1Y",
-    headerName: "Price Change % YTD",
+    headerName: "Change % YTD",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1357,7 +1357,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_2Y",
-    headerName: "Price Change % 2Y",
+    headerName: "Change % 2Y",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1368,7 +1368,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_3Y",
-    headerName: "Price Change % 3Y",
+    headerName: "Change % 3Y",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
@@ -1379,7 +1379,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
   {
     field: "price_change_pct_4Y",
-    headerName: "Price Change % 4Y",
+    headerName: "Change % 4Y",
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Price & Volume" },
     cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
