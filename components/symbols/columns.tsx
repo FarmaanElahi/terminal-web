@@ -196,7 +196,6 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     field: "day_close",
     headerName: "Last",
     cellDataType: "price" satisfies CellDataType,
-    cellRenderer: "agAnimateShowChangeCellRenderer",
     context: { category: "General" },
   },
   {

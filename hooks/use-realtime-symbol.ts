@@ -8,15 +8,26 @@ import IFeed = MarketV3.com.upstox.marketdatafeeder.rpc.proto.IFeed;
 /**
  * Extract and transform market data from a feed into symbol properties
  * @param feed The market data feed
+ * @param symbol
  * @returns An object with extracted symbol properties
  */
-function extractMarketDataFromFeed(feed: IFeed): Partial<Symbol> {
+function extractMarketDataFromFeed(
+  feed: IFeed,
+  symbol: Symbol,
+): Partial<Symbol> {
   const change: Partial<Symbol> = {};
 
   const ltpc = feed.ff?.marketFF?.ltpc ?? feed.ff?.indexFF?.ltpc;
-  const day_close = ltpc?.ltp;
-  if (day_close !== null) change["day_close"] = day_close;
-
+  const dayClose = ltpc?.ltp;
+  const prevDayClose = symbol.prev_day_close;
+  if (dayClose !== null) change["day_close"] = dayClose;
+  if (prevDayClose && dayClose) {
+    const ch = dayClose - prevDayClose;
+    change["price_change_today_pct"] = (ch / prevDayClose) * 100;
+  }
+  // TODO:
+  // price_change_from_open_pct
+  // price_change_from_high_pct
   return change;
 }
 
@@ -159,16 +170,14 @@ export function useRealtimeSymbol(symbols: Symbol[] | undefined) {
         if (!subscribedSymbols.has(ticker) || !originalSymbols[ticker]) return;
 
         // Extract market data from the feed
-        const marketData = extractMarketDataFromFeed(feed);
+        const symbol = originalSymbols[ticker];
+        const updates = extractMarketDataFromFeed(feed, symbol);
 
         // Skip if no meaningful data was extracted
-        if (Object.keys(marketData).length === 0) return;
+        if (Object.keys(updates).length === 0) return;
 
         // Merge the original symbol with market data
-        const updatedSymbol = mergeSymbolWithMarketData(
-          originalSymbols[ticker],
-          marketData,
-        );
+        const updatedSymbol = mergeSymbolWithMarketData(symbol, updates);
 
         // Update the complete symbols map
         allSymbolsMap[ticker] = updatedSymbol;
