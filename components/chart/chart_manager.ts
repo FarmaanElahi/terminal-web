@@ -99,12 +99,6 @@ export class ChartManager {
           supportPositionBrackets: true,
         },
       },
-      widgetbar: {
-        watchlist: true,
-        watchlist_settings: {
-          default_symbols: [],
-        },
-      },
 
       disabled_features: [
         // "order_panel",
