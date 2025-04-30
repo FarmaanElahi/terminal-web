@@ -3,6 +3,7 @@ import { Datafeed } from "@/components/chart/datafeed";
 import {
   Bar,
   DatafeedErrorCallback,
+  DOMCallback,
   HistoryCallback,
   LibrarySymbolInfo,
   OnReadyCallback,
@@ -55,6 +56,11 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     }
   >();
 
+  private readonly domListener = new Map<
+    string,
+    { symbol: string; cb: DOMCallback }
+  >();
+
   private instrumentKeyToTicker = new Map<string, string>();
   private prevDayClose = new Map<string, number>();
 
@@ -69,8 +75,9 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     super(logoProvider);
     this.marketFeed.on("message", (data) => {
       this.feeds = data.feeds;
-      this.refreshBar();
-      void this.refreshQuotes();
+      setTimeout(() => this.refreshBar());
+      setTimeout(() => this.refreshQuotes());
+      setTimeout(() => this.refreshDom());
     });
     this.marketFeed.on("open", () => console.log("TBT Connected"));
     this.marketFeed.on("error", (e) => console.error("TBT Conn Failed", e));
@@ -385,8 +392,8 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
       // Not available in websocket
       this.prevDayClose.set(symbol.ticker as string, prevClose);
       const chp = (q.net_change / prevClose) * 100;
-      const ask = Math.min(...q.depth.sell.map((s) => s.price));
-      const bid = Math.max(...q.depth.buy.map((s) => s.price));
+      const ask = Math.min(...(q.depth.sell.map((s) => s.price) ?? [lp]));
+      const bid = Math.max(...(q.depth.buy.map((s) => s.price) ?? [lp]));
       return {
         s: "ok",
         n: symbol.ticker as string,
@@ -466,13 +473,15 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
             .find((f) => f.interval === "1d");
           if (!day) return;
 
+          const close = ff.ltpc?.ltp;
           const prevClose = this.prevDayClose.get(s) ?? 0;
           const ch = (ff.ltpc?.ltp ?? 0) - prevClose;
           const chp = (ch / prevClose) * 100;
           const bid = Math.max(
             ...(
-              feed.ff?.marketFF?.marketLevel?.bidAskQuote?.map((v) => v.bp) ??
-              []
+              feed.ff?.marketFF?.marketLevel?.bidAskQuote?.map((v) => v.bp) ?? [
+                close,
+              ]
             )
               .filter((v) => v)
               .map((v) => v!),
@@ -480,8 +489,9 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
 
           const ask = Math.min(
             ...(
-              feed.ff?.marketFF?.marketLevel?.bidAskQuote?.map((v) => v.ap) ??
-              []
+              feed.ff?.marketFF?.marketLevel?.bidAskQuote?.map((v) => v.ap) ?? [
+                close,
+              ]
             )
               .filter((v) => v)
               .map((v) => v!),
@@ -519,5 +529,35 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     const instrumentKey = toUpstoxInstrumentKey(symbol);
     this.instrumentKeyToTicker.set(instrumentKey, ticker);
     return instrumentKey;
+  }
+
+  subscribeDepth(symbol: string, cb: DOMCallback) {
+    const id = symbol + Math.random().toString();
+    this.domListener.set(id, { symbol, cb });
+    return id;
+  }
+
+  unsubscribeDepth(unsubId: string) {
+    this.domListener.delete(unsubId);
+  }
+
+  refreshDom() {
+    this.domListener.forEach((value) => {
+      const { symbol, cb } = value;
+      const feed = this.feeds[symbol];
+      const bidAskQuote = feed?.ff?.marketFF?.marketLevel?.bidAskQuote;
+      if (!bidAskQuote) return;
+      cb({
+        snapshot: true,
+        asks: bidAskQuote.map((ba) => ({
+          price: ba.ap ?? 0,
+          volume: ba.aq ?? 0,
+        })),
+        bids: bidAskQuote.map((ba) => ({
+          price: ba.bp ?? 0,
+          volume: ba.bp ?? 0,
+        })),
+      });
+    });
   }
 }

@@ -983,9 +983,16 @@ export interface QuoteData {
   };
 }
 
+export interface IDatafeedDomApi {
+  subscribeDepth(symbol: string, cb: DOMCallback): void;
+
+  unsubscribeDepth(unsubId: string): void;
+}
+
 export type StreamingDataFeed = IDatafeedChartApi &
   IExternalDatafeed &
-  IDatafeedQuotesApi;
+  IDatafeedQuotesApi &
+  IDatafeedDomApi;
 
 /**
  * ===============================================================
@@ -1370,6 +1377,7 @@ export interface TradingViewWidgetOptions {
   broker_factory?: (host: IBrokerConnectionAdapterHost) => IBrokerTerminal;
   broker_config: {
     configFlags: {
+      supportLevel2Data?: true;
       supportNativeReversePosition?: true;
       supportClosePosition?: true;
       supportPLUpdate?: true;

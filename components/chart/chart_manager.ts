@@ -89,6 +89,7 @@ export class ChartManager {
       broker_factory: (host) => new TerminalBroker(host, this.accounts),
       broker_config: {
         configFlags: {
+          supportLevel2Data: true,
           supportNativeReversePosition: true,
           supportClosePosition: true,
           supportPLUpdate: true,
@@ -119,6 +120,8 @@ export class ChartManager {
       ],
 
       enabled_features: [
+        "show_dom_first_time",
+        "dom_widget",
         "hide_right_toolbar",
         "hide_left_toolbar_by_default",
         "border_around_the_chart",

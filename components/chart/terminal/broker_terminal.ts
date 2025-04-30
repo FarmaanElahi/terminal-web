@@ -272,6 +272,8 @@ export class TerminalBroker implements IBrokerTerminal {
     return true;
   }
 
+  cancelOrders() {}
+
   async refreshHolding() {
     const holding = await kiteHolding(this.currentAccount());
     this.holding = holding.map((h) => ({
