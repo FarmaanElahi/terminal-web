@@ -29,6 +29,7 @@ import { Json } from "@/types/generated/supabase";
 import { LayoutItem } from "@/components/dashboard/use-dashboard";
 import { DashboardSelector } from "@/components/dashboard/dashboard-selector";
 import { restrictToHorizontalAxis } from "@dnd-kit/modifiers";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 interface TabItemProps {
   id: string;
@@ -222,6 +223,7 @@ export function DashboardManager() {
   return (
     <div className="h-full flex flex-col">
       <div className="flex">
+        <SidebarTrigger className="my-auto mx-1" />
         <DashboardSelector
           dashboards={dashboards}
           activeDashboard={activeDashboardId}

@@ -17,6 +17,7 @@ import { ImperativePanelHandle } from "react-resizable-panels";
 import { WatchlistProvider } from "@/hooks/use-active-watchlist";
 import { WatchlistSelector } from "@/components/watchlist/watchlist-selector";
 import { Watchlist } from "@/components/watchlist/watchlist";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export default function Page() {
   return (
@@ -37,11 +38,12 @@ function WatchlistContent() {
     <>
       <header className="flex h-12 shrink-0 items-center gap-2">
         <SymbolSearch />
-        <div className="flex items-center justify-between gap-2 px-4 w-full">
+        <div className="flex items-center justify-between gap-2 w-full">
           <div className="flex gap-2">
+            <SidebarTrigger className="my-auto" />
             <WatchlistSelector />
           </div>
-          <div className="flex space-x-4">
+          <div className="flex space-x-4 pr-1">
             <div className="space-x-2">
               <Toggle
                 size="sm"

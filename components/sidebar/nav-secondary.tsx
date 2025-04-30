@@ -34,11 +34,11 @@ export function NavSecondary({
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
-
-          <SidebarMenuItem>
-            <ModeToggle />
-          </SidebarMenuItem>
         </SidebarMenu>
+
+        <SidebarMenuItem>
+          <ModeToggle />
+        </SidebarMenuItem>
       </SidebarGroupContent>
     </SidebarGroup>
   );

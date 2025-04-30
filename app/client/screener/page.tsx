@@ -23,6 +23,7 @@ import { Stats } from "@/components/symbols/stats";
 import { Ideas } from "@/components/symbols/ideas";
 import "@/components/grid/grid_init";
 import { ImperativePanelHandle } from "react-resizable-panels";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export default function Page() {
   return (
@@ -44,12 +45,13 @@ function ScreenerContent() {
     <>
       <header className="flex h-12 shrink-0 items-center gap-2">
         <SymbolSearch />
-        <div className="flex items-center justify-between gap-2 px-4 w-full">
+        <div className="flex items-center justify-between gap-2 w-full">
           <div className="flex gap-2">
+            <SidebarTrigger className="my-auto" />
             <Tag placeholder={"Search Symbol"} name={"JINDRILL"} />
             <ScreenSelector />
           </div>
-          <div className="flex space-x-4">
+          <div className="flex space-x-4 pr-2">
             <div className="space-x-2">
               <Toggle
                 size="sm"

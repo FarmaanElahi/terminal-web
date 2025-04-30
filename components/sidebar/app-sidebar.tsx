@@ -2,18 +2,17 @@
 
 import * as React from "react";
 import {
-  Activity,
-  Frame,
-  LayoutDashboard,
+  BookOpen,
+  Bot,
+  Command,
   LifeBuoy,
-  Map,
-  Megaphone,
-  PieChart,
-  Radar,
   Send,
-  Star,
+  SquareTerminal,
 } from "lucide-react";
 
+import { NavMain } from "@/components/sidebar/nav-main";
+import { NavSecondary } from "@/components/sidebar/nav-secondary";
+import { NavUser } from "@/components/sidebar/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -22,44 +21,35 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
-import { NavMain } from "@/components/sidebar/nav-main";
-import { NavSecondary } from "@/components/sidebar/nav-secondary";
-import { NavUser } from "@/components/sidebar/nav-user";
 
 const data = {
   user: {
-    name: "Farmaaan",
-    email: "farmaan@gmail.com",
-    avatar: "/profile.png",
+    name: "shadcn",
+    email: "m@example.com",
+    avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
     {
       title: "Dashboard",
       url: "/client/dashboard",
-      icon: LayoutDashboard,
+      icon: SquareTerminal,
       isActive: true,
     },
     {
       title: "Screener",
       url: "/client/screener",
-      icon: Radar,
+      icon: Bot,
     },
     {
       title: "Watchlist",
       url: "/client/watchlist",
-      icon: Star,
-    },
-    {
-      title: "Alert",
-      url: "/client/alerts",
-      icon: Megaphone,
+      icon: BookOpen,
     },
   ],
   navSecondary: [
     {
-      title: "Support",
+      title: "Integration",
       url: "/integration",
       icon: LifeBuoy,
     },
@@ -69,40 +59,22 @@ const data = {
       icon: Send,
     },
   ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { toggleSidebar } = useSidebar();
   return (
-    <Sidebar variant="inset" collapsible="icon" {...props}>
+    <Sidebar variant="inset" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" onClick={toggleSidebar} asChild>
+            <SidebarMenuButton size="lg" asChild>
               <a href="#">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Activity className="size-4" />
+                  <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">Terminal</span>
-                  <span className="truncate text-xs">Farmaan Elahi</span>
+                  <span className="truncate text-xs">Enterprise</span>
                 </div>
               </a>
             </SidebarMenuButton>
