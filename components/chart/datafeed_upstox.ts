@@ -549,14 +549,18 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
       if (!bidAskQuote) return;
       cb({
         snapshot: true,
-        asks: bidAskQuote.map((ba) => ({
-          price: ba.ap ?? 0,
-          volume: ba.aq ?? 0,
-        })),
-        bids: bidAskQuote.map((ba) => ({
-          price: ba.bp ?? 0,
-          volume: ba.bp ?? 0,
-        })),
+        asks: bidAskQuote
+          .map((ba) => ({
+            price: ba.ap ?? 0,
+            volume: ba.aq ?? 0,
+          }))
+          .toSorted((a, b) => a.price - b.price),
+        bids: bidAskQuote
+          .map((ba) => ({
+            price: ba.bp ?? 0,
+            volume: ba.bp ?? 0,
+          }))
+          .toSorted((a, b) => a.price - b.price),
       });
     });
   }
