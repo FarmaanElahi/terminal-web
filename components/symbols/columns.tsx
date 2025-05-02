@@ -657,6 +657,114 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Sub Industry",
     context: { category: "Sector & Industry" },
   },
+
+  {
+    field: "sector_return_1D",
+    headerName: "Sector Return 1D",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "sector_return_1W",
+    headerName: "Sector Return 1W",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "sector_return_1M",
+    headerName: "Sector Return 1M",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "sector_return_3M",
+    headerName: "Sector Return 3M",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "sector_return_6M",
+    headerName: "Sector Return 6M",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "sector_return_9M",
+    headerName: "Sector Return 9M",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "sector_return_12M",
+    headerName: "Sector Return 12M",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "industry_return_1D",
+    headerName: "Industry Return 1D",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "industry_return_1W",
+    headerName: "Industry Return 1W",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "industry_return_1M",
+    headerName: "Industry Return 1M",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "industry_return_3M",
+    headerName: "Industry Return 3M",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "industry_return_6M",
+    headerName: "Industry Return 6M",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "industry_return_9M",
+    headerName: "Industry Return 9M",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "industry_return_12M",
+    headerName: "Industry Return 12M",
+    context: { category: "Sector & Industry" },
+  },
+
+  {
+    field: "sub_industry_return_1D",
+    headerName: "Sub Industry Return 1D",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "sub_industry_return_1W",
+    headerName: "Sub Industry Return 1W",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "sub_industry_return_1M",
+    headerName: "Sub Industry Return 1M",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "sub_industry_return_3M",
+    headerName: "Sub Industry Return 3M",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "sub_industry_return_6M",
+    headerName: "Sub Industry Return 6M",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "sub_industry_return_9M",
+    headerName: "Sub Industry Return 9M",
+    context: { category: "Sector & Industry" },
+  },
+  {
+    field: "sub_industry_return_12M",
+    headerName: "Sub Industry Return 12M",
+    context: { category: "Sector & Industry" },
+  },
+
   // ##########################  Sector & Industry  ##########################
 
   // ##############################  Fundamental  ############################
@@ -2947,109 +3055,109 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   },
 
   {
-    field: "sector_rating_1D",
-    headerName: "Sector Rating 1D",
+    field: "sector_ranking_1D",
+    headerName: "Sector Ranking 1D",
     context: { category: "Ratings" },
   },
   {
-    field: "sector_rating_1W",
-    headerName: "Sector Rating 1W",
+    field: "sector_ranking_1W",
+    headerName: "Sector Ranking 1W",
     context: { category: "Ratings" },
   },
   {
-    field: "sector_rating_1M",
-    headerName: "Sector Rating 1M",
+    field: "sector_ranking_1M",
+    headerName: "Sector Ranking 1M",
     context: { category: "Ratings" },
   },
   {
-    field: "sector_rating_3M",
-    headerName: "Sector Rating 3M",
+    field: "sector_ranking_3M",
+    headerName: "Sector Ranking 3M",
     context: { category: "Ratings" },
   },
   {
-    field: "sector_rating_6M",
-    headerName: "Sector Rating 6M",
+    field: "sector_ranking_6M",
+    headerName: "Sector Ranking 6M",
     context: { category: "Ratings" },
   },
   {
-    field: "sector_rating_9M",
-    headerName: "Sector Rating 9M",
+    field: "sector_ranking_9M",
+    headerName: "Sector Ranking 9M",
     context: { category: "Ratings" },
   },
   {
-    field: "sector_rating_12M",
-    headerName: "Sector Rating 12M",
+    field: "sector_ranking_12M",
+    headerName: "Sector Ranking 12M",
     context: { category: "Ratings" },
   },
   {
-    field: "industry_rating_1D",
-    headerName: "Industry Rating 1D",
+    field: "industry_ranking_1D",
+    headerName: "Industry Ranking 1D",
     context: { category: "Ratings" },
   },
   {
-    field: "industry_rating_1W",
-    headerName: "Industry Rating 1W",
+    field: "industry_ranking_1W",
+    headerName: "Industry Ranking 1W",
     context: { category: "Ratings" },
   },
   {
-    field: "industry_rating_1M",
-    headerName: "Industry Rating 1M",
+    field: "industry_ranking_1M",
+    headerName: "Industry Ranking 1M",
     context: { category: "Ratings" },
   },
   {
-    field: "industry_rating_3M",
-    headerName: "Industry Rating 3M",
+    field: "industry_ranking_3M",
+    headerName: "Industry Ranking 3M",
     context: { category: "Ratings" },
   },
   {
-    field: "industry_rating_6M",
-    headerName: "Industry Rating 6M",
+    field: "industry_ranking_6M",
+    headerName: "Industry Ranking 6M",
     context: { category: "Ratings" },
   },
   {
-    field: "industry_rating_9M",
-    headerName: "Industry Rating 9M",
+    field: "industry_ranking_9M",
+    headerName: "Industry Ranking 9M",
     context: { category: "Ratings" },
   },
   {
-    field: "industry_rating_12M",
-    headerName: "Industry Rating 12M",
+    field: "industry_ranking_12M",
+    headerName: "Industry Ranking 12M",
     context: { category: "Ratings" },
   },
 
   {
-    field: "sub_industry_rating_1D",
-    headerName: "Sub Industry Rating 1D",
+    field: "sub_industry_ranking_1D",
+    headerName: "Sub Industry Ranking 1D",
     context: { category: "Ratings" },
   },
   {
-    field: "sub_industry_rating_1W",
-    headerName: "Sub Industry Rating 1W",
+    field: "sub_industry_ranking_1W",
+    headerName: "Sub Industry Ranking 1W",
     context: { category: "Ratings" },
   },
   {
-    field: "sub_industry_rating_1M",
-    headerName: "Sub Industry Rating 1M",
+    field: "sub_industry_ranking_1M",
+    headerName: "Sub Industry Ranking 1M",
     context: { category: "Ratings" },
   },
   {
-    field: "sub_industry_rating_3M",
-    headerName: "Sub Industry Rating 3M",
+    field: "sub_industry_ranking_3M",
+    headerName: "Sub Industry Ranking 3M",
     context: { category: "Ratings" },
   },
   {
-    field: "sub_industry_rating_6M",
-    headerName: "Sub Industry Rating 6M",
+    field: "sub_industry_ranking_6M",
+    headerName: "Sub Industry Ranking 6M",
     context: { category: "Ratings" },
   },
   {
-    field: "sub_industry_rating_9M",
-    headerName: "Sub Industry Rating 9M",
+    field: "sub_industry_ranking_9M",
+    headerName: "Sub Industry Ranking 9M",
     context: { category: "Ratings" },
   },
   {
-    field: "sub_industry_rating_12M",
-    headerName: "Sub Industry Rating 12M",
+    field: "sub_industry_ranking_12M",
+    headerName: "Sub Industry Ranking 12M",
     context: { category: "Ratings" },
   },
   // ##########################  Ratings  ##########################
