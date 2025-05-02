@@ -125,7 +125,7 @@ function ErrorState({ symbol }: { symbol: string }) {
 }
 
 // Rating details list component for expandable ratings
-function RatingDetailsList({
+function RankingDetailsList({
   category,
   symbolData,
   limit,
@@ -153,18 +153,19 @@ function RatingDetailsList({
             "ticker",
             "logo",
             "name",
-            "RS_Rating_1M",
-            "RS_Rating_3M",
+            "AS_Rating_1M",
+            "AS_Rating_3M",
             "price_change_today_pct",
           ],
           where: `${category} = '${categoryValue}'`,
           order: [
-            { field: "RS_Rating_1M", sort: "DESC" },
-            { field: "RS_Rating_3M", sort: "DESC" },
+            { field: "AS_Rating_1M", sort: "DESC" },
+            { field: "AS_Rating_3M", sort: "DESC" },
           ],
           limit,
         });
 
+        console.log(result);
         setRelatedSymbols(result);
       } catch (error) {
         console.error("Error fetching related symbols:", error);
@@ -195,8 +196,8 @@ function RatingDetailsList({
           <tr className="text-xs font-semibold text-muted-foreground py-2">
             <th className="text-left py-2">Symbol</th>
             <th className="text-right py-2">% Change</th>
-            <th className="text-right py-2">RS 1M</th>
-            <th className="text-right py-2">RS 3M</th>
+            <th className="text-right py-2">AS 1M</th>
+            <th className="text-right py-2">AS 3M</th>
           </tr>
         </thead>
         <tbody>
@@ -241,10 +242,10 @@ function RatingDetailsList({
                 </span>
               </td>
               <td className="text-right">
-                {symbol.RS_Rating_1M as unknown as string}
+                {symbol.AS_Rating_1M as unknown as string}
               </td>
               <td className="text-right">
-                {symbol.RS_Rating_3M as unknown as string}
+                {symbol.AS_Rating_3M as unknown as string}
               </td>
             </tr>
           ))}
@@ -295,7 +296,7 @@ function ColumnItem({
   const canShowRating = isRatingColumn || isSectorIndustryColumn;
 
   // Extract the category type
-  const getRatingCategory = () => {
+  const getRankingCategory = () => {
     if (!isRatingColumn || !column.field) return null;
 
     let category: "sector" | "industry" | "sub_industry" | null = null;
@@ -311,7 +312,7 @@ function ColumnItem({
     return category;
   };
 
-  const ratingCategory = getRatingCategory();
+  const rankingCategory = getRankingCategory();
 
   // Format value helper function
   const formatValue = (column: ColDef<Symbol>, value: unknown) => {
@@ -432,10 +433,10 @@ function ColumnItem({
         </span>
       </div>
 
-      {isRatingColumn && showingRating && ratingCategory && (
+      {isRatingColumn && showingRating && rankingCategory && (
         <div className="border-t border-dashed">
-          <RatingDetailsList
-            category={ratingCategory}
+          <RankingDetailsList
+            category={rankingCategory}
             symbolData={symbolData}
           />
         </div>
@@ -443,7 +444,7 @@ function ColumnItem({
 
       {isSectorIndustryColumn && showingRating && (
         <div className="border-t border-dashed">
-          <RatingDetailsList
+          <RankingDetailsList
             category={column.field as "sector" | "industry" | "sub_industry"}
             symbolData={symbolData}
             limit={10}
