@@ -867,6 +867,86 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   }),
   // ##############################  Fundamental  ############################
   // ######################  Price and Volume  #######################
+
+
+  {
+    field: "price_perf_1D",
+    headerName: "Perf 1D",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+  {
+    field: "price_perf_1W",
+    headerName: "Perf 1W",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+  {
+    field: "price_perf_1M",
+    headerName: "Perf 1M",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+  {
+    field: "price_perf_3M",
+    headerName: "Perf 3M",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+
+  {
+    field: "price_perf_6M",
+    headerName: "Perf 6M",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+  {
+    field: "price_perf_9M",
+    headerName: "Perf 9M",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+  {
+    field: "price_perf_12M",
+    headerName: "Perf 12M",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
   {
     field: "price_change_today_abs",
     headerName: "Change",
