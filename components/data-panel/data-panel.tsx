@@ -278,14 +278,14 @@ function ColumnItem({
   columnMap: Record<string, ColDef<Symbol>>;
   isLast?: boolean;
 }) {
-  const [showingRating, setShowingRating] = useState(false);
+  const [showingRanking, setShowingRanking] = useState(false);
 
   // Check if this is a rating column that should have expandable details
   const isRatingColumn =
     column.field &&
-    (column.field.startsWith("sector_rating_") ||
-      column.field.startsWith("industry_rating_") ||
-      column.field.startsWith("sub_industry_rating_"));
+    (column.field.startsWith("sector_ranking_") ||
+      column.field.startsWith("industry_ranking_") ||
+      column.field.startsWith("sub_industry_ranking_"));
 
   const isSectorIndustryColumn = [
     "sector",
@@ -293,7 +293,7 @@ function ColumnItem({
     "sub_industry",
   ].includes(column.field as unknown as string);
 
-  const canShowRating = isRatingColumn || isSectorIndustryColumn;
+  const canShowRanking = isRatingColumn || isSectorIndustryColumn;
 
   // Extract the category type
   const getRankingCategory = () => {
@@ -301,11 +301,11 @@ function ColumnItem({
 
     let category: "sector" | "industry" | "sub_industry" | null = null;
 
-    if (column.field.startsWith("sector_rating_")) {
+    if (column.field.startsWith("sector_ranking_")) {
       category = "sector";
-    } else if (column.field.startsWith("industry_rating_")) {
+    } else if (column.field.startsWith("industry_ranking_")) {
       category = "industry";
-    } else if (column.field.startsWith("sub_industry_rating_")) {
+    } else if (column.field.startsWith("sub_industry_ranking_")) {
       category = "sub_industry";
     }
 
@@ -404,21 +404,21 @@ function ColumnItem({
   return (
     <div className="border-b">
       <div
-        onClick={() => canShowRating && setShowingRating((prev) => !prev)}
+        onClick={() => canShowRanking && setShowingRanking((prev) => !prev)}
         className={cn(
           "flex justify-between items-center px-4 py-1.5 border-t first:border-t-0 text-sm hover:bg-muted/30",
           {
-            "rounded-b-md": isLast && !showingRating,
-            "cursor-pointer": canShowRating,
+            "rounded-b-md": isLast && !showingRanking,
+            "cursor-pointer": canShowRanking,
           },
         )}
       >
         <span className="font-bold flex items-center gap-2">
           {column.headerName}
-          {canShowRating && (
+          {canShowRanking && (
             <ChevronDown
               className={cn("h-3 w-3 transition-transform", {
-                "transform rotate-180": showingRating,
+                "transform rotate-180": showingRanking,
               })}
             />
           )}
@@ -433,7 +433,7 @@ function ColumnItem({
         </span>
       </div>
 
-      {isRatingColumn && showingRating && rankingCategory && (
+      {isRatingColumn && showingRanking && rankingCategory && (
         <div className="border-t border-dashed">
           <RankingDetailsList
             category={rankingCategory}
@@ -442,7 +442,7 @@ function ColumnItem({
         </div>
       )}
 
-      {isSectorIndustryColumn && showingRating && (
+      {isSectorIndustryColumn && showingRanking && (
         <div className="border-t border-dashed">
           <RankingDetailsList
             category={column.field as "sector" | "industry" | "sub_industry"}
