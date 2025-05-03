@@ -24,6 +24,9 @@ export function PriceVolume(PineJS: PineJS): CustomIndicator<PriceVolumeProps> {
             plottype: LineStudyPlotStyle.Histogram,
             color: "green",
           },
+          priceVolumeMa: {
+            plottype: LineStudyPlotStyle.Line,
+          },
         },
         palettes: {},
       },
@@ -50,10 +53,19 @@ export function PriceVolume(PineJS: PineJS): CustomIndicator<PriceVolumeProps> {
       is_hidden_study: false,
       is_price_study: false,
       palettes: {},
-      plots: [{ id: "priceVolume", type: "line" }],
+      plots: [
+        { id: "priceVolume", type: "line" },
+        { id: "priceVolumeMa", type: "line" },
+      ],
       styles: {
         priceVolume: {
           title: "PriceVolume",
+          histogramBase: 0,
+          isHidden: false,
+          joinPoints: false,
+        },
+        priceVolumeMa: {
+          title: "PriceVolumeMa",
           histogramBase: 0,
           isHidden: false,
           joinPoints: false,
@@ -87,7 +99,7 @@ export function PriceVolume(PineJS: PineJS): CustomIndicator<PriceVolumeProps> {
             priceVolume > this.maThreshold) ||
           priceVolume > this.absoluteThreshold;
 
-        return [showCandle ? priceVolume : NaN];
+        return [showCandle ? priceVolume : NaN, priceVolumeSma];
       };
     },
   };
