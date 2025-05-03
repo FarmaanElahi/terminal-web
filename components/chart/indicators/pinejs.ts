@@ -1928,7 +1928,7 @@ interface StudyPriceInputInfo {
   /**
    * Default value for the price input.
    */
-  readonly defval: number;
+  readonly defval?: number;
 
   /**
    * An array of plot IDs; if these plots are hidden, this input should also be hidden within the legend.

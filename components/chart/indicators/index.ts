@@ -6,6 +6,7 @@ import { TechnicalPatterns } from "@/components/chart/indicators/technical-patte
 import { ADR } from "@/components/chart/indicators/adr";
 import { RMV } from "@/components/chart/indicators/rmv";
 import { RSLine } from "@/components/chart/indicators/rs_line";
+import { PriceVolume } from "@/components/chart/indicators/price_volume";
 
 export function getIndicators(PineJS: PineJS): Promise<CustomIndicator[]> {
   // eslint-disable-next-line
@@ -18,5 +19,6 @@ export function getIndicators(PineJS: PineJS): Promise<CustomIndicator[]> {
     ADR(PineJS),
     RMV(PineJS),
     RSLine(PineJS),
+    PriceVolume(PineJS)
   ]);
 }
