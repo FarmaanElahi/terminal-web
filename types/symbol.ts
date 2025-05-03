@@ -919,6 +919,24 @@ export interface Symbol {
   AS_Rating_3M?:number;
   AS_Rating_6M?:number;
   AS_Rating_12M?:number;
+
+  sector_ranking_1W?:number;
+  sector_ranking_1M?:number;
+  sector_ranking_3M?:number;
+  sector_ranking_6M?:number;
+  sector_ranking_12M?:number;
+
+  industry_ranking_1W?:number;
+  industry_ranking_1M?:number;
+  industry_ranking_3M?:number;
+  industry_ranking_6M?:number;
+  industry_ranking_12M?:number;
+
+  sub_industry_ranking_1W?:number;
+  sub_industry_ranking_1M?:number;
+  sub_industry_ranking_3M?:number;
+  sub_industry_ranking_6M?:number;
+  sub_industry_ranking_12M?:number;
 }
 
 export interface Subsession {
