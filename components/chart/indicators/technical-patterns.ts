@@ -43,7 +43,7 @@ export function TechnicalPatterns(
       defaults: {
         inputs: {
           insideBar: false,
-          oopsReversal: false,
+          oopsReversal: true,
           keyReversal: false,
         },
         styles: {
@@ -112,8 +112,8 @@ export function TechnicalPatterns(
         },
       ],
       styles: {
-        insideBar: { title: "Inside Bar" },
-        oopsReversal: { title: "Oops Reversal" },
+        insideBar: { title: "Inside Bar", text: "IB" },
+        oopsReversal: { title: "Oops Reversal", text: "Oops" },
         bullishKeyReversal: { title: "Bullish Key Reversal" },
         bearishKeyReversal: { title: "Bearish Key Reversal" },
       },
