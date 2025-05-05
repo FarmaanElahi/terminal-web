@@ -40,7 +40,7 @@ export function EnhancedVolume(
           volume: {
             linestyle: 0,
             linewidth: 2,
-            plottype: LineStudyPlotStyle.Columns,
+            plottype: LineStudyPlotStyle.Histogram,
           },
           volume_ma: {
             linestyle: 0,
