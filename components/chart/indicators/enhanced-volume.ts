@@ -106,7 +106,7 @@ export function EnhancedVolume(
         },
         {
           id: "accumulateMultiple",
-          name: "Accumulate Multiple(Cr)",
+          name: "Accumulate MA Multiple",
           type: "float",
           group: "Institution",
           min: 1,
