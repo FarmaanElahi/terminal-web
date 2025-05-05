@@ -1,8 +1,19 @@
-import { CustomIndicator, LineStudyPlotStyle, PineJS } from "./pinejs";
+import {
+  CustomIndicator,
+  LineStudyPlotStyle,
+  MarkLocation,
+  PineJS,
+  PlotShapeId,
+} from "./pinejs";
 
 interface EnhancedVolumeProps {
   dailyAverage: number;
   weeklyAverage: number;
+
+  instantBuyThreshold: number;
+  accumulateThreshold: number;
+  accumulateMultiple: number;
+  accumulatePeriod: number;
 }
 
 export function EnhancedVolume(
@@ -20,6 +31,10 @@ export function EnhancedVolume(
         inputs: {
           dailyAvg: 20,
           weeklyAvg: 10,
+          instantBuyThreshold: 4,
+          accumulateThreshold: 1,
+          accumulateMultiple: 5,
+          accumulatePeriod: 20,
         },
         styles: {
           volume: {
@@ -32,6 +47,16 @@ export function EnhancedVolume(
             linewidth: 1,
             plottype: LineStudyPlotStyle.Line,
             color: "red",
+          },
+          instant_buy: {
+            location: MarkLocation.Top,
+            plottype: PlotShapeId.shape_arrow_up,
+            color: "green",
+          },
+          accumulated_buy: {
+            location: MarkLocation.Top,
+            plottype: PlotShapeId.shape_xcross,
+            color: "green",
           },
         },
         palettes: {
@@ -52,6 +77,7 @@ export function EnhancedVolume(
         {
           id: "dailyAvg",
           name: "Daily Average",
+          group: "Volume",
           type: "integer",
           min: 1,
           max: 1000,
@@ -60,8 +86,37 @@ export function EnhancedVolume(
           id: "weeklyAvg",
           name: "Weekly Average",
           type: "integer",
+          group: "Volume",
           min: 1,
           max: 1000,
+        },
+        {
+          id: "instantBuyThreshold",
+          name: "Instant Buy Threshold(Cr)",
+          type: "float",
+          group: "Institution",
+          min: 1,
+        },
+        {
+          id: "accumulateThreshold",
+          name: "accumulate Threshold(Cr)",
+          type: "float",
+          group: "Institution",
+          min: 1,
+        },
+        {
+          id: "accumulateMultiple",
+          name: "Accumulate Multiple(Cr)",
+          type: "float",
+          group: "Institution",
+          min: 1,
+        },
+        {
+          id: "accumulatePeriod",
+          name: "Accumulation Period(Min)",
+          type: "integer",
+          group: "Institution",
+          min: 1,
         },
       ],
       is_hidden_study: false,
@@ -90,6 +145,14 @@ export function EnhancedVolume(
           id: "volume_ma",
           type: "line",
         },
+        {
+          id: "instant_buy",
+          type: "shapes",
+        },
+        {
+          id: "accumulated_buy",
+          type: "shapes",
+        },
       ],
       styles: {
         volume: {
@@ -104,6 +167,14 @@ export function EnhancedVolume(
           joinPoints: false,
           title: "Volume MA",
         },
+        instant_buy: {
+          title: "Instant Buy",
+          text: "Buy",
+        },
+        accumulated_buy: {
+          title: "Accumulated Buy",
+          text: "Accumulate",
+        },
       },
     },
     constructor: function (this) {
@@ -112,6 +183,10 @@ export function EnhancedVolume(
         this._input = inputs;
         this.dailyAverage = this._input(0);
         this.weeklyAverage = this._input(1);
+        this.instantBuyThreshold = (this._input(2) as number) * 1_00_00_000;
+        this.accumulateThreshold = (this._input(3) as number) * 1_00_00_000;
+        this.accumulateMultiple = this._input(4);
+        this.accumulatePeriod = this._input(5);
       };
       this.main = function (ctx) {
         this._context = ctx;
@@ -140,7 +215,8 @@ export function EnhancedVolume(
         let volumeColor = upDay ? 0 : 1;
         const range = (close - low) / (high - low);
         const strongCR = range > 0.5;
-        const pocketPivot = upDay && strongCR && volume > historicalDownDayVolume;
+        const pocketPivot =
+          upDay && strongCR && volume > historicalDownDayVolume;
         const reversePocketPivot = downDay && volume <= historicalDownDayVolume;
         if (pocketPivot) volumeColor = 2;
         if (reversePocketPivot) volumeColor = 3;
@@ -154,11 +230,35 @@ export function EnhancedVolume(
           this._context,
         );
 
+        // Institution Buying Indicator (Will only work in intraday and 1 minute candle)
+        let instantBuy = false;
+        let accumulationBuy = false;
+        if (PineJS.Std.isintraday(ctx) && PineJS.Std.period(ctx) === "1") {
+          const avgPrice = (open + high) / 2;
+          const volume = PineJS.Std.volume(ctx);
+          const priceVolume = avgPrice * volume;
+          const priceVolumeSer = ctx.new_unlimited_var(priceVolume);
+          const priceVolumeSma = PineJS.Std.sma(
+            priceVolumeSer,
+            this.accumulatePeriod,
+            ctx,
+          );
+
+          instantBuy = priceVolume > this.instantBuyThreshold;
+          if (!instantBuy) {
+            accumulationBuy =
+              priceVolume > priceVolumeSma * this.accumulateMultiple &&
+              priceVolume > this.accumulateThreshold;
+          }
+        }
+
         return [
           // Market cycle count
           volume,
           volumeColor,
           volumeMA,
+          instantBuy ? 1 : NaN,
+          accumulationBuy ? 1 : NaN,
         ] satisfies (number | string)[];
       };
     },
