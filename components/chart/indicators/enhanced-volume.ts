@@ -169,11 +169,11 @@ export function EnhancedVolume(
         },
         instant_buy: {
           title: "Instant Buy",
-          text: "I",
+          text: "IB",
         },
         accumulated_buy: {
           title: "Accumulated Buy",
-          text: "A",
+          text: "AB",
         },
       },
     },
