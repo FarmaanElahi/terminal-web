@@ -15,6 +15,8 @@ interface MarketCycleCountProps {
   midpoint2: number;
   midpoint3: number;
   showBgColor: boolean;
+  slAtrLoopback: number;
+  slAtrMultiplier: number;
 }
 
 export function RMV(PineJS: PineJS): CustomIndicator<MarketCycleCountProps> {
@@ -34,6 +36,8 @@ export function RMV(PineJS: PineJS): CustomIndicator<MarketCycleCountProps> {
           midpoint2: 20,
           midpoint3: 30,
           showBgColor: true,
+          slAtrLoopback: 14,
+          slAtrMultiplier: 2,
         },
         styles: {
           midpoint_1: {
@@ -69,6 +73,11 @@ export function RMV(PineJS: PineJS): CustomIndicator<MarketCycleCountProps> {
             plottype: LineStudyPlotStyle.Histogram,
           },
           bg_color: { display: StudyPlotDisplayMode.All },
+          sl: {
+            plottype: LineStudyPlotStyle.Line,
+            linewidth: 2,
+            transparency: 30,
+          },
         },
         palettes: {
           bg_color_palette: {
@@ -89,14 +98,46 @@ export function RMV(PineJS: PineJS): CustomIndicator<MarketCycleCountProps> {
       format: { type: "inherit" },
       id: "TM-RMV@tv-basicstudies-1",
       inputs: [
-        { id: "loopback", name: "Length", type: "integer" },
-        { id: "short1", name: "Short-term Lookback 1", type: "integer" },
-        { id: "short2", name: "Short-term Lookback 2", type: "integer" },
-        { id: "short3", name: "Short-term Lookback 3", type: "integer" },
-        { id: "showBgColor", name: "Show BG Color", type: "bool" },
-        { id: "midpoint1", name: "Midpoint 1", type: "float" },
-        { id: "midpoint2", name: "Midpoint 2", type: "float" },
-        { id: "midpoint3", name: "Midpoint 3", type: "float" },
+        { id: "loopback", name: "Length", type: "integer", group: "RMV" },
+        {
+          id: "short1",
+          name: "Short-term Lookback 1",
+          type: "integer",
+          group: "RMV",
+        },
+        {
+          id: "short2",
+          name: "Short-term Lookback 2",
+          type: "integer",
+          group: "RMV",
+        },
+        {
+          id: "short3",
+          name: "Short-term Lookback 3",
+          type: "integer",
+          group: "RMV",
+        },
+        {
+          id: "showBgColor",
+          name: "Show BG Color",
+          type: "bool",
+          group: "RMV",
+        },
+        { id: "midpoint1", name: "Midpoint 1", type: "float", group: "RMV" },
+        { id: "midpoint2", name: "Midpoint 2", type: "float", group: "RMV" },
+        { id: "midpoint3", name: "Midpoint 3", type: "float", group: "RMV" },
+        {
+          id: "slAtrLoopback",
+          name: "SL ATR Loopback",
+          type: "integer",
+          group: "Stoploss",
+        },
+        {
+          id: "slAtrMultiplier",
+          name: "SL ATR Multiplier",
+          type: "float",
+          group: "Stoploss",
+        },
       ],
       is_hidden_study: false,
       is_price_study: false,
@@ -131,6 +172,7 @@ export function RMV(PineJS: PineJS): CustomIndicator<MarketCycleCountProps> {
           type: "bg_colorer",
           palette: "bg_color_palette",
         },
+        { id: "sl", type: "line" },
       ],
       styles: {
         midpoint_1: {
@@ -166,6 +208,12 @@ export function RMV(PineJS: PineJS): CustomIndicator<MarketCycleCountProps> {
         bg_color: {
           title: "BG Color",
         },
+        sl: {
+          title: "SL Percent",
+          histogramBase: 0,
+          isHidden: false,
+          joinPoints: false,
+        },
       },
     },
     constructor: function (this) {
@@ -180,6 +228,8 @@ export function RMV(PineJS: PineJS): CustomIndicator<MarketCycleCountProps> {
         this.midpoint1 = this._input(5);
         this.midpoint2 = this._input(6);
         this.midpoint3 = this._input(7);
+        this.slAtrLoopback = this._input(8);
+        this.slAtrMultiplier = this._input(9);
       };
       this.main = function (ctx) {
         this._context = ctx;
@@ -218,6 +268,19 @@ export function RMV(PineJS: PineJS): CustomIndicator<MarketCycleCountProps> {
         if (this.showBgColor && rmv >= 0 && rmv <= 10) bgColor = 10;
         if (this.showBgColor && rmv > 10 && rmv <= 20) bgColor = 20;
 
+        // Stoploss calculation
+        const close = PineJS.Std.close(this._context);
+        const atr = PineJS.Std.atr(this.slAtrLoopback, this._context);
+        const sl = atr * this.slAtrMultiplier;
+        const slPer = (sl / close) * 100;
+
+        console.log(
+          atr,
+          slPer,
+          this.slAtrMultiplier,
+          this.slAtrLoopback,
+          close,
+        );
         return [
           this.midpoint1,
           this.midpoint2,
@@ -226,6 +289,7 @@ export function RMV(PineJS: PineJS): CustomIndicator<MarketCycleCountProps> {
           rmv,
           rmvHistColor,
           bgColor,
+          slPer,
         ];
       };
     },
