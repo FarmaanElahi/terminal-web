@@ -274,13 +274,6 @@ export function RMV(PineJS: PineJS): CustomIndicator<MarketCycleCountProps> {
         const sl = atr * this.slAtrMultiplier;
         const slPer = (sl / close) * 100;
 
-        console.log(
-          atr,
-          slPer,
-          this.slAtrMultiplier,
-          this.slAtrLoopback,
-          close,
-        );
         return [
           this.midpoint1,
           this.midpoint2,
