@@ -290,14 +290,14 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   {
     field: "eps_fq_latest",
     headerName: "EPS Recent",
-    context: { category: "Sales" },
+    context: { category: "Earnings" },
   },
   ...agoCols("eps", "EPS", "fq", 6, { category: "Earnings" }),
   ...agoCols("eps", "EPS", "fy", 6, { category: "Earnings" }),
   {
     field: "eps_growth_qoq_fq_latest",
     headerName: "EPS Growth QoQ Recent",
-    context: { category: "Sales" },
+    context: { category: "Earnings" },
     cellDataType: "percentage",
   },
   ...agoCols(
@@ -311,7 +311,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   {
     field: "eps_growth_yoy_fq_latest",
     headerName: "EPS Growth YoY Recent",
-    context: { category: "Sales" },
+    context: { category: "Earnings" },
     cellDataType: "percentage",
   },
   ...agoCols(
@@ -361,7 +361,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   {
     field: "revenue_fq_latest",
     headerName: "Revenue Recent",
-    context: { category: "Sales" },
+    context: { category: "Earnings" },
     cellDataType: "fundamental_price",
   },
   ...agoCols(
