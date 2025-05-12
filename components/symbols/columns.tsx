@@ -361,7 +361,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   {
     field: "revenue_fq_latest",
     headerName: "Revenue Recent",
-    context: { category: "Earnings" },
+    context: { category: "Sales" },
     cellDataType: "fundamental_price",
   },
   ...agoCols(
@@ -374,7 +374,7 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   ),
   ...agoCols(
     "revenue",
-    "Revenue",
+    "Sales",
     "fy",
     6,
     { category: "Sales" },
