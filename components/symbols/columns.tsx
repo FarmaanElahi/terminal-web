@@ -29,7 +29,7 @@ function agoCols(
   const freqName = freqNameMapping[freq];
 
   const cols = [] as ColDef<Symbol>[];
-  for (let i = 0; i <= ago; i++) {
+  for (let i = 0; i < ago; i++) {
     let hist =
       i === 0
         ? `Latest ${freqName}`
@@ -48,37 +48,6 @@ function agoCols(
   }
   return cols;
 }
-
-function forwardCols(
-  metric: string,
-  name_prefix: string,
-  freq: "fq" | "fy",
-  ago: number,
-  context?: unknown,
-  cellDataType?: CellDataType,
-): ColDef<Symbol>[] {
-  const freqNameMapping = { fq: "Qtr", fy: "Yr" } as Record<
-    typeof freq,
-    string
-  >;
-  const freqName = freqNameMapping[freq];
-
-  const cols = [] as ColDef<Symbol>[];
-  for (let i = 0; i <= ago; i++) {
-    let hist = i === 0 ? `Next ${freqName}` : undefined;
-    hist = hist ? hist : `${i + 1} ${freqName}s Forward`;
-
-    const sign = cellDataType === "percentage" ? "%" : "";
-    cols.push({
-      field: [metric, freq, i].join("_") as keyof Symbol,
-      headerName: [name_prefix, hist, sign].filter((s) => s).join(" "),
-      cellDataType,
-      context,
-    });
-  }
-  return cols;
-}
-
 export const extendedColumnType: Record<
   CellDataType,
   DataTypeDefinition<Symbol>
@@ -266,41 +235,6 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Name",
     context: { category: "General" },
   },
-  {
-    field: "website",
-    headerName: "Website",
-    context: { category: "General" },
-  },
-  {
-    field: "ceo",
-    headerName: "CEO",
-    context: { category: "General" },
-  },
-  {
-    field: "employees",
-    headerName: "Employee Count",
-    context: { category: "General" },
-  },
-  {
-    field: "country",
-    headerName: "Country",
-    cellRenderer: LogoTextCell,
-    cellRendererParams: { logoCol: "country_code", logoPrefix: "country" },
-    context: { category: "General" },
-  },
-  { field: "location", headerName: "City", context: { category: "General" } },
-  {
-    field: "ipo_date",
-    headerName: "IPO Date",
-    cellDataType: "date",
-    context: { category: "General" },
-  },
-  {
-    field: "most_recent_split",
-    headerName: "Recent Split",
-    cellDataType: "date",
-    context: { category: "General" },
-  },
   { field: "type", headerName: "Type", context: { category: "General" } },
   {
     field: "exchange",
@@ -318,18 +252,6 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
   {
     field: "shares_float",
     headerName: "Shares Float",
-    context: { category: "General" },
-  },
-  {
-    // Weighted Shares Outstanding.
-    field: "total_shares_outstanding",
-    headerName: "Total Outstanding Shares",
-    context: { category: "General" },
-  },
-  // TODO: Add Non-Weighted Shares Outstanding
-  {
-    field: "timezone",
-    headerName: "Timezone",
     context: { category: "General" },
   },
   {
@@ -360,52 +282,55 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     context: { category: "Earnings" },
   },
   {
-    field: "earnings_per_share_ttm",
+    field: "eps_ttm",
     headerName: "EPS TTM",
     context: { category: "Earnings" },
+    cellDataType: "fundamental_price",
   },
-
-  ...agoCols("eps", "EPS", "fq", 9, { category: "Earnings" }),
-  ...agoCols("eps", "EPS", "fy", 3, { category: "Earnings" }),
-
+  {
+    field: "eps_fq_latest",
+    headerName: "EPS Recent",
+    context: { category: "Earnings" },
+  },
+  ...agoCols("eps", "EPS", "fq", 6, { category: "Earnings" }),
+  ...agoCols("eps", "EPS", "fy", 6, { category: "Earnings" }),
+  {
+    field: "eps_growth_qoq_fq_latest",
+    headerName: "EPS Growth QoQ Recent %",
+    context: { category: "Earnings" },
+    cellDataType: "percentage",
+  },
   ...agoCols(
-    "earning_surprise",
-    "EPS Surprise",
+    "eps_growth_qoq",
+    "EPS Growth QoQ",
     "fq",
-    9,
+    6,
     { category: "Earnings" },
     "percentage",
   ),
+  {
+    field: "eps_growth_yoy_fq_latest",
+    headerName: "EPS Growth YoY Recent %",
+    context: { category: "Earnings" },
+    cellDataType: "percentage",
+  },
   ...agoCols(
-    "earning_surprise",
-    "EPS Surprise",
-    "fy",
-    3,
+    "eps_growth_yoy",
+    "EPS Growth YoY",
+    "fq",
+    6,
     { category: "Earnings" },
     "percentage",
   ),
-  ...forwardCols("eps_estimated", "EPS Estimate", "fq", 3, {
-    category: "Earnings",
-  }),
-  ...forwardCols("eps_estimated", "EPS Estimate", "fy", 2, {
-    category: "Earnings",
-  }),
   ...agoCols(
     "eps_growth",
     "EPS Growth",
-    "fq",
-    9,
-    { category: "Earnings" },
-    "percentage",
-  ),
-  ...agoCols(
-    "eps_growth",
-    "EPS Growth",
     "fy",
-    3,
+    6,
     { category: "Earnings" },
     "percentage",
   ),
+  //TODO: Missing in new scanner
   {
     field: "eps_avg_growth_fq_2",
     headerName: "Average Quarterly EPS Growth Last 2 Qtrs",
@@ -430,72 +355,20 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Earnings" },
   },
-  // TODO: Quarterly Earnings Acceleration
-  // TODO: Quarter Over Quarter EPS $ Growth
-  ...forwardCols(
-    "eps_estimated_growth",
-    "Quarterly EPS Estimated Growth",
-    "fq",
-    3,
-    { category: "Earnings" },
-    "percentage",
-  ),
-  ...forwardCols(
-    "eps_estimated_growth",
-    "Annual EPS Estimated Growth",
-    "fy",
-    2,
-    { category: "Earnings" },
-    "percentage",
-  ),
-  {
-    field: "eps_estimated_growth_avg_fq_2",
-    headerName: "Average Quarterly Estimated EPS Growth 2 Qtrs Forward",
-    cellDataType: "percentage" satisfies CellDataType,
-    context: { category: "Earnings" },
-  },
-  {
-    field: "eps_estimated_growth_avg_fq_3",
-    headerName: "Average Quarterly Estimated EPS Growth 3 Qtrs Forward",
-    cellDataType: "percentage" satisfies CellDataType,
-    context: { category: "Earnings" },
-  },
-  {
-    field: "eps_estimated_growth_avg_fy_2",
-    headerName: "Average Annual Estimated EPS Growth 2 Yrs Forward",
-    cellDataType: "percentage" satisfies CellDataType,
-    context: { category: "Earnings" },
-  },
-  {
-    field: "eps_estimated_growth_avg_fy_3",
-    headerName: "Average Annual Estimated EPS Growth 3 Yrs Forward",
-    cellDataType: "percentage" satisfies CellDataType,
-    context: { category: "Earnings" },
-  },
   // ##############################  Earnings  ###############################
 
   // ##############################  Sales  ##################################
-  ...agoCols(
-    "ebitda",
-    "EBITDA",
-    "fq",
-    9,
-    { category: "Sales" },
-    "fundamental_price",
-  ),
-  ...agoCols(
-    "ebit",
-    "EBIT",
-    "fq",
-    9,
-    { category: "Sales" },
-    "fundamental_price",
-  ),
+  {
+    field: "revenue_fq_latest",
+    headerName: "Revenue Recent",
+    context: { category: "Sales" },
+    cellDataType: "fundamental_price",
+  },
   ...agoCols(
     "revenue",
-    "Sales",
+    "Revenue",
     "fq",
-    9,
+    6,
     { category: "Sales" },
     "fundamental_price",
   ),
@@ -503,44 +376,47 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     "revenue",
     "Sales",
     "fy",
-    3,
+    6,
     { category: "Sales" },
     "fundamental_price",
   ),
-  ...forwardCols(
-    "revenue_forecast",
-    "Sales Estimate",
-    "fq",
-    3,
-    { category: "Sales" },
-    "fundamental_price",
-  ),
-  ...forwardCols(
-    "revenue_forecast",
-    "Sales Estimate ",
-    "fy",
-    2,
-    { category: "Sales" },
-    "fundamental_price",
-  ),
-  // TODO: Quarterly Estimated Sales – Latest Reported
-  // TODO: Annual Estimated Sales – Latest Reported Year
   ...agoCols(
-    "revenue_growth",
-    "Sales Growth",
+    "revenue_growth_yoy",
+    "Revenue Growth YOY",
     "fq",
-    9,
+    6,
     { category: "Sales" },
     "percentage",
   ),
+  {
+    field: "revenue_growth_yoy_fq_latest",
+    headerName: "Revenue Growth YoY Recent %",
+    context: { category: "Sales" },
+    cellDataType: "percentage",
+  },
+  ...agoCols(
+    "revenue_growth_qoq",
+    "Revenue Growth QoQ",
+    "fq",
+    6,
+    { category: "Sales" },
+    "percentage",
+  ),
+  {
+    field: "revenue_growth_qoq_fq_latest",
+    headerName: "Revenue Growth QoQ Recent %",
+    context: { category: "Sales" },
+    cellDataType: "percentage",
+  },
   ...agoCols(
     "revenue_growth",
     "Sales Growth",
     "fy",
-    3,
+    6,
     { category: "Sales" },
     "percentage",
   ),
+  //TODO: Missing in new scanner
   {
     field: "revenue_avg_growth_fq_2",
     headerName: "Average Quarterly Sales Growth 2 Qtrs",
@@ -565,74 +441,6 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     cellDataType: "percentage" satisfies CellDataType,
     context: { category: "Sales" },
   }, // TODO: Quarterly Sales Acceleration
-
-  ...agoCols(
-    "revenue_growth_yoy",
-    "QoQ Sales Growth",
-    "fq",
-    9,
-    { category: "Sales" },
-    "percentage",
-  ),
-
-  ...forwardCols(
-    "revenue_forecast_growth",
-    "Sales Growth Estimated",
-    "fq",
-    3,
-    { category: "Sales" },
-    "percentage",
-  ),
-  ...forwardCols(
-    "revenue_forecast_growth",
-    "Sales Growth Estimated",
-    "fy",
-    2,
-    { category: "Sales" },
-    "percentage",
-  ),
-  {
-    field: "revenue_forecast_growth_avg_fq_2",
-    headerName: "Average Quarterly Estimated Sales Growth 2 Qtrs",
-    cellDataType: "percentage" satisfies CellDataType,
-    context: { category: "Sales" },
-  },
-  {
-    field: "revenue_forecast_growth_avg_fq_3",
-    headerName: "Average Quarterly Estimated Sales Growth 3 Qtrs",
-    cellDataType: "percentage" satisfies CellDataType,
-    context: { category: "Sales" },
-  },
-
-  {
-    field: "revenue_forecast_growth_avg_fy_2",
-    headerName: "Average Quarterly Estimated Sales Growth 2 Yrs",
-    cellDataType: "percentage" satisfies CellDataType,
-    context: { category: "Sales" },
-  },
-  {
-    field: "revenue_forecast_growth_avg_fy_3",
-    headerName: "Average Quarterly Estimated Sales Growth 3 Yrs",
-    cellDataType: "percentage" satisfies CellDataType,
-    context: { category: "Sales" },
-  },
-  // TODO: Quarterly Sales Acceleration
-  ...agoCols(
-    "revenue_surprise",
-    "Sales Surprise",
-    "fq",
-    9,
-    { category: "Sales" },
-    "percentage",
-  ),
-  ...agoCols(
-    "revenue_surprise",
-    "Sales Surprise",
-    "fy",
-    3,
-    { category: "Sales" },
-    "percentage",
-  ),
 
   // ##############################  Sales  ##################################
 
@@ -769,31 +577,8 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
 
   // ##############################  Fundamental  ############################
   {
-    field: "price_revenue_ttm",
+    field: "price_sales_current",
     headerName: "Price Revenue TTM",
-    context: { category: "Fundamentals" },
-  },
-
-  {
-    field: "dividend_amount",
-    headerName: "Last Dividend Amount",
-    cellDataType: "fundamental_price" satisfies CellDataType,
-    context: { category: "Fundamentals" },
-  },
-  // TODO: Missing Dividend Declaration Date
-  //Declaration Date - Date on which dividend is declared
-  //Ex Date - Date before which an investor must have purchased the stock to receive the upcoming dividend
-  //Record Date- This date determines all shareholders of record who are entitled to the dividend payment and it usually occurs two days after the ex-date. Date -This is when dividend payments are issued to shareholders and it's usually about one month after the record date
-  //Payment Date -This is when dividend payments are issued to shareholders and it's usually about one month after the record date
-  {
-    field: "divided_ex_date",
-    headerName: "Last Dividend Ex Date",
-    cellDataType: "date" satisfies CellDataType,
-    context: { category: "Fundamentals" },
-  },
-  {
-    field: "dividend_yield",
-    headerName: "Dividend Yield",
     context: { category: "Fundamentals" },
   },
   {
@@ -801,73 +586,19 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     headerName: "Price Earning",
     context: { category: "Fundamentals" },
   },
+  // TODO: Missing
   {
     field: "price_earnings_run_rate",
     headerName: "Price Earning Run Rate",
     context: { category: "Fundamentals" },
   },
   {
-    field: "forward_price_earnings",
-    headerName: "Forward Price Earnings",
-    context: { category: "Fundamentals" },
-  },
-
-  ...agoCols(
-    "net_income",
-    "Net Income",
-    "fy",
-    2,
-    { category: "Fundamentals" },
-    "fundamental_price",
-  ),
-  ...agoCols(
-    "total_assets",
-    "Total Assets",
-    "fq",
-    3,
-    { category: "Fundamentals" },
-    "fundamental_price",
-  ),
-  ...agoCols(
-    "total_liabilities",
-    "Total Liabilities",
-    "fq",
-    3,
-    { category: "Fundamentals" },
-    "fundamental_price",
-  ),
-  ...agoCols("current_ratio", "Current Ratio", "fq", 3, {
-    category: "Fundamentals",
-  }),
-  {
-    field: "net_income_ttm_0",
-    headerName: "Net Income TTM",
-    context: { category: "Fundamentals" },
-  },
-
-  {
     field: "price_earnings_growth_ttm",
     headerName: "Price Earning Growth",
     context: { category: "Fundamentals" },
   },
-  {
-    field: "price_sales_ttm",
-    headerName: "Price Sales",
-    context: { category: "Fundamentals" },
-  },
-  ...agoCols("price_earnings", "Price Earning", "fq", 3, {
-    category: "Fundamentals",
-  }),
-  ...agoCols("debt_to_equity", "Debt to Equity", "fq", 3, {
-    category: "Fundamentals",
-  }),
-  ...agoCols("price_book", "Price Book", "fq", 3, { category: "Fundamentals" }),
-  ...agoCols("price_sales", "Price Sales", "fy", 3, {
-    category: "Fundamentals",
-  }),
   // ##############################  Fundamental  ############################
   // ######################  Price and Volume  #######################
-
 
   {
     field: "price_perf_1D",

@@ -16,7 +16,7 @@ import {
 
 const TABLES = {
   symbols:
-    "https://objectstorage.ap-hyderabad-1.oraclecloud.com/n/axbaetdfzydd/b/terminal-files/o/symbols-full.parquet",
+    "https://objectstorage.ap-hyderabad-1.oraclecloud.com/n/axbaetdfzydd/b/terminal-files/o/symbols-full-v2.parquet",
   columns:
     "https://raw.githubusercontent.com/FarmaanElahi/terminal-data/refs/heads/main/data/scan/cols.parquet",
 };
@@ -163,7 +163,7 @@ export async function queryDuckDB<T>(
   try {
     conn = await db.connect();
     return await simpleQuery(db, table, props).then(
-      (r) => JSON.parse(JSON.stringify(r.toArray())) as T[],
+      (r) => r.toArray().map((row) => row.toJSON()) as T[],
     );
   } finally {
     await conn?.close();

@@ -11,7 +11,6 @@ import {
 } from "@/components/chart/types";
 import { LogoProvider } from "@/components/chart/logo_provider";
 import { symbolQuote, symbolResolve, symbolSearch } from "@/lib/state/symbol";
-import { Subsession } from "@/types/supabase";
 import type { Symbol } from "@/types/symbol";
 
 export abstract class Datafeed {
@@ -84,20 +83,24 @@ export abstract class Datafeed {
   ) {
     console.log("Resolve", symbolName);
     const data = await symbolResolve(symbolName).catch(onError);
-    if (!data) return;
+    if (!data) {
+      onError("Failed");
+      return;
+    }
 
     // Cache the symbol
     this.symbolCache.set(data.ticker as string, data);
 
     // Map it
     const subsession_id = "regular";
-    const minmov = 5;
-    const pricescale = 100;
-    const sessionDetails = (data.subsessions as Subsession[]).find(
-      (s) => s.id === subsession_id,
-    );
-    const session = sessionDetails?.session;
-    const session_display = sessionDetails?.["session-display"];
+    const minmov = data.minmov ?? 5;
+    const pricescale = data.pricescale ?? 100;
+    // TODO:
+    // const sessionDetails = (data.subsessions as Subsession[]).find(
+    //   (s) => s.id === subsession_id,
+    // );
+    // const session = sessionDetails?.session;
+    // const session_display = sessionDetails?.["session-display"];
     const listed_exchange = data.exchange;
 
     const symbol = {
@@ -115,13 +118,13 @@ export abstract class Datafeed {
       minmov: minmov,
       pricescale: pricescale,
       currency_code: data.currency,
-      session: session,
+      // session: session,
       industry: data.industry,
       sector: data.sector,
       has_intraday: true,
       has_seconds: false,
       intraday_multipliers: ["1", "2", "3", "5", "10", "15", "30", "45"],
-      session_display: session_display,
+      // session_display: session_display,
       has_weekly_and_monthly: false,
       data_status: "streaming",
       has_daily: true,
