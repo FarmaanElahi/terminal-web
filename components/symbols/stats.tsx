@@ -10,11 +10,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
 import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
 import {
@@ -24,7 +19,6 @@ import {
 } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { ActionH } from "@/types/supabase";
 
 export function Stats() {
   const [freq, setFreq] = useState<"fq" | "fy">("fq");
@@ -62,54 +56,65 @@ export const StatsTable = ({ freq }: { freq: "fq" | "fy" }) => {
   const data = useMemo(() => {
     if (!quote) return { noData: true } as const;
 
-    const sales = ((freq === "fq"
-      ? quote.revenue_action_fq_h
-      : quote.revenue_action_fy_h) ?? []) as unknown as ActionH[];
+    const base: unknown[][] = transpose(
+      freq === "fq" ? JSON.parse(quote.quarterly!) : JSON.parse(quote.yearly!),
+    );
 
-    const salesGrowth = sales.map((a, index) => {
-      const current = a?.Actual ?? a.Estimate;
-      const previous = sales[index - 1]?.Actual ?? sales[index - 1]?.Estimate;
-      if (!current || !previous) return 0;
-
-      return ((current - previous) / previous) * 100;
+    // These are time period. The first cell name is Date
+    const columns = (base[0].slice(1) as string[]).map((value) => {
+      if (freq === "fq") {
+        const year = value.substring(0, 4);
+        const month = value.substring(4, 6);
+        if (month === "03") return `${year}-Q4`;
+        if (month === "06") return `${year}-Q1`;
+        if (month === "09") return `${year}-Q2`;
+        if (month === "12") return `${year}-Q3`;
+        return `${year} -`;
+      }
+      return value.substring(0, 4);
     });
 
-    const earnings = ((freq === "fq"
-      ? quote.earning_action_fq_h
-      : quote.earning_action_fy_h) ?? []) as unknown as ActionH[];
+    const revenue =
+      base.find((value) => value?.[0] === "Revenue")?.slice(1) ?? [];
 
-    const earningsGrowth = earnings.map((a, index) => {
-      const current = a?.Actual ?? a.Estimate;
-      const previous = earnings[index - 1]?.Actual;
-      if (!current || !previous) return 0;
-      return ((current - previous) / previous) * 100;
-    });
+    const revenueGrowthYoY =
+      base.find((value) => value?.[0] === "Revenue Growth YoY")?.slice(1) ?? [];
 
-    const salesAcceleration = findContinuousTrends(salesGrowth);
-    const earningAcceleration = findContinuousTrends(earningsGrowth);
+    const revenueGrowthQoQ =
+      base.find((value) => value[0] === "Revenue Growth QoQ")?.slice(1) ?? [];
 
-    const tableData = earnings.map((e, index) => ({
-      period: e.FiscalPeriod,
-      salesActual: sales[index]?.Actual,
-      salesEstimate: sales[index]?.Estimate,
-      salesSurprise: sales[index]?.Surprise,
-      salesReported: sales[index]?.IsReported,
-      salesGrowth: salesGrowth[index],
-      salesAcceleration: salesAcceleration[index],
-      earningActual: e.Actual,
-      earningEstimate: e.Estimate,
-      earningSurprise: e.Surprise,
-      earningReported: e.IsReported,
-      earningGrowth: earningsGrowth[index],
-      earningAcceleration: earningAcceleration[index],
+    const revenueAcceleration = findContinuousTrends(
+      revenueGrowthQoQ as number[],
+    );
+
+    const revenueList = revenue.map((value, index) => ({
+      value: value as number,
+      growthQoQ: revenueGrowthQoQ[index] as number,
+      growthYoY: revenueGrowthYoY[index] as number,
+      acceleration: revenueAcceleration[index] === 1,
+      deceleration: revenueAcceleration[index] === -1,
     }));
-    const firstEstimateIndex = tableData.findIndex((r) => !r.salesReported);
 
-    return {
-      noData: false,
-      tableData,
-      firstEstimateIndex,
-    } as const;
+    const earnings = base.find((value) => value?.[0] === "EPS")?.slice(1) ?? [];
+
+    const earningsGrowthYoY =
+      base.find((value) => value?.[0] === "EPS Growth YoY")?.slice(1) ?? [];
+
+    const earningsGrowthQoQ =
+      base.find((value) => value?.[0] === "EPS Growth QoQ")?.slice(1) ?? [];
+
+    const earningsAcceleration = findContinuousTrends(
+      earningsGrowthQoQ as number[],
+    );
+    const earningsList = earnings.map((value, index) => ({
+      value: value as number,
+      growthQoQ: earningsGrowthQoQ[index] as number,
+      growthYoY: earningsGrowthYoY[index] as number,
+      acceleration: earningsAcceleration[index] === 1,
+      deceleration: earningsAcceleration[index] === -1,
+    }));
+
+    return { columns, revenueList, earningsList };
   }, [quote, freq]);
 
   const tableRef = useRef<HTMLTableElement>(null);
@@ -118,7 +123,7 @@ export const StatsTable = ({ freq }: { freq: "fq" | "fy" }) => {
     return null;
   }
 
-  const { tableData, firstEstimateIndex } = data;
+  const { columns, revenueList, earningsList } = data;
   return (
     <div className="w-full overflow-auto h-full transition-colors cursor-default border relative">
       <Table ref={tableRef} className="w-full table-auto h-full">
@@ -131,14 +136,9 @@ export const StatsTable = ({ freq }: { freq: "fq" | "fy" }) => {
               Period
             </TableHead>
 
-            {tableData.map((c, index) => (
-              <TableHead
-                key={c.period}
-                className={cn("text-left px-6 text-nowrap", {
-                  "border-l-2 border-muted": firstEstimateIndex === index,
-                })}
-              >
-                {c.period}
+            {columns.map((c) => (
+              <TableHead key={c} className={cn("text-left px-6 text-nowrap")}>
+                {c}
               </TableHead>
             ))}
           </TableRow>
@@ -147,30 +147,20 @@ export const StatsTable = ({ freq }: { freq: "fq" | "fy" }) => {
           <TableRow>
             <TableCell
               key={"Sales"}
-              className="text-left px-6 text-nowrap sticky left-0 bg-background z-10 border-r"
+              className="text-left px-6 text-nowrap sticky left-0 bg-background z-10 border-r space-y-2"
             >
-              Sales
+              <div className="font-bold">Sales</div>
+              <div className="text-xs">QoQ</div>
+              <div className="text-xs">YoY</div>
             </TableCell>
-            {tableData.map((c, index) => {
-              const value = c.salesReported ? c.salesActual : c.salesEstimate;
+            {revenueList.map((c, index) => {
+              const value = c.value;
               const formattedValue = value ? moneyFormatter.format(value) : "-";
-              const salesAcceleration = c.salesAcceleration;
-              const formattedActual = c.salesActual
-                ? moneyFormatter.format(c.salesActual)
+              const formattedQoQGrowth = c.growthQoQ
+                ? percentFormatter.format(c.growthQoQ / 100)
                 : "-";
-              const formattedEstimate = c.salesEstimate
-                ? moneyFormatter.format(c.salesEstimate)
-                : "-";
-              const formattedSurpriseAbs =
-                c.salesActual && c.salesEstimate
-                  ? moneyFormatter.format(c.salesActual - c.salesEstimate)
-                  : "-";
-              const formattedGrowth = c.salesGrowth
-                ? percentFormatter.format(c.salesGrowth / 100)
-                : "-";
-
-              const formattedSurrpise = c.salesSurprise
-                ? percentFormatter.format(c.salesSurprise / 100)
+              const formattedYoYGrowth = c.growthYoY
+                ? percentFormatter.format(c.growthYoY / 100)
                 : "-";
 
               const overview = (
@@ -178,94 +168,54 @@ export const StatsTable = ({ freq }: { freq: "fq" | "fy" }) => {
                   <div>{formattedValue}</div>
                   <div
                     className={cn({
-                      "text-bullish": c.salesGrowth > 0,
-                      "text-bearish": c.salesGrowth < 0,
+                      "text-bullish": c.growthQoQ > 0,
+                      "text-bearish": c.growthQoQ < 0,
                     })}
                   >
-                    {formattedGrowth}
+                    {formattedQoQGrowth}
+                  </div>
+                  <div
+                    className={cn({
+                      "text-bullish": c.growthQoQ > 0,
+                      "text-bearish": c.growthQoQ < 0,
+                    })}
+                  >
+                    {formattedYoYGrowth}
                   </div>
                 </>
-              );
-
-              const detail = (
-                <div>
-                  <div className="bg-muted p-2">Sales</div>
-                  <div className="p-2 space-y-2">
-                    <div className="space-x-2">
-                      <span className="font-bold">Actual:</span>
-                      <span>{formattedActual}</span>
-                    </div>
-                    <div className="space-x-2">
-                      <span className="font-bold">Growth%:</span>
-                      <span className="font-bold">{formattedGrowth}</span>
-                    </div>
-                    <div className="space-x-2">
-                      <span className="font-bold">Estimate:</span>
-                      <span>{formattedEstimate}</span>
-                    </div>
-                    <div className="space-x-2">
-                      <span className="font-bold">Surprise:</span>
-                      <span className="font-bold">{formattedSurpriseAbs}</span>
-                    </div>
-
-                    <div className="space-x-2">
-                      <span className="font-bold">Surprise%:</span>
-                      <span className="font-bold">{formattedSurrpise}</span>
-                    </div>
-                  </div>
-                </div>
               );
 
               return (
                 <TableCell
                   key={index}
-                  className={cn("text-left px-6 text-nowrap", {
-                    "border-l-2 border-l-muted": firstEstimateIndex === index,
-                    "border-b-bullish": salesAcceleration === 1,
-                    "border-b-bearish": salesAcceleration === -1,
-                    "border-b": salesAcceleration,
+                  className={cn("text-left px-6 text-nowrap space-y-2", {
+                    "border-b-bullish": c.acceleration,
+                    "border-b-bearish": c.deceleration,
+                    "border-b": c.acceleration || c.deceleration,
                   })}
                 >
-                  <HoverCard openDelay={50} closeDelay={50}>
-                    <HoverCardTrigger>{overview}</HoverCardTrigger>
-                    <HoverCardContent className="p-0">
-                      {detail}
-                    </HoverCardContent>
-                  </HoverCard>
+                  {overview}
                 </TableCell>
               );
             })}
           </TableRow>
           <TableRow>
             <TableCell
-              key={"Earning"}
-              className="text-left px-6 text-nowrap sticky left-0 bg-background z-10 border-r"
+              key={"Earnings"}
+              className="text-left px-6 text-nowrap sticky left-0 bg-background z-10 border-r space-y-2"
             >
-              Earning
+              <div className="font-bold">Earnings</div>
+              <div className="text-xs">QoQ</div>
+              <div className="text-xs">YoY</div>
             </TableCell>
-            {tableData.map((c, index) => {
-              const value = c.earningReported
-                ? c.earningActual
-                : c.earningEstimate;
+            {earningsList.map((c, index) => {
+              const value = c.value;
               const formattedValue = value ? moneyFormatter.format(value) : "-";
-              const earningAcceleration = c.earningAcceleration;
-              const formattedActual = c.earningActual
-                ? moneyFormatter.format(c.earningActual)
+              const formattedQoQGrowth = c.growthQoQ
+                ? percentFormatter.format(c.growthQoQ / 100)
                 : "-";
-              const formattedEstimate = c.earningEstimate
-                ? moneyFormatter.format(c.earningEstimate)
-                : "-";
-              const formattedSurpriseAbs =
-                c.earningActual && c.earningEstimate
-                  ? moneyFormatter.format(c.earningActual - c.earningEstimate)
-                  : "-";
-
-              const formattedGrowth = c.earningGrowth
-                ? percentFormatter.format(c.earningGrowth / 100)
-                : "-";
-
-              const formattedSurprise = c.earningSurprise
-                ? percentFormatter.format(c.earningSurprise / 100)
+              const formattedYoYGrowth = c.growthYoY
+                ? percentFormatter.format(c.growthYoY / 100)
                 : "-";
 
               const overview = (
@@ -273,62 +223,33 @@ export const StatsTable = ({ freq }: { freq: "fq" | "fy" }) => {
                   <div>{formattedValue}</div>
                   <div
                     className={cn({
-                      "text-bullish": c.earningGrowth > 0,
-                      "text-bearish": c.earningGrowth < 0,
+                      "text-bullish": c.growthQoQ > 0,
+                      "text-bearish": c.growthQoQ < 0,
                     })}
                   >
-                    {formattedGrowth}
+                    {formattedQoQGrowth}
+                  </div>
+                  <div
+                    className={cn({
+                      "text-bullish": c.growthQoQ > 0,
+                      "text-bearish": c.growthQoQ < 0,
+                    })}
+                  >
+                    {formattedYoYGrowth}
                   </div>
                 </>
-              );
-
-              const detail = (
-                <div>
-                  <div className="bg-muted p-2">Earning</div>
-
-                  <div className="p-2 space-y-2">
-                    <div className="space-x-2">
-                      <span className="font-bold">Actual:</span>
-                      <span>{formattedActual}</span>
-                    </div>
-
-                    <div className="space-x-2">
-                      <span className="font-bold">Growth%:</span>
-                      <span className="font-bold">{formattedGrowth}</span>
-                    </div>
-
-                    <div className="space-x-2">
-                      <span className="font-bold">Estimate:</span>
-                      <span>{formattedEstimate}</span>
-                    </div>
-                    <div className="space-x-2">
-                      <span className="font-bold">Surprise:</span>
-                      <span className="font-bold">{formattedSurpriseAbs}</span>
-                    </div>
-                    <div className="space-x-2">
-                      <span className="font-bold">Surprise%:</span>
-                      <span className="font-bold">{formattedSurprise}</span>
-                    </div>
-                  </div>
-                </div>
               );
 
               return (
                 <TableCell
                   key={index}
-                  className={cn("text-left px-6 text-nowrap border-l-muted", {
-                    "border-l-2 border-l-muted": firstEstimateIndex === index,
-                    "border-b-bullish": earningAcceleration === 1,
-                    "border-b-bearish": earningAcceleration === -1,
-                    "border-b": earningAcceleration,
+                  className={cn("text-left px-6 text-nowrap space-y-2", {
+                    "border-b-bullish": c.acceleration,
+                    "border-b-bearish": c.deceleration,
+                    "border-b": c.acceleration || c.deceleration,
                   })}
                 >
-                  <HoverCard openDelay={50} closeDelay={50}>
-                    <HoverCardTrigger>{overview}</HoverCardTrigger>
-                    <HoverCardContent className="p-0">
-                      {detail}
-                    </HoverCardContent>
-                  </HoverCard>
+                  {overview}
                 </TableCell>
               );
             })}
@@ -425,4 +346,8 @@ function findTrueRanges(values: boolean[]): BooleanRange[] {
     ranges.push({ start, end: values.length - 1 });
   }
   return ranges.filter((r) => r.end - r.start >= 2);
+}
+
+function transpose(matrix: unknown[][]) {
+  return matrix[0].map((_, colIndex) => matrix.map((row) => row[colIndex]));
 }
