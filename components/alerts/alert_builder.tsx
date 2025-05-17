@@ -18,17 +18,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Alert, InsertAlert } from "@/types/supabase";
-import {
-  useCreateAlert,
-  useSymbolQuote,
-  useUpdateAlert,
-} from "@/lib/state/symbol";
+import { useCreateAlert, useUpdateAlert } from "@/lib/state/symbol";
 import type { Json } from "@/types/generated/supabase";
+import { toast } from "sonner";
 
 interface AlertBuilderProps {
   open: boolean;
-  onClose: () => void;
+  onOpenChange: (value: boolean) => void;
   initialSymbol?: string;
+  alertPrice?: number;
   initialType?: "price" | "trendline";
   existingAlert?: Alert;
   onSave?: (alert: Alert) => void;
@@ -36,10 +34,11 @@ interface AlertBuilderProps {
 
 export function AlertBuilder({
   open,
-  onClose,
+  onOpenChange,
   initialSymbol = "",
   initialType = "price",
   existingAlert,
+  alertPrice,
   onSave,
 }: AlertBuilderProps) {
   const [symbol, setSymbol] = useState(
@@ -55,26 +54,31 @@ export function AlertBuilder({
     existingAlert?.operator || ">",
   );
   const [price, setPrice] = useState<number>(
-    existingAlert?.rhs_attr &&
-      typeof existingAlert.rhs_attr === "object" &&
-      "value" in existingAlert.rhs_attr
-      ? (existingAlert.rhs_attr as { value: number }).value
-      : 0,
+    (existingAlert?.rhs_attr as Record<string, number>)?.["constant"] ??
+      alertPrice,
   );
   const [notes, setNotes] = useState<string>(existingAlert?.notes || "");
-
-  const { data: symbolData } = useSymbolQuote(symbol);
-  const { mutate: createAlert, isPending: isCreating } = useCreateAlert(onSave);
-  const { mutate: updateAlert, isPending: isUpdating } = useUpdateAlert(onSave);
+  const { mutate: createAlert, isPending: isCreating } = useCreateAlert(
+    (alert) => {
+      toast(`Alert created for ${alert.symbol} at ${price}`);
+      onOpenChange(false);
+      onSave?.(alert);
+    },
+  );
+  const { mutate: updateAlert, isPending: isUpdating } = useUpdateAlert(
+    (alert) => {
+      toast(`Alert updated for ${alert.symbol} at ${price}`);
+      onOpenChange(false);
+      onSave?.(alert);
+    },
+  );
 
   const isPending = isCreating || isUpdating;
 
-  // When symbol data loads, set initial price if not set
   useEffect(() => {
-    if (symbolData?.day_close && !existingAlert && price === 0) {
-      setPrice(symbolData.day_close);
-    }
-  }, [symbolData, existingAlert, price]);
+    if (alertPrice) setPrice(alertPrice);
+    if (initialSymbol) setSymbol(initialSymbol);
+  }, [initialSymbol, alertPrice]);
 
   const handleSave = () => {
     if (!symbol) return;
@@ -86,7 +90,7 @@ export function AlertBuilder({
       rhs_type: rhsType,
       operator,
       notes: notes || null,
-      rhs_attr: { value: price } as Json,
+      rhs_attr: { constant: price } as Json,
     };
 
     if (existingAlert) {
@@ -100,7 +104,7 @@ export function AlertBuilder({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
@@ -169,24 +173,13 @@ export function AlertBuilder({
                 <Input
                   id="price"
                   type="number"
-                  value={price.toString()}
+                  value={price?.toString()}
                   onChange={(e) => setPrice(parseFloat(e.target.value))}
                   className="col-span-3"
                   placeholder="Enter alert price"
                   step="0.01"
                 />
               </div>
-
-              {symbolData?.day_close && (
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <div className="text-right text-sm text-muted-foreground">
-                    Current
-                  </div>
-                  <div className="col-span-3 text-sm">
-                    {symbolData.day_close.toFixed(2)}
-                  </div>
-                </div>
-              )}
             </>
           )}
 
@@ -232,7 +225,11 @@ export function AlertBuilder({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isPending}>
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={isPending}
+          >
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={isPending}>

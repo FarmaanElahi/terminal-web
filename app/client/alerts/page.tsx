@@ -50,12 +50,9 @@ export default function AlertsPage() {
 
   const formatAlertDescription = (alert: Alert) => {
     const condition = alert.operator === ">" ? "Above" : "Below";
-
     if (alert.rhs_type === "constant") {
       const price =
-        typeof alert.rhs_attr === "object" && "value" in (alert.rhs_attr ?? {})
-          ? (alert.rhs_attr as { value: number }).value
-          : 0;
+        (alert?.rhs_attr as Record<string, number>)?.["constant"] ?? 0;
       return `${condition} ${price.toFixed(2)}`;
     } else {
       return `${condition} Trendline`;
@@ -158,7 +155,7 @@ export default function AlertsPage() {
 
       <AlertBuilder
         open={isAlertBuilderOpen}
-        onClose={closeAlertBuilder}
+        onOpenChange={closeAlertBuilder}
         initialType={initialAlertType}
         initialSymbol={initialSymbol}
         existingAlert={editingAlert}

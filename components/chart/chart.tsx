@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useEffect,
   useRef,
+  useState,
 } from "react";
 import { useChartManager } from "@/lib/state/charts";
 import { useGroupSymbol } from "@/lib/state/grouper";
@@ -17,6 +18,7 @@ import {
 } from "@/components/chart/types";
 import { getIndicators } from "@/components/chart/indicators";
 import { TerminalBroker } from "@/components/chart/terminal/broker_terminal";
+import { AlertBuilder } from "@/components/alerts/alert_builder";
 
 interface ChartProps extends HTMLAttributes<HTMLDivElement> {
   layoutId?: string;
@@ -37,13 +39,17 @@ export function Chart({ layoutId, onLayoutChange, ...props }: ChartProps) {
         ? "light"
         : (theme.systemTheme ?? "light");
 
+  const [showAlert, setShowAlert] = useState<[string, number] | undefined>(
+    undefined,
+  );
+
   const { setSymbol, changeTheme } = useChart({
     containerRef: chartContainerRef,
     layoutId,
     onLayoutChange: onLayoutChange,
     symbol,
     theme: chartTheme,
-    showAlertBuilder: (s, p) => alert(`Show alert at ${s} ${p}`),
+    showAlertBuilder: (symbol, price) => setShowAlert([symbol, price]),
   });
 
   useEffect(() => {
@@ -55,11 +61,22 @@ export function Chart({ layoutId, onLayoutChange, ...props }: ChartProps) {
   }, [chartTheme, changeTheme]);
 
   return (
-    <div
-      ref={chartContainerRef}
-      className={"h-full overflow-auto"}
-      {...props}
-    />
+    <>
+      <AlertBuilder
+        open={!!showAlert}
+        onOpenChange={(value) =>
+          value ? setShowAlert(showAlert) : setShowAlert(undefined)
+        }
+        initialSymbol={showAlert?.[0]}
+        initialType={"price"}
+        alertPrice={showAlert?.[1]}
+      />
+      <div
+        ref={chartContainerRef}
+        className={"h-full overflow-auto"}
+        {...props}
+      />
+    </>
   );
 }
 
