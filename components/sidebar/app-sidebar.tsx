@@ -6,6 +6,7 @@ import {
   Bot,
   Command,
   LifeBuoy,
+  MegaphoneIcon,
   Send,
   SquareTerminal,
 } from "lucide-react";
@@ -45,6 +46,11 @@ const data = {
       title: "Watchlist",
       url: "/client/watchlist",
       icon: BookOpen,
+    },
+    {
+      title: "Alert",
+      url: "/client/alerts",
+      icon: MegaphoneIcon,
     },
   ],
   navSecondary: [
