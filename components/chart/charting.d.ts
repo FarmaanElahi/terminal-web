@@ -77,6 +77,16 @@ type PlusClickParams = { x: number; y: number; price: number; symbol: string };
 type RangeOptions = { from: number; to: number; resolution: string };
 type UndoRedoState = { canUndo: boolean; canRedo: boolean };
 
+interface ISubscription<T> {
+  subscribe: (
+    obj: unknown,
+    member: (v: T) => void,
+    singleshot?: boolean,
+  ) => void;
+  unsubscribe: (obj: unknown, member: (v: T) => void) => void;
+  unsubscribeAll: (obj: unknown) => void;
+}
+
 interface SaveLoadChartRecord {
   id: string | number;
   image_url: string;
@@ -86,17 +96,33 @@ interface SaveLoadChartRecord {
   short_symbol: string;
 }
 
+export interface CrossHairMovedEventParams {
+  price: number;
+  time: number;
+}
+
 declare namespace TradingView {
   interface IChartWidgetApi {
     resolution: () => string;
     setSymbol: (symbol: string, tf: string) => void;
     loadChartTemplate: (template: string) => void;
+    crossHairMoved: () => ISubscription<CrossHairMovedEventParams>;
+    symbol: () => string;
+  }
+
+  interface ContextMenuItem {
+    click: () => void;
+    position: "top" | "bottom";
+    text: string;
   }
 
   class widget {
     constructor(options: TradingViewWidgetOptions);
 
     onChartReady: (cb: () => void) => void;
+    onContextMenu: (
+      cb: (unixtime: number, price: number) => ContextMenuItem[],
+    ) => void;
     headerReady: () => Promise<void>;
     chart: (index?: number) => IChartWidgetApi;
     chartsCount: () => number;

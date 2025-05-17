@@ -1373,10 +1373,72 @@ export interface WidgetbarOptions {
   };
 }
 
+export interface IAction {
+  actionId: string;
+}
+
+export interface ISeparator {
+  actionId: string;
+}
+
+export interface ActionOptions {
+  actionId: string;
+  active?: boolean;
+  checkable?: boolean;
+  checked?: boolean;
+  disabled?: boolean;
+  doNotCloseOnClick?: boolean;
+  hint?: string;
+  icon?: string;
+  iconChecked?: string;
+  label?: string;
+  loading?: boolean;
+  noInteractive?: boolean;
+  onExecute: (action: IAction) => void;
+  shortcutHint?: string;
+  styledLabel?: string;
+  subItems?: string;
+}
+
+export type IActionVariant = IAction | ISeparator;
+
+export interface CrossHairMovedEventParams {
+  price: number;
+  time: number;
+}
+
+export interface ActionsFactory {
+  createAction(option: ActionOptions): IAction;
+
+  createAsyncAction(loader: () => Promise<ActionOptions>): IAction;
+
+  createSeparator(): ISeparator;
+}
+
+export interface CreateContextMenuParams {
+  menuName: string;
+  detail:
+    | { id: string; type: "series" }
+    | { id: string; type: "study" }
+    | { id: string | number; type: "shape" }
+    | {
+        id: string;
+        type: "groupOfShapes";
+      }
+    | { id: string; type: "position" }
+    | { id: string; type: "order" };
+}
+
+export type ContextMenuItemsProcessor = (
+  items: IActionVariant[],
+  actionsFactory: ActionsFactory,
+  params: CreateContextMenuParams,
+) => Promise<IActionVariant[]>;
+
 export interface TradingViewWidgetOptions {
   broker_factory?: (host: IBrokerConnectionAdapterHost) => IBrokerTerminal;
-  broker_config: {
-    configFlags: {
+  broker_config?: {
+    configFlags?: {
       supportLevel2Data?: true;
       supportNativeReversePosition?: true;
       supportClosePosition?: true;
@@ -1396,18 +1458,6 @@ export interface TradingViewWidgetOptions {
   client_id?: string;
   compare_symbols?: { symbol: string; title: string }[];
   container: string | HTMLElement;
-  context_menu?: {
-    items_processor: (
-      items: unknown,
-      actionsFactory: unknown,
-      params: unknown,
-    ) => Promise<unknown>;
-    renderer_factory: (
-      items: unknown[],
-      params: unknown,
-      onDestroy: () => void,
-    ) => Promise<unknown>;
-  };
   custom_chart_description_function?: (
     context: Record<string, unknown>,
   ) => Promise<string | null>;
@@ -1509,4 +1559,7 @@ export interface TradingViewWidgetOptions {
   user_id?: string;
   width?: number;
   widgetbar?: WidgetbarOptions;
+  context_menu?: {
+    items_processor?: ContextMenuItemsProcessor;
+  };
 }

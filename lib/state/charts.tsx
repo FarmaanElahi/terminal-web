@@ -14,7 +14,6 @@ const ChartContext = createContext<Charts | null>(null);
 
 export function ChartProvider({ children }: { children: ReactNode }) {
   const appInfo = useAppInfo();
-
   // Used to fetch market data
   const upstoxToken = appInfo.tradingAccounts.find(
     (value) => value.type === "upstox",
