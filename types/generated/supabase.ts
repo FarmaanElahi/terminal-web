@@ -9,6 +9,66 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      alerts: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          is_active: boolean
+          last_triggered_at: string | null
+          last_triggered_price: number
+          lhs_attr: Json | null
+          lhs_type: Database["public"]["Enums"]["alert_lhs_type"]
+          notes: string | null
+          operator: string
+          rhs_attr: Json
+          rhs_type: Database["public"]["Enums"]["alert_rhs_type"]
+          symbol: string
+          triggered_count: number
+          type: Database["public"]["Enums"]["alert_type"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at: string
+          deleted_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_triggered_at?: string | null
+          last_triggered_price?: number
+          lhs_attr?: Json | null
+          lhs_type: Database["public"]["Enums"]["alert_lhs_type"]
+          notes?: string | null
+          operator: string
+          rhs_attr: Json
+          rhs_type: Database["public"]["Enums"]["alert_rhs_type"]
+          symbol: string
+          triggered_count?: number
+          type: Database["public"]["Enums"]["alert_type"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_triggered_at?: string | null
+          last_triggered_price?: number
+          lhs_attr?: Json | null
+          lhs_type?: Database["public"]["Enums"]["alert_lhs_type"]
+          notes?: string | null
+          operator?: string
+          rhs_attr?: Json
+          rhs_type?: Database["public"]["Enums"]["alert_rhs_type"]
+          symbol?: string
+          triggered_count?: number
+          type?: Database["public"]["Enums"]["alert_type"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       chart_drawings: {
         Row: {
           chart_id: string | null
@@ -275,6 +335,9 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      alert_lhs_type: "last_price"
+      alert_rhs_type: "constant" | "trend_line"
+      alert_type: "simple"
       watchlist_type: "custom" | "colored"
     }
     CompositeTypes: {
@@ -391,6 +454,9 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      alert_lhs_type: ["last_price"],
+      alert_rhs_type: ["constant", "trend_line"],
+      alert_type: ["simple"],
       watchlist_type: ["custom", "colored"],
     },
   },

@@ -40,3 +40,7 @@ export type InsertDataPanel =
   Database["public"]["Tables"]["data_panels"]["Insert"];
 export type UpdateDataPanel =
   Database["public"]["Tables"]["data_panels"]["Update"];
+
+export type Alert = Database["public"]["Tables"]["alerts"]["Row"];
+export type InsertAlert = Database["public"]["Tables"]["alerts"]["Insert"];
+export type UpdateAlert = Database["public"]["Tables"]["alerts"]["Update"];

@@ -12,13 +12,16 @@ import { fetchStockTwit } from "@/server/stocktwits";
 import type { StockTwitFeed } from "@/types/stocktwits";
 import { queryDuckDB } from "@/utils/duckdb";
 import {
+  Alert,
   Dashboard,
   DataPanel,
+  InsertAlert,
   InsertDashboard,
   InsertDataPanel,
   InsertScreen,
   InsertWatchlist,
   Screen,
+  UpdateAlert,
   UpdateDashboard,
   UpdateDataPanel,
   UpdateScreen,
@@ -717,6 +720,180 @@ export function useDataPanelData(id: string) {
 
       if (error) throw error;
       return data as DataPanel;
+    },
+  });
+}
+
+//##################### ALERTS #####################
+
+export function useAlerts() {
+  return useQuery({
+    queryKey: ["alerts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("alerts")
+        .select("*")
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data as Alert[];
+    },
+  });
+}
+
+export function useAlert(id: string) {
+  return useQuery({
+    queryKey: ["alerts", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("alerts")
+        .select("*")
+        .eq("id", id)
+        .is("deleted_at", null)
+        .single();
+
+      if (error) throw error;
+      return data as Alert;
+    },
+  });
+}
+
+export function useAlertsForSymbol(symbol: string) {
+  return useQuery({
+    queryKey: ["alerts", "symbol", symbol],
+    enabled: !!symbol,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("alerts")
+        .select("*")
+        .eq("symbol", symbol)
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      return data as Alert[];
+    },
+  });
+}
+
+export function useCreateAlert(onComplete?: (alert: Alert) => void) {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: (alert: Alert) => {
+      void client.invalidateQueries({ queryKey: ["alerts"] });
+      void client.invalidateQueries({
+        queryKey: ["alerts", "symbol", alert.symbol],
+      });
+      onComplete?.(alert);
+    },
+    mutationFn: async (alert: InsertAlert) => {
+      const { data, error } = await supabase
+        .from("alerts")
+        .insert({
+          ...alert,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          is_active: true,
+          triggered_count: 0,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Alert;
+    },
+  });
+}
+
+export function useUpdateAlert(onComplete?: (alert: Alert) => void) {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: (alert: Alert) => {
+      void client.invalidateQueries({ queryKey: ["alerts"] });
+      void client.invalidateQueries({ queryKey: ["alerts", alert.id] });
+      void client.invalidateQueries({
+        queryKey: ["alerts", "symbol", alert.symbol],
+      });
+      onComplete?.(alert);
+    },
+    mutationFn: async ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: UpdateAlert;
+    }) => {
+      const { data, error } = await supabase
+        .from("alerts")
+        .update({
+          ...payload,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Alert;
+    },
+  });
+}
+
+export function useDeleteAlert(onComplete?: () => void) {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: (alert: Alert) => {
+      void client.invalidateQueries({ queryKey: ["alerts"] });
+      void client.invalidateQueries({ queryKey: ["alerts", alert.id] });
+      void client.invalidateQueries({
+        queryKey: ["alerts", "symbol", alert.symbol],
+      });
+      onComplete?.();
+    },
+    mutationFn: async (id: string) => {
+      // Soft delete by setting deleted_at
+      const { data, error } = await supabase
+        .from("alerts")
+        .update({
+          deleted_at: new Date().toISOString(),
+          is_active: false,
+        })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Alert;
+    },
+  });
+}
+
+export function useToggleAlertActive(onComplete?: (alert: Alert) => void) {
+  const client = useQueryClient();
+  return useMutation({
+    onSuccess: (alert: Alert) => {
+      void client.invalidateQueries({ queryKey: ["alerts"] });
+      void client.invalidateQueries({ queryKey: ["alerts", alert.id] });
+      void client.invalidateQueries({
+        queryKey: ["alerts", "symbol", alert.symbol],
+      });
+      onComplete?.(alert);
+    },
+    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+      const { data, error } = await supabase
+        .from("alerts")
+        .update({
+          is_active: isActive,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data as Alert;
     },
   });
 }
