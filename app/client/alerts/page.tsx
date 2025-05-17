@@ -114,7 +114,7 @@ export default function AlertsPage() {
                       ` • Triggered ${alert.triggered_count} times`}
                     {alert.last_triggered_at &&
                       ` • Last triggered on ${DateTime.fromISO(alert.last_triggered_at).toFormat("dd LLL yyyy hh:mm")}`}{" "}
-                    at {alert.last_triggered_price.toFixed(2)}
+                    at {alert.last_triggered_price?.toFixed(2)}
                   </div>
                 </div>
                 <div className="flex space-x-2">
