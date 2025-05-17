@@ -147,6 +147,29 @@ export interface IWatchedValue<T = any> {
   setValue: (value: T, forceUpdate?: boolean) => void;
 }
 
+export interface ActionDescription {
+  checkable?: boolean;
+  checked?: boolean;
+  checkedStateSource: () => boolean;
+  enabled: boolean;
+  externalLink: boolean;
+  icon: string;
+  separator: boolean;
+  shortcut: boolean;
+  text: string;
+  tooltip?: string;
+}
+
+export interface INumberFormatter {
+  pa: () => void;
+}
+
+export interface ActionDescriptionWithCallback extends ActionDescription {
+  action: (a: ActionDescription) => void;
+}
+
+export type ActionMetaInfo = ActionDescriptionWithCallback;
+
 export interface IBrokerTerminal {
   accountManagerInfo(): AccountManagerInfo;
 
@@ -154,7 +177,7 @@ export interface IBrokerTerminal {
 
   currentAccount?(): string;
 
-  chartContextMenuActions: (t: TradeContext) => Promise<[]>;
+  chartContextMenuActions: (t: TradeContext) => Promise<ActionMetaInfo[]>;
 
   isTradable(symbol: string): Promise<boolean>;
 
@@ -165,6 +188,11 @@ export interface IBrokerTerminal {
   executions(): Promise<Execution[]>;
 
   symbolInfo(symbol: string): Promise<InstrumentInfo>;
+
+  formatter: (
+    symbol: string,
+    alignToMinMove: boolean,
+  ) => Promise<INumberFormatter>;
 }
 
 export interface IBrokerConnectionAdapterFactory {
@@ -178,5 +206,13 @@ export interface IBrokerConnectionAdapterHost {
 
   factory: IBrokerConnectionAdapterFactory;
 
-  defaultContextMenuActions(t: TradeContext): Promise<[]>;
+  defaultContextMenuActions(
+    t: TradeContext,
+    p?: unknown,
+  ): Promise<ActionMetaInfo[]>;
+
+  defaultFormatter: (
+    symbol: string,
+    alignToMinMove: boolean,
+  ) => Promise<INumberFormatter>;
 }

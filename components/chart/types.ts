@@ -1373,15 +1373,7 @@ export interface WidgetbarOptions {
   };
 }
 
-export interface IAction {
-  actionId: string;
-}
-
-export interface ISeparator {
-  actionId: string;
-}
-
-export interface ActionOptions {
+export interface ActionOption {
   actionId: string;
   active?: boolean;
   checkable?: boolean;
@@ -1400,6 +1392,22 @@ export interface ActionOptions {
   subItems?: string;
 }
 
+export interface ISeparator {
+  type: "separator";
+  actionId: string;
+}
+
+export interface ActionState {
+  actionId: string;
+  label: string;
+}
+
+export type IAction = {
+  id: string;
+  type: "action";
+  getState: () => ActionState;
+};
+
 export type IActionVariant = IAction | ISeparator;
 
 export interface CrossHairMovedEventParams {
@@ -1408,9 +1416,9 @@ export interface CrossHairMovedEventParams {
 }
 
 export interface ActionsFactory {
-  createAction(option: ActionOptions): IAction;
+  createAction(option: ActionOption): IAction;
 
-  createAsyncAction(loader: () => Promise<ActionOptions>): IAction;
+  createAsyncAction(loader: () => Promise<ActionOption>): IAction;
 
   createSeparator(): ISeparator;
 }

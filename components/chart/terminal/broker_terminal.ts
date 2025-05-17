@@ -5,6 +5,7 @@ import {
   IBrokerConnectionAdapterHost,
   IBrokerTerminal,
   InstrumentInfo,
+  INumberFormatter,
   ISubscription,
   IWatchedValue,
   Order,
@@ -264,8 +265,16 @@ export class TerminalBroker implements IBrokerTerminal {
     return this.activeAccount.accountId;
   }
 
-  chartContextMenuActions(t: TradeContext) {
-    return this.host.defaultContextMenuActions(t);
+  formatter(
+    symbol: string,
+    alignToMinMove: boolean,
+  ): Promise<INumberFormatter> {
+    console.log("get format");
+    return this.host.defaultFormatter(symbol, alignToMinMove);
+  }
+
+  async chartContextMenuActions(t: TradeContext) {
+    return await this.host.defaultContextMenuActions(t);
   }
 
   async isTradable() {
