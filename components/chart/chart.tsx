@@ -19,7 +19,7 @@ import {
 } from "@/components/chart/types";
 import { getIndicators } from "@/components/chart/indicators";
 import { TerminalBroker } from "@/components/chart/terminal/broker_terminal";
-import { AlertBuilder } from "@/components/alerts/alert_builder";
+import { AlertBuilder, AlertParams } from "@/components/alerts/alert_builder";
 
 interface ChartProps extends HTMLAttributes<HTMLDivElement> {
   layoutId?: string;
@@ -40,7 +40,7 @@ export function Chart({ layoutId, onLayoutChange, ...props }: ChartProps) {
         ? "light"
         : (theme.systemTheme ?? "light");
 
-  const [showAlert, setShowAlert] = useState<[string, number] | undefined>(
+  const [showAlert, setShowAlert] = useState<AlertParams | undefined>(
     undefined,
   );
 
@@ -50,7 +50,7 @@ export function Chart({ layoutId, onLayoutChange, ...props }: ChartProps) {
     onLayoutChange: onLayoutChange,
     symbol,
     theme: chartTheme,
-    showAlertBuilder: (symbol, price) => setShowAlert([symbol, price]),
+    showAlertBuilder: (p) => setShowAlert(p),
   });
 
   useEffect(() => {
@@ -68,9 +68,7 @@ export function Chart({ layoutId, onLayoutChange, ...props }: ChartProps) {
         onOpenChange={(value) =>
           value ? setShowAlert(showAlert) : setShowAlert(undefined)
         }
-        initialSymbol={showAlert?.[0]}
-        initialType={"price"}
-        alertPrice={showAlert?.[1]}
+        alertParams={showAlert}
       />
       <div
         ref={chartContainerRef}
@@ -90,7 +88,7 @@ export function useChart({
   onReady,
   showAlertBuilder,
 }: {
-  showAlertBuilder?: (symbol: string, price: number) => void;
+  showAlertBuilder?: (p: AlertParams) => void;
   containerRef: RefObject<HTMLElement>;
   symbol?: string;
   theme: "dark" | "light";
@@ -177,7 +175,13 @@ export function useChart({
   const contextMenuItemProcessor: ContextMenuItemsProcessor = useCallback(
     async (items, actionsFactory, params) => {
       console.log(items, actionsFactory, params);
-      if (crossHairRef.current && widgetReadyRef.current) {
+
+      // Called for chart context menu
+      if (
+        params.menuName === "ChartContextMenu" &&
+        crossHairRef.current &&
+        widgetReadyRef.current
+      ) {
         const label = (
           items.find(
             (value) =>
@@ -194,9 +198,66 @@ export function useChart({
           actionId: "Terminal.AddAlert",
           icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alarm-clock-plus-icon lucide-alarm-clock-plus"><circle cx="12" cy="13" r="8"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>`,
           label: `Add Alert at ${price}`,
-          onExecute: () => showAlertBuilder?.(symbol, price),
+          onExecute: () =>
+            showAlertBuilder?.({
+              symbol,
+              params: { constant: price },
+              type: "constant",
+            }),
         });
         return [newItem, actionsFactory.createSeparator(), ...items];
+      }
+
+      if (
+        params.menuName === "ObjectTreeContextMenu" &&
+        widgetReadyRef.current
+      ) {
+        if (params.detail.type === "shape" && params.detail.id) {
+          const points = widgetReadyRef.current
+            .activeChart()
+            .getShapeById(params.detail.id)
+            ?.getPoints();
+          if (!points) return items;
+
+          const symbol = widgetReadyRef.current.activeChart().symbol();
+
+          // Build just price alert because it is a single point
+          if (points.length === 1) {
+            const price = parseFloat(points[0].price.toFixed(2));
+            const symbol = widgetReadyRef.current.activeChart().symbol();
+            const newItem = actionsFactory.createAction({
+              actionId: "Terminal.AddAlert",
+              icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alarm-clock-plus-icon lucide-alarm-clock-plus"><circle cx="12" cy="13" r="8"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>`,
+              label: `Add Alert at ${price}`,
+              onExecute: () =>
+                showAlertBuilder?.({
+                  symbol,
+                  params: { constant: price },
+                  type: "constant",
+                }),
+            });
+
+            return [newItem, actionsFactory.createSeparator(), ...items];
+          }
+
+          // this is a line
+          if (points.length === 2) {
+            const newItem = actionsFactory.createAction({
+              actionId: "Terminal.TrendlineAlert",
+              icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alarm-clock-plus-icon lucide-alarm-clock-plus"><circle cx="12" cy="13" r="8"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>`,
+              label: `Add Alert on Trend Line`,
+              onExecute: () => {
+                showAlertBuilder?.({
+                  type: "trend_line",
+                  symbol,
+                  params: { trend_line: points },
+                });
+              },
+            });
+            return [newItem, actionsFactory.createSeparator(), ...items];
+          }
+          return items;
+        }
       }
       return items;
     },

@@ -101,6 +101,15 @@ export interface CrossHairMovedEventParams {
   time: number;
 }
 
+interface PricePoint {
+  price: number;
+  time: number;
+}
+
+interface ILineDataSourceApi {
+  getPoints: () => PricePoint[];
+}
+
 declare namespace TradingView {
   interface IChartWidgetApi {
     resolution: () => string;
@@ -108,6 +117,7 @@ declare namespace TradingView {
     loadChartTemplate: (template: string) => void;
     crossHairMoved: () => ISubscription<CrossHairMovedEventParams>;
     symbol: () => string;
+    getShapeById: (id: string | number) => ILineDataSourceApi;
   }
 
   interface ContextMenuItem {

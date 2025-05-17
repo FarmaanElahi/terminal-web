@@ -19,26 +19,38 @@ import {
 } from "@/components/ui/select";
 import type { Alert, InsertAlert } from "@/types/supabase";
 import { useCreateAlert, useUpdateAlert } from "@/lib/state/symbol";
-import type { Json } from "@/types/generated/supabase";
 import { toast } from "sonner";
 
 interface AlertBuilderProps {
   open: boolean;
   onOpenChange: (value: boolean) => void;
-  initialSymbol?: string;
-  alertPrice?: number;
-  initialType?: "price" | "trendline";
+  alertParams?: AlertParams;
   existingAlert?: Alert;
   onSave?: (alert: Alert) => void;
 }
 
+interface ConstantAlertParams {
+  type: "constant";
+  symbol: string;
+  params: { constant: number };
+}
+
+interface TrenldineAlertParams {
+  type: "trend_line";
+  symbol: string;
+  params: { trend_line: { price: number; time: number }[] };
+}
+
+type ParamsType =
+  | ConstantAlertParams["params"]
+  | TrenldineAlertParams["params"];
+export type AlertParams = ConstantAlertParams | TrenldineAlertParams;
+
 export function AlertBuilder({
   open,
   onOpenChange,
-  initialSymbol = "",
-  initialType = "price",
+  alertParams,
   existingAlert,
-  alertPrice,
   onSave,
 }: AlertBuilderProps) {
   const [symbol, setSymbol] = useState("");
@@ -46,12 +58,14 @@ export function AlertBuilder({
   const [lhsType, setLhsType] = useState<"last_price">("last_price");
   const [rhsType, setRhsType] = useState<"constant" | "trend_line">("constant");
   const [operator, setOperator] = useState<string>(">");
-  const [price, setPrice] = useState<number | undefined>(undefined);
+  const [rhsAttr, setRhsAttr] = useState<ParamsType | undefined>(undefined);
   const [notes, setNotes] = useState<string>("");
 
   const { mutate: createAlert, isPending: isCreating } = useCreateAlert(
     (alert) => {
-      toast(`Alert created for ${alert.symbol}${price ? ` at ${price}` : ""}`);
+      toast(
+        `Alert created for ${alert.symbol}${rhsAttr ? ` at ${rhsAttr}` : ""}`,
+      );
       onOpenChange(false);
       onSave?.(alert);
     },
@@ -59,7 +73,9 @@ export function AlertBuilder({
 
   const { mutate: updateAlert, isPending: isUpdating } = useUpdateAlert(
     (alert) => {
-      toast(`Alert updated for ${alert.symbol}${price ? ` at ${price}` : ""}`);
+      toast(
+        `Alert updated for ${alert.symbol}${rhsAttr ? ` at ${rhsAttr}` : ""}`,
+      );
       onOpenChange(false);
       onSave?.(alert);
     },
@@ -79,37 +95,24 @@ export function AlertBuilder({
         setOperator(existingAlert.operator);
 
         // Handle price from rhs_attr depending on the format
-        const rhsAttr = existingAlert.rhs_attr;
-        if (typeof rhsAttr === "object" && rhsAttr !== null) {
-          if ("constant" in rhsAttr) {
-            setPrice((rhsAttr as Record<string, number>)["constant"]);
-          } else if ("value" in rhsAttr) {
-            setPrice((rhsAttr as Record<string, number>)["value"]);
-          }
-        }
-
+        setRhsAttr(existingAlert.rhs_attr as ParamsType);
         setNotes(existingAlert.notes || "");
-      } else {
+      } else if (alertParams) {
         // Initialize with provided values or defaults
-        setSymbol(initialSymbol || "");
+        setSymbol(alertParams.symbol || "");
         setAlertType("simple");
         setLhsType("last_price");
-        setRhsType(initialType === "price" ? "constant" : "trend_line");
+        setRhsType(alertParams.type);
         setOperator(">");
-        setPrice(alertPrice);
+        setRhsAttr(alertParams.params);
         setNotes("");
       }
     }
-  }, [open, existingAlert, initialSymbol, initialType, alertPrice]);
+  }, [open, existingAlert, alertParams]);
 
   const handleSave = () => {
     if (!symbol) {
       toast.error("Symbol is required");
-      return;
-    }
-
-    if (rhsType === "constant" && (price === undefined || isNaN(price))) {
-      toast.error("Valid price is required");
       return;
     }
 
@@ -120,10 +123,7 @@ export function AlertBuilder({
       rhs_type: rhsType,
       operator,
       notes: notes || null,
-      rhs_attr:
-        rhsType === "constant"
-          ? ({ constant: price } as Json)
-          : ({ trend_line_id: "placeholder" } as Json), // Would need an actual trendline ID in real usage
+      rhs_attr: rhsAttr,
     };
 
     if (existingAlert) {
@@ -135,6 +135,8 @@ export function AlertBuilder({
       createAlert(alertData as InsertAlert);
     }
   };
+
+  if (!alertParams && !existingAlert) return <></>;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -157,30 +159,11 @@ export function AlertBuilder({
               onChange={(e) => setSymbol(e.target.value.toUpperCase())}
               className="col-span-3"
               placeholder="Enter symbol (e.g. AAPL)"
-              disabled={!!initialSymbol || !!existingAlert}
+              disabled={!!alertParams?.symbol}
             />
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="alertType" className="text-right">
-              Alert Type
-            </label>
-            <Select
-              value={rhsType}
-              onValueChange={(value: "constant" | "trend_line") =>
-                setRhsType(value)
-              }
-              disabled={!!existingAlert} // Type cannot be changed after creation
-            >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select alert type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="constant">Price Alert</SelectItem>
-                <SelectItem value="trend_line">Trendline Alert</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+
 
           {rhsType === "constant" && (
             <>
@@ -206,10 +189,12 @@ export function AlertBuilder({
                 <Input
                   id="price"
                   type="number"
-                  value={price !== undefined ? price.toString() : ""}
+                  value={(rhsAttr as ConstantAlertParams["params"])?.[
+                    "constant"
+                  ]?.toString()}
                   onChange={(e) => {
                     const val = e.target.value;
-                    setPrice(val ? parseFloat(val) : undefined);
+                    setRhsAttr({ constant: parseFloat(val) });
                   }}
                   className="col-span-3"
                   placeholder="Enter alert price"
@@ -217,16 +202,6 @@ export function AlertBuilder({
                 />
               </div>
             </>
-          )}
-
-          {rhsType === "trend_line" && (
-            <div className="col-span-4 text-sm text-muted-foreground">
-              Trendline alerts will trigger when the price crosses the trendline
-              you have drawn on the chart.
-              <br />
-              <br />
-              Set the condition for when the alert should trigger:
-            </div>
           )}
 
           {rhsType === "trend_line" && (

@@ -15,18 +15,17 @@ import { DateTime } from "luxon";
 export default function AlertsPage() {
   const { data: alerts = [], isLoading } = useAlerts();
   const [isAlertBuilderOpen, setIsAlertBuilderOpen] = useState(false);
-  const [initialAlertType, setInitialAlertType] = useState<
-    "price" | "trendline"
-  >("price");
-  const [initialSymbol, setInitialSymbol] = useState<string>("");
   const [editingAlert, setEditingAlert] = useState<Alert | undefined>();
 
   const { mutate: deleteAlert } = useDeleteAlert();
   const { mutate: toggleAlertActive } = useToggleAlertActive();
 
-  const openAlertBuilder = (type: "price" | "trendline", symbol?: string) => {
-    setInitialAlertType(type);
-    setInitialSymbol(symbol || "");
+  const openAlertBuilder = (
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _?: "constant" | "trendline",
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    __?: string,
+  ) => {
     setEditingAlert(undefined);
     setIsAlertBuilderOpen(true);
   };
@@ -64,7 +63,7 @@ export default function AlertsPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Alerts</h1>
         <div className="space-x-2">
-          <Button onClick={() => openAlertBuilder("price")}>
+          <Button onClick={() => openAlertBuilder("constant")}>
             <PlusCircle className="mr-2 h-4 w-4" /> Price Alert
           </Button>
         </div>
@@ -81,7 +80,7 @@ export default function AlertsPage() {
               are met.
             </p>
             <div className="space-x-2">
-              <Button onClick={() => openAlertBuilder("price")}>
+              <Button onClick={() => openAlertBuilder("constant")}>
                 Create Price Alert
               </Button>
               <Button
@@ -114,7 +113,8 @@ export default function AlertsPage() {
                     {alert.triggered_count > 0 &&
                       ` • Triggered ${alert.triggered_count} times`}
                     {alert.last_triggered_at &&
-                      ` • Last triggered on ${DateTime.fromISO(alert.last_triggered_at).toFormat("dd LLL yyyy hh:mm")}`}
+                      ` • Last triggered on ${DateTime.fromISO(alert.last_triggered_at).toFormat("dd LLL yyyy hh:mm")}`}{" "}
+                    at {alert.last_triggered_price.toFixed(2)}
                   </div>
                 </div>
                 <div className="flex space-x-2">
@@ -156,9 +156,12 @@ export default function AlertsPage() {
       <AlertBuilder
         open={isAlertBuilderOpen}
         onOpenChange={closeAlertBuilder}
-        initialType={initialAlertType}
-        initialSymbol={initialSymbol}
         existingAlert={editingAlert}
+        alertParams={{
+          type: "constant",
+          symbol: "NSE:NIFTY",
+          params: { constant: 100 },
+        }}
       />
     </div>
   );
