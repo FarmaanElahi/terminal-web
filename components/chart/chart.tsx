@@ -14,7 +14,6 @@ import { ISubscription, TradingView } from "@/components/chart/charting";
 import {
   ContextMenuItemsProcessor,
   CrossHairMovedEventParams,
-  IAction,
   TradingViewWidgetOptions,
 } from "@/components/chart/types";
 import { getIndicators } from "@/components/chart/indicators";
@@ -175,24 +174,53 @@ export function useChart({
   const contextMenuItemProcessor: ContextMenuItemsProcessor = useCallback(
     async (items, actionsFactory, params) => {
       console.log(items, actionsFactory, params);
-
-      // Called for chart context menu
       if (
-        params.menuName === "ChartContextMenu" &&
-        crossHairRef.current &&
+        params.menuName === "ObjectTreeContextMenu" &&
         widgetReadyRef.current
       ) {
-        const label = (
-          items.find(
-            (value) =>
-              value.type === "action" &&
-              value.getState().actionId === "Chart.Clipboard.CopyPrice",
-          ) as IAction
-        )?.getState().label;
+        if (params.detail.type === "shape" && params.detail.id) {
+          const points = widgetReadyRef.current
+            .activeChart()
+            .getShapeById(params.detail.id)
+            ?.getPoints();
+          const symbol = widgetReadyRef.current.activeChart().symbol();
+          if (points && points.length === 2) {
+            const newItem = actionsFactory.createAction({
+              actionId: "Terminal.TrendlineAlert",
+              icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alarm-clock-plus-icon lucide-alarm-clock-plus"><circle cx="12" cy="13" r="8"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>`,
+              label: `Add Alert on Trend Line`,
+              onExecute: () => {
+                showAlertBuilder?.({
+                  type: "trend_line",
+                  symbol,
+                  params: { trend_line: points },
+                });
+              },
+            });
 
-        const parts = label?.split(" ") ?? [];
-        const price = parseFloat(parts[parts.length - 1]);
+            return [newItem, actionsFactory.createSeparator(), ...items];
+          }
+          if (points && points.length === 1) {
+            const price = parseFloat(points[0].price.toFixed(2));
+            const newItem = actionsFactory.createAction({
+              actionId: "Terminal.AddAlert",
+              icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alarm-clock-plus-icon lucide-alarm-clock-plus"><circle cx="12" cy="13" r="8"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>`,
+              label: `Add Alert at ${price}`,
+              onExecute: () =>
+                showAlertBuilder?.({
+                  symbol,
+                  params: { constant: price },
+                  type: "constant",
+                }),
+            });
+            return [newItem, actionsFactory.createSeparator(), ...items];
+          }
+        }
+      }
 
+      // Called for chart context menu
+      if (crossHairRef.current?.price && widgetReadyRef.current) {
+        const price = parseFloat(crossHairRef.current.price.toFixed(2));
         const symbol = widgetReadyRef.current.activeChart().symbol();
         const newItem = actionsFactory.createAction({
           actionId: "Terminal.AddAlert",
@@ -208,57 +236,6 @@ export function useChart({
         return [newItem, actionsFactory.createSeparator(), ...items];
       }
 
-      if (
-        params.menuName === "ObjectTreeContextMenu" &&
-        widgetReadyRef.current
-      ) {
-        if (params.detail.type === "shape" && params.detail.id) {
-          const points = widgetReadyRef.current
-            .activeChart()
-            .getShapeById(params.detail.id)
-            ?.getPoints();
-          if (!points) return items;
-
-          const symbol = widgetReadyRef.current.activeChart().symbol();
-
-          // Build just price alert because it is a single point
-          if (points.length === 1) {
-            const price = parseFloat(points[0].price.toFixed(2));
-            const symbol = widgetReadyRef.current.activeChart().symbol();
-            const newItem = actionsFactory.createAction({
-              actionId: "Terminal.AddAlert",
-              icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alarm-clock-plus-icon lucide-alarm-clock-plus"><circle cx="12" cy="13" r="8"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>`,
-              label: `Add Alert at ${price}`,
-              onExecute: () =>
-                showAlertBuilder?.({
-                  symbol,
-                  params: { constant: price },
-                  type: "constant",
-                }),
-            });
-
-            return [newItem, actionsFactory.createSeparator(), ...items];
-          }
-
-          // this is a line
-          if (points.length === 2) {
-            const newItem = actionsFactory.createAction({
-              actionId: "Terminal.TrendlineAlert",
-              icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alarm-clock-plus-icon lucide-alarm-clock-plus"><circle cx="12" cy="13" r="8"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>`,
-              label: `Add Alert on Trend Line`,
-              onExecute: () => {
-                showAlertBuilder?.({
-                  type: "trend_line",
-                  symbol,
-                  params: { trend_line: points },
-                });
-              },
-            });
-            return [newItem, actionsFactory.createSeparator(), ...items];
-          }
-          return items;
-        }
-      }
       return items;
     },
     [showAlertBuilder],
