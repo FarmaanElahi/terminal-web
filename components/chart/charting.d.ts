@@ -110,13 +110,139 @@ interface ILineDataSourceApi {
   getPoints: () => PricePoint[];
 }
 
+type OrderLineLengthUnit = "percentage" | "pixel" | "bar";
+
+interface IOrderLine {
+  // Getters
+  getBodyBackgroundColor(): string;
+
+  getBodyBorderColor(): string;
+
+  getBodyFont(): string;
+
+  getBodyTextColor(): string;
+
+  getCancelButtonBackgroundColor(): string;
+
+  getCancelButtonBorderColor(): string;
+
+  getCancelButtonIconColor(): string;
+
+  getCancelTooltip(): string;
+
+  getCancellable(): boolean;
+
+  getEditable(): boolean;
+
+  getExtendLeft(): boolean;
+
+  getLineColor(): string;
+
+  getLineLength(): number;
+
+  getLineLengthUnit(): OrderLineLengthUnit;
+
+  getLineStyle(): number;
+
+  getLineWidth(): number;
+
+  getModifyTooltip(): string;
+
+  getPrice(): number;
+
+  getQuantity(): string;
+
+  getQuantityBackgroundColor(): string;
+
+  getQuantityBorderColor(): string;
+
+  getQuantityFont(): string;
+
+  getQuantityTextColor(): string;
+
+  getText(): string;
+
+  getTooltip(): string;
+
+  // Event handlers
+  onCancel(callback: () => void): this;
+
+  onCancel<T>(data: T, callback: (data: T) => void): this;
+
+  onModify(callback: () => void): this;
+
+  onModify<T>(data: T, callback: (data: T) => void): this;
+
+  onMove(callback: () => void): this;
+
+  onMove<T>(data: T, callback: (data: T) => void): this;
+
+  onMoving(callback: () => void): this;
+
+  onMoving<T>(data: T, callback: (data: T) => void): this;
+
+  // Setters
+  setBodyBackgroundColor(value: string): this;
+
+  setBodyBorderColor(value: string): this;
+
+  setBodyFont(value: string): this;
+
+  setBodyTextColor(value: string): this;
+
+  setCancelButtonBackgroundColor(value: string): this;
+
+  setCancelButtonBorderColor(value: string): this;
+
+  setCancelButtonIconColor(value: string): this;
+
+  setCancelTooltip(value: string): this;
+
+  setCancellable(value: boolean): this;
+
+  setEditable(value: boolean): this;
+
+  setExtendLeft(value: boolean): this;
+
+  setLineColor(value: string): this;
+
+  setLineLength(value: number, unit?: OrderLineLengthUnit): this;
+
+  setLineStyle(value: number): this;
+
+  setLineWidth(value: number): this;
+
+  setModifyTooltip(value: string): this;
+
+  setPrice(value: number): this;
+
+  setQuantity(value: string): this;
+
+  setQuantityBackgroundColor(value: string): this;
+
+  setQuantityBorderColor(value: string): this;
+
+  setQuantityFont(value: string): this;
+
+  setQuantityTextColor(value: string): this;
+
+  setText(value: string): this;
+
+  setTooltip(value: string): this;
+
+  // Utility
+  remove(): void;
+}
+
 declare namespace TradingView {
   interface IChartWidgetApi {
     resolution: () => string;
     setSymbol: (symbol: string, tf: string) => void;
     loadChartTemplate: (template: string) => void;
     crossHairMoved: () => ISubscription<CrossHairMovedEventParams>;
+    onSymbolChanged(): ISubscription<void>;
     symbol: () => string;
+    createOrderLine: () => Promise<IOrderLine>;
     getShapeById: (id: string | number) => ILineDataSourceApi;
   }
 
