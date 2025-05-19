@@ -61,18 +61,19 @@ export const StatsTable = ({ freq }: { freq: "fq" | "fy" }) => {
     );
 
     // These are time period. The first cell name is Date
-    const columns = (base[0].slice(1) as string[]).map((value) => {
-      if (freq === "fq") {
-        const year = value.substring(0, 4);
-        const month = value.substring(4, 6);
-        if (month === "03") return `${year}-Q4`;
-        if (month === "06") return `${year}-Q1`;
-        if (month === "09") return `${year}-Q2`;
-        if (month === "12") return `${year}-Q3`;
-        return `${year} -`;
-      }
-      return value.substring(0, 4);
-    });
+    const columns =
+      (base[0]?.slice(1) as string[]).map((value) => {
+        if (freq === "fq") {
+          const year = value.substring(0, 4);
+          const month = value.substring(4, 6);
+          if (month === "03") return `${year}-Q4`;
+          if (month === "06") return `${year}-Q1`;
+          if (month === "09") return `${year}-Q2`;
+          if (month === "12") return `${year}-Q3`;
+          return `${year} -`;
+        }
+        return value.substring(0, 4);
+      }) ?? [];
 
     const revenue =
       base.find((value) => value?.[0] === "Revenue")?.slice(1) ?? [];
