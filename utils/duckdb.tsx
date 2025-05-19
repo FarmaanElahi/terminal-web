@@ -163,7 +163,7 @@ export async function queryDuckDB<T>(
   try {
     conn = await db.connect();
     return await simpleQuery(db, table, props).then(
-      (r) => r.toArray().map((row) => row.toJSON()) as T[],
+      (r) => JSON.parse(JSON.stringify(r.toArray())) as T[],
     );
   } finally {
     await conn?.close();
