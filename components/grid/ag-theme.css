@@ -32,3 +32,15 @@
 .ag-terminal-theme .ag-header {
     @apply w-full flex items-center p-0 justify-between text-xs font-bold text-muted-foreground rounded-t-md bg-muted/60 hover:bg-muted transition-colors
 }
+
+.ag-terminal-theme .ag-header-cell-menu-button {
+    display: none;
+}
+
+.ag-terminal-theme .ag-header-cell-label {
+    justify-content: space-between;
+}
+
+.ag-terminal-theme .ag-sort-indicator-container {
+    gap: 0;
+}
