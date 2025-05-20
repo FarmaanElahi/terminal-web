@@ -156,6 +156,7 @@ export function useScreener() {
     queryKey: ["symbols2"],
     refetchOnWindowFocus: false,
     queryFn: async () => {
+
       const result = await queryDuckDB("symbols", {
         columns: [], // Will load all columns
         order: [{ field: "mcap", sort: "DESC" }],

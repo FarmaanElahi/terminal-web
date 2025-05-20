@@ -340,9 +340,7 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
   }
 
   async getQuotes(symbols: string[], onDataCallback: QuotesCallback) {
-    console.log("Get quotes", symbols);
     if (symbols.length === 0) {
-      console.log("Returning empty");
       return onDataCallback([]);
     }
 
@@ -361,7 +359,6 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
       s.map((symbol) => this.symbolCache.set(symbol.ticker as string, symbol));
       cachedSymbols.push(...s);
     }
-    console.log("result", cachedSymbols);
 
     const mapping = cachedSymbols.map((sy) => ({
       symbol: sy,

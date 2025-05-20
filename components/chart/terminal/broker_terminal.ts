@@ -244,8 +244,7 @@ export class TerminalBroker implements IBrokerTerminal {
     }));
   }
 
-  async symbolInfo(symbol: string): Promise<InstrumentInfo> {
-    console.log("Get symbol info", symbol);
+  async symbolInfo(): Promise<InstrumentInfo> {
     return {
       qty: { min: 1, max: 1000000, step: 1, uiStep: 1, default: 1 },
       currency: "INR",

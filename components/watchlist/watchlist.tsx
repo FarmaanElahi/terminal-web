@@ -19,7 +19,6 @@ import {
   GetContextMenuItems,
   GetRowIdFunc,
   GetRowIdParams,
-  GridApi,
   GridReadyEvent,
   GridState,
   StateUpdatedEvent,
@@ -42,6 +41,7 @@ import { WatchlistCreatorDialog } from "./watchlist-selector";
 import { WatchlistSymbol } from "@/components/watchlist/watchlist-symbol";
 import { cn } from "@/lib/utils";
 import { useRealtimeSymbol } from "@/hooks/use-realtime-symbol";
+import { buildDataSource } from "@/components/grid/datasource";
 
 type WatchlistProps = HTMLAttributes<HTMLDivElement>;
 
@@ -90,7 +90,7 @@ function useGridInitialState(activeScreenId?: string | null) {
     const defaultVisible = new Set([
       "name",
       "day_close",
-      "price_change_today_pct"
+      "price_change_today_pct",
     ]);
 
     const hiddenColIds = colDefs
@@ -124,7 +124,6 @@ export function Watchlist(props: WatchlistProps) {
   const statusBar = useMemo(
     () => ({
       statusPanels: [
-        { statusPanel: "agTotalAndFilteredRowCountComponent" },
         { statusPanel: "agSelectedRowCountComponent" },
         { statusPanel: "agAggregationComponent" },
       ],
@@ -173,19 +172,31 @@ export function Watchlist(props: WatchlistProps) {
   );
 
   // Add a ref to store the grid API
-  const gridApiRef = useRef<GridApi<Symbol>>(null);
+  const agGridRef = useRef<AgGridReact<Symbol>>(null);
 
   // Use our market data grid hook
   const { isConnected, updatedSymbols } = useRealtimeSymbol(rowData);
   // Add an onGridReady handler to store the grid API
-  const onGridReady = useCallback((params: GridReadyEvent) => {
-    gridApiRef.current = params.api;
-  }, []);
+  const onGridReady = useCallback(
+    (params: GridReadyEvent) => {
+      params.api.setGridOption(
+        "serverSideDatasource",
+        buildDataSource(() => watchlist?.symbols ?? []),
+      );
+    },
+    [watchlist?.symbols],
+  );
+
+  useEffect(() => {
+    console.log();
+    agGridRef.current?.api?.refreshServerSide();
+  }, [watchlist?.symbols]);
 
   // Notify the grid about the realtime changes as a transaction
   useEffect(() => {
-    if (!gridApiRef.current) return;
-    gridApiRef.current.applyTransactionAsync({ update: updatedSymbols });
+    agGridRef.current?.api?.applyServerSideTransactionAsync({
+      update: updatedSymbols,
+    });
   }, [updatedSymbols]);
 
   let node: JSX.Element | null = null;
@@ -197,7 +208,12 @@ export function Watchlist(props: WatchlistProps) {
   } else if (rowData && rowData.length > 0)
     node = (
       <AgGridReact
+        rowModelType={"serverSide"}
+        ref={agGridRef}
         onGridReady={onGridReady}
+        onColumnVisible={(event) =>
+          event.api.refreshServerSide({ purge: true })
+        }
         dataTypeDefinitions={extendedColumnType}
         key={activeWatchlistId ?? "default"}
         className="ag-terminal-theme"
@@ -207,7 +223,6 @@ export function Watchlist(props: WatchlistProps) {
         headerHeight={36}
         rowHeight={32}
         getContextMenuItems={getContextMenuItems}
-        rowData={rowData}
         animateRows
         maintainColumnOrder={true}
         autoSizeStrategy={{
