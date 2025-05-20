@@ -266,9 +266,10 @@ export function Watchlist(props: WatchlistProps) {
           if (rowIndex === undefined || rowIndex === null) return;
           const symbol = event.api.getDisplayedRowAtIndex(rowIndex)?.data;
           if (!symbol) return;
-          const { exchange, name } = symbol;
-          if (!exchange || !name) return;
-          switcher([exchange, name].join(":"));
+          if (!symbol) return;
+          const { ticker } = symbol;
+          if (!ticker) return;
+          switcher(ticker);
         }}
       />
     );

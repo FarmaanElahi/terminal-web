@@ -54,10 +54,10 @@ export const StatsTable = ({ freq }: { freq: "fq" | "fy" }) => {
   }, []);
 
   const data = useMemo(() => {
-    if (!quote) return { noData: true } as const;
+    if (!quote?.quarterly || !quote?.yearly) return { noData: true } as const;
 
     const base: unknown[][] = transpose(
-      freq === "fq" ? JSON.parse(quote.quarterly!) : JSON.parse(quote.yearly!),
+      freq === "fq" ? JSON.parse(quote.quarterly) : JSON.parse(quote.yearly!),
     );
 
     // These are time period. The first cell name is Date
