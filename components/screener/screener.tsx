@@ -207,9 +207,9 @@ export function Screener(props: ScreenerProps) {
             if (rowIndex === undefined || rowIndex === null) return;
             const symbol = event.api.getDisplayedRowAtIndex(rowIndex)?.data;
             if (!symbol) return;
-            const { exchange, name } = symbol;
-            if (!exchange || !name) return;
-            switcher([exchange, name].join(":"));
+            const { ticker } = symbol;
+            if (!ticker) return;
+            switcher(ticker);
           }}
         />
       )}
