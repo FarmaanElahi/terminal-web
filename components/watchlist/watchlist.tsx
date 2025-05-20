@@ -194,7 +194,9 @@ export function Watchlist(props: WatchlistProps) {
 
   // Notify the grid about the realtime changes as a transaction
   useEffect(() => {
-    agGridRef.current?.api?.applyTransactionAsync({ update: updatedSymbols });
+    agGridRef.current?.api?.applyServerSideTransactionAsync({
+      update: updatedSymbols,
+    });
   }, [updatedSymbols]);
 
   let node: JSX.Element | null = null;
@@ -209,6 +211,9 @@ export function Watchlist(props: WatchlistProps) {
         rowModelType={"serverSide"}
         ref={agGridRef}
         onGridReady={onGridReady}
+        onColumnVisible={(event) =>
+          event.api.refreshServerSide({ purge: true })
+        }
         dataTypeDefinitions={extendedColumnType}
         key={activeWatchlistId ?? "default"}
         className="ag-terminal-theme"

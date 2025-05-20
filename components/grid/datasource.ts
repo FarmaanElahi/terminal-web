@@ -9,11 +9,14 @@ import {
 import { runRawSymbolCount, runRawSymbolQuery } from "@/utils/duckdb";
 
 export function buildDataSource(allowedTickers?: () => string[]) {
+  const mandatoryColumn = ["ticker", "logo", "earnings_release_date"];
+
   function buildSql(
-    request: IServerSideGetRowsRequest,
+    params: IServerSideGetRowsParams,
     tableName: string,
   ): string {
-    const columns = selectSql(request);
+    const request = params.request;
+    const columns = selectSql(params);
     const where = whereSql(request);
     const order = orderBySql(request);
     const limit = limitSql(request);
@@ -21,12 +24,18 @@ export function buildDataSource(allowedTickers?: () => string[]) {
     return `SELECT ${columns} FROM ${tableName}${where}${order}${limit};`;
   }
 
-  function selectSql(request: IServerSideGetRowsRequest): string {
-    console.log("Column select", request, `Is watchlist ${!!allowedTickers}`);
-    if (request.valueCols && request.valueCols.length > 0) {
-      return request.valueCols.map((col) => `"${col.field}"`).join(", ");
-    }
-    return "*";
+  function selectSql(params: IServerSideGetRowsParams): string {
+    const visibleCols =
+      params.api
+        .getColumns()
+        ?.filter((c) => c.isVisible())
+        ?.flatMap((c) => [
+          c.getColId(),
+          ...(c.getColDef().context?.dependencyColumns ?? []),
+        ]) ?? [];
+    visibleCols.push(...mandatoryColumn);
+
+    return visibleCols.map((col) => `${col}`).join(",");
   }
 
   function whereSql(request: IServerSideGetRowsRequest): string {
@@ -128,13 +137,14 @@ export function buildDataSource(allowedTickers?: () => string[]) {
 
   return {
     getRows: async (params: IServerSideGetRowsParams) => {
-      console.log("Get row", params);
-      const rows = await runRawSymbolQuery((tbl) =>
-        buildSql(params.request, tbl),
-      );
+      const rows = await runRawSymbolQuery((tbl) => buildSql(params, tbl));
+      const rowData = JSON.parse(JSON.stringify(rows.toArray()));
       const lastRowCount = await runRawSymbolCount(whereSql(params.request));
       try {
-        params.success({ rowData: rows, rowCount: lastRowCount });
+        params.success({
+          rowData,
+          rowCount: lastRowCount,
+        });
       } catch (e) {
         console.error(`Failed to run query`, e);
         params.fail();

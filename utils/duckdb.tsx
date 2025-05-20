@@ -103,7 +103,11 @@ async function init() {
       reliableHeadRequests: false,
     },
   };
-  const db = await initializeDuckDb({ config, debug: true });
+  const db = await initializeDuckDb({
+    config,
+    // debug: process.env.NEXT_PUBLIC_ENVIRONMENT === "development",
+    debug: false,
+  });
   await initTables(db);
   return db;
 }
@@ -197,8 +201,7 @@ export async function runRawSymbolQuery(queryBuilder: (tbl: string) => string) {
   try {
     const db = await getDuckDB();
     conn = await db.connect();
-    const result = await conn.query(queryBuilder(`'${TABLES.symbols}'`));
-    return result.toArray();
+    return await conn.query(queryBuilder(`'${TABLES.symbols}'`));
   } finally {
     await conn?.close();
   }

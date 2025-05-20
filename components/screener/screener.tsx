@@ -105,7 +105,7 @@ export function Screener(props: ScreenerProps) {
     () => ({
       statusPanels: [
         { statusPanel: "agSelectedRowCountComponent" },
-        { statusPanel: 'agTotalRowCountComponent' },
+        { statusPanel: "agTotalRowCountComponent" },
       ],
     }),
     [],
@@ -165,6 +165,9 @@ export function Screener(props: ScreenerProps) {
         <AgGridReact
           onGridReady={onGridReady}
           rowModelType={"serverSide"}
+          onColumnVisible={(event) =>
+            event.api.refreshServerSide({ purge: true })
+          }
           dataTypeDefinitions={extendedColumnType}
           key={activeScreenId ?? "default"}
           getContextMenuItems={getContextMenuItems}

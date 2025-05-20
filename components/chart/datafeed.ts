@@ -81,7 +81,6 @@ export abstract class Datafeed {
     onResolve: ResolveCallback,
     onError: DatafeedErrorCallback,
   ) {
-    console.log("Resolve", symbolName);
     const data = await symbolResolve(symbolName).catch(onError);
     if (!data) {
       onError("Failed");
