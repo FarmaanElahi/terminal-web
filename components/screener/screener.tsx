@@ -163,6 +163,7 @@ export function Screener(props: ScreenerProps) {
     <div {...props} className={cn("h-full relative", props.className)}>
       {!isLoading && (
         <AgGridReact
+          suppressServerSideFullWidthLoadingRow={true}
           onGridReady={onGridReady}
           rowModelType={"serverSide"}
           onColumnVisible={(event) =>

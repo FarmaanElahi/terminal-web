@@ -208,6 +208,7 @@ export function Watchlist(props: WatchlistProps) {
   } else if (rowData && rowData.length > 0)
     node = (
       <AgGridReact
+        suppressServerSideFullWidthLoadingRow={true}
         rowModelType={"serverSide"}
         ref={agGridRef}
         onGridReady={onGridReady}
