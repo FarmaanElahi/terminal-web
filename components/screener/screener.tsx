@@ -2,7 +2,6 @@
 
 import React, { HTMLAttributes, useCallback, useMemo } from "react";
 import {
-  useScreener,
   useScreens,
   useUpdateScreen,
   useUpdateWatchlist,
@@ -13,6 +12,7 @@ import {
   GetContextMenuItems,
   GetRowIdFunc,
   GetRowIdParams,
+  GridReadyEvent,
   GridState,
   StateUpdatedEvent,
 } from "ag-grid-community";
@@ -29,6 +29,7 @@ import { Json } from "@/types/generated/supabase";
 import { useActiveScreenerId } from "@/hooks/use-active-screener";
 import type { Symbol } from "@/types/symbol";
 import { cn } from "@/lib/utils";
+import { buildDataSource } from "@/components/grid/datasource";
 
 type ScreenerProps = HTMLAttributes<HTMLDivElement>;
 
@@ -97,16 +98,14 @@ export function Screener(props: ScreenerProps) {
   const colDefs = useColumnDefs();
   const switcher = useGroupSymbolSwitcher();
   const handleStateChange = useScreenerChangeCallback(activeScreenId);
-  const { data: rowData } = useScreener();
   const { isLoading } = useScreens();
   const initialState = useGridInitialState(activeScreenId);
 
   const statusBar = useMemo(
     () => ({
       statusPanels: [
-        { statusPanel: "agTotalAndFilteredRowCountComponent" },
         { statusPanel: "agSelectedRowCountComponent" },
-        { statusPanel: "agAggregationComponent" },
+        { statusPanel: 'agTotalRowCountComponent' },
       ],
     }),
     [],
@@ -156,10 +155,16 @@ export function Screener(props: ScreenerProps) {
     [watchlists, updateWatchlist],
   );
 
+  const onGridReady = useCallback((params: GridReadyEvent) => {
+    params.api.setGridOption("serverSideDatasource", buildDataSource());
+  }, []);
+
   return (
     <div {...props} className={cn("h-full relative", props.className)}>
       {!isLoading && (
         <AgGridReact
+          onGridReady={onGridReady}
+          rowModelType={"serverSide"}
           dataTypeDefinitions={extendedColumnType}
           key={activeScreenId ?? "default"}
           getContextMenuItems={getContextMenuItems}
@@ -170,7 +175,6 @@ export function Screener(props: ScreenerProps) {
           sideBar={false}
           maintainColumnOrder={true}
           includeHiddenColumnsInAdvancedFilter={true}
-          rowData={rowData}
           autoSizeStrategy={{
             type: "fitCellContents",
           }}

@@ -112,13 +112,15 @@ export abstract class Datafeed {
       exchange: data.exchange,
       listed_exchange: listed_exchange,
       exchange_logo: data.exchange_logo,
-      timezone: data.timezone,
+      // hardcode for now
+      timezone: "Asia/Kolkata",
       subsessions: data.subsessions,
       subsession_id: subsession_id,
       minmov: minmov,
       pricescale: pricescale,
       currency_code: data.currency,
-      // session: session,
+      // hardcode for now
+      session: "0900-1535",
       industry: data.industry,
       sector: data.sector,
       has_intraday: true,

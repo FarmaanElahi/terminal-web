@@ -176,7 +176,13 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
   }));
   useEffect(() => {
     init()
-      .then((db) => setDb({ status: "loaded", db, runQuery: buildQuery(db) }))
+      .then((db) =>
+        setDb({
+          status: "loaded",
+          db,
+          runQuery: buildQuery(db),
+        }),
+      )
       .catch((err) => {
         console.error(err);
         setDb({ status: "error", error: err });
@@ -184,4 +190,32 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return <DuckDBContext.Provider value={db}>{children}</DuckDBContext.Provider>;
+}
+
+export async function runRawSymbolQuery(queryBuilder: (tbl: string) => string) {
+  let conn: AsyncDuckDBConnection | null = null;
+  try {
+    const db = await getDuckDB();
+    conn = await db.connect();
+    const result = await conn.query(queryBuilder(`'${TABLES.symbols}'`));
+    return result.toArray();
+  } finally {
+    await conn?.close();
+  }
+}
+
+export async function runRawSymbolCount(filterSql: string) {
+  const sql = `SELECT COUNT(*) as total FROM '${TABLES.symbols}' ${filterSql}`;
+  let conn: AsyncDuckDBConnection | null = null;
+  try {
+    const db = await getDuckDB();
+    conn = await db.connect();
+    const res = await conn.query(sql);
+    return res.getChild(0)?.get(0);
+  } catch (e) {
+    console.error("Failed to get the row count", e);
+    return undefined;
+  } finally {
+    await conn?.close();
+  }
 }
