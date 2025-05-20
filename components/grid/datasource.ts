@@ -137,8 +137,7 @@ export function buildDataSource(allowedTickers?: () => string[]) {
 
   return {
     getRows: async (params: IServerSideGetRowsParams) => {
-      const rows = await runRawSymbolQuery((tbl) => buildSql(params, tbl));
-      const rowData = JSON.parse(JSON.stringify(rows.toArray()));
+      const rowData = await runRawSymbolQuery((tbl) => buildSql(params, tbl));
       const lastRowCount = await runRawSymbolCount(whereSql(params.request));
       try {
         params.success({

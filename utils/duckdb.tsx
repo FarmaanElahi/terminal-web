@@ -201,7 +201,8 @@ export async function runRawSymbolQuery(queryBuilder: (tbl: string) => string) {
   try {
     const db = await getDuckDB();
     conn = await db.connect();
-    return await conn.query(queryBuilder(`'${TABLES.symbols}'`));
+    const rows = await conn.query(queryBuilder(`'${TABLES.symbols}'`));
+    return JSON.parse(JSON.stringify(rows.toArray()));
   } finally {
     await conn?.close();
   }
