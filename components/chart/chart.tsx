@@ -10,7 +10,11 @@ import React, {
 import { useChartManager } from "@/lib/state/charts";
 import { useGroupSymbol } from "@/lib/state/grouper";
 import { useTheme } from "next-themes";
-import { ISubscription, TradingView } from "@/components/chart/charting";
+import {
+  IOrderLine,
+  ISubscription,
+  TradingView,
+} from "@/components/chart/charting";
 import {
   ContextMenuItemsProcessor,
   CrossHairMovedEventParams,
@@ -20,6 +24,8 @@ import { getIndicators } from "@/components/chart/indicators";
 import { TerminalBroker } from "@/components/chart/terminal/broker_terminal";
 import { AlertBuilder, AlertParams } from "@/components/alerts/alert_builder";
 import { ChartManager } from "./chart_manager";
+import { useAlerts } from "@/lib/state/symbol";
+import { Alert } from "@/types/supabase";
 
 interface ChartProps extends HTMLAttributes<HTMLDivElement> {
   layoutId?: string;
@@ -44,7 +50,7 @@ export function Chart({ layoutId, onLayoutChange, ...props }: ChartProps) {
     undefined,
   );
 
-  const { setSymbol, changeTheme } = useTVChart({
+  const { widget } = useTVChart({
     containerRef: chartContainerRef,
     layoutId,
     onLayoutChange,
@@ -53,13 +59,7 @@ export function Chart({ layoutId, onLayoutChange, ...props }: ChartProps) {
     showAlertBuilder: (p) => setShowAlert(p),
   });
 
-  useEffect(() => {
-    setSymbol(symbol);
-  }, [symbol, setSymbol]);
-
-  useEffect(() => {
-    changeTheme(chartTheme);
-  }, [chartTheme, changeTheme]);
+  useTVAlertOnChart(widget);
 
   return (
     <>
@@ -95,6 +95,7 @@ function useTVChart({
   onLayoutChange?: (layout: string) => void;
 }) {
   const ref = useRef<TradingView | null>(null);
+  const [widget, setWidget] = useState<TradingView.widget | null>(null);
   const chartManager = useChartManager();
   const contextMenuItemProcessor = useChartContextMenuProcessor(
     ref,
@@ -121,13 +122,23 @@ function useTVChart({
     widget.onChartReady(() => {
       onReady(widget, layoutId, onLayoutChange);
       ref.current = widget;
+      setWidget(widget);
+      console.log("Set widget ready");
     });
 
     return () => widget.remove();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerRef.current]);
 
-  return { ref, setSymbol, changeTheme };
+  useEffect(() => {
+    setSymbol(symbol);
+  }, [symbol, setSymbol]);
+
+  useEffect(() => {
+    changeTheme(theme);
+  }, [theme, changeTheme]);
+
+  return { ref, widget };
 }
 
 function useTVInit(widgetReadyRef: RefObject<TradingView.widget>) {
@@ -344,4 +355,68 @@ function getTVChartConfig({
       "hide_image_invalid_symbol",
     ],
   } satisfies TradingViewWidgetOptions;
+}
+
+function useTVAlertOnChart(widget: TradingView.widget | null) {
+  const activeOrderLines = useRef<IOrderLine[]>([]);
+  const { data: alerts } = useAlerts();
+  const [activeSymbols, setActiveSymbols] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!widget) return;
+
+    function ref() {
+      if (!widget) return;
+
+      const symbols = [];
+      for (let i = 0; i < widget.chartsCount(); i++) {
+        symbols.push(widget.chart(i).symbol());
+      }
+      setActiveSymbols(symbols);
+    }
+
+    function refetch() {
+      if (!widget) return;
+
+      for (let i = 0; i < widget.chartsCount(); i++) {
+        const sub = widget.chart(i).onSymbolChanged();
+        sub.subscribe(null, ref);
+      }
+      ref();
+    }
+
+    refetch();
+  }, [widget]);
+
+  useEffect(() => {
+    if (!alerts) return;
+
+    async function renderAlertLine(index: number, alert: Alert) {
+      if (!widget) return;
+
+      // Only price alert are showing as order line
+      const price = (alert.rhs_attr as Record<string, number>)?.[
+        "constant"
+      ] as number;
+      if (!price) return;
+
+      // Add the new oder line
+      const chart = widget.chart(index);
+      chart.dataReady(async () => {
+        const orderline = await chart.createOrderLine();
+        orderline.setText(alert.notes ?? `Alert`).setPrice(price);
+        activeOrderLines.current.push(orderline);
+      });
+    }
+
+    // Reset the order
+    activeOrderLines.current.forEach((o) => o.remove());
+    activeOrderLines.current = [];
+
+    activeSymbols.forEach((value, index) => {
+      alerts
+        .filter((a) => a.symbol === value)
+        .forEach((a) => renderAlertLine(index, a));
+    });
+  }, [widget, alerts, activeSymbols]);
 }
