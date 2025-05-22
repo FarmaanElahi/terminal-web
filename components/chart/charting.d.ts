@@ -239,8 +239,11 @@ declare namespace TradingView {
     resolution: () => string;
     setSymbol: (symbol: string, tf: string) => void;
     loadChartTemplate: (template: string) => void;
+    dataReady: (cb: () => void) => void;
     crossHairMoved: () => ISubscription<CrossHairMovedEventParams>;
+
     onSymbolChanged(): ISubscription<void>;
+
     symbol: () => string;
     createOrderLine: () => Promise<IOrderLine>;
     getShapeById: (id: string | number) => ILineDataSourceApi;
