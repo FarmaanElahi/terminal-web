@@ -2990,6 +2990,31 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     context: { category: "Technicals" },
   },
 
+  {
+    field: "RMV_5D",
+    headerName: "RMV 5D",
+    cellDataType: "number",
+    context: { category: "Technicals" },
+  },
+  {
+    field: "RMV_10D",
+    headerName: "RMV 10D",
+    cellDataType: "number",
+    context: { category: "Technicals" },
+  },
+  {
+    field: "RMV_15D",
+    headerName: "RMV 15D",
+    cellDataType: "number",
+    context: { category: "Technicals" },
+  },
+  {
+    field: "RMV_20D",
+    headerName: "RMV 20D",
+    cellDataType: "number",
+    context: { category: "Technicals" },
+  },
+
   // ##########################  Technical  ##########################
 
   // ##########################  Ratings  ##########################
