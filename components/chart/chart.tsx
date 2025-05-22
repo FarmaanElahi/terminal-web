@@ -50,6 +50,10 @@ export function Chart({ layoutId, onLayoutChange, ...props }: ChartProps) {
   const [showAlert, setShowAlert] = useState<AlertParams | undefined>(
     undefined,
   );
+  const [showEditAlert, setShowEditAlert] = useState<boolean>(false);
+  const [editingAlert, setEditingAlert] = useState<Alert | undefined>(
+    undefined,
+  );
 
   const { widget } = useTVChart({
     containerRef: chartContainerRef,
@@ -60,7 +64,10 @@ export function Chart({ layoutId, onLayoutChange, ...props }: ChartProps) {
     showAlertBuilder: (p) => setShowAlert(p),
   });
 
-  useTVAlertOnChart(widget);
+  useTVAlertOnChart(widget, (a) => {
+    setEditingAlert(a);
+    setShowEditAlert(true);
+  });
 
   return (
     <>
@@ -70,6 +77,20 @@ export function Chart({ layoutId, onLayoutChange, ...props }: ChartProps) {
           value ? setShowAlert(showAlert) : setShowAlert(undefined)
         }
         alertParams={showAlert}
+      />
+
+      <AlertBuilder
+        open={showEditAlert}
+        onOpenChange={() => {
+          setShowEditAlert(false);
+          setEditingAlert(undefined);
+        }}
+        existingAlert={editingAlert}
+        alertParams={{
+          type: "constant",
+          symbol: "NSE:NIFTY",
+          params: { constant: 100 },
+        }}
       />
       <div
         ref={chartContainerRef}
@@ -358,7 +379,10 @@ function getTVChartConfig({
   } satisfies TradingViewWidgetOptions;
 }
 
-function useTVAlertOnChart(widget: TradingView.widget | null) {
+function useTVAlertOnChart(
+  widget: TradingView.widget | null,
+  showAlert: (a: Alert) => void,
+) {
   const activeOrderLines = useRef<IOrderLine[]>([]);
   const { data: alerts } = useAlerts();
   const { mutate: updateAlert } = useUpdateAlert(() => toast("Alert Updated"));
@@ -414,6 +438,7 @@ function useTVAlertOnChart(widget: TradingView.widget | null) {
           .setExtendLeft(true)
           .setCancelTooltip("Remove Alert")
           .onCancel(() => deleteAlert(alert.id))
+          .onModify(() => showAlert(alert))
           .onMove(() => {
             updateAlert({
               id: alert.id,
