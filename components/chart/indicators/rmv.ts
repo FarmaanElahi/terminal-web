@@ -1,5 +1,6 @@
 import {
   CustomIndicator,
+  IContext,
   LineStudyPlotStyle,
   LineStyle,
   PineJS,
@@ -234,30 +235,7 @@ export function RMV(PineJS: PineJS): CustomIndicator<MarketCycleCountProps> {
       this.main = function (ctx) {
         this._context = ctx;
 
-        // Short term average
-        const shortAvg = this._context.new_unlimited_var(
-          (PineJS.Std.atr(this.short1, this._context) +
-            PineJS.Std.atr(this.short2, this._context) +
-            PineJS.Std.atr(this.short3, this._context)) /
-            3,
-        );
-
-        // Highest and Lowest of the Short term average
-        const highestShortAvg = PineJS.Std.highest(
-          shortAvg,
-          this.loopback,
-          this._context,
-        );
-        const lowestShortAvg = PineJS.Std.lowest(
-          shortAvg,
-          this.loopback,
-          this._context,
-        );
-
-        const rmv =
-          ((shortAvg.get() - lowestShortAvg) /
-            PineJS.Std.max(highestShortAvg - lowestShortAvg, 0.001)) *
-          100;
+        const rmv = simpleRMV(PineJS, this._context, this.loopback);
 
         const histogramThreshold = 30;
         let rmvHistColor = NaN;
@@ -287,4 +265,14 @@ export function RMV(PineJS: PineJS): CustomIndicator<MarketCycleCountProps> {
       };
     },
   };
+}
+
+function simpleRMV(PineJS: PineJS, _context: IContext, loopback: number) {
+  const atr = PineJS.Std.atr(loopback, _context);
+  const atrSeries = _context.new_unlimited_var(atr);
+
+  const min_atr = PineJS.Std.lowest(atrSeries, loopback, _context);
+  const max_atr = PineJS.Std.highest(atrSeries, loopback, _context);
+
+  return (100 * (atr - min_atr)) / (max_atr - min_atr);
 }
