@@ -24,8 +24,9 @@ import { getIndicators } from "@/components/chart/indicators";
 import { TerminalBroker } from "@/components/chart/terminal/broker_terminal";
 import { AlertBuilder, AlertParams } from "@/components/alerts/alert_builder";
 import { ChartManager } from "./chart_manager";
-import { useAlerts } from "@/lib/state/symbol";
+import { useAlerts, useDeleteAlert, useUpdateAlert } from "@/lib/state/symbol";
 import { Alert } from "@/types/supabase";
+import { toast } from "sonner";
 
 interface ChartProps extends HTMLAttributes<HTMLDivElement> {
   layoutId?: string;
@@ -360,6 +361,8 @@ function getTVChartConfig({
 function useTVAlertOnChart(widget: TradingView.widget | null) {
   const activeOrderLines = useRef<IOrderLine[]>([]);
   const { data: alerts } = useAlerts();
+  const { mutate: updateAlert } = useUpdateAlert(() => toast("Alert Updated"));
+  const { mutate: deleteAlert } = useDeleteAlert(() => toast("Alert deleted"));
   const [activeSymbols, setActiveSymbols] = useState<string[]>([]);
 
   useEffect(() => {
@@ -404,7 +407,21 @@ function useTVAlertOnChart(widget: TradingView.widget | null) {
       const chart = widget.chart(index);
       chart.dataReady(async () => {
         const orderline = await chart.createOrderLine();
-        orderline.setText(alert.notes ?? `Alert`).setPrice(price);
+        orderline
+          .setText(alert.notes ?? `Alert: ${price}`)
+          .setPrice(price)
+          .setLineStyle(2)
+          .setExtendLeft(true)
+          .setCancelTooltip("Remove Alert")
+          .onCancel(() => deleteAlert(alert.id))
+          .onMove(() => {
+            updateAlert({
+              id: alert.id,
+              payload: {
+                rhs_attr: { constant: orderline.getPrice() },
+              },
+            });
+          });
         activeOrderLines.current.push(orderline);
       });
     }
@@ -418,5 +435,5 @@ function useTVAlertOnChart(widget: TradingView.widget | null) {
         .filter((a) => a.symbol === value)
         .forEach((a) => renderAlertLine(index, a));
     });
-  }, [widget, alerts, activeSymbols]);
+  }, [widget, alerts, activeSymbols, deleteAlert, updateAlert]);
 }
