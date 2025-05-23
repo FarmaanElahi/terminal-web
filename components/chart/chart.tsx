@@ -10,14 +10,9 @@ import React, {
 import { useChartManager } from "@/lib/state/charts";
 import { useGroupSymbol } from "@/lib/state/grouper";
 import { useTheme } from "next-themes";
-import {
-  IOrderLine,
-  ISubscription,
-  TradingView,
-} from "@/components/chart/charting";
+import { IOrderLine, TradingView } from "@/components/chart/charting";
 import {
   ContextMenuItemsProcessor,
-  CrossHairMovedEventParams,
   TradingViewWidgetOptions,
 } from "@/components/chart/types";
 import { getIndicators } from "@/components/chart/indicators";
@@ -218,25 +213,25 @@ function useChartContextMenuProcessor(
   widgetReadyRef: RefObject<TradingView.widget>,
   showAlertBuilder?: (al: AlertParams) => void,
 ) {
-  const crossHairRef = useRef<CrossHairMovedEventParams | undefined>(undefined);
-  const crossHairSubRef = useRef<
-    ISubscription<CrossHairMovedEventParams> | undefined
-  >(undefined);
+  // const crossHairRef = useRef<CrossHairMovedEventParams | undefined>(undefined);
+  // const crossHairSubRef = useRef<
+  //   ISubscription<CrossHairMovedEventParams> | undefined
+  // >(undefined);
 
-  const widget = widgetReadyRef.current;
+  // const widget = widgetReadyRef.current;
 
-  useEffect(() => {
-    if (!widget) return;
-
-    const crossHairSub = widget.activeChart().crossHairMoved();
-    const cb = (v: CrossHairMovedEventParams) => (crossHairRef.current = v);
-    crossHairSub.subscribe("crosshair", cb);
-    crossHairSubRef.current = crossHairSub;
-
-    return () => {
-      crossHairSub.unsubscribe("crosshair", cb);
-    };
-  }, [widget]);
+  // useEffect(() => {
+  //   if (!widget) return;
+  //
+  //   const crossHairSub = widget.activeChart().crossHairMoved();
+  //   const cb = (v: CrossHairMovedEventParams) => (crossHairRef.current = v);
+  //   crossHairSub.subscribe("crosshair", cb);
+  //   crossHairSubRef.current = crossHairSub;
+  //
+  //   return () => {
+  //     crossHairSub.unsubscribe("crosshair", cb);
+  //   };
+  // }, [widget]);
 
   return useCallback<ContextMenuItemsProcessor>(
     async (items, actionsFactory, params) => {
@@ -285,8 +280,8 @@ function useChartContextMenuProcessor(
       }
 
       // Called for chart context menu
-      if (crossHairRef.current?.price && widgetReadyRef.current) {
-        const price = parseFloat(crossHairRef.current.price.toFixed(2));
+      if (widgetReadyRef.current) {
+        const price = 1000;
         const symbol = widgetReadyRef.current.activeChart().symbol();
         const newItem = actionsFactory.createAction({
           actionId: "Terminal.AddAlert",
@@ -460,5 +455,5 @@ function useTVAlertOnChart(
         .filter((a) => a.symbol === value)
         .forEach((a) => renderAlertLine(index, a));
     });
-  }, [widget, alerts, activeSymbols, deleteAlert, updateAlert]);
+  }, [widget, alerts, activeSymbols, deleteAlert, updateAlert, showAlert]);
 }
