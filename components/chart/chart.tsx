@@ -395,6 +395,7 @@ function useTVAlertOnChart(
         symbols.push(widget.chart(i).symbol());
       }
       setActiveSymbols(symbols);
+      console.log("Alert symbol refreshed");
     }
 
     function refetch() {
@@ -454,6 +455,7 @@ function useTVAlertOnChart(
       alerts
         .filter((a) => a.symbol === value)
         .forEach((a) => renderAlertLine(index, a));
+      console.log("Orderline created", value);
     });
   }, [widget, alerts, activeSymbols, deleteAlert, updateAlert, showAlert]);
 }
