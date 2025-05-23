@@ -80,7 +80,11 @@ async function simpleQuery(
     .join(" ");
   try {
     conn = await db.connect();
-    return await conn.query(query);
+    return await fetch("http://localhost:8000/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+    });
   } finally {
     await conn?.close();
   }
@@ -142,7 +146,7 @@ type DuckDBContextProps =
       runQuery: (
         table: keyof typeof TABLES,
         props?: QueryProps,
-      ) => ReturnType<AsyncDuckDBConnection["query"]>;
+      ) => Promise<Response>;
     }
   | { status: "error"; error: unknown };
 
@@ -167,7 +171,7 @@ export async function queryDuckDB<T>(
   try {
     conn = await db.connect();
     return await simpleQuery(db, table, props).then(
-      (r) => JSON.parse(JSON.stringify(r.toArray())) as T[],
+      (r) => r.json() as Promise<T[]>,
     );
   } finally {
     await conn?.close();
@@ -197,29 +201,40 @@ export function DuckDBProvider({ children }: { children: ReactNode }) {
 }
 
 export async function runRawSymbolQuery(queryBuilder: (tbl: string) => string) {
-  let conn: AsyncDuckDBConnection | null = null;
+  // let conn: AsyncDuckDBConnection | null = null;
   try {
-    const db = await getDuckDB();
-    conn = await db.connect();
-    const rows = await conn.query(queryBuilder(`'${TABLES.symbols}'`));
-    return JSON.parse(JSON.stringify(rows.toArray()));
+    // const db = await getDuckDB();
+    // conn = await db.connect();
+    const rows = await fetch("http://localhost:8000/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: queryBuilder(`'${TABLES.symbols}'`) }),
+    });
+    return rows.json();
   } finally {
-    await conn?.close();
+    // await conn?.close();
   }
 }
 
 export async function runRawSymbolCount(filterSql: string) {
   const sql = `SELECT COUNT(*) as total FROM '${TABLES.symbols}' ${filterSql}`;
-  let conn: AsyncDuckDBConnection | null = null;
+  // let conn: AsyncDuckDBConnection | null = null;
   try {
-    const db = await getDuckDB();
-    conn = await db.connect();
-    const res = await conn.query(sql);
-    return res.getChild(0)?.get(0);
+    // const db = await getDuckDB();
+    // conn = await db.connect();
+    // const res = await conn.query(sql);
+    const rows = await fetch("http://localhost:8000/query", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: sql }),
+    });
+
+    const data = await rows.json();
+    return data[0].total as number;
   } catch (e) {
     console.error("Failed to get the row count", e);
     return undefined;
   } finally {
-    await conn?.close();
+    // await conn?.close();
   }
 }
