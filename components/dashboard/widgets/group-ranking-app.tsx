@@ -56,7 +56,7 @@ export function GroupRankingApp({
 }
 
 const DUMMY_RANK = 9999;
-const TIMEFRAMES = ["1D", "1W", "1M", "3M", "6M", "12M"];
+const TIMEFRAMES = ["1D", "1W", "2W", "1M", "3M", "6M", "12M"];
 
 function easedProgress(rank: number, min: number, max: number): number {
   if (max === min) return 0.5;

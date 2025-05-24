@@ -689,6 +689,17 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
       }),
   },
   {
+    field: "price_perf_2W",
+    headerName: "Perf 2W",
+    cellDataType: "percentage" satisfies CellDataType,
+    context: { category: "Price & Volume" },
+    cellClass: ({ value = 0 }: CellClassParams<Symbol, number>) =>
+      cn("font-bold", {
+        "text-bullish": value !== null && value > 0,
+        "text-bearish": value !== null && value < 0,
+      }),
+  },
+  {
     field: "price_perf_1M",
     headerName: "Perf 1M",
     cellDataType: "percentage" satisfies CellDataType,

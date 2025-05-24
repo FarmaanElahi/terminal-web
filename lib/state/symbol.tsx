@@ -900,7 +900,9 @@ export function useToggleAlertActive(onComplete?: (alert: Alert) => void) {
 
 type GroupRankProps = {
   group: "sector" | "industry" | "sub_industry" | "industry_2";
-  periods: Array<"1D" | "1W" | "1M" | "3M" | "6M" | "9M" | "12M" | string>;
+  periods: Array<
+    "1D" | "1W" | "2W" | "1M" | "3M" | "6M" | "9M" | "12M" | string
+  >;
   sort: { field: GroupRankProps["periods"][number]; direction: "ASC" | "DESC" };
 };
 
@@ -925,7 +927,7 @@ export function useGroupRanks(props: GroupRankProps) {
 
         return {
           symbol: grp as string,
-          ranks: ranks as Record<GroupRankProps['periods'][number], number>,
+          ranks: ranks as Record<GroupRankProps["periods"][number], number>,
         };
       });
     },
