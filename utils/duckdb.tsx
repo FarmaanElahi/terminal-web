@@ -4,7 +4,8 @@ const TABLES = {
   symbols: "symbols",
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_BASE_URL =
+  localStorage.getItem("BASE_API_URL") ?? process.env.NEXT_PUBLIC_API_URL;
 
 interface QueryProps {
   columns?: (string | { column: string; distinct?: boolean; alias?: string })[];
