@@ -6,7 +6,7 @@ import { WidgetProps } from "@/components/dashboard/widgets/widget-props";
 import { IdeasApp } from "@/components/dashboard/widgets/ideas-app";
 import { StatsApp } from "@/components/dashboard/widgets/stats-app";
 import { DataPanelApp } from "@/components/dashboard/widgets/data-panel-app";
-import { PerformanceChartApp } from "@/components/dashboard/widgets/performance-chart-app";
+import { GroupRankingApp } from "@/components/dashboard/widgets/group-ranking-app";
 
 export type WidgetType =
   | "screener"
@@ -15,7 +15,7 @@ export type WidgetType =
   | "ideas"
   | "chart"
   | "panel"
-  | "performance_chart";
+  | "group_ranking";
 
 export const widgetComponents: Record<
   WidgetType,
@@ -27,7 +27,7 @@ export const widgetComponents: Record<
   ideas: IdeasApp,
   chart: ChartApp,
   panel: DataPanelApp,
-  performance_chart: PerformanceChartApp,
+  group_ranking: GroupRankingApp,
 };
 
 export const widgets: Array<{
@@ -66,9 +66,9 @@ export const widgets: Array<{
     description: "Data Panel",
   },
   {
-    type: "performance_chart",
-    name: "Performance Chart",
-    description: "Track performance easily",
+    type: "group_ranking",
+    name: "Group Ranking",
+    description: "Track group easily",
   },
 ];
 
@@ -77,7 +77,7 @@ export const WIDGET_SIZES: Record<
   { w: number; h: number; minW: number; minH: number }
 > = {
   chart: { w: 6, h: 4, minW: 1, minH: 1 },
-  performance_chart: { w: 6, h: 4, minW: 1, minH: 1 },
+  group_ranking: { w: 6, h: 4, minW: 1, minH: 1 },
   watchlist: { w: 6, h: 4, minW: 1, minH: 1 },
   screener: { w: 6, h: 4, minW: 1, minH: 1 },
   stats: { w: 6, h: 2, minW: 1, minH: 1 },

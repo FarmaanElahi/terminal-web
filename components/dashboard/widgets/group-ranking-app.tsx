@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 import { SelectTrigger } from "@radix-ui/react-select";
 
-export function PerformanceChartApp({
+export function GroupRankingApp({
   onRemoveWidget,
   layout,
   updateSettings,
@@ -126,9 +126,9 @@ export default function SymbolRankTable() {
   return (
     <div className="overflow-auto max-h-[80vh]">
       <Table className="min-w-full text-sm text-left border-collapse">
-        <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
+        <TableHeader className="sticky top-0 bg-background z-10 shadow-sm">
           <TableRow>
-            <TableHead className="p-2 sticky left-0 bg-white z-40 font-bold">
+            <TableHead className="p-2 sticky left-0 bg-background z-40 font-bold">
               <Select
                 value={group}
                 onValueChange={(s) => setGroup(s as IndustryGroup)}
@@ -139,7 +139,7 @@ export default function SymbolRankTable() {
                 <SelectContent>
                   <SelectItem value="sector">Sector</SelectItem>
                   <SelectItem value="industry">Industry</SelectItem>
-                  <SelectItem value="industry_2">Industry 2</SelectItem>
+                  <SelectItem value="industry_2">Niche</SelectItem>
                   <SelectItem value="sub_industry">Sub Industry</SelectItem>
                 </SelectContent>
               </Select>
@@ -167,7 +167,7 @@ export default function SymbolRankTable() {
           {data.map(({ symbol, ranks }) => (
             <TableRow key={symbol} className="border-t">
               <TableCell
-                className="p-2 font-bold sticky left-0 bg-white z-10 cursor-pointer hover:underline"
+                className="p-2 font-bold sticky left-0 cursor-pointer hover:underline"
                 onClick={() => {
                   switchFilter({
                     name: symbol,
