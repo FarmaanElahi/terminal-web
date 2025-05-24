@@ -501,6 +501,11 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     context: { category: "Sector & Industry" },
     cellDataType: "text",
   },
+  {
+    field: "industry_2",
+    headerName: "Niche",
+    context: { category: "Sector & Industry" },
+  },
 
   {
     field: "sector_return_1D",

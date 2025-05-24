@@ -925,7 +925,7 @@ export function useGroupRanks(props: GroupRankProps) {
 
         return {
           symbol: grp as string,
-          ranks: ranks as Record<string, number>,
+          ranks: ranks as Record<GroupRankProps['periods'][number], number>,
         };
       });
     },

@@ -17,6 +17,13 @@ import {
 import { useGroupRanks } from "@/lib/state/symbol";
 import chroma from "chroma-js";
 import { ArrowDown, ArrowUp } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+import { SelectTrigger } from "@radix-ui/react-select";
 
 export function PerformanceChartApp({
   onRemoveWidget,
@@ -67,14 +74,16 @@ function getColorFromEffectiveRank(
   return scale(eased).hex();
 }
 
+type IndustryGroup = "sector" | "industry" | "sub_industry" | "industry_2";
 export default function SymbolRankTable() {
   const switchFilter = useGroupFilterSwitcher();
   const [sortField, setSortField] = useState("1M");
   const [sortDirection, setSortDirection] = useState<"ASC" | "DESC">("ASC");
+  const [group, setGroup] = useState<IndustryGroup>("industry");
 
   const timeframe = useMemo(() => TIMEFRAMES, []);
   const { data = [] } = useGroupRanks({
-    group: "sector",
+    group,
     periods: timeframe,
     sort: { field: sortField, direction: sortDirection },
   });
@@ -120,7 +129,20 @@ export default function SymbolRankTable() {
         <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
           <TableRow>
             <TableHead className="p-2 sticky left-0 bg-white z-40 font-bold">
-              Group
+              <Select
+                value={group}
+                onValueChange={(s) => setGroup(s as IndustryGroup)}
+              >
+                <SelectTrigger className="w-[180px] ring-0 outline-0">
+                  <SelectValue placeholder="Group" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sector">Sector</SelectItem>
+                  <SelectItem value="industry">Industry</SelectItem>
+                  <SelectItem value="industry_2">Industry 2</SelectItem>
+                  <SelectItem value="sub_industry">Sub Industry</SelectItem>
+                </SelectContent>
+              </Select>
             </TableHead>
             {timeframe.map((tf) => (
               <TableHead
@@ -145,7 +167,7 @@ export default function SymbolRankTable() {
           {data.map(({ symbol, ranks }) => (
             <TableRow key={symbol} className="border-t">
               <TableCell
-                className="p-2 font-bold sticky left-0 bg-white z-10"
+                className="p-2 font-bold sticky left-0 bg-white z-10 cursor-pointer hover:underline"
                 onClick={() => {
                   switchFilter({
                     name: symbol,
@@ -155,7 +177,7 @@ export default function SymbolRankTable() {
                         type: "AND",
                         conditions: [
                           {
-                            colId: "sector",
+                            colId: group,
                             filterType: "text",
                             filter: symbol,
                             type: "equals",

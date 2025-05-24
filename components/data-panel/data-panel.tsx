@@ -6,7 +6,11 @@ import {
   defaultColumns,
   extendedColumnType,
 } from "@/components/symbols/columns";
-import { useDataPanels, useSymbolQuote } from "@/lib/state/symbol";
+import {
+  useDataPanels,
+  useGroupRanks,
+  useSymbolQuote,
+} from "@/lib/state/symbol";
 import { ColDef } from "ag-grid-community";
 import type { Symbol } from "@/types/symbol";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,7 +22,11 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useActiveDataPanelId } from "@/hooks/use-active-data-panel";
-import { useGroupSymbol, useGroupSymbolSwitcher } from "@/lib/state/grouper";
+import {
+  useGroupFilterSwitcher,
+  useGroupSymbol,
+  useGroupSymbolSwitcher,
+} from "@/lib/state/grouper";
 import Image from "next/image";
 import { queryDuckDB } from "@/utils/duckdb";
 
@@ -125,7 +133,7 @@ function ErrorState({ symbol }: { symbol: string }) {
 }
 
 // Rating details list component for expandable ratings
-function RankingDetailsList({
+function GroupLeader({
   category,
   symbolData,
   limit,
@@ -435,19 +443,14 @@ function ColumnItem({
 
       {isRatingColumn && showingRanking && rankingCategory && (
         <div className="border-t border-dashed">
-          <RankingDetailsList
-            category={rankingCategory}
-            symbolData={symbolData}
-          />
+          <GroupLeader category={rankingCategory} symbolData={symbolData} />
         </div>
       )}
 
       {isSectorIndustryColumn && showingRanking && (
         <div className="border-t border-dashed">
-          <RankingDetailsList
+          <GroupList
             category={column.field as "sector" | "industry" | "sub_industry"}
-            symbolData={symbolData}
-            limit={10}
           />
         </div>
       )}
@@ -711,6 +714,89 @@ export function DataPanel({
           />
         ))}
       </div>
+    </div>
+  );
+}
+
+function GroupList({
+  category,
+}: {
+  category: "sector" | "industry" | "sub_industry";
+}) {
+  const { data, isLoading } = useGroupRanks({
+    group: category,
+    periods: ["1W", "1M", "3M"],
+    sort: { field: "1M", direction: "DESC" },
+  });
+  const switcher = useGroupFilterSwitcher();
+
+  if (isLoading || !data) {
+    return (
+      <div className="py-2 px-4">
+        <Skeleton className="h-4 w-full mb-2" />
+        <Skeleton className="h-4 w-full mb-2" />
+        <Skeleton className="h-4 w-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-4 text-sm bg-muted/5 max-h-96 overflow-auto">
+      <table className="w-full">
+        <thead className="sticky top-0 bg-background z-10">
+          <tr className="text-xs font-semibold text-muted-foreground py-2">
+            <th className="text-left py-2">Group</th>
+            <th className="text-right py-2">1W</th>
+            <th className="text-right py-2">1M</th>
+            <th className="text-right py-2">3M</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((d, index) => (
+            <tr
+              key={d.symbol}
+              className={cn(
+                "hover:bg-muted/20 transition-colors",
+                index !== 0 && "border-t border-border/30",
+              )}
+            >
+              <td className="py-1.5">
+                <div className="flex items-center gap-2 font-bold w-32 overflow-clip">
+                  <span
+                    className="hover:underline cursor-pointer"
+                    onClick={() =>
+                      switcher({
+                        name: d.symbol,
+                        state: {
+                          advancedFilterModel: {
+                            filterType: "join",
+                            type: "AND",
+                            conditions: [
+                              {
+                                colId: category,
+                                filterType: "text",
+                                filter: d.symbol,
+                                type: "equals",
+                              },
+                            ],
+                          },
+                        },
+                      })
+                    }
+                  >
+                    {d.symbol}
+                  </span>
+                </div>
+              </td>
+              <td className="text-right">
+                <span>{d.ranks["1W"]}</span>
+              </td>
+              <td className="text-right">{d.ranks["1M"]}</td>
+              <td className="text-right">{d.ranks["3M"]}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
