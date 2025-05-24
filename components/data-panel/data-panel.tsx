@@ -725,7 +725,7 @@ function GroupList({
 }) {
   const { data, isLoading } = useGroupRanks({
     group: category,
-    periods: ["1W", "1M", "3M"],
+    periods: ["1W", "2W", "1M", "3M"],
     sort: { field: "1M", direction: "ASC" },
   });
   const switcher = useGroupFilterSwitcher();
