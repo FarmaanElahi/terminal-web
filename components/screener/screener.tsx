@@ -70,36 +70,38 @@ function useScreenerChangeCallback(activeScreenId?: string | null) {
   );
 }
 
-function useGridInitialState(activeScreenId?: string | null) {
+function useGridInitialState() {
+  const {
+    activeScreenId,
+    defaultColumns: defaultVisible,
+    defaultSort,
+  } = useActiveScreenerId();
+
   const activeScreen = useActiveScreen(activeScreenId);
   const colDefs = useColumnDefs();
 
   const defaultState = useMemo(() => {
-    const defaultVisible = new Set([
-      "name",
-      "mcap",
-      "day_close",
-      "price_change_today_pct",
-    ]);
-
     const hiddenColIds = colDefs
-      .filter((c) => c.colId && !defaultVisible.has(c.colId))
+      .filter((c) => c.colId && !defaultVisible.has(c.colId as keyof Symbol))
       .map((c) => c.colId!)
       .filter(Boolean);
 
-    return { columnVisibility: { hiddenColIds } } satisfies GridState;
-  }, [colDefs]);
+    return {
+      columnVisibility: { hiddenColIds },
+      sort: defaultSort,
+    } satisfies GridState;
+  }, [colDefs, defaultVisible, defaultSort]);
 
   return (activeScreen?.state ?? defaultState) as GridState;
 }
 
 export function Screener(props: ScreenerProps) {
-  const { activeScreenId } = useActiveScreenerId();
+  const { activeScreenId, enableFilter } = useActiveScreenerId();
   const colDefs = useColumnDefs();
   const switcher = useGroupSymbolSwitcher();
   const handleStateChange = useScreenerChangeCallback(activeScreenId);
   const { isLoading } = useScreens();
-  const initialState = useGridInitialState(activeScreenId);
+  const initialState = useGridInitialState();
 
   const statusBar = useMemo(
     () => ({
@@ -173,7 +175,7 @@ export function Screener(props: ScreenerProps) {
           key={activeScreenId ?? "default"}
           getContextMenuItems={getContextMenuItems}
           className="ag-terminal-theme"
-          enableAdvancedFilter={true}
+          enableAdvancedFilter={enableFilter}
           headerHeight={36}
           rowHeight={32}
           sideBar={false}
@@ -187,7 +189,7 @@ export function Screener(props: ScreenerProps) {
           getRowId={getRowId}
           defaultColDef={{
             wrapHeaderText: true,
-            filter: true,
+            filter: enableFilter,
             sortable: true,
             resizable: true,
             enableRowGroup: true,

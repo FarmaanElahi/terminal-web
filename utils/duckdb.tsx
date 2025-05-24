@@ -7,7 +7,7 @@ const TABLES = {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface QueryProps {
-  columns?: string[];
+  columns?: (string | { column: string; distinct?: boolean; alias?: string })[];
   where?: string;
   order?: { field: string; sort: "DESC" | "ASC"; nullLast?: boolean }[];
   limit?: number;
@@ -21,8 +21,11 @@ async function simpleQuery(table: keyof typeof TABLES, props?: QueryProps) {
 
   // Columns Builder
   let colsString = columns
-    .map((c) => `${c}`)
-    .join(",")
+    .map((c) => {
+      if (typeof c === "string") return `"${c}"`;
+      return `${c.distinct ? "DISTINCT " : ""}${c.alias ? `"${c.column}" AS "${c.alias}"` : `${c.column}`}`;
+    })
+    .join(", ")
     .trim();
   if (!colsString) colsString = "*";
 

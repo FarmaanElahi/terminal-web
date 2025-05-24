@@ -156,7 +156,6 @@ export function useScreener() {
     queryKey: ["symbols2"],
     refetchOnWindowFocus: false,
     queryFn: async () => {
-
       const result = await queryDuckDB("symbols", {
         columns: [], // Will load all columns
         order: [{ field: "mcap", sort: "DESC" }],
@@ -895,6 +894,40 @@ export function useToggleAlertActive(onComplete?: (alert: Alert) => void) {
 
       if (error) throw error;
       return data as Alert;
+    },
+  });
+}
+
+type GroupRankProps = {
+  group: "sector" | "industry" | "sub_industry" | "industry_2";
+  periods: Array<"1D" | "1W" | "1M" | "3M" | "6M" | "9M" | "12M" | string>;
+  sort: { field: GroupRankProps["periods"][number]; direction: "ASC" | "DESC" };
+};
+
+export function useGroupRanks(props: GroupRankProps) {
+  return useQuery({
+    queryKey: ["ranks", JSON.stringify(props)],
+    queryFn: async () => {
+      const result = await queryDuckDB<Record<string, unknown>>("symbols", {
+        columns: [
+          { column: props.group, distinct: true, alias: "grp" },
+          ...props.periods.map((period) => ({
+            column: [props.group, "ranking", period].join("_"),
+            alias: period,
+          })),
+        ],
+        where: `${[props.group, "ranking", "1M"].join("_")} < 1000`,
+        order: [{ field: props.sort.field, sort: props.sort.direction }],
+      });
+
+      return result.map((value) => {
+        const { grp, ...ranks } = value;
+
+        return {
+          symbol: grp as string,
+          ranks: ranks as Record<string, number>,
+        };
+      });
     },
   });
 }

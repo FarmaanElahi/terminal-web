@@ -52,7 +52,7 @@ export function buildDataSource(allowedTickers?: () => string[]) {
     }
 
     // AG Grid dynamic filter
-    if (filterModel) {
+    if (filterModel && filterModel.type) {
       const gridClause = generateWhereClauseFromAdvancedFilter(
         filterModel as unknown as AdvancedFilterModel,
       );
