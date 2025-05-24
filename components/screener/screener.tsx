@@ -1,6 +1,12 @@
 "use client";
 
-import React, { HTMLAttributes, useCallback, useMemo } from "react";
+import React, {
+  HTMLAttributes,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import {
   useScreens,
   useUpdateScreen,
@@ -12,6 +18,7 @@ import {
   GetContextMenuItems,
   GetRowIdFunc,
   GetRowIdParams,
+  GridApi,
   GridReadyEvent,
   GridState,
   StateUpdatedEvent,
@@ -21,7 +28,7 @@ import {
   extendedColumnType,
 } from "@/components/symbols/columns";
 import { AgGridReact } from "ag-grid-react";
-import { useGroupSymbolSwitcher } from "@/lib/state/grouper";
+import { useGroupFilter, useGroupSymbolSwitcher } from "@/lib/state/grouper";
 import "../grid/ag-theme.css";
 import debounce from "debounce";
 import { toast } from "sonner";
@@ -71,32 +78,36 @@ function useScreenerChangeCallback(activeScreenId?: string | null) {
 }
 
 function useGridInitialState() {
-  const {
-    activeScreenId,
-    defaultColumns: defaultVisible,
-    defaultSort,
-  } = useActiveScreenerId();
+  const { activeScreenId } = useActiveScreenerId();
 
   const activeScreen = useActiveScreen(activeScreenId);
+  const filter = useGroupFilter();
   const colDefs = useColumnDefs();
 
   const defaultState = useMemo(() => {
+    const defaultVisible = new Set([
+      "name",
+      "mcap",
+      "day_close",
+      "price_change_today_pct",
+    ]);
+
     const hiddenColIds = colDefs
-      .filter((c) => c.colId && !defaultVisible.has(c.colId as keyof Symbol))
+      .filter((c) => c.colId && !defaultVisible.has(c.colId))
       .map((c) => c.colId!)
       .filter(Boolean);
 
     return {
       columnVisibility: { hiddenColIds },
-      sort: defaultSort,
+      filter: filter?.state,
     } satisfies GridState;
-  }, [colDefs, defaultVisible, defaultSort]);
+  }, [colDefs, filter]);
 
   return (activeScreen?.state ?? defaultState) as GridState;
 }
 
 export function Screener(props: ScreenerProps) {
-  const { activeScreenId, enableFilter } = useActiveScreenerId();
+  const { activeScreenId } = useActiveScreenerId();
   const colDefs = useColumnDefs();
   const switcher = useGroupSymbolSwitcher();
   const handleStateChange = useScreenerChangeCallback(activeScreenId);
@@ -157,9 +168,26 @@ export function Screener(props: ScreenerProps) {
     [watchlists, updateWatchlist],
   );
 
+  const ref = useRef<GridApi<Symbol> | undefined>(undefined);
   const onGridReady = useCallback((params: GridReadyEvent) => {
+    ref.current = params.api;
     params.api.setGridOption("serverSideDatasource", buildDataSource());
   }, []);
+
+  const filter = useGroupFilter();
+  useEffect(() => {
+    console.log("Filter state trigger");
+    if (activeScreenId || !ref.current) return;
+    if (filter?.state?.advancedFilterModel) {
+      console.log("Temp filter added", filter);
+      ref.current.setAdvancedFilterModel(filter.state?.advancedFilterModel);
+      ref.current.refreshServerSide({ purge: true });
+    } else {
+      console.log("Temp filter removed");
+      ref.current.setAdvancedFilterModel(null);
+      ref.current.refreshServerSide({ purge: true });
+    }
+  }, [filter, activeScreenId]);
 
   return (
     <div {...props} className={cn("h-full relative", props.className)}>
@@ -175,7 +203,7 @@ export function Screener(props: ScreenerProps) {
           key={activeScreenId ?? "default"}
           getContextMenuItems={getContextMenuItems}
           className="ag-terminal-theme"
-          enableAdvancedFilter={enableFilter}
+          enableAdvancedFilter={true}
           headerHeight={36}
           rowHeight={32}
           sideBar={false}
@@ -189,7 +217,7 @@ export function Screener(props: ScreenerProps) {
           getRowId={getRowId}
           defaultColDef={{
             wrapHeaderText: true,
-            filter: enableFilter,
+            filter: true,
             sortable: true,
             resizable: true,
             enableRowGroup: true,

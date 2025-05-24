@@ -5,31 +5,16 @@ import {
   useEffect,
   useState,
 } from "react";
-import { GridState } from "ag-grid-community";
-import { type Symbol } from "@/types/symbol";
-
-const defaultVisible = new Set<keyof Symbol>([
-  "name",
-  "mcap",
-  "day_close",
-  "price_change_today_pct",
-]);
 
 interface ScreenerContextType {
   activeScreenId: string | null;
   setActiveScreenId: (activeScreen: string | null) => void;
-  enableFilter?: boolean;
-  defaultColumns: Set<keyof Symbol>;
-  defaultSort?: GridState["sort"];
 }
 
 interface ScreenerProviderProps {
   children: ReactNode;
   defaultActiveScreenId?: string | null;
   onActiveScreenIdChange?: (screenerId: string | null) => void;
-  enableFilter?: boolean;
-  defaultColumns?: Set<keyof Symbol>;
-  defaultSort?: GridState["sort"];
 }
 
 const ScreenerContext = createContext<ScreenerContextType | null>(null);
@@ -38,9 +23,6 @@ export function ScreenerProvider({
   children,
   defaultActiveScreenId = null,
   onActiveScreenIdChange,
-  enableFilter,
-  defaultSort,
-  defaultColumns,
 }: ScreenerProviderProps) {
   const [activeScreenId, setActiveScreenIdState] = useState<string | null>(
     defaultActiveScreenId,
@@ -69,9 +51,6 @@ export function ScreenerProvider({
       value={{
         activeScreenId,
         setActiveScreenId,
-        enableFilter,
-        defaultColumns: defaultColumns ?? defaultVisible,
-        defaultSort,
       }}
     >
       {children}

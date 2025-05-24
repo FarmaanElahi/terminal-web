@@ -1,13 +1,8 @@
 "use client";
 
-import { ChartSpline, Grid3X3, Lightbulb, List, Table, X } from "lucide-react";
+import { ChartSpline, Grid3X3, Lightbulb, List, Table } from "lucide-react";
 import React, { useRef } from "react";
-import {
-  GrouperProvider,
-  GroupSymbolProvider,
-  useGroupSymbol,
-} from "@/lib/state/grouper";
-import { Button } from "@/components/ui/button";
+import { GrouperProvider, GroupSymbolProvider } from "@/lib/state/grouper";
 import { Toggle } from "@/components/ui/toggle";
 import { SymbolSearch } from "@/components/search/search-command";
 import { ScreenSelector } from "@/components/screener/screen-selector";
@@ -24,6 +19,7 @@ import { Ideas } from "@/components/symbols/ideas";
 import "@/components/grid/grid_init";
 import { ImperativePanelHandle } from "react-resizable-panels";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { GroupInfo } from "@/components/symbols/group";
 
 export default function Page() {
   return (
@@ -48,7 +44,7 @@ function ScreenerContent() {
         <div className="flex items-center justify-between gap-2 w-full">
           <div className="flex gap-2">
             <SidebarTrigger className="my-auto" />
-            <Tag placeholder={"Search Symbol"} name={"JINDRILL"} />
+            <GroupInfo placeholder={"Search Symbol"} name={"NIFTY"} />
             <ScreenSelector />
           </div>
           <div className="flex space-x-4 pr-2">
@@ -155,20 +151,5 @@ function ScreenerContent() {
         </ResizablePanelGroup>
       </div>
     </>
-  );
-}
-
-function Tag({ name, placeholder }: { name?: string; placeholder: string }) {
-  const symbol = useGroupSymbol()?.split(":")?.[1];
-  const value = name || placeholder;
-  return (
-    <Button
-      variant="outline"
-      size="sm"
-      className="font-bold justify-between w-32"
-    >
-      {symbol ?? value}
-      <X className="size-4" />
-    </Button>
   );
 }

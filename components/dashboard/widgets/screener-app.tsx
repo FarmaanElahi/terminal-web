@@ -2,9 +2,10 @@ import { ScreenerProvider } from "@/hooks/use-active-screener";
 import { Screener } from "@/components/screener/screener";
 import { ScreenSelector } from "@/components/screener/screen-selector";
 import type { WidgetProps } from "@/components/dashboard/widgets/widget-props";
-import { Group, GrouperProvider } from "@/lib/state/grouper";
+import { Group, GrouperProvider, useGroupFilter } from "@/lib/state/grouper";
 import { useCallback } from "react";
 import { WidgetControl } from "@/components/dashboard/widget-control";
+import { GroupInfo } from "@/components/symbols/group";
 
 export function ScreenerApp({
   updateSettings,
@@ -34,21 +35,46 @@ export function ScreenerApp({
       group={(layout.settings?.group ?? 0) as Group}
       onChange={groupChanged}
     >
-      <ScreenerProvider
+      <AppChild
+        layout={layout}
+        updateSettings={updateSettings}
+        onRemoveWidget={onRemoveWidget}
         defaultActiveScreenId={defaultActiveScreenId}
-        onActiveScreenIdChange={screenChanged}
-      >
-        <div className={"h-full flex flex-col"}>
-          <WidgetControl
-            layout={layout}
-            onRemove={onRemoveWidget}
-            className={"m-2"}
-          >
-            <ScreenSelector />
-          </WidgetControl>
-          <Screener className="flex-1" />
-        </div>
-      </ScreenerProvider>
+        screenChanged={screenChanged}
+      />
     </GrouperProvider>
+  );
+}
+
+function AppChild({
+  layout,
+  onRemoveWidget,
+  defaultActiveScreenId,
+  screenChanged,
+}: WidgetProps & {
+  defaultActiveScreenId?: string;
+  screenChanged: (id: string | null) => void;
+}) {
+  const filter = useGroupFilter();
+
+  return (
+    <ScreenerProvider
+      defaultActiveScreenId={filter ? undefined : defaultActiveScreenId}
+      onActiveScreenIdChange={screenChanged}
+    >
+      <div className={"h-full flex flex-col"}>
+        <WidgetControl
+          layout={layout}
+          onRemove={onRemoveWidget}
+          className={"m-2"}
+        >
+          <div className="flex gap-2">
+            {filter && <GroupInfo />}
+            {!filter && <ScreenSelector />}
+          </div>
+        </WidgetControl>
+        <Screener className="flex-1" />
+      </div>
+    </ScreenerProvider>
   );
 }

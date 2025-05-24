@@ -1,5 +1,9 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { Group, GrouperProvider } from "@/lib/state/grouper";
+import {
+  Group,
+  GrouperProvider,
+  useGroupFilterSwitcher,
+} from "@/lib/state/grouper";
 import type { WidgetProps } from "@/components/dashboard/widgets/widget-props";
 import { WidgetControl } from "@/components/dashboard/widget-control";
 import {
@@ -64,6 +68,7 @@ function getColorFromEffectiveRank(
 }
 
 export default function SymbolRankTable() {
+  const switchFilter = useGroupFilterSwitcher();
   const [sortField, setSortField] = useState("1M");
   const [sortDirection, setSortDirection] = useState<"ASC" | "DESC">("ASC");
 
@@ -139,7 +144,28 @@ export default function SymbolRankTable() {
         <TableBody>
           {data.map(({ symbol, ranks }) => (
             <TableRow key={symbol} className="border-t">
-              <TableCell className="p-2 font-bold sticky left-0 bg-white z-10">
+              <TableCell
+                className="p-2 font-bold sticky left-0 bg-white z-10"
+                onClick={() => {
+                  switchFilter({
+                    name: symbol,
+                    state: {
+                      advancedFilterModel: {
+                        filterType: "join",
+                        type: "AND",
+                        conditions: [
+                          {
+                            colId: "sector",
+                            filterType: "text",
+                            filter: symbol,
+                            type: "equals",
+                          },
+                        ],
+                      },
+                    },
+                  });
+                }}
+              >
                 {symbol}
               </TableCell>
               {timeframe.map((tf) => {
