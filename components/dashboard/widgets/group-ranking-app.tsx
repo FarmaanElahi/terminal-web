@@ -70,7 +70,7 @@ function getColorFromEffectiveRank(
   max: number,
 ): string {
   const eased = easedProgress(rank, min, max);
-  const scale = chroma.scale(["#2ecc71", "#e74c3c"]).domain([0, 1]);
+  const scale = chroma.scale(["#2196F3", "#E040FB"]).domain([0, 1]);
   return scale(eased).hex();
 }
 
