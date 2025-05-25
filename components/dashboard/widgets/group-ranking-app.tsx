@@ -65,7 +65,7 @@ function getColorFromEffectiveRank(
 ): string {
   const scale = chroma
     .scale(["#2196F3", "#6677F6", "#B056F9", "#E040FB"])
-    .domain([min, min + (max - min) * 0.3, min + (max - min) * 0.6, max]);
+    .domain([min, min + (max - min) * 0.25, min + (max - min) * 0.5, max]);
   return scale(rank).hex();
 }
 
