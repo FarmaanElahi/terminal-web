@@ -1777,19 +1777,25 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     field: "price_volume",
     headerName: "Price Volume",
     context: { category: "Price & Volume" },
-    cellDataType: "number",
+    cellDataType: "fundamental_price",
+  },
+  {
+    field: "price_volume_sma_5D",
+    headerName: "Price Volume 5D",
+    context: { category: "Price & Volume" },
+    cellDataType: "fundamental_price",
   },
   {
     field: "price_volume_sma_20D",
     headerName: "Price Volume 20D",
     context: { category: "Price & Volume" },
-    cellDataType: "price",
+    cellDataType: "fundamental_price",
   },
   {
     field: "price_volume_sma_50D",
     headerName: "Price Volume 50D",
     context: { category: "Price & Volume" },
-    cellDataType: "price",
+    cellDataType: "fundamental_price",
   },
   {
     field: "vol_sma_5D",
