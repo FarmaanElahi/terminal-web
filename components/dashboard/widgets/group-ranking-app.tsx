@@ -58,20 +58,15 @@ export function GroupRankingApp({
 const DUMMY_RANK = 9999;
 const TIMEFRAMES = ["1D", "1W", "2W", "1M", "3M", "6M", "12M"];
 
-function easedProgress(rank: number, min: number, max: number): number {
-  if (max === min) return 0.5;
-  const t = (rank - min) / (max - min);
-  return 1 - Math.pow(1 - t, 0.7);
-}
-
 function getColorFromEffectiveRank(
   rank: number,
   min: number,
   max: number,
 ): string {
-  const eased = easedProgress(rank, min, max);
-  const scale = chroma.scale(["#2196F3", "#E040FB"]).domain([0, 1]);
-  return scale(eased).hex();
+  const scale = chroma
+    .scale(["#2196F3", "#6677F6", "#B056F9", "#E040FB"])
+    .domain([min, min + (max - min) * 0.3, min + (max - min) * 0.6, max]);
+  return scale(rank).hex();
 }
 
 type IndustryGroup = "sector" | "industry" | "sub_industry" | "industry_2";
@@ -102,14 +97,12 @@ export default function SymbolRankTable() {
   data.forEach(({ ranks }) => {
     timeframe.forEach((tf) => {
       const raw = ranks[tf];
-      const maxForTF = maxRankPerTimeframe[tf];
-      const effective = raw === DUMMY_RANK ? maxForTF + 1 : raw;
-      allEffectiveRanks.push(effective);
+      allEffectiveRanks.push(raw);
     });
   });
 
-  const minEffectiveRank = Math.min(...allEffectiveRanks);
-  const maxEffectiveRank = Math.max(...allEffectiveRanks);
+  const minRank = Math.min(...allEffectiveRanks);
+  const maxRank = Math.max(...allEffectiveRanks);
 
   const toggleSort = useCallback(
     (tf: string) => {
@@ -192,14 +185,11 @@ export default function SymbolRankTable() {
               </TableCell>
               {timeframe.map((tf) => {
                 const rawRank = ranks[tf];
-                const maxForTF = maxRankPerTimeframe[tf];
-                const effectiveRank =
-                  rawRank === DUMMY_RANK ? maxForTF + 1 : rawRank;
 
                 const color = getColorFromEffectiveRank(
-                  effectiveRank,
-                  minEffectiveRank,
-                  maxEffectiveRank,
+                  rawRank,
+                  minRank,
+                  maxRank,
                 );
 
                 return (
@@ -209,11 +199,11 @@ export default function SymbolRankTable() {
                     style={{ backgroundColor: color }}
                     title={
                       rawRank === DUMMY_RANK
-                        ? `No data — effective rank: ${effectiveRank}`
+                        ? `No data — effective rank: ${rawRank}`
                         : `Rank: ${rawRank}`
                     }
                   >
-                    {effectiveRank}
+                    {rawRank}
                   </TableCell>
                 );
               })}
