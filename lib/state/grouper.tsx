@@ -73,8 +73,13 @@ export function GrouperProvider(props: {
 // @ts-ignore
 const GroupSymbolContext = createContext<GroupSymbolContextType>();
 
-export function GroupSymbolProvider(props: HTMLAttributes<HTMLDivElement>) {
+interface GroupSymbolProviderProps extends HTMLAttributes<HTMLDivElement> {
+  def?: Partial<Record<Group, string>>;
+}
+
+export function GroupSymbolProvider(props: GroupSymbolProviderProps) {
   const [groupSymbols, setGroupSymbol] = useState<Record<Group, string>>(() => {
+    if (props.def) return props.def;
     // Initialize from localStorage if available
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(GROUP_SYMBOL_STORAGE_KEY);
