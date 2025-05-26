@@ -321,7 +321,7 @@ function getTVChartConfig({
     locale: "en",
     auto_save_delay: 3,
     load_last_chart: true,
-    custom_css_url: "/css/charts/styles.css",
+    custom_css_url: "/static/css/charts/styles.css",
     custom_indicators_getter: getIndicators,
     save_load_adapter: chartManager.chartStorage,
     broker_factory: (host) => new TerminalBroker(host, chartManager.accounts),
