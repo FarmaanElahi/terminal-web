@@ -20,6 +20,8 @@ import {
 import type { Alert, InsertAlert } from "@/types/supabase";
 import { useCreateAlert, useUpdateAlert } from "@/lib/state/symbol";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 interface AlertBuilderProps {
   open: boolean;
@@ -55,6 +57,7 @@ export function AlertBuilder({
 }: AlertBuilderProps) {
   const [symbol, setSymbol] = useState("");
   const [alertType, setAlertType] = useState<"simple">("simple");
+  const [active, setActive] = useState(true);
   const [lhsType, setLhsType] = useState<"last_price">("last_price");
   const [rhsType, setRhsType] = useState<"constant" | "trend_line">("constant");
   const [operator, setOperator] = useState<string>(">");
@@ -93,6 +96,7 @@ export function AlertBuilder({
         setLhsType(existingAlert.lhs_type);
         setRhsType(existingAlert.rhs_type);
         setOperator(existingAlert.operator);
+        setActive(existingAlert.is_active);
 
         // Handle price from rhs_attr depending on the format
         setRhsAttr(existingAlert.rhs_attr as ParamsType);
@@ -106,6 +110,7 @@ export function AlertBuilder({
         setOperator(">");
         setRhsAttr(alertParams.params);
         setNotes("");
+        setActive(true);
       }
     }
   }, [open, existingAlert, alertParams]);
@@ -124,6 +129,7 @@ export function AlertBuilder({
       operator,
       notes: notes || null,
       rhs_attr: rhsAttr,
+      is_active: active,
     };
 
     if (existingAlert) {
@@ -163,7 +169,16 @@ export function AlertBuilder({
             />
           </div>
 
-
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="symbol" className="text-right">
+              Active
+            </Label>
+            <Switch
+              className="outline-0"
+              checked={active}
+              onCheckedChange={setActive}
+            />
+          </div>
 
           {rhsType === "constant" && (
             <>
