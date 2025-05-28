@@ -19,7 +19,12 @@ import { getIndicators } from "@/components/chart/indicators";
 import { TerminalBroker } from "@/components/chart/terminal/broker_terminal";
 import { AlertBuilder, AlertParams } from "@/components/alerts/alert_builder";
 import { ChartManager } from "./chart_manager";
-import { useAlerts, useDeleteAlert, useUpdateAlert } from "@/lib/state/symbol";
+import {
+  chartLayout,
+  useAlerts,
+  useDeleteAlert,
+  useUpdateAlert,
+} from "@/lib/state/symbol";
 import { Alert } from "@/types/supabase";
 import { toast } from "sonner";
 
@@ -33,7 +38,7 @@ export function Chart({ layoutId, onLayoutChange, ...props }: ChartProps) {
     null,
   ) as RefObject<HTMLDivElement>;
 
-  const symbol = useGroupSymbol();
+  const symbol = useGroupSymbol() ?? "NSE:NIFTY";
   const theme = useTheme();
   const chartTheme =
     theme.theme === "dark"
@@ -111,14 +116,10 @@ function useTVChart({
   layoutId?: string;
   onLayoutChange?: (layout: string) => void;
 }) {
-  const ref = useRef<TradingView | null>(null);
+  const widgetRef = useRef<TradingView.widget | null>(null);
   const [widget, setWidget] = useState<TradingView.widget | null>(null);
   const chartManager = useChartManager();
-  const contextMenuItemProcessor = useChartContextMenuProcessor(
-    ref,
-    showAlertBuilder,
-  );
-  const { setSymbol, changeTheme, onReady } = useTVInit(ref);
+  const { setSymbol, changeTheme, onReady } = useTVInit(widget);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -128,22 +129,62 @@ function useTVChart({
       container: containerRef.current,
       chartManager,
     });
-    const widget = new TradingView.widget({
-      ...config,
-      container: containerRef.current,
-      symbol,
-      theme,
-      context_menu: { items_processor: contextMenuItemProcessor },
-    });
+    let widget: TradingView.widget | null = null;
 
-    widget.onChartReady(() => {
-      onReady(widget, layoutId, onLayoutChange);
-      ref.current = widget;
-      setWidget(widget);
-      console.log("Set widget ready");
-    });
+    async function withLayout(layoutId: string) {
+      const layout = await chartLayout(layoutId);
+      const l = layout!;
+      const s = layout?.content as Record<string, unknown>;
+      const layoutContent = s.content
+        ? JSON.parse(s.content as string)
+        : undefined;
+      return new TradingView.widget({
+        ...config,
+        container: containerRef.current,
+        load_last_chart: false,
+        theme,
+        saved_data: layoutContent,
+        saved_data_meta_info: {
+          name: l.name as string,
+          uid: l.id as string,
+          description: l.name as string,
+        },
+        context_menu: {
+          items_processor: createContextMenuProcessor(
+            widgetRef,
+            showAlertBuilder,
+          ),
+        },
+      });
+    }
 
-    return () => widget.remove();
+    async function withSymbol() {
+      return new TradingView.widget({
+        ...config,
+        container: containerRef.current,
+        theme,
+        symbol,
+        context_menu: {
+          items_processor: createContextMenuProcessor(
+            widgetRef,
+            showAlertBuilder,
+          ),
+        },
+      });
+    }
+
+    async function create() {
+      widget = await (layoutId ? withLayout(layoutId as string) : withSymbol());
+      widget.onChartReady(() => {
+        onReady(widget!, onLayoutChange);
+        setWidget(widget);
+        console.log("Set widget ready");
+      });
+    }
+
+    void create();
+
+    return () => widget?.remove();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerRef.current]);
 
@@ -155,13 +196,12 @@ function useTVChart({
     changeTheme(theme);
   }, [theme, changeTheme]);
 
-  return { ref, widget };
+  return { widget };
 }
 
-function useTVInit(widgetReadyRef: RefObject<TradingView.widget>) {
+function useTVInit(widget: TradingView.widget | null) {
   const setSymbol = useCallback(
     (newSymbol: string) => {
-      const widget = widgetReadyRef.current;
       if (!widget) return;
 
       for (let i = 0; i < widget.chartsCount(); i++) {
@@ -170,22 +210,18 @@ function useTVInit(widgetReadyRef: RefObject<TradingView.widget>) {
         chart.setSymbol(newSymbol, resolution);
       }
     },
-    [widgetReadyRef],
+    [widget],
   );
 
   const changeTheme = useCallback(
     (newTheme: "dark" | "light") => {
-      widgetReadyRef.current?.changeTheme(newTheme);
+      widget?.changeTheme(newTheme);
     },
-    [widgetReadyRef],
+    [widget],
   );
 
   const onReady = useCallback(
-    (
-      widget: TradingView.widget,
-      layoutId?: string,
-      onLayoutChange?: (id: string) => void,
-    ) => {
+    (widget: TradingView.widget, onLayoutChange?: (id: string) => void) => {
       widget.subscribe("onAutoSaveNeeded", () =>
         widget.saveChartToServer(() => console.log("Chart saved to server")),
       );
@@ -195,13 +231,6 @@ function useTVInit(widgetReadyRef: RefObject<TradingView.widget>) {
           onLayoutChange((e as { id: string }).id),
         );
       }
-
-      if (layoutId) {
-        widget.getSavedCharts((record) => {
-          const layout = record.find((r) => r.id === layoutId);
-          if (layout) widget.loadChartFromServer(layout);
-        });
-      }
     },
     [],
   );
@@ -209,8 +238,8 @@ function useTVInit(widgetReadyRef: RefObject<TradingView.widget>) {
   return { onReady, changeTheme, setSymbol };
 }
 
-function useChartContextMenuProcessor(
-  widgetReadyRef: RefObject<TradingView.widget>,
+function createContextMenuProcessor(
+  widgetReadyRef: RefObject<TradingView.widget | null>,
   showAlertBuilder?: (al: AlertParams) => void,
 ) {
   // const crossHairRef = useRef<CrossHairMovedEventParams | undefined>(undefined);
@@ -233,74 +262,72 @@ function useChartContextMenuProcessor(
   //   };
   // }, [widget]);
 
-  return useCallback<ContextMenuItemsProcessor>(
-    async (items, actionsFactory, params) => {
-      if (
-        params.menuName === "ObjectTreeContextMenu" &&
-        widgetReadyRef.current
-      ) {
-        if (params.detail.type === "shape" && params.detail.id) {
-          const points = widgetReadyRef.current
-            .activeChart()
-            .getShapeById(params.detail.id)
-            ?.getPoints();
-          const symbol = widgetReadyRef.current.activeChart().symbol();
-          if (points && points.length === 2) {
-            const newItem = actionsFactory.createAction({
-              actionId: "Terminal.TrendlineAlert",
-              icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alarm-clock-plus-icon lucide-alarm-clock-plus"><circle cx="12" cy="13" r="8"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>`,
-              label: `Add Alert on Trend Line`,
-              onExecute: () => {
-                showAlertBuilder?.({
-                  type: "trend_line",
-                  symbol,
-                  params: { trend_line: points },
-                });
-              },
-            });
+  const processor: ContextMenuItemsProcessor = async (
+    items,
+    actionsFactory,
+    params,
+  ) => {
+    if (params.menuName === "ObjectTreeContextMenu" && widgetReadyRef.current) {
+      if (params.detail.type === "shape" && params.detail.id) {
+        const points = widgetReadyRef.current
+          .activeChart()
+          .getShapeById(params.detail.id)
+          ?.getPoints();
+        const symbol = widgetReadyRef.current.activeChart().symbol();
+        if (points && points.length === 2) {
+          const newItem = actionsFactory.createAction({
+            actionId: "Terminal.TrendlineAlert",
+            icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alarm-clock-plus-icon lucide-alarm-clock-plus"><circle cx="12" cy="13" r="8"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>`,
+            label: `Add Alert on Trend Line`,
+            onExecute: () => {
+              showAlertBuilder?.({
+                type: "trend_line",
+                symbol,
+                params: { trend_line: points },
+              });
+            },
+          });
 
-            return [newItem, actionsFactory.createSeparator(), ...items];
-          }
-          if (points && points.length === 1) {
-            const price = parseFloat(points[0].price.toFixed(2));
-            const newItem = actionsFactory.createAction({
-              actionId: "Terminal.AddAlert",
-              icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alarm-clock-plus-icon lucide-alarm-clock-plus"><circle cx="12" cy="13" r="8"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>`,
-              label: `Add Alert at ${price}`,
-              onExecute: () =>
-                showAlertBuilder?.({
-                  symbol,
-                  params: { constant: price },
-                  type: "constant",
-                }),
-            });
-            return [newItem, actionsFactory.createSeparator(), ...items];
-          }
+          return [newItem, actionsFactory.createSeparator(), ...items];
+        }
+        if (points && points.length === 1) {
+          const price = parseFloat(points[0].price.toFixed(2));
+          const newItem = actionsFactory.createAction({
+            actionId: "Terminal.AddAlert",
+            icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alarm-clock-plus-icon lucide-alarm-clock-plus"><circle cx="12" cy="13" r="8"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>`,
+            label: `Add Alert at ${price}`,
+            onExecute: () =>
+              showAlertBuilder?.({
+                symbol,
+                params: { constant: price },
+                type: "constant",
+              }),
+          });
+          return [newItem, actionsFactory.createSeparator(), ...items];
         }
       }
+    }
 
-      // Called for chart context menu
-      if (widgetReadyRef.current) {
-        const price = 1000;
-        const symbol = widgetReadyRef.current.activeChart().symbol();
-        const newItem = actionsFactory.createAction({
-          actionId: "Terminal.AddAlert",
-          icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alarm-clock-plus-icon lucide-alarm-clock-plus"><circle cx="12" cy="13" r="8"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>`,
-          label: `Add Alert at ${price}`,
-          onExecute: () =>
-            showAlertBuilder?.({
-              symbol,
-              params: { constant: price },
-              type: "constant",
-            }),
-        });
-        return [newItem, actionsFactory.createSeparator(), ...items];
-      }
-
-      return items;
-    },
-    [widgetReadyRef, showAlertBuilder],
-  );
+    // Called for chart context menu
+    if (widgetReadyRef.current) {
+      const price = 1000;
+      const symbol = widgetReadyRef.current.activeChart().symbol();
+      const newItem = actionsFactory.createAction({
+        actionId: "Terminal.AddAlert",
+        icon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alarm-clock-plus-icon lucide-alarm-clock-plus"><circle cx="12" cy="13" r="8"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>`,
+        label: `Add Alert at ${price}`,
+        onExecute: () =>
+          showAlertBuilder?.({
+            symbol,
+            params: { constant: price },
+            type: "constant",
+          }),
+      });
+      return [newItem, actionsFactory.createSeparator(), ...items];
+    }
+    return items;
+  };
+  return processor;
 }
 
 function getTVChartConfig({

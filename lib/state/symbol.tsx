@@ -201,6 +201,41 @@ export function chartContent(chartId: number | string) {
   });
 }
 
+export function chartLayout(chartId: number | string) {
+  return queryClient.fetchQuery({
+    queryKey: ["chart_layouts_content", chartId],
+    queryFn: async ({ signal }) => {
+      chartId = typeof chartId === "number" ? "" + chartId : chartId;
+      const { data, error } = await supabase
+        .from("chart_layouts")
+        .select()
+        .eq("id", chartId as string)
+        .abortSignal(signal)
+        .maybeSingle();
+      if (error || !data) throw new Error("Cannot fetch chart content");
+      return data;
+    },
+  });
+}
+
+export function useChartLayout(chartId?: number | string) {
+  return useQuery({
+    queryKey: ["chart_layouts_content", chartId],
+    enabled: !!chartId,
+    queryFn: async ({ signal }) => {
+      chartId = typeof chartId === "number" ? "" + chartId : chartId;
+      const { data, error } = await supabase
+        .from("chart_layouts")
+        .select()
+        .eq("id", chartId as string)
+        .abortSignal(signal)
+        .maybeSingle();
+      if (error || !data) throw new Error("Cannot fetch chart content");
+      return data;
+    },
+  });
+}
+
 export function allChartTemplates() {
   return queryClient.fetchQuery({
     queryKey: ["chart_templates"],
