@@ -132,7 +132,9 @@ function useTVChart({
     let widget: TradingView.widget | null = null;
 
     async function withLayout(layoutId: string) {
-      const layout = await chartLayout(layoutId);
+      const layout = await chartLayout(layoutId).catch(() => null);
+      if (!layout) return withSymbol();
+
       const l = layout!;
       const s = layout?.content as Record<string, unknown>;
       const layoutContent = s.content
