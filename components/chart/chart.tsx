@@ -178,6 +178,7 @@ function useTVChart({
     async function create() {
       widget = await (layoutId ? withLayout(layoutId as string) : withSymbol());
       widget.onChartReady(() => {
+        widgetRef.current = widget;
         onReady(widget!, onLayoutChange);
         setWidget(widget);
         console.log("Set widget ready");
