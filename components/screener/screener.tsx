@@ -91,6 +91,10 @@ function useGridInitialState() {
       "mcap",
       "day_close",
       "price_change_today_pct",
+      "price_perf_1D",
+      "price_perf_1W",
+      "price_perf_1M",
+      "price_perf_3M",
     ]);
 
     const hiddenColIds = colDefs
