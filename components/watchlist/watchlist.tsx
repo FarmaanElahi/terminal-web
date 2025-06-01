@@ -42,6 +42,7 @@ import { WatchlistSymbol } from "@/components/watchlist/watchlist-symbol";
 import { cn } from "@/lib/utils";
 import { useRealtimeSymbol } from "@/hooks/use-realtime-symbol";
 import { buildDataSource } from "@/components/grid/datasource";
+import { RowCountStatusBarComponent } from "@/components/grid/row-count";
 
 type WatchlistProps = HTMLAttributes<HTMLDivElement>;
 
@@ -123,10 +124,7 @@ export function Watchlist(props: WatchlistProps) {
 
   const statusBar = useMemo(
     () => ({
-      statusPanels: [
-        { statusPanel: "agSelectedRowCountComponent" },
-        { statusPanel: "agAggregationComponent" },
-      ],
+      statusPanels: [{ statusPanel: RowCountStatusBarComponent }],
     }),
     [],
   );

@@ -37,6 +37,7 @@ import { useActiveScreenerId } from "@/hooks/use-active-screener";
 import type { Symbol } from "@/types/symbol";
 import { cn } from "@/lib/utils";
 import { buildDataSource } from "@/components/grid/datasource";
+import { RowCountStatusBarComponent } from "@/components/grid/row-count";
 
 type ScreenerProps = HTMLAttributes<HTMLDivElement>;
 
@@ -116,10 +117,7 @@ export function Screener(props: ScreenerProps) {
 
   const statusBar = useMemo(
     () => ({
-      statusPanels: [
-        { statusPanel: "agSelectedRowCountComponent" },
-        { statusPanel: "agTotalRowCountComponent" },
-      ],
+      statusPanels: [{ statusPanel: RowCountStatusBarComponent }],
     }),
     [],
   );
