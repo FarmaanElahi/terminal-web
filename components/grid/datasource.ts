@@ -125,6 +125,7 @@ export function buildDataSource(allowedTickers?: () => string[]) {
     const sorts = request.sortModel.map(
       (s: SortModelItem) => `"${s.colId}" ${s.sort.toUpperCase()}`,
     );
+    sorts.push(`"name" ASC`)
     return " ORDER BY " + sorts.join(", ");
   }
 
