@@ -88,7 +88,6 @@ function useGridInitialState() {
   const defaultState = useMemo(() => {
     const defaultVisible = new Set([
       "name",
-      "mcap",
       "day_close",
       "price_change_today_pct",
       "price_perf_1D",
