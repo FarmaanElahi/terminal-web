@@ -1,172 +1,119 @@
-import {
-  CustomIndicator,
-  IContext,
-  LineStudyPlotStyle,
-  LineStyle,
-  PineJS,
-  StudyPlotDisplayMode,
-} from "./pinejs";
+import { CustomIndicator, PineJS } from "./pinejs";
 
-interface MarketCycleCountProps {
+interface RMV2Props {
   loopback: number;
-  midpoint1: number;
-  midpoint2: number;
-  midpoint3: number;
-  showBgColor: boolean;
-  slAtrLoopback: number;
-  slAtrMultiplier: number;
 }
 
-export function RMV(PineJS: PineJS): CustomIndicator<MarketCycleCountProps> {
+export function RMV(PineJS: PineJS): CustomIndicator<RMV2Props> {
   return {
-    name: "TM-RMV",
+    name: "TM-RMV2",
     metainfo: {
+      description: "TM-RMV",
+      id: "TM-RMV@tv-basicstudies-1",
       isCustomIndicator: true,
       _metainfoVersion: 53,
       shortDescription: "TM-RMV",
-      defaults: {
-        inputs: {
-          loopback: 5,
-          showBgColor: true,
-          midpoint1: 10,
-          midpoint2: 20,
-          midpoint3: 30,
-        },
-        styles: {
-          midpoint_1: {
-            plottype: LineStudyPlotStyle.Line,
-            linestyle: LineStyle.Dotted,
-            color: "green",
-            linewidth: 1,
-            transparency: 30,
-            visible: false,
-          },
-          midpoint_2: {
-            plottype: LineStudyPlotStyle.Line,
-            linestyle: LineStyle.Dotted,
-            color: "orange",
-            linewidth: 1,
-            transparency: 30,
-            visible: false,
-          },
-          midpoint_3: {
-            plottype: LineStudyPlotStyle.Line,
-            linestyle: LineStyle.Dotted,
-            color: "red",
-            linewidth: 1,
-            transparency: 30,
-          },
-          rmv: {
-            plottype: LineStudyPlotStyle.Line,
-            color: "#787b86",
-            linewidth: 1,
-            transparency: 30,
-          },
-          rmv_histogram: {
-            linestyle: 0,
-            linewidth: 1,
-            plottype: LineStudyPlotStyle.Histogram,
-            visible: false,
-          },
-          bg_color: { display: StudyPlotDisplayMode.All },
-        },
-        palettes: {
-          bg_color_palette: {
-            colors: {
-              10: { color: "green", width: 1, style: 0 },
-              20: { color: "orange", width: 1, style: 0 },
-            },
-          },
-          rmv_histogram_color_palette: {
-            colors: {
-              0: { color: "white", width: 3, style: 0 },
-              1: { color: "#787b86", width: 1, style: 0 },
-            },
-          },
-        },
-      },
-      description: "TM-RMV",
-      format: { type: "inherit" },
-      id: "TM-RMV@tv-basicstudies-1",
-      inputs: [
-        { id: "loopback", name: "Length", type: "integer", group: "RMV" },
-        {
-          id: "showBgColor",
-          name: "Show BG Color",
-          type: "bool",
-          group: "RMV",
-        },
-        { id: "midpoint1", name: "Midpoint 1", type: "float", group: "RMV" },
-        { id: "midpoint2", name: "Midpoint 2", type: "float", group: "RMV" },
-        { id: "midpoint3", name: "Midpoint 3", type: "float", group: "RMV" },
-      ],
-      is_hidden_study: false,
       is_price_study: false,
-      palettes: {
-        bg_color_palette: {
-          colors: {
-            10: { name: "Background Color for 0-10 RMV" },
-            20: { name: "Background Color for 10-20 RMV" },
-          },
-        },
-        rmv_histogram_color_palette: {
-          colors: {
-            0: { name: "Histogram Bright Color" },
-            1: { name: "Histogram Dim Color" },
-          },
-        },
-      },
-      plots: [
-        { id: "midpoint_1", type: "line" },
-        { id: "midpoint_2", type: "line" },
-        { id: "midpoint_3", type: "line" },
-        { id: "rmv", type: "line" },
-        { id: "rmv_histogram", type: "line" },
+      format: { type: "inherit" },
+      plots: [{ id: "plot_0", type: "line" }],
+      bands: [
+        { id: "hline_0", isHidden: false, name: "Level 1" },
+        { id: "hline_1", isHidden: false, name: "Level 2" },
+        { id: "hline_2", isHidden: false, name: "Level 3" },
+        { id: "hline_3", isHidden: false, name: "Level 4" },
+      ],
+      filledAreas: [
         {
-          id: "rmv_hist_colorer",
-          type: "colorer",
-          palette: "rmv_histogram_color_palette",
-          target: "rmv_histogram",
+          fillgaps: false,
+          id: "fill_0",
+          isHidden: false,
+          objAId: "hline_0",
+          objBId: "hline_1",
+          title: "Zone 1",
+          type: "hline_hline",
         },
         {
-          id: "bg_color",
-          type: "bg_colorer",
-          palette: "bg_color_palette",
+          fillgaps: false,
+          id: "fill_1",
+          isHidden: false,
+          objAId: "hline_1",
+          objBId: "hline_2",
+          title: "Zone 2",
+          type: "hline_hline",
+        },
+        {
+          fillgaps: false,
+          id: "fill_2",
+          isHidden: false,
+          objAId: "hline_2",
+          objBId: "hline_3",
+          title: "Zone 3",
+          type: "hline_hline",
         },
       ],
       styles: {
-        midpoint_1: {
-          title: "Midpoint 1",
+        plot_0: {
           histogramBase: 0,
           isHidden: false,
           joinPoints: false,
+          title: "Plot",
         },
-        midpoint_2: {
-          title: "Midpoint 2",
-          histogramBase: 0,
-          isHidden: false,
-          joinPoints: false,
+      },
+      inputs: [
+        {
+          id: "lookback_period0",
+          name: "Lookback Period",
+          type: "integer",
+          defval: 15,
         },
-        midpoint_3: {
-          title: "Midpoint 3",
-          histogramBase: 0,
-          isHidden: false,
-          joinPoints: false,
+      ],
+      defaults: {
+        inputs: { lookback_period0: 15 },
+        bands: [
+          {
+            color: "#808080",
+            linestyle: 2,
+            linewidth: 1,
+            value: 15,
+            visible: true,
+          },
+          {
+            color: "#808080",
+            linestyle: 2,
+            linewidth: 1,
+            value: 10,
+            visible: true,
+          },
+          {
+            color: "#808080",
+            linestyle: 2,
+            linewidth: 1,
+            value: 5,
+            visible: true,
+          },
+          {
+            color: "#808080",
+            linestyle: 2,
+            linewidth: 1,
+            value: 0,
+            visible: true,
+          },
+        ],
+        filledAreasStyle: {
+          fill_0: { color: "#00897B", transparency: 90, visible: true },
+          fill_1: { color: "#4CAF50", transparency: 90, visible: true },
+          fill_2: { color: "#9C27B0", transparency: 90, visible: true },
         },
-        rmv: {
-          title: "RMV",
-          histogramBase: 0,
-          isHidden: false,
-          joinPoints: false,
-        },
-        rmv_histogram: {
-          title: "RMV Histogram",
-          histogramBase: 0,
-          isHidden: false,
-          joinPoints: false,
-        },
-        bg_color: {
-          title: "BG Color",
+        styles: {
+          plot_0: {
+            display: 15,
+            color: "#2196F3",
+            linestyle: 0,
+            linewidth: 1,
+            plottype: 0,
+            trackPrice: false,
+            transparency: 0,
+          },
         },
       },
     },
@@ -175,45 +122,94 @@ export function RMV(PineJS: PineJS): CustomIndicator<MarketCycleCountProps> {
         this._context = ctx;
         this._input = inputs;
         this.loopback = this._input(0);
-        this.showBgColor = this._input(1);
-        this.midpoint1 = this._input(2);
-        this.midpoint2 = this._input(3);
-        this.midpoint3 = this._input(4);
       };
+
       this.main = function (ctx) {
         this._context = ctx;
 
-        const rmv = simpleRMV(PineJS, this._context, this.loopback);
+        // Calculations based on 2-period highs/lows
+        const high2 = PineJS.Std.highest(
+          this._context.new_var(PineJS.Std.high(this._context)),
+          2,
+          this._context,
+        ); // o
+        const lowOfHigh2 = PineJS.Std.lowest(
+          this._context.new_var(PineJS.Std.high(this._context)),
+          2,
+          this._context,
+        ); // i (this is unusual, lowest of highs)
+        const close2 = PineJS.Std.highest(
+          this._context.new_var(PineJS.Std.close(this._context)),
+          2,
+          this._context,
+        ); // a
+        const lowClose2 = PineJS.Std.lowest(
+          this._context.new_var(PineJS.Std.close(this._context)),
+          2,
+          this._context,
+        ); // c
+        const highOfLow2 = PineJS.Std.highest(
+          this._context.new_var(PineJS.Std.low(this._context)),
+          2,
+          this._context,
+        ); // l (highest of lows)
+        const low2 = PineJS.Std.lowest(
+          this._context.new_var(PineJS.Std.low(this._context)),
+          2,
+          this._context,
+        ); // u
 
-        const histogramThreshold = 30;
-        let rmvHistColor = NaN;
-        if (rmv > histogramThreshold) rmvHistColor = 1;
-        if (rmv <= histogramThreshold) rmvHistColor = 0;
+        const term1_2p = ((high2 - lowOfHigh2) / lowClose2) * 100; // d
+        const term2_2p = ((close2 - lowClose2) / lowClose2) * 100; // p
+        const term3_2p = ((highOfLow2 - low2) / low2) * 100; // f
+        const avg_2p = (term1_2p + 1.5 * term2_2p + term3_2p) / 3; // M
 
-        let bgColor = NaN;
-        if (this.showBgColor && rmv >= 0 && rmv <= 10) bgColor = 10;
-        if (this.showBgColor && rmv > 10 && rmv <= 20) bgColor = 20;
+        // Calculations based on 3-period highs/lows
+        const high3 = PineJS.Std.highest(
+          this._context.new_var(PineJS.Std.high(this._context)),
+          3,
+          this._context,
+        ); // g
+        const lowOfHigh3 = PineJS.Std.lowest(
+          this._context.new_var(PineJS.Std.high(this._context)),
+          3,
+          this._context,
+        ); // O
+        const close3 = PineJS.Std.highest(
+          this._context.new_var(PineJS.Std.close(this._context)),
+          3,
+          this._context,
+        ); // v
+        const lowClose3 = PineJS.Std.lowest(
+          this._context.new_var(PineJS.Std.close(this._context)),
+          3,
+          this._context,
+        ); // y
 
-        return [
-          this.midpoint1,
-          this.midpoint2,
-          this.midpoint3,
-          rmv,
-          rmv,
-          rmvHistColor,
-          bgColor,
-        ];
+        const term1_3p = ((high3 - lowOfHigh3) / lowClose3) * 100; // A
+        const term2_3p = 1.5 * ((close3 - lowClose3) / lowClose3) * 100; // _
+        const avg_3p = (term1_3p + term2_3p) / 2; // C
+
+        const combinedAvg = (3 * avg_2p + avg_3p) / 4; // S
+        const combinedAvgSeries = this._context.new_var(combinedAvg);
+
+        const highestCombinedAvg = PineJS.Std.highest(
+          combinedAvgSeries,
+          this.loopback,
+          this._context,
+        ); // x
+        const lowestCombinedAvg = PineJS.Std.lowest(
+          combinedAvgSeries,
+          this.loopback,
+          this._context,
+        ); // R
+
+        const rmvValue =
+          ((combinedAvg - lowestCombinedAvg) /
+            (highestCombinedAvg - lowestCombinedAvg)) *
+          100;
+        return [rmvValue];
       };
     },
   };
-}
-
-function simpleRMV(PineJS: PineJS, _context: IContext, loopback: number) {
-  const atr = PineJS.Std.atr(loopback, _context);
-  const atrSeries = _context.new_unlimited_var(atr);
-
-  const min_atr = PineJS.Std.lowest(atrSeries, loopback, _context);
-  const max_atr = PineJS.Std.highest(atrSeries, loopback, _context);
-
-  return (100 * (atr - min_atr)) / (max_atr - min_atr);
 }

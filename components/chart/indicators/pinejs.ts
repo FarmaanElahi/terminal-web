@@ -1488,6 +1488,12 @@ interface PineJSStd {
   zigzagbars(n_deviation: number, n_depth: number, context: IContext): number;
 }
 
+interface StudyBandInfo {
+  id: string;
+  isHidden?: boolean;
+  name: string;
+}
+
 interface StudyMetaInfo {
   _metainfoVersion: 53;
   isCustomIndicator: boolean;
@@ -1507,6 +1513,7 @@ interface StudyMetaInfo {
   name?: string;
   palettes?: Record<string, StudyPalettesInfo>;
   plots: Array<StudyPlotInformation>;
+  bands?: Array<StudyBandInfo>;
   filledAreas?: Array<StudyFilledAreaInfo>;
   priceScale?: StudyTargetPriceScale;
   // Can't be changed from UI, Any additional value that can be changed will be in defaults
@@ -1515,8 +1522,17 @@ interface StudyMetaInfo {
   behind_chart?: boolean;
 }
 
+interface StudyBandPreference {
+  color?: string;
+  linestyle?: LineStyle;
+  linewidth?: number;
+  value: number;
+  visible?: boolean;
+}
+
 interface StudyMetaInfoDefaults {
   inputs: Record<string, string | number | boolean>;
+  bands: StudyBandPreference[];
   precision: string | number;
   styles: Record<string, StudyPlotPreferences>;
   palettes: Record<string, StudyPaletteStyle>;

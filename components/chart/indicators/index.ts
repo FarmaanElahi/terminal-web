@@ -19,6 +19,6 @@ export function getIndicators(PineJS: PineJS): Promise<CustomIndicator[]> {
     ADR(PineJS),
     RMV(PineJS),
     RSLine(PineJS),
-    PriceVolume(PineJS)
+    PriceVolume(PineJS),
   ]);
 }
