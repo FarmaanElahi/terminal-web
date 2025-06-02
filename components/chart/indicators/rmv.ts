@@ -6,13 +6,13 @@ interface RMV2Props {
 
 export function RMV(PineJS: PineJS): CustomIndicator<RMV2Props> {
   return {
-    name: "TM-RMV2",
+    name: "TM-RMV",
     metainfo: {
       description: "TM-RMV",
       id: "TM-RMV@tv-basicstudies-1",
+      shortDescription: "TM-RMV",
       isCustomIndicator: true,
       _metainfoVersion: 53,
-      shortDescription: "TM-RMV",
       is_price_study: false,
       format: { type: "inherit" },
       plots: [{ id: "plot_0", type: "line" }],
