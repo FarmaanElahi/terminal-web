@@ -19,12 +19,7 @@ import { getIndicators } from "@/components/chart/indicators";
 import { TerminalBroker } from "@/components/chart/terminal/broker_terminal";
 import { AlertBuilder, AlertParams } from "@/components/alerts/alert_builder";
 import { ChartManager } from "./chart_manager";
-import {
-  chartLayout,
-  useAlerts,
-  useDeleteAlert,
-  useUpdateAlert,
-} from "@/lib/state/symbol";
+import { useAlerts, useDeleteAlert, useUpdateAlert } from "@/lib/state/symbol";
 import { Alert } from "@/types/supabase";
 import { toast } from "sonner";
 
@@ -106,8 +101,6 @@ function useTVChart({
   theme,
   symbol,
   showAlertBuilder,
-  layoutId,
-  onLayoutChange,
 }: {
   containerRef: RefObject<HTMLDivElement>;
   symbol: string;
@@ -131,35 +124,6 @@ function useTVChart({
     });
     let widget: TradingView.widget | null = null;
 
-    async function withLayout(layoutId: string) {
-      const layout = await chartLayout(layoutId).catch(() => null);
-      if (!layout) return withSymbol();
-
-      const l = layout!;
-      const s = layout?.content as Record<string, unknown>;
-      const layoutContent = s.content
-        ? JSON.parse(s.content as string)
-        : undefined;
-      return new TradingView.widget({
-        ...config,
-        container: containerRef.current,
-        load_last_chart: false,
-        theme,
-        saved_data: layoutContent,
-        saved_data_meta_info: {
-          name: l.name as string,
-          uid: l.id as string,
-          description: l.name as string,
-        },
-        context_menu: {
-          items_processor: createContextMenuProcessor(
-            widgetRef,
-            showAlertBuilder,
-          ),
-        },
-      });
-    }
-
     async function withSymbol() {
       return new TradingView.widget({
         ...config,
@@ -176,10 +140,11 @@ function useTVChart({
     }
 
     async function create() {
-      widget = await (layoutId ? withLayout(layoutId as string) : withSymbol());
+      // widget = await (layoutId ? withLayout(layoutId as string) : withSymbol());
+      widget = await withSymbol();
       widget.onChartReady(() => {
         widgetRef.current = widget;
-        onReady(widget!, onLayoutChange);
+        onReady(widget!);
         setWidget(widget);
         console.log("Set widget ready");
       });
@@ -223,20 +188,17 @@ function useTVInit(widget: TradingView.widget | null) {
     [widget],
   );
 
-  const onReady = useCallback(
-    (widget: TradingView.widget, onLayoutChange?: (id: string) => void) => {
-      widget.subscribe("onAutoSaveNeeded", () =>
-        widget.saveChartToServer(() => console.log("Chart saved to server")),
-      );
+  const onReady = useCallback((widget: TradingView.widget) => {
+    widget.subscribe("onAutoSaveNeeded", () =>
+      widget.saveChartToServer(() => console.log("Chart saved to server")),
+    );
 
-      if (onLayoutChange) {
-        widget.subscribe("chart_load_requested", (e: unknown) =>
-          onLayoutChange((e as { id: string }).id),
-        );
-      }
-    },
-    [],
-  );
+    // if (onLayoutChange) {
+    //   widget.subscribe("chart_load_requested", (e: unknown) =>
+    //     onLayoutChange((e as { id: string }).id),
+    //   );
+    // }
+  }, []);
 
   return { onReady, changeTheme, setSymbol };
 }
