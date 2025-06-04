@@ -86,6 +86,7 @@ export async function runRawSymbolQuery(queryBuilder: (tbl: string) => string) {
     // conn = await db.connect();
     const rows = await fetch(`${API_BASE_URL}/scanner/scan`, {
       method: "POST",
+      mode: "cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query: queryBuilder(`'${TABLES.symbols}'`) }),
     });
