@@ -193,11 +193,13 @@ function useTVChart({
 
   useEffect(() => {
     setSymbol(symbol);
-  }, [symbol, setSymbol]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [symbol]);
 
   useEffect(() => {
     changeTheme(theme);
-  }, [theme, changeTheme]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [theme]);
 
   return { widget };
 }
