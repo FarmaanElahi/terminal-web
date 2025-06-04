@@ -92,21 +92,17 @@ export class DatafeedUpstox extends Datafeed implements StreamingDataFeed {
     onError: DatafeedErrorCallback,
   ) {
     // Ensure we are subscribed to realtime data
-    try {
-      this.ensureTBTSubscribe(symbolInfo, periodParams.firstDataRequest);
+    this.ensureTBTSubscribe(symbolInfo, periodParams.firstDataRequest);
 
-      const interval: UpstoxInterval = resolution === "1D" ? "day" : "1minute";
+    const interval: UpstoxInterval = resolution === "1D" ? "day" : "1minute";
 
-      const filtered = await (interval === "day"
-        ? this.pullDayCandle(symbolInfo, periodParams, interval)
-        : this.pullMinutesCandles(symbolInfo, periodParams, interval));
+    const filtered = await (interval === "day"
+      ? this.pullDayCandle(symbolInfo, periodParams, interval)
+      : this.pullMinutesCandles(symbolInfo, periodParams, interval));
 
-      if (!filtered) return onError("Unable to resolve symbol");
-      if (filtered.length === 0) return onResult([], { noData: true });
-      onResult(filtered);
-    } catch (e: unknown) {
-      onError((e as Error).message);
-    }
+    if (!filtered) return onError("Unable to resolve symbol");
+    if (filtered.length === 0) return onResult([], { noData: true });
+    onResult(filtered);
   }
 
   /**
