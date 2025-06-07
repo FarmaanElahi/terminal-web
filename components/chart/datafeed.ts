@@ -29,6 +29,7 @@ export abstract class Datafeed {
         "15",
         "30",
         "45",
+        "65",
         "D",
         "1W",
         "1M",

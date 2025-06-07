@@ -386,6 +386,7 @@ function getTVChartConfig({
       "show_object_tree",
     ],
     enabled_features: [
+      "custom_resolutions",
       "show_dom_first_time",
       "hide_right_toolbar",
       "hide_left_toolbar_by_default",

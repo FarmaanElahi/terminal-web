@@ -290,6 +290,7 @@ export type ResolutionString =
   | "30"
   | "45"
   | "60"
+  | "65"
   | "120"
   | "180"
   | "240"
