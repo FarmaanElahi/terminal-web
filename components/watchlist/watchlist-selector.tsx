@@ -8,6 +8,7 @@ import {
   Loader2,
   Plus,
   Trash,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -37,6 +38,8 @@ import { Input } from "@/components/ui/input";
 import {
   useCreateWatchlist,
   useDeleteWatchlist,
+  useScreens,
+  useSymbolSearch,
   useWatchlist,
 } from "@/lib/state/symbol";
 import { toast } from "sonner";
@@ -54,6 +57,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useActiveWatchlistId } from "@/hooks/use-active-watchlist";
 import { WatchlistSymbol } from "@/components/watchlist/watchlist-symbol";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 
 export function WatchlistSelector() {
   const { activeWatchlistId, setActiveWatchlistId } = useActiveWatchlistId();
@@ -195,6 +201,15 @@ export function WatchlistCreatorDialog({
   default?: { name: string; state: Json; symbols: string[] };
 }) {
   const { setActiveWatchlistId } = useActiveWatchlistId();
+  const { data: watchlists = [] } = useWatchlist();
+
+  const [listType, setListType] = useState<"simple" | "combo">("simple");
+  const [selectedWatchlists, setSelectedWatchlists] = useState<string[]>([]);
+  const [selectedScreeners, setSelectedScreeners] = useState<string[]>([]);
+  const [symbolInput, setSymbolInput] = useState("");
+  const [selectedSymbols, setSelectedSymbols] = useState<string[]>([]);
+  const { data: symbolResults = [], isLoading: isSearching } =
+    useSymbolSearch(symbolInput);
 
   const { mutate: createWatchlist, isPending } = useCreateWatchlist(
     (watchlist) => {
@@ -203,17 +218,80 @@ export function WatchlistCreatorDialog({
       setActiveWatchlistId(watchlist.id);
     },
   );
-  const [watchlistName, setNewWatchlistName] = useState<string>();
-  useEffect(() => setNewWatchlistName(defaultState?.name), [defaultState]);
+
+  const [watchlistName, setNewWatchlistName] = useState<string>("");
+
+  useEffect(() => {
+    if (open) {
+      setNewWatchlistName(defaultState?.name || "");
+      setListType("simple");
+      setSelectedWatchlists([]);
+      setSelectedScreeners([]);
+      setSelectedSymbols(defaultState?.symbols || []);
+      setSymbolInput("");
+    }
+  }, [defaultState, open]);
+
+  // Mock screener data - in a real implementation, you would fetch this data
+  const { data: screeners = [] } = useScreens();
+
+  const handleCreateWatchlist = () => {
+    if (listType === "simple") {
+      createWatchlist({
+        type: "custom",
+        name: watchlistName,
+        state: defaultState?.state,
+        symbols: selectedSymbols,
+      });
+    } else {
+      // Create a combo list with the selected watchlists and screeners
+      createWatchlist({
+        type: "combo",
+        name: watchlistName,
+        state: defaultState?.state,
+        lists: [...selectedWatchlists, ...selectedScreeners],
+        symbols: [],
+      });
+    }
+    setOpen(false);
+  };
+
+  const handleWatchlistSelection = (watchlistId: string) => {
+    setSelectedWatchlists((prevSelected) =>
+      prevSelected.includes(watchlistId)
+        ? prevSelected.filter((id) => id !== watchlistId)
+        : [...prevSelected, watchlistId],
+    );
+  };
+
+  const handleScreenerSelection = (screenerId: string) => {
+    setSelectedScreeners((prevSelected) =>
+      prevSelected.includes(screenerId)
+        ? prevSelected.filter((id) => id !== screenerId)
+        : [...prevSelected, screenerId],
+    );
+  };
+
+  const addSymbol = (symbol: string) => {
+    if (!selectedSymbols.includes(symbol)) {
+      setSelectedSymbols([...selectedSymbols, symbol]);
+      setSymbolInput("");
+    }
+  };
+
+  const removeSymbol = (symbol: string) => {
+    setSelectedSymbols(selectedSymbols.filter((s) => s !== symbol));
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
             {defaultState?.name ? "Clone Watchlist" : "Create New Watchlist"}
           </DialogTitle>
         </DialogHeader>
+
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="name">Watchlist Name</Label>
@@ -221,22 +299,205 @@ export function WatchlistCreatorDialog({
               id="name"
               value={watchlistName}
               onChange={(e) => setNewWatchlistName(e.target.value)}
-              placeholder="Enter watchlist"
+              placeholder="Enter watchlist name"
             />
           </div>
+
+          <div className="grid gap-2">
+            <Label>List Type</Label>
+            <Tabs
+              defaultValue="simple"
+              value={listType}
+              onValueChange={(value) =>
+                setListType(value as "simple" | "combo")
+              }
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="simple">Simple List</TabsTrigger>
+                <TabsTrigger value="combo">Combo List</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="simple">
+                <div className="py-2 space-y-4">
+                  <div className="text-sm text-muted-foreground">
+                    A simple list contains individual symbols only.
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="symbol-search">Add Symbols</Label>
+
+                    {/* Symbol search input with integrated tag management */}
+                    <div className="flex flex-wrap min-h-10 px-3 py-2 border rounded-md gap-1 focus-within:ring-1 focus-within:ring-ring">
+                      {selectedSymbols.map((symbol) => (
+                        <Badge
+                          key={symbol}
+                          variant="secondary"
+                          className="flex items-center gap-1 h-6"
+                        >
+                          {symbol}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 p-0 hover:bg-transparent"
+                            onClick={() => removeSymbol(symbol)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </Badge>
+                      ))}
+
+                      <div className="flex-1 min-w-[8rem]">
+                        <Input
+                          id="symbol-search"
+                          value={symbolInput}
+                          onChange={(e) => setSymbolInput(e.target.value)}
+                          placeholder={
+                            selectedSymbols.length === 0
+                              ? "Search for symbols (e.g., AAPL, MSFT)"
+                              : "Add more symbols..."
+                          }
+                          className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 h-6 p-0"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Symbol search results dropdown */}
+                    {symbolInput.trim() !== "" && (
+                      <div className="relative">
+                        {isSearching ? (
+                          <div className="absolute top-0 w-full border rounded-md p-3 flex items-center justify-center bg-background z-10">
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground mr-2" />
+                            <span className="text-sm text-muted-foreground">
+                              Searching...
+                            </span>
+                          </div>
+                        ) : symbolResults.length > 0 ? (
+                          <div className="absolute top-0 w-full border rounded-md max-h-[200px] overflow-y-auto bg-background z-10">
+                            <Command>
+                              <CommandList>
+                                <CommandGroup>
+                                  {symbolResults.map((result) => (
+                                    <CommandItem
+                                      key={result.ticker}
+                                      onSelect={() => {
+                                        addSymbol(result.ticker as string);
+                                      }}
+                                      className="flex justify-between cursor-pointer"
+                                    >
+                                      <div className="flex items-center">
+                                        <span className="font-medium mr-2">
+                                          {result.name}
+                                        </span>
+                                        <span className="text-sm text-muted-foreground truncate">
+                                          {result.description || result.name}
+                                        </span>
+                                      </div>
+                                      <Plus className="h-4 w-4 opacity-70" />
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </div>
+                        ) : (
+                          <div className="absolute top-0 w-full border rounded-md p-3 bg-background z-10">
+                            <p className="text-sm text-muted-foreground">
+                              No matching symbols found
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Help text for selected symbols */}
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {selectedSymbols.length === 0
+                        ? "Search and select symbols to add to your watchlist"
+                        : `${selectedSymbols.length} symbol${selectedSymbols.length > 1 ? "s" : ""} selected`}
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="combo">
+                <div className="py-2 space-y-4">
+                  <div className="text-sm text-muted-foreground mb-2">
+                    A combo list can include multiple watchlists and screeners.
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Select Watchlists</Label>
+                    <div className="border rounded-md p-3 max-h-[150px] overflow-y-auto">
+                      {watchlists.length > 0 ? (
+                        watchlists.map((list) => (
+                          <div
+                            key={list.id}
+                            className="flex items-center space-x-2 py-1"
+                          >
+                            <Checkbox
+                              id={`watchlist-${list.id}`}
+                              checked={selectedWatchlists.includes(list.id)}
+                              onCheckedChange={() =>
+                                handleWatchlistSelection(list.id)
+                              }
+                            />
+                            <Label
+                              htmlFor={`watchlist-${list.id}`}
+                              className="cursor-pointer"
+                            >
+                              {list.name}
+                            </Label>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-sm text-muted-foreground py-1">
+                          No watchlists available
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Select Screeners</Label>
+                    <div className="border rounded-md p-3 max-h-[150px] overflow-y-auto">
+                      {screeners.map((screener) => (
+                        <div
+                          key={screener.id}
+                          className="flex items-center space-x-2 py-1"
+                        >
+                          <Checkbox
+                            id={`screener-${screener.id}`}
+                            checked={selectedScreeners.includes(screener.id)}
+                            onCheckedChange={() =>
+                              handleScreenerSelection(screener.id)
+                            }
+                          />
+                          <Label
+                            htmlFor={`screener-${screener.id}`}
+                            className="cursor-pointer"
+                          >
+                            {screener.name}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
+
         <DialogFooter>
           <Button
-            disabled={!watchlistName}
-            onClick={(e) => {
-              e.stopPropagation();
-              createWatchlist({
-                name: watchlistName!,
-                state: defaultState?.state,
-                symbols: defaultState?.symbols ?? [],
-              });
-              setOpen(false);
-            }}
+            disabled={
+              !watchlistName ||
+              (listType === "combo" &&
+                selectedWatchlists.length === 0 &&
+                selectedScreeners.length === 0) ||
+              (listType === "simple" && selectedSymbols.length === 0)
+            }
+            onClick={handleCreateWatchlist}
           >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {defaultState?.name ? "Clone" : "Create"}
