@@ -15,6 +15,7 @@ import {
 } from "@/lib/state/symbol";
 import {
   AgColumn,
+  ColumnVisibleEvent,
   GetContextMenuItems,
   GetRowIdFunc,
   GetRowIdParams,
@@ -36,8 +37,9 @@ import { Json } from "@/types/generated/supabase";
 import { useActiveScreenerId } from "@/hooks/use-active-screener";
 import type { Symbol } from "@/types/symbol";
 import { cn } from "@/lib/utils";
-import { buildDataSource } from "@/components/grid/datasource";
+import { RealtimeDatasource } from "@/components/grid/datasource";
 import { RowCountStatusBarComponent } from "@/components/grid/row-count";
+import { useRealtimeClient } from "@/hooks/use-realtime";
 
 type ScreenerProps = HTMLAttributes<HTMLDivElement>;
 
@@ -169,11 +171,21 @@ export function Screener(props: ScreenerProps) {
     [watchlists, updateWatchlist],
   );
 
+  const realtimeClient = useRealtimeClient();
+  const datasource = useMemo(
+    () => new RealtimeDatasource(realtimeClient),
+    [realtimeClient],
+  );
+  const onColumnVisibilityChanged = useCallback(
+    (ev: ColumnVisibleEvent) => datasource.columnVisibilityChanged(ev),
+    [datasource],
+  );
+
   const ref = useRef<GridApi<Symbol> | undefined>(undefined);
-  const onGridReady = useCallback((params: GridReadyEvent) => {
-    ref.current = params.api;
-    params.api.setGridOption("serverSideDatasource", buildDataSource());
-  }, []);
+  const onGridReady = useCallback(
+    (ev: GridReadyEvent) => (ref.current = ev.api),
+    [ref],
+  );
 
   const filter = useGroupFilter();
   useEffect(() => {
@@ -182,24 +194,26 @@ export function Screener(props: ScreenerProps) {
     if (filter?.state?.advancedFilterModel) {
       console.log("Temp filter added", filter);
       ref.current.setAdvancedFilterModel(filter.state?.advancedFilterModel);
-      ref.current.refreshServerSide({ purge: true });
+      datasource.filterChanged(filter.state?.advancedFilterModel);
     } else {
       console.log("Temp filter removed");
       ref.current.setAdvancedFilterModel(null);
-      ref.current.refreshServerSide({ purge: true });
+      datasource.filterChanged(null);
     }
-  }, [filter, activeScreenId]);
+  }, [filter, activeScreenId, datasource]);
 
+  const onDestroy = useCallback(() => console.error("Grid pre destr"), []);
   return (
     <div {...props} className={cn("h-full relative", props.className)}>
       {!isLoading && (
         <AgGridReact
-          suppressServerSideFullWidthLoadingRow={true}
           onGridReady={onGridReady}
-          rowModelType={"serverSide"}
-          onColumnVisible={(event) =>
-            event.api.refreshServerSide({ purge: true })
-          }
+          onGridPreDestroyed={onDestroy}
+          viewportDatasource={datasource}
+          viewportRowModelBufferSize={50}
+          viewportRowModelPageSize={100}
+          rowModelType={"viewport"}
+          onColumnVisible={onColumnVisibilityChanged}
           dataTypeDefinitions={extendedColumnType}
           key={activeScreenId ?? "default"}
           getContextMenuItems={getContextMenuItems}
