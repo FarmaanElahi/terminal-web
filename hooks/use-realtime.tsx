@@ -26,17 +26,22 @@ const RealtimeContext = createContext<RealtimeContextType | null>(null);
 interface RealtimeProviderProps {
   children: ReactNode;
   autoConnect?: boolean;
+  token?: string;
 }
 
 export const realtimeClient = new RealtimeConnection(
   process.env.NEXT_PUBLIC_WS_URL as string,
 );
 
-export const RealtimeProvider: FC<RealtimeProviderProps> = ({ children }) => {
+export const RealtimeProvider: FC<RealtimeProviderProps> = ({
+  token,
+  children,
+}) => {
   useEffect(() => {
     realtimeClient.connect();
+    realtimeClient.sendMessage({ t: "AUTH", token: token || "no_auth" });
     return () => realtimeClient.disconnect();
-  }, []);
+  }, [token]);
 
   const value = useMemo(
     () => ({

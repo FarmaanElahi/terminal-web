@@ -1,5 +1,10 @@
 import { EventEmitter } from "eventemitter3";
 
+interface AuthRequest {
+  t: "AUTH";
+  token: string | "no_auth";
+}
+
 interface ScreenerSubscribeRequest {
   t: "SCREENER_SUBSCRIBE";
   session_id: string;
@@ -21,6 +26,7 @@ interface ScreenerUnSubscribeRequest {
 }
 
 export type RealtimeRequest =
+  | AuthRequest
   | ScreenerSubscribeRequest
   | ScreenerUnSubscribeRequest
   | ScreenerPatchRequest;

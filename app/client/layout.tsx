@@ -10,9 +10,10 @@ import { RealtimeProvider } from "@/hooks/use-realtime";
 
 export default async function Layout({ children }: { children: ReactNode }) {
   const [tradingAccounts] = await Promise.all([getAllTradingAccounts()]);
+  const token = tradingAccounts.find((value) => value.type === "upstox")?.token;
   return (
     <AppInfoProvider tradingAccounts={tradingAccounts}>
-      <RealtimeProvider>
+      <RealtimeProvider token={token}>
         <ReactQueryProvider>
           <ChartProvider>
             <ChartLoader>
