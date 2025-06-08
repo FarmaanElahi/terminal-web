@@ -8,7 +8,7 @@ interface AuthRequest {
 interface ScreenerSubscribeRequest {
   t: "SCREENER_SUBSCRIBE";
   session_id: string;
-  query?: string;
+  universe?: string[];
 }
 
 interface ScreenerPatchRequest {
@@ -25,11 +25,18 @@ interface ScreenerUnSubscribeRequest {
   session_id: string;
 }
 
+interface ScreenerSetUniverseRequest {
+  t: "SCREENER_SET_UNIVERSE";
+  session_id: string;
+  universe: string[] | null;
+}
+
 export type RealtimeRequest =
   | AuthRequest
   | ScreenerSubscribeRequest
   | ScreenerUnSubscribeRequest
-  | ScreenerPatchRequest;
+  | ScreenerPatchRequest
+  | ScreenerSetUniverseRequest;
 
 interface ScreenerSubscribedResponse {
   t: "SCREENER_SUBSCRIBED";

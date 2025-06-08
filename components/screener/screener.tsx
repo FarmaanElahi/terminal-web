@@ -171,16 +171,18 @@ export function Screener(props: ScreenerProps) {
   );
 
   const realtimeClient = useRealtimeClient();
+  const datasource = useMemo(
+    () => new RealtimeDatasource(realtimeClient, "scr"),
+    [realtimeClient],
+  );
+
   const ref = useRef<GridApi<Symbol> | undefined>(undefined);
   const onGridReady = useCallback(
     (params: GridReadyEvent) => {
       ref.current = params.api;
-      params.api.setGridOption(
-        "serverSideDatasource",
-        new RealtimeDatasource(params.api, realtimeClient),
-      );
+      datasource.onReady(params.api);
     },
-    [realtimeClient],
+    [datasource],
   );
 
   const filter = useGroupFilter();
@@ -202,6 +204,7 @@ export function Screener(props: ScreenerProps) {
     <div {...props} className={cn("h-full relative", props.className)}>
       {!isLoading && (
         <AgGridReact
+          serverSideDatasource={datasource}
           suppressServerSideFullWidthLoadingRow={true}
           onGridReady={onGridReady}
           rowModelType={"serverSide"}

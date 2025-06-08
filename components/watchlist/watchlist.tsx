@@ -2,23 +2,19 @@
 
 import React, {
   HTMLAttributes,
-  JSX,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import {
-  useUpdateWatchlist,
-  useWatchlist,
-  useWatchlistSymbols,
-} from "@/lib/state/symbol";
+import { useUpdateWatchlist, useWatchlist } from "@/lib/state/symbol";
 import {
   AgColumn,
   GetContextMenuItems,
   GetRowIdFunc,
   GetRowIdParams,
+  GridApi,
   GridReadyEvent,
   GridState,
   StateUpdatedEvent,
@@ -40,9 +36,9 @@ import { Button } from "@/components/ui/button";
 import { WatchlistCreatorDialog } from "./watchlist-selector";
 import { WatchlistSymbol } from "@/components/watchlist/watchlist-symbol";
 import { cn } from "@/lib/utils";
-import { useRealtimeSymbol } from "@/hooks/use-realtime-symbol";
-import { buildDataSource } from "@/components/grid/datasource";
+import { RealtimeDatasource } from "@/components/grid/datasource";
 import { RowCountStatusBarComponent } from "@/components/grid/row-count";
+import { useRealtimeClient } from "@/hooks/use-realtime";
 
 type WatchlistProps = HTMLAttributes<HTMLDivElement>;
 
@@ -110,8 +106,36 @@ function useGridInitialState(activeScreenId?: string | null) {
 export function Watchlist(props: WatchlistProps) {
   const { activeWatchlistId } = useActiveWatchlistId();
   const watchlist = useActiveWatchlist(activeWatchlistId);
-  const { data: rowData } = useWatchlistSymbols(watchlist);
 
+  const [openWatchlistSymbol, setOpenWatchlistSymbol] = useState(false);
+  const [openWatchlistCreator, setOpenWatchlistCreator] = useState(false);
+
+  const { data: allWatchlist } = useWatchlist();
+  return (
+    <div {...props} className={cn("h-full", props.className)}>
+      {watchlist && (
+        <WatchlistSymbol
+          open={openWatchlistSymbol}
+          setOpen={setOpenWatchlistSymbol}
+          watchlist={watchlist}
+        />
+      )}
+      <WatchlistCreatorDialog
+        open={openWatchlistCreator}
+        setOpen={setOpenWatchlistCreator}
+      />
+      {!activeWatchlistId || !allWatchlist || allWatchlist.length === 0 ? (
+        <CreateWatchlist setOpen={setOpenWatchlistCreator} />
+      ) : (
+        <WatchlistG activeWatchlistId={activeWatchlistId} />
+      )}
+    </div>
+  );
+}
+
+function WatchlistG({ activeWatchlistId }: { activeWatchlistId?: string }) {
+  const { data: allWatchlist, isLoading } = useWatchlist();
+  const watchlist = useActiveWatchlist(activeWatchlistId);
   const switcher = useGroupSymbolSwitcher();
   const handleStateChange = useWatchlistChangeCallback(activeWatchlistId);
   const colDefs = useColumnDefs();
@@ -129,12 +153,28 @@ export function Watchlist(props: WatchlistProps) {
     [],
   );
 
-  const [openWatchlistSymbol, setOpenWatchlistSymbol] = useState(false);
-  const [openWatchlistCreator, setOpenWatchlistCreator] = useState(false);
-  const { data: allWatchlist } = useWatchlist();
+  const [gridReady, setaGridReady] = useState(false);
+  // Add a ref to store the grid API
+  const realtimeClient = useRealtimeClient();
+  const datasource = useMemo(
+    () => new RealtimeDatasource(realtimeClient, "wl"),
+    [realtimeClient],
+  );
+
+  const ref = useRef<GridApi<Symbol> | undefined>(undefined);
+  const onGridReady = useCallback(
+    (params: GridReadyEvent) => {
+      ref.current = params.api;
+      setaGridReady(true);
+      datasource.onReady(params.api);
+    },
+    [datasource],
+  );
+
   const { mutate: updateWatchlist } = useUpdateWatchlist((w) => {
     toast(`${w.name} updated`);
   });
+
   const getContextMenuItems = useCallback<GetContextMenuItems<Symbol>>(
     (params) => {
       const symbol = params.node?.data;
@@ -169,150 +209,79 @@ export function Watchlist(props: WatchlistProps) {
     [allWatchlist, updateWatchlist],
   );
 
-  // Add a ref to store the grid API
-  const agGridRef = useRef<AgGridReact<Symbol>>(null);
-
-  // Use our market data grid hook
-  const { isConnected, updatedSymbols } = useRealtimeSymbol(rowData);
-  // Add an onGridReady handler to store the grid API
-  const onGridReady = useCallback(
-    (params: GridReadyEvent) => {
-      params.api.setGridOption(
-        "serverSideDatasource",
-        buildDataSource(() => watchlist?.symbols ?? []),
-      );
-    },
-    [watchlist?.symbols],
-  );
-
   useEffect(() => {
-    console.log();
-    agGridRef.current?.api?.refreshServerSide();
-  }, [watchlist?.symbols]);
+    if (isLoading || !gridReady) return;
+    datasource.setUniverse(watchlist?.symbols ?? []);
+    ref.current?.refreshServerSide({ purge: true });
+  }, [watchlist?.symbols, datasource, ref, isLoading, gridReady]);
 
-  // Notify the grid about the realtime changes as a transaction
-  useEffect(() => {
-    agGridRef.current?.api?.applyServerSideTransactionAsync({
-      update: updatedSymbols,
-    });
-  }, [updatedSymbols]);
+  return (
+    <AgGridReact
+      suppressServerSideFullWidthLoadingRow={true}
+      rowModelType={"serverSide"}
+      serverSideDatasource={datasource}
+      onGridReady={onGridReady}
+      onColumnVisible={(event) => event.api.refreshServerSide({ purge: true })}
+      dataTypeDefinitions={extendedColumnType}
+      key={activeWatchlistId ?? "default"}
+      className="ag-terminal-theme"
+      selectionColumnDef={{ pinned: "left" }}
+      enableAdvancedFilter={true}
+      includeHiddenColumnsInAdvancedFilter={true}
+      headerHeight={36}
+      rowHeight={32}
+      getContextMenuItems={getContextMenuItems}
+      animateRows
+      maintainColumnOrder={true}
+      autoSizeStrategy={{
+        type: "fitCellContents",
+      }}
+      columnDefs={colDefs}
+      initialState={initialState}
+      getRowId={getRowId}
+      processDataFromClipboard={(params) => {
+        if (!watchlist) return params.data;
+        const tickers = params.data[0]?.[0]
+          ?.split(/[\\n ,]+/)
+          ?.filter((s) => s)
+          ?.map((s) => s?.trim()?.toUpperCase());
 
-  let node: JSX.Element | null = null;
+        if (!tickers || tickers.length === 0) return params.data;
+        updateWatchlist({
+          id: watchlist.id,
+          payload: { symbols: [...watchlist.symbols, ...tickers] },
+        });
 
-  if (!activeWatchlistId || !allWatchlist || allWatchlist.length === 0) {
-    node = <CreateWatchlist setOpen={setOpenWatchlistCreator} />;
-  } else if (watchlist && (!rowData || rowData.length === 0)) {
-    node = <AddSymbolToWatchlist setOpen={setOpenWatchlistSymbol} />;
-  } else if (rowData && rowData.length > 0)
-    node = (
-      <AgGridReact
-        suppressServerSideFullWidthLoadingRow={true}
-        rowModelType={"serverSide"}
-        ref={agGridRef}
-        onGridReady={onGridReady}
-        onColumnVisible={(event) =>
-          event.api.refreshServerSide({ purge: true })
+        return params.data;
+      }}
+      statusBar={statusBar}
+      defaultColDef={{
+        wrapHeaderText: true,
+        filter: true,
+        sortable: true,
+        resizable: true,
+        enableRowGroup: true,
+      }}
+      onStateUpdated={handleStateChange}
+      onCellFocused={(event) => {
+        // If the cell was focus because of selection change, we will ignore
+        // switching the symbol
+        if ((event.column as AgColumn)?.colId === "ag-Grid-SelectionColumn") {
+          return;
         }
-        dataTypeDefinitions={extendedColumnType}
-        key={activeWatchlistId ?? "default"}
-        className="ag-terminal-theme"
-        selectionColumnDef={{ pinned: "left" }}
-        enableAdvancedFilter={true}
-        includeHiddenColumnsInAdvancedFilter={true}
-        headerHeight={36}
-        rowHeight={32}
-        getContextMenuItems={getContextMenuItems}
-        animateRows
-        maintainColumnOrder={true}
-        autoSizeStrategy={{
-          type: "fitCellContents",
-        }}
-        columnDefs={colDefs}
-        initialState={initialState}
-        getRowId={getRowId}
-        processDataFromClipboard={(params) => {
-          if (!watchlist) return params.data;
-          const tickers = params.data[0]?.[0]
-            ?.split(/[\\n ,]+/)
-            ?.filter((s) => s)
-            ?.map((s) => s?.trim()?.toUpperCase());
 
-          if (!tickers || tickers.length === 0) return params.data;
-          updateWatchlist({
-            id: watchlist.id,
-            payload: { symbols: [...watchlist.symbols, ...tickers] },
-          });
-
-          return params.data;
-        }}
-        statusBar={statusBar}
-        defaultColDef={{
-          wrapHeaderText: true,
-          filter: true,
-          sortable: true,
-          resizable: true,
-          enableRowGroup: true,
-        }}
-        onStateUpdated={handleStateChange}
-        onCellFocused={(event) => {
-          // If the cell was focus because of selection change, we will ignore
-          // switching the symbol
-          if ((event.column as AgColumn)?.colId === "ag-Grid-SelectionColumn") {
-            return;
-          }
-
-          const { rowIndex } = event;
-          if (rowIndex === undefined || rowIndex === null) return;
-          const symbol = event.api.getDisplayedRowAtIndex(rowIndex)?.data;
-          if (!symbol) return;
-          if (!symbol) return;
-          const { ticker } = symbol;
-          if (!ticker) return;
-          switcher(ticker);
-        }}
-      />
-    );
-
-  return (
-    <div {...props} className={cn("h-full", props.className)}>
-      {watchlist && (
-        <WatchlistSymbol
-          open={openWatchlistSymbol}
-          setOpen={setOpenWatchlistSymbol}
-          watchlist={watchlist}
-        />
-      )}
-      <WatchlistCreatorDialog
-        open={openWatchlistCreator}
-        setOpen={setOpenWatchlistCreator}
-      />
-      {isConnected}
-      {node}
-    </div>
+        const { rowIndex } = event;
+        if (rowIndex === undefined || rowIndex === null) return;
+        const symbol = event.api.getDisplayedRowAtIndex(rowIndex)?.data;
+        if (!symbol) return;
+        if (!symbol) return;
+        const { ticker } = symbol;
+        if (!ticker) return;
+        switcher(ticker);
+      }}
+    />
   );
 }
-
-interface NoSymbolInWatchlistProps extends HTMLAttributes<HTMLDivElement> {
-  setOpen: (open: boolean) => void;
-}
-
-function AddSymbolToWatchlist({ setOpen, ...props }: NoSymbolInWatchlistProps) {
-  return (
-    <div
-      {...props}
-      className={"h-full flex justify-center items-center align-middle"}
-    >
-      <div className="space-y-2">
-        <div>Your watchlist is empty</div>
-        <Button variant="default" onClick={() => setOpen(true)}>
-          <Plus size={4} />
-          Add Symbols
-        </Button>
-      </div>
-    </div>
-  );
-}
-
 interface WatchlistCreateDialogProps extends HTMLAttributes<HTMLDivElement> {
   setOpen: (open: boolean) => void;
 }

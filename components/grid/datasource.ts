@@ -158,17 +158,24 @@ export function buildDataSource(allowedTickers?: () => string[]) {
 
 export class RealtimeDatasource implements IServerSideDatasource {
   private mandatoryColumns = ["ticker", "logo", "earnings_release_date"];
+  private api?: GridApi;
+  private universe?: string[];
 
   constructor(
-    private readonly api: GridApi,
     private readonly realtimeClient: RealtimeConnection,
-    private readonly sessionId: string = Math.random()
-      .toString(36)
-      .substring(2),
-  ) {
+    type: "wl" | "scr",
+    private readonly sessionId: string = [
+      type,
+      Math.random().toString(36).substring(2),
+    ].join("_"),
+  ) {}
+
+  onReady(api: GridApi) {
+    this.api = api;
     this.realtimeClient.sendMessage({
       t: "SCREENER_SUBSCRIBE",
       session_id: this.sessionId,
+      universe: this.universe,
     });
     this.realtimeClient.on("SCREENER_PARTIAL_RESPONSE", this.onPartialUpdate);
   }
@@ -178,9 +185,22 @@ export class RealtimeDatasource implements IServerSideDatasource {
       t: "SCREENER_UNSUBSCRIBE",
       session_id: this.sessionId,
     });
+    this.realtimeClient.off("SCREENER_PARTIAL_RESPONSE", this.onPartialUpdate);
+    delete this.api;
+  }
+
+  setUniverse(universe: string[]) {
+    this.universe = universe;
+    this.realtimeClient.sendMessage({
+      t: "SCREENER_SET_UNIVERSE",
+      session_id: this.sessionId,
+      universe,
+    });
   }
 
   async getRows(params: IServerSideGetRowsParams) {
+    if (!this.api) return;
+
     const visibleCols =
       params.api
         .getColumns()
@@ -226,11 +246,11 @@ export class RealtimeDatasource implements IServerSideDatasource {
       .map((value) => {
         const ticker = value.ticker;
         if (typeof ticker !== "string") return null;
-        const rowNode = this.api.getRowNode(ticker);
+        const rowNode = this.api?.getRowNode(ticker);
         if (!rowNode || typeof rowNode.data !== "object") return null;
         return { ...rowNode.data, ...value };
       })
       .filter((u) => u);
-    this.api.applyServerSideTransactionAsync({ update });
+    this.api?.applyServerSideTransactionAsync({ update });
   };
 }
