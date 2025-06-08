@@ -44,6 +44,12 @@ interface ScreenerFullResponse {
   range: [number, number];
 }
 
+interface ScreenerPartialResponse {
+  t: "SCREENER_PARTIAL_RESPONSE";
+  session_id: string;
+  d: Record<string, unknown>[];
+}
+
 interface ScreenerMetaUpdate {
   t: "SCREENER_META_UPDATE";
   session_id: string;
@@ -55,7 +61,8 @@ export type RealtimeResponse =
   | ScreenerSubscribedResponse
   | ScreenerPatchedResponse
   | ScreenerFullResponse
-  | ScreenerMetaUpdate;
+  | ScreenerMetaUpdate
+  | ScreenerPartialResponse;
 
 // Define the type mapping for event names to their respective response types
 export type EventTypeMap = {
@@ -63,6 +70,7 @@ export type EventTypeMap = {
   SCREENER_PATCHED: ScreenerPatchedResponse;
   SCREENER_META_UPDATE: ScreenerMetaUpdate;
   SCREENER_FULL_RESPONSE: ScreenerFullResponse;
+  SCREENER_PARTIAL_RESPONSE: ScreenerPartialResponse;
 };
 
 export class RealtimeConnection {
@@ -148,7 +156,7 @@ export class RealtimeConnection {
 
   sendMessage(request: RealtimeRequest) {
     this.messageQueue.push(request);
-    this.flushMessages();
+    setTimeout(() => this.flushMessages());
 
     // Auto-connect if not connected
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {

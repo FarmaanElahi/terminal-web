@@ -15,7 +15,6 @@ import {
 } from "@/lib/state/symbol";
 import {
   AgColumn,
-  ColumnVisibleEvent,
   GetContextMenuItems,
   GetRowIdFunc,
   GetRowIdParams,
@@ -172,19 +171,16 @@ export function Screener(props: ScreenerProps) {
   );
 
   const realtimeClient = useRealtimeClient();
-  const datasource = useMemo(
-    () => new RealtimeDatasource(realtimeClient),
-    [realtimeClient],
-  );
-  const onColumnVisibilityChanged = useCallback(
-    (ev: ColumnVisibleEvent) => datasource.columnVisibilityChanged(ev),
-    [datasource],
-  );
-
   const ref = useRef<GridApi<Symbol> | undefined>(undefined);
   const onGridReady = useCallback(
-    (ev: GridReadyEvent) => (ref.current = ev.api),
-    [ref],
+    (params: GridReadyEvent) => {
+      ref.current = params.api;
+      params.api.setGridOption(
+        "serverSideDatasource",
+        new RealtimeDatasource(params.api, realtimeClient),
+      );
+    },
+    [realtimeClient],
   );
 
   const filter = useGroupFilter();
@@ -194,26 +190,24 @@ export function Screener(props: ScreenerProps) {
     if (filter?.state?.advancedFilterModel) {
       console.log("Temp filter added", filter);
       ref.current.setAdvancedFilterModel(filter.state?.advancedFilterModel);
-      datasource.filterChanged(filter.state?.advancedFilterModel);
+      ref.current.refreshServerSide({ purge: true });
     } else {
       console.log("Temp filter removed");
       ref.current.setAdvancedFilterModel(null);
-      datasource.filterChanged(null);
+      ref.current.refreshServerSide({ purge: true });
     }
-  }, [filter, activeScreenId, datasource]);
+  }, [filter, activeScreenId]);
 
-  const onDestroy = useCallback(() => console.error("Grid pre destr"), []);
   return (
     <div {...props} className={cn("h-full relative", props.className)}>
       {!isLoading && (
         <AgGridReact
+          suppressServerSideFullWidthLoadingRow={true}
           onGridReady={onGridReady}
-          onGridPreDestroyed={onDestroy}
-          viewportDatasource={datasource}
-          viewportRowModelBufferSize={50}
-          viewportRowModelPageSize={100}
-          rowModelType={"viewport"}
-          onColumnVisible={onColumnVisibilityChanged}
+          rowModelType={"serverSide"}
+          onColumnVisible={(event) =>
+            event.api.refreshServerSide({ purge: true })
+          }
           dataTypeDefinitions={extendedColumnType}
           key={activeScreenId ?? "default"}
           getContextMenuItems={getContextMenuItems}

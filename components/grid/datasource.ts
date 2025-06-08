@@ -1,12 +1,10 @@
 import {
   type AdvancedFilterModel,
   ColumnAdvancedFilterModel,
-  ColumnVisibleEvent,
+  GridApi,
   IServerSideDatasource,
   IServerSideGetRowsParams,
   IServerSideGetRowsRequest,
-  IViewportDatasource,
-  IViewportDatasourceParams,
   SortModelItem,
 } from "ag-grid-community";
 import { runRawSymbolCount, runRawSymbolQuery } from "@/utils/duckdb";
@@ -158,38 +156,21 @@ export function buildDataSource(allowedTickers?: () => string[]) {
   } satisfies IServerSideDatasource;
 }
 
-export class RealtimeDatasource implements IViewportDatasource {
-  private params!: IViewportDatasourceParams;
+export class RealtimeDatasource implements IServerSideDatasource {
   private mandatoryColumns = ["ticker", "logo", "earnings_release_date"];
 
   constructor(
+    private readonly api: GridApi,
     private readonly realtimeClient: RealtimeConnection,
     private readonly sessionId: string = Math.random()
       .toString(36)
       .substring(2),
-  ) {}
-
-  init(params: IViewportDatasourceParams) {
-    this.params = params;
-    // Attach listener
-    this.realtimeClient.on(
-      "SCREENER_FULL_RESPONSE",
-      this.onFullResponseReceived,
-    );
-    this.realtimeClient.on("SCREENER_META_UPDATE", this.onMetaUpdated);
-
+  ) {
     this.realtimeClient.sendMessage({
       t: "SCREENER_SUBSCRIBE",
       session_id: this.sessionId,
     });
-  }
-
-  setViewportRange(firstRow: number, lastRow: number): void {
-    this.realtimeClient.sendMessage({
-      t: "SCREENER_PATCH",
-      session_id: this.sessionId,
-      range: [firstRow, lastRow],
-    });
+    this.realtimeClient.on("SCREENER_PARTIAL_RESPONSE", this.onPartialUpdate);
   }
 
   destroy(): void {
@@ -197,47 +178,11 @@ export class RealtimeDatasource implements IViewportDatasource {
       t: "SCREENER_UNSUBSCRIBE",
       session_id: this.sessionId,
     });
-    this.realtimeClient.off(
-      "SCREENER_FULL_RESPONSE",
-      this.onFullResponseReceived,
-    );
-    this.realtimeClient.off("SCREENER_META_UPDATE", this.onMetaUpdated);
   }
 
-  private readonly onFullResponseReceived = (
-    event: EventTypeMap["SCREENER_FULL_RESPONSE"],
-  ) => {
-    if (event.session_id !== this.sessionId) return;
-
-    const rowData = {} as Record<string, unknown>;
-    event.d.forEach((value, index) => {
-      const rowIndex = event.range[0] + index;
-      const obj = {} as Record<string, unknown>;
-      event.c.forEach((col, index) => (obj[col] = value[index]));
-      rowData[rowIndex.toString()] = obj;
-    });
-
-    this.params.setRowData(rowData);
-  };
-
-  private readonly onMetaUpdated = (
-    event: EventTypeMap["SCREENER_META_UPDATE"],
-  ) => {
-    if (event.session_id !== this.sessionId) return;
-    this.params.setRowCount(event.filtered);
-  };
-
-  filterChanged(model: AdvancedFilterModel | null) {
-    this.realtimeClient.sendMessage({
-      t: "SCREENER_PATCH",
-      session_id: this.sessionId,
-      filters: model ? [model] : [],
-    });
-  }
-
-  columnVisibilityChanged(ev: ColumnVisibleEvent) {
+  async getRows(params: IServerSideGetRowsParams) {
     const visibleCols =
-      ev.api
+      params.api
         .getColumns()
         ?.filter((c) => c.isVisible())
         ?.flatMap((c) => [
@@ -246,10 +191,46 @@ export class RealtimeDatasource implements IViewportDatasource {
         ]) ?? [];
     visibleCols.push(...this.mandatoryColumns);
 
-    this.realtimeClient.sendMessage({
-      t: "SCREENER_PATCH",
-      session_id: this.sessionId,
-      columns: visibleCols,
-    });
+    try {
+      this.realtimeClient.sendMessage({
+        t: "SCREENER_PATCH",
+        session_id: this.sessionId,
+        columns: visibleCols,
+        sort: params.request.sortModel,
+        filters: params.request.filterModel ? [params.request.filterModel] : [],
+        range: [params.request.startRow ?? 0, params.request.endRow ?? 0],
+      });
+
+      const data = await this.realtimeClient.waitFor(
+        "SCREENER_FULL_RESPONSE",
+        (event) => event.session_id === this.sessionId,
+      );
+
+      const rowData = data.d.map((value) => {
+        const obj = {} as Record<string, unknown>;
+        data.c.forEach((col, index) => (obj[col] = value[index]));
+        return obj;
+      });
+      params.success({ rowData, rowCount: data.total });
+    } catch (e) {
+      console.error(e);
+      params.fail();
+    }
   }
+
+  private onPartialUpdate = (
+    event: EventTypeMap["SCREENER_PARTIAL_RESPONSE"],
+  ) => {
+    if (this.sessionId !== event.session_id) return;
+    const update = event.d
+      .map((value) => {
+        const ticker = value.ticker;
+        if (typeof ticker !== "string") return null;
+        const rowNode = this.api.getRowNode(ticker);
+        if (!rowNode || typeof rowNode.data !== "object") return null;
+        return { ...rowNode.data, ...value };
+      })
+      .filter((u) => u);
+    this.api.applyServerSideTransactionAsync({ update });
+  };
 }
