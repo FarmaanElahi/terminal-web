@@ -29,9 +29,12 @@ interface RealtimeProviderProps {
   token?: string;
 }
 
-export const realtimeClient = new RealtimeConnection(
-  process.env.NEXT_PUBLIC_WS_URL as string,
-);
+const WS_BASE_URL =
+  typeof window !== "undefined"
+    ? localStorage.getItem("BASE_WS_URL") || process.env.NEXT_PUBLIC_WS_URL
+    : process.env.NEXT_PUBLIC_WS_URL;
+
+export const realtimeClient = new RealtimeConnection(`${WS_BASE_URL}/ws`);
 
 export const RealtimeProvider: FC<RealtimeProviderProps> = ({
   token,

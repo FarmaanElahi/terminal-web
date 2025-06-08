@@ -95,7 +95,9 @@ export class RealtimeConnection {
   private readonly maxReconnectAttempts: number = 5;
   private readonly reconnectDelay: number = 1000;
 
-  constructor(private readonly url: string) {}
+  constructor(private readonly url: string) {
+
+  }
 
   connect() {
     if (
