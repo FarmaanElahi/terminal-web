@@ -199,10 +199,13 @@ function useGridBase(scanner: Scanner) {
   );
   const onGridReady = useCallback(
     (p: GridReadyEvent) => {
-      const symbols = scanner.symbols ?? [];
-      datasource.onReady(p.api, symbols);
+      const symbols = scanner.symbols;
+      datasource.onReady(
+        p.api,
+        type === "Watchlist" ? (symbols ?? []) : undefined,
+      );
     },
-    [scanner.symbols, datasource],
+    [scanner.symbols, datasource, type],
   );
 
   const onStateUpdated = useScannerChangeCallback(type, scanner.id);
