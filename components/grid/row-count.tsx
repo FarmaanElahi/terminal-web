@@ -12,6 +12,7 @@ export function RowCountStatusBarComponent(props: CustomStatusPanelProps) {
     props.api.addEventListener("paginationChanged", onRowCountChanged);
 
     return () => {
+      if (props.api.isDestroyed()) return;
       props.api.removeEventListener("paginationChanged", onRowCountChanged);
     };
   }, [props.api]);

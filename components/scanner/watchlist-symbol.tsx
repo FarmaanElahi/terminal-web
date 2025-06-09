@@ -1,5 +1,5 @@
 import React, { useMemo, useRef } from "react";
-import { useSymbolSearch, useUpdateWatchlist } from "@/lib/state/symbol";
+import { useSymbolSearch, useUpdateScanner } from "@/lib/state/symbol";
 import {
   CommandDialog,
   CommandEmpty,
@@ -8,9 +8,10 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import Image from "next/image";
-import { Watchlist } from "@/types/supabase";
+import { Scanner } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash } from "lucide-react";
+import { useCurrentScanner } from "@/hooks/use-active-scanner";
 
 export function WatchlistSymbol({
   watchlist,
@@ -19,8 +20,9 @@ export function WatchlistSymbol({
 }: {
   open: boolean;
   setOpen: (v: boolean) => void;
-  watchlist: Watchlist;
+  watchlist: Scanner;
 }) {
+  const { type } = useCurrentScanner();
   const [q, setQ] = React.useState("");
   const commandInputRef = useRef<HTMLInputElement>(null);
   const { data, isLoading } = useSymbolSearch(q);
@@ -29,7 +31,7 @@ export function WatchlistSymbol({
     [watchlist.symbols],
   );
 
-  const { mutate: updateWatchlist } = useUpdateWatchlist();
+  const { mutate: updateWatchlist } = useUpdateScanner(type);
 
   const items = data?.map((s) => (
     <CommandItem key={s.name} value={s.ticker!} className="m-2">

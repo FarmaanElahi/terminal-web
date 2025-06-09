@@ -16,7 +16,7 @@ export type Database = {
           id: string
           is_active: boolean
           last_triggered_at: string | null
-          last_triggered_price: number
+          last_triggered_price: number | null
           lhs_attr: Json | null
           lhs_type: Database["public"]["Enums"]["alert_lhs_type"]
           notes: string | null
@@ -35,7 +35,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           last_triggered_at?: string | null
-          last_triggered_price?: number
+          last_triggered_price?: number | null
           lhs_attr?: Json | null
           lhs_type: Database["public"]["Enums"]["alert_lhs_type"]
           notes?: string | null
@@ -54,7 +54,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           last_triggered_at?: string | null
-          last_triggered_price?: number
+          last_triggered_price?: number | null
           lhs_attr?: Json | null
           lhs_type?: Database["public"]["Enums"]["alert_lhs_type"]
           notes?: string | null
@@ -204,6 +204,54 @@ export type Database = {
         }
         Relationships: []
       }
+      scanner: {
+        Row: {
+          active: boolean
+          color: string | null
+          combo_lists: string[] | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          shared: boolean
+          state: Json | null
+          symbols: string[]
+          type: Database["public"]["Enums"]["list_type"]
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          color?: string | null
+          combo_lists?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          shared?: boolean
+          state?: Json | null
+          symbols?: string[]
+          type: Database["public"]["Enums"]["list_type"]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          color?: string | null
+          combo_lists?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          shared?: boolean
+          state?: Json | null
+          symbols?: string[]
+          type?: Database["public"]["Enums"]["list_type"]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       screens: {
         Row: {
           created_at: string
@@ -289,6 +337,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          lists: string[] | null
           name: string
           shared: boolean
           state: Json | null
@@ -303,6 +352,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          lists?: string[] | null
           name?: string
           shared?: boolean
           state?: Json | null
@@ -317,6 +367,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          lists?: string[] | null
           name?: string
           shared?: boolean
           state?: Json | null
@@ -338,7 +389,8 @@ export type Database = {
       alert_lhs_type: "last_price"
       alert_rhs_type: "constant" | "trend_line"
       alert_type: "simple"
-      watchlist_type: "custom" | "colored"
+      list_type: "screener" | "simple" | "combo" | "colored"
+      watchlist_type: "custom" | "colored" | "combo"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -457,7 +509,8 @@ export const Constants = {
       alert_lhs_type: ["last_price"],
       alert_rhs_type: ["constant", "trend_line"],
       alert_type: ["simple"],
-      watchlist_type: ["custom", "colored"],
+      list_type: ["screener", "simple", "combo", "colored"],
+      watchlist_type: ["custom", "colored", "combo"],
     },
   },
 } as const

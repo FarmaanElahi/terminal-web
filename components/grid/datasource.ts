@@ -1,12 +1,14 @@
 import {
   type AdvancedFilterModel,
   ColumnAdvancedFilterModel,
+  GridApi,
   IServerSideDatasource,
   IServerSideGetRowsParams,
   IServerSideGetRowsRequest,
   SortModelItem,
 } from "ag-grid-community";
 import { runRawSymbolCount, runRawSymbolQuery } from "@/utils/duckdb";
+import { EventTypeMap, RealtimeConnection } from "@/utils/realtime-client";
 
 export function buildDataSource(allowedTickers?: () => string[]) {
   const mandatoryColumn = ["ticker", "logo", "earnings_release_date"];
@@ -125,7 +127,7 @@ export function buildDataSource(allowedTickers?: () => string[]) {
     const sorts = request.sortModel.map(
       (s: SortModelItem) => `"${s.colId}" ${s.sort.toUpperCase()}`,
     );
-    sorts.push(`"name" ASC`)
+    sorts.push(`"name" ASC`);
     return " ORDER BY " + sorts.join(", ");
   }
 
@@ -152,4 +154,102 @@ export function buildDataSource(allowedTickers?: () => string[]) {
     },
     destroy() {},
   } satisfies IServerSideDatasource;
+}
+
+export class RealtimeDatasource implements IServerSideDatasource {
+  private mandatoryColumns = ["ticker", "logo", "earnings_release_date"];
+  private api?: GridApi;
+
+  constructor(
+    private readonly realtimeClient: RealtimeConnection,
+    type: string,
+    private readonly sessionId: string = [
+      type,
+      Math.random().toString(36).substring(2),
+    ].join("_"),
+  ) {}
+
+  onReady(api: GridApi, universe?: string[]) {
+    this.api = api;
+    this.realtimeClient.sendMessage({
+      t: "SCREENER_SUBSCRIBE",
+      session_id: this.sessionId,
+      universe,
+    });
+    this.realtimeClient.on("SCREENER_PARTIAL_RESPONSE", this.onPartialUpdate);
+  }
+
+  destroy(): void {
+    this.realtimeClient.sendMessage({
+      t: "SCREENER_UNSUBSCRIBE",
+      session_id: this.sessionId,
+    });
+    this.realtimeClient.off("SCREENER_PARTIAL_RESPONSE", this.onPartialUpdate);
+    delete this.api;
+  }
+
+  setUniverse(universe: string[]) {
+    this.realtimeClient.sendMessage({
+      t: "SCREENER_SET_UNIVERSE",
+      session_id: this.sessionId,
+      universe,
+    });
+    this.api?.refreshServerSide({ purge: true });
+  }
+
+  async getRows(params: IServerSideGetRowsParams) {
+    if (!this.api) return;
+
+    const visibleCols =
+      params.api
+        .getColumns()
+        ?.filter((c) => c.isVisible())
+        ?.flatMap((c) => [
+          c.getColId(),
+          ...(c.getColDef().context?.dependencyColumns ?? []),
+        ]) ?? [];
+    visibleCols.push(...this.mandatoryColumns);
+
+    try {
+      this.realtimeClient.sendMessage({
+        t: "SCREENER_PATCH",
+        session_id: this.sessionId,
+        columns: visibleCols,
+        sort: params.request.sortModel,
+        filters: params.request.filterModel ? [params.request.filterModel] : [],
+        range: [params.request.startRow ?? 0, params.request.endRow ?? 0],
+      });
+
+      const data = await this.realtimeClient.waitFor(
+        "SCREENER_FULL_RESPONSE",
+        (event) => event.session_id === this.sessionId,
+      );
+
+      const rowData = data.d.map((value) => {
+        const obj = {} as Record<string, unknown>;
+        data.c.forEach((col, index) => (obj[col] = value[index]));
+        return obj;
+      });
+      params.success({ rowData, rowCount: data.total });
+    } catch (e) {
+      console.error(e);
+      params.fail();
+    }
+  }
+
+  private onPartialUpdate = (
+    event: EventTypeMap["SCREENER_PARTIAL_RESPONSE"],
+  ) => {
+    if (this.sessionId !== event.session_id) return;
+    const update = event.d
+      .map((value) => {
+        const ticker = value.ticker;
+        if (typeof ticker !== "string") return null;
+        const rowNode = this.api?.getRowNode(ticker);
+        if (!rowNode || typeof rowNode.data !== "object") return null;
+        return { ...rowNode.data, ...value };
+      })
+      .filter((u) => u);
+    this.api?.applyServerSideTransactionAsync({ update });
+  };
 }

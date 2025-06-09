@@ -18,15 +18,15 @@ import {
   InsertAlert,
   InsertDashboard,
   InsertDataPanel,
+  InsertScanner,
   InsertScreen,
-  InsertWatchlist,
+  Scanner,
   Screen,
   UpdateAlert,
   UpdateDashboard,
   UpdateDataPanel,
+  UpdateScanner,
   UpdateScreen,
-  UpdateWatchlist,
-  Watchlist,
 } from "@/types/supabase";
 
 //##################### SYMBOL QUOTE #####################
@@ -419,18 +419,21 @@ export function useScreens() {
 //##################### WATCHLIST #####################
 
 //##################### SCREENS #####################
-export function useCreateWatchlist(onComplete?: (screen: Watchlist) => void) {
+export function useCreateScanner(
+  type: string,
+  onComplete?: (scanner: Scanner) => void,
+) {
   const client = useQueryClient();
   return useMutation({
-    onSuccess: (watchlist: Watchlist) => {
-      void client.invalidateQueries({ queryKey: ["watchlist"] });
-      onComplete?.(watchlist);
+    onSuccess: (list: Scanner) => {
+      void client.invalidateQueries({ queryKey: ["scanner", type] });
+      onComplete?.(list);
     },
-    mutationFn: async (watchlist: InsertWatchlist) => {
+    mutationFn: async (scanner: InsertScanner) => {
       const { data, error } = await supabase
-        .from("watchlists")
+        .from("scanner")
         .insert({
-          ...watchlist,
+          ...scanner,
           updated_at: new Date().toISOString(),
         })
         .select()
@@ -442,16 +445,16 @@ export function useCreateWatchlist(onComplete?: (screen: Watchlist) => void) {
   });
 }
 
-export function useDeleteWatchlist(onComplete?: () => void) {
+export function useDeleteScanner(type: string, onComplete?: () => void) {
   const client = useQueryClient();
   return useMutation({
     onSuccess: () => {
-      void client.invalidateQueries({ queryKey: ["watchlist"] });
+      void client.invalidateQueries({ queryKey: ["scanner", type] });
       onComplete?.();
     },
     mutationFn: async (id: string) => {
       const { data, error } = await supabase
-        .from("watchlists")
+        .from("scanner")
         .delete()
         .eq("id", id)
         .maybeSingle();
@@ -462,27 +465,25 @@ export function useDeleteWatchlist(onComplete?: () => void) {
   });
 }
 
-export function useUpdateWatchlist(onComplete?: (screen: Watchlist) => void) {
+export function useUpdateScanner(
+  type: string,
+  onComplete?: (scanner: Scanner) => void,
+) {
   const client = useQueryClient();
   return useMutation({
-    onSuccess: async (watchlist: Watchlist, params) => {
-      await client.invalidateQueries({ queryKey: ["watchlist"] });
-      if ((params.payload.symbols?.length ?? 0) > 0) {
-        await client.invalidateQueries({
-          queryKey: ["watchlist", watchlist.id, "symbols"],
-        });
-      }
-      onComplete?.(watchlist);
+    onSuccess: async (scanner: Scanner) => {
+      await client.invalidateQueries({ queryKey: ["scanner", type] });
+      onComplete?.(scanner);
     },
     mutationFn: async ({
       id,
       payload,
     }: {
       id: string;
-      payload: UpdateWatchlist;
+      payload: UpdateScanner;
     }) => {
       const { data, error } = await supabase
-        .from("watchlists")
+        .from("scanner")
         .update({
           ...payload,
           updated_at: new Date().toISOString(),
@@ -497,13 +498,14 @@ export function useUpdateWatchlist(onComplete?: (screen: Watchlist) => void) {
   });
 }
 
-export function useWatchlist() {
+export function useScanners(types: Scanner["type"][], type: string) {
   return useQuery({
-    queryKey: ["watchlist"],
+    queryKey: ["scanner", type],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("watchlists")
+        .from("scanner")
         .select("*")
+        .in("type", types)
         .order("updated_at", { ascending: false });
 
       if (error) throw error;
@@ -521,17 +523,6 @@ export async function querySymbols(symbols: string[]) {
     where: `ticker IN (${inQuery})`,
     limit: symbols.length,
   })) as Symbol[];
-}
-
-export function useWatchlistSymbols(watchlist?: Watchlist) {
-  return useQuery({
-    queryKey: ["watchlist", watchlist?.id, "symbols"],
-    queryFn: async () => {
-      const symbols = watchlist?.symbols;
-      if (!symbols || (symbols?.length ?? 0) === 0) return [];
-      return querySymbols(symbols);
-    },
-  });
 }
 
 //##################### SCREENS #####################

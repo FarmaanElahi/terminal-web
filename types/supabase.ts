@@ -29,6 +29,10 @@ export type InsertWatchlist =
 export type UpdateWatchlist =
   Database["public"]["Tables"]["watchlists"]["Update"];
 
+export type Scanner = Database["public"]["Tables"]["scanner"]["Row"];
+export type InsertScanner = Database["public"]["Tables"]["scanner"]["Insert"];
+export type UpdateScanner = Database["public"]["Tables"]["scanner"]["Update"];
+
 export type Dashboard = Database["public"]["Tables"]["dashboards"]["Row"];
 export type InsertDashboard =
   Database["public"]["Tables"]["dashboards"]["Insert"];
