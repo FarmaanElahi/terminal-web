@@ -3,6 +3,7 @@
 import React, {
   HTMLAttributes,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -15,6 +16,7 @@ import {
   GetContextMenuItems,
   GetRowIdFunc,
   GetRowIdParams,
+  GridApi,
   GridReadyEvent,
   GridState,
   ProcessDataFromClipboardParams,
@@ -25,7 +27,7 @@ import {
   extendedColumnType,
 } from "@/components/symbols/columns";
 import { AgGridReact } from "ag-grid-react";
-import { useGroupSymbolSwitcher } from "@/lib/state/grouper";
+import { useGroupFilter, useGroupSymbolSwitcher } from "@/lib/state/grouper";
 import "../grid/ag-theme.css";
 import debounce from "debounce";
 import { toast } from "sonner";
@@ -117,26 +119,28 @@ export function ScannerList(props: ScannerListProps) {
   const { data } = useScanners(types, type);
   return (
     <div {...props} className={cn("h-full", props.className)}>
-      {scanner && (
+      {scanner && type === "Watchlist" && (
         <WatchlistSymbol
           open={openWatchlistSymbol}
           setOpen={setOpenWatchlistSymbol}
           watchlist={scanner}
         />
       )}
-      <WatchlistCreatorDialog
-        open={openWatchlistCreator}
-        setOpen={setOpenWatchlistCreator}
-      />
-      {(!scannerId || !data || data.length === 0) && (
+      {scanner && type === "Watchlist" && (
+        <WatchlistCreatorDialog
+          open={openWatchlistCreator}
+          setOpen={setOpenWatchlistCreator}
+        />
+      )}
+      {type === "Watchlist" && (!scannerId || !data || data.length === 0) && (
         <CreateWatchlist setOpen={setOpenWatchlistCreator} />
       )}
-      {scanner && <SymbolList scanner={scanner as Scanner} />}
+      <SymbolList scanner={scanner} />
     </div>
   );
 }
 
-function useGridBase(scanner: Scanner) {
+function useGridBase(scanner?: Scanner) {
   const { type, types } = useCurrentScanner();
   const initialState = useGridInitialState();
 
@@ -191,7 +195,6 @@ function useGridBase(scanner: Scanner) {
   );
 
   const switcher = useGroupSymbolSwitcher();
-
   const realtimeClient = useRealtimeClient();
   const datasource = useMemo(
     () => new RealtimeDatasource(realtimeClient, type),
@@ -199,16 +202,17 @@ function useGridBase(scanner: Scanner) {
   );
   const onGridReady = useCallback(
     (p: GridReadyEvent) => {
-      const symbols = scanner.symbols;
+      ref.current = p.api;
+      const symbols = scanner?.symbols;
       datasource.onReady(
         p.api,
         type === "Watchlist" ? (symbols ?? []) : undefined,
       );
     },
-    [scanner.symbols, datasource, type],
+    [scanner?.symbols, datasource, type],
   );
 
-  const onStateUpdated = useScannerChangeCallback(type, scanner.id);
+  const onStateUpdated = useScannerChangeCallback(type, scanner?.id);
 
   const processClipboardPaste = useCallback(
     (params: ProcessDataFromClipboardParams) => {
@@ -264,8 +268,26 @@ function useGridBase(scanner: Scanner) {
     (event: ColumnVisibleEvent) => event.api.refreshServerSide({ purge: true }),
     [],
   );
+
+  const filter = useGroupFilter();
+  const ref = useRef<GridApi | null>(null);
+  useEffect(() => {
+    if (type === "Watchlist" || !ref.current) return;
+
+    if (filter?.state?.advancedFilterModel) {
+      console.log("Temp filter added", filter);
+      ref.current?.setAdvancedFilterModel(filter.state?.advancedFilterModel);
+      ref.current?.refreshServerSide({ purge: true });
+    } else {
+      console.log("Temp filter removed");
+      ref.current?.setAdvancedFilterModel(null);
+      ref.current?.refreshServerSide({ purge: true });
+    }
+  }, [filter, scanner?.id, type]);
+
   return {
-    initialState: (scanner.state as GridState) ?? initialState,
+    ref,
+    initialState: (scanner?.state as GridState) ?? initialState,
     onCellFocused,
     getRowId,
     datasource,
@@ -281,7 +303,7 @@ function useGridBase(scanner: Scanner) {
   };
 }
 
-function SymbolList({ scanner }: { scanner: Scanner }) {
+function SymbolList({ scanner }: { scanner?: Scanner }) {
   const colDefs = useColumnDefs();
   const {
     defaultColDef,
@@ -297,12 +319,9 @@ function SymbolList({ scanner }: { scanner: Scanner }) {
     onColumnVisible,
   } = useGridBase(scanner);
 
-  const ref = useRef<AgGridReact | null>(null);
-
   return (
     <AgGridReact
-      ref={ref}
-      key={scanner.id}
+      key={scanner?.id}
       serverSideDatasource={datasource}
       onGridReady={onGridReady}
       suppressServerSideFullWidthLoadingRow={true}
