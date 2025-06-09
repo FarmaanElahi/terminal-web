@@ -18,15 +18,15 @@ import {
   InsertAlert,
   InsertDashboard,
   InsertDataPanel,
+  InsertScanner,
   InsertScreen,
-  InsertWatchlist,
+  Scanner,
   Screen,
   UpdateAlert,
   UpdateDashboard,
   UpdateDataPanel,
+  UpdateScanner,
   UpdateScreen,
-  UpdateWatchlist,
-  Watchlist,
 } from "@/types/supabase";
 
 //##################### SYMBOL QUOTE #####################
@@ -419,18 +419,18 @@ export function useScreens() {
 //##################### WATCHLIST #####################
 
 //##################### SCREENS #####################
-export function useCreateWatchlist(onComplete?: (screen: Watchlist) => void) {
+export function useCreateWatchlist(onComplete?: (scanner: Scanner) => void) {
   const client = useQueryClient();
   return useMutation({
-    onSuccess: (watchlist: Watchlist) => {
+    onSuccess: (list: Scanner) => {
       void client.invalidateQueries({ queryKey: ["watchlist"] });
-      onComplete?.(watchlist);
+      onComplete?.(list);
     },
-    mutationFn: async (watchlist: InsertWatchlist) => {
+    mutationFn: async (scanner: InsertScanner) => {
       const { data, error } = await supabase
-        .from("watchlists")
+        .from("scanner")
         .insert({
-          ...watchlist,
+          ...scanner,
           updated_at: new Date().toISOString(),
         })
         .select()
@@ -451,7 +451,7 @@ export function useDeleteWatchlist(onComplete?: () => void) {
     },
     mutationFn: async (id: string) => {
       const { data, error } = await supabase
-        .from("watchlists")
+        .from("scanner")
         .delete()
         .eq("id", id)
         .maybeSingle();
@@ -462,27 +462,22 @@ export function useDeleteWatchlist(onComplete?: () => void) {
   });
 }
 
-export function useUpdateWatchlist(onComplete?: (screen: Watchlist) => void) {
+export function useUpdateWatchlist(onComplete?: (scanner: Scanner) => void) {
   const client = useQueryClient();
   return useMutation({
-    onSuccess: async (watchlist: Watchlist, params) => {
+    onSuccess: async (list: Scanner) => {
       await client.invalidateQueries({ queryKey: ["watchlist"] });
-      if ((params.payload.symbols?.length ?? 0) > 0) {
-        await client.invalidateQueries({
-          queryKey: ["watchlist", watchlist.id, "symbols"],
-        });
-      }
-      onComplete?.(watchlist);
+      onComplete?.(list);
     },
     mutationFn: async ({
       id,
       payload,
     }: {
       id: string;
-      payload: UpdateWatchlist;
+      payload: UpdateScanner;
     }) => {
       const { data, error } = await supabase
-        .from("watchlists")
+        .from("scanner")
         .update({
           ...payload,
           updated_at: new Date().toISOString(),
@@ -502,26 +497,10 @@ export function useWatchlist() {
     queryKey: ["watchlist"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("watchlists")
+        .from("scanner")
         .select("*")
+        .in("type", ["simple", "combo"])
         .order("updated_at", { ascending: false });
-
-      if (error) throw error;
-      return data;
-    },
-  });
-}
-
-export function useWatchlistSingle(id?: string) {
-  return useQuery({
-    enabled: !!id,
-    queryKey: ["watchlist", id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("watchlists")
-        .select("*")
-        .eq("id", id as string)
-        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -538,17 +517,6 @@ export async function querySymbols(symbols: string[]) {
     where: `ticker IN (${inQuery})`,
     limit: symbols.length,
   })) as Symbol[];
-}
-
-export function useWatchlistSymbols(watchlist?: Watchlist) {
-  return useQuery({
-    queryKey: ["watchlist", watchlist?.id, "symbols"],
-    queryFn: async () => {
-      const symbols = watchlist?.symbols;
-      if (!symbols || (symbols?.length ?? 0) === 0) return [];
-      return querySymbols(symbols);
-    },
-  });
 }
 
 //##################### SCREENS #####################

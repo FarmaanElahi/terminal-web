@@ -204,6 +204,54 @@ export type Database = {
         }
         Relationships: []
       }
+      scanner: {
+        Row: {
+          active: boolean
+          color: string | null
+          combo_lists: string[] | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          shared: boolean
+          state: Json | null
+          symbols: string[]
+          type: Database["public"]["Enums"]["list_type"] | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          color?: string | null
+          combo_lists?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          shared?: boolean
+          state?: Json | null
+          symbols?: string[]
+          type?: Database["public"]["Enums"]["list_type"] | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          color?: string | null
+          combo_lists?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          shared?: boolean
+          state?: Json | null
+          symbols?: string[]
+          type?: Database["public"]["Enums"]["list_type"] | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       screens: {
         Row: {
           created_at: string
@@ -341,6 +389,7 @@ export type Database = {
       alert_lhs_type: "last_price"
       alert_rhs_type: "constant" | "trend_line"
       alert_type: "simple"
+      list_type: "screener" | "simple" | "combo" | "colored"
       watchlist_type: "custom" | "colored" | "combo"
     }
     CompositeTypes: {
@@ -460,6 +509,7 @@ export const Constants = {
       alert_lhs_type: ["last_price"],
       alert_rhs_type: ["constant", "trend_line"],
       alert_type: ["simple"],
+      list_type: ["screener", "simple", "combo", "colored"],
       watchlist_type: ["custom", "colored", "combo"],
     },
   },

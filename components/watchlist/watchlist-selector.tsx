@@ -43,7 +43,7 @@ import {
   useWatchlist,
 } from "@/lib/state/symbol";
 import { toast } from "sonner";
-import { Json, Watchlist } from "@/types/supabase";
+import { Json, Scanner, Watchlist } from "@/types/supabase";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -239,7 +239,7 @@ export function WatchlistCreatorDialog({
   const handleCreateWatchlist = () => {
     if (listType === "simple") {
       createWatchlist({
-        type: "custom",
+        type: "simple",
         name: watchlistName,
         state: defaultState?.state,
         symbols: selectedSymbols,
@@ -250,7 +250,7 @@ export function WatchlistCreatorDialog({
         type: "combo",
         name: watchlistName,
         state: defaultState?.state,
-        lists: [...selectedWatchlists, ...selectedScreeners],
+        combo_lists: [...selectedWatchlists, ...selectedScreeners],
         symbols: [],
       });
     }
@@ -513,7 +513,7 @@ function DeleteWatchlist({
   watchlist,
   children,
 }: {
-  watchlist: Watchlist;
+  watchlist: Scanner;
   children: ReactNode;
 }) {
   const { mutate: deleteWatchlist } = useDeleteWatchlist(() =>

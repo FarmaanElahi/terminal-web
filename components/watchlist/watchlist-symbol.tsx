@@ -8,7 +8,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import Image from "next/image";
-import { Watchlist } from "@/types/supabase";
+import { Scanner } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash } from "lucide-react";
 
@@ -19,7 +19,7 @@ export function WatchlistSymbol({
 }: {
   open: boolean;
   setOpen: (v: boolean) => void;
-  watchlist: Watchlist;
+  watchlist: Scanner;
 }) {
   const [q, setQ] = React.useState("");
   const commandInputRef = useRef<HTMLInputElement>(null);

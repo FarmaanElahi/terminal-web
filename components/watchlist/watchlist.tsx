@@ -39,7 +39,7 @@ import { WatchlistSymbol } from "@/components/watchlist/watchlist-symbol";
 import { cn } from "@/lib/utils";
 import { RowCountStatusBarComponent } from "@/components/grid/row-count";
 import { useRealtimeClient } from "@/hooks/use-realtime";
-import { type Watchlist as WatchlistType } from "@/types/supabase";
+import { Scanner } from "@/types/supabase";
 import { RealtimeDatasource } from "@/components/grid/datasource";
 
 type WatchlistProps = HTMLAttributes<HTMLDivElement>;
@@ -124,16 +124,15 @@ export function Watchlist(props: WatchlistProps) {
         open={openWatchlistCreator}
         setOpen={setOpenWatchlistCreator}
       />
-      {!activeWatchlistId || !allWatchlist || allWatchlist.length === 0 ? (
+      {(!activeWatchlistId || !allWatchlist || allWatchlist.length === 0) && (
         <CreateWatchlist setOpen={setOpenWatchlistCreator} />
-      ) : (
-        <SymbolList watchlist={watchlist as WatchlistType} />
       )}
+      {watchlist && <SymbolList watchlist={watchlist as Scanner} />}
     </div>
   );
 }
 
-function useGridBase(watchlist: WatchlistType) {
+function useGridBase(watchlist: Scanner) {
   const initialState = useGridInitialState();
 
   const getRowId = useCallback<GetRowIdFunc>(
@@ -274,7 +273,7 @@ function useGridBase(watchlist: WatchlistType) {
   };
 }
 
-function SymbolList({ watchlist }: { watchlist: WatchlistType }) {
+function SymbolList({ watchlist }: { watchlist: Scanner }) {
   const colDefs = useColumnDefs();
   const {
     defaultColDef,
