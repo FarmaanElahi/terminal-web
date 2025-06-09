@@ -512,6 +512,23 @@ export function useWatchlist() {
   });
 }
 
+export function useWatchlistSingle(id?: string) {
+  return useQuery({
+    enabled: !!id,
+    queryKey: ["watchlist", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("watchlists")
+        .select("*")
+        .eq("id", id as string)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 export async function querySymbols(symbols: string[]) {
   if (symbols.length === 0) return [];
 

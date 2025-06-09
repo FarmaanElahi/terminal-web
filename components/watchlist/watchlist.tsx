@@ -3,7 +3,6 @@
 import React, {
   HTMLAttributes,
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -11,12 +10,14 @@ import React, {
 import { useUpdateWatchlist, useWatchlist } from "@/lib/state/symbol";
 import {
   AgColumn,
+  CellFocusedEvent,
+  ColumnVisibleEvent,
   GetContextMenuItems,
   GetRowIdFunc,
   GetRowIdParams,
-  GridApi,
   GridReadyEvent,
   GridState,
+  ProcessDataFromClipboardParams,
   StateUpdatedEvent,
 } from "ag-grid-community";
 import {
@@ -36,9 +37,10 @@ import { Button } from "@/components/ui/button";
 import { WatchlistCreatorDialog } from "./watchlist-selector";
 import { WatchlistSymbol } from "@/components/watchlist/watchlist-symbol";
 import { cn } from "@/lib/utils";
-import { RealtimeDatasource } from "@/components/grid/datasource";
 import { RowCountStatusBarComponent } from "@/components/grid/row-count";
 import { useRealtimeClient } from "@/hooks/use-realtime";
+import { type Watchlist as WatchlistType } from "@/types/supabase";
+import { RealtimeDatasource } from "@/components/grid/datasource";
 
 type WatchlistProps = HTMLAttributes<HTMLDivElement>;
 
@@ -79,10 +81,8 @@ function useWatchlistChangeCallback(activeWatchlist?: string | null) {
   );
 }
 
-function useGridInitialState(activeScreenId?: string | null) {
-  const activeScreen = useActiveWatchlist(activeScreenId);
+function useGridInitialState() {
   const colDefs = useColumnDefs();
-
   const defaultState = useMemo(() => {
     const defaultVisible = new Set([
       "name",
@@ -100,7 +100,7 @@ function useGridInitialState(activeScreenId?: string | null) {
     } satisfies GridState;
   }, [colDefs]);
 
-  return (activeScreen?.state ?? defaultState) as GridState;
+  return defaultState as GridState;
 }
 
 export function Watchlist(props: WatchlistProps) {
@@ -127,19 +127,14 @@ export function Watchlist(props: WatchlistProps) {
       {!activeWatchlistId || !allWatchlist || allWatchlist.length === 0 ? (
         <CreateWatchlist setOpen={setOpenWatchlistCreator} />
       ) : (
-        <WatchlistG activeWatchlistId={activeWatchlistId} />
+        <SymbolList watchlist={watchlist as WatchlistType} />
       )}
     </div>
   );
 }
 
-function WatchlistG({ activeWatchlistId }: { activeWatchlistId?: string }) {
-  const { data: allWatchlist, isLoading } = useWatchlist();
-  const watchlist = useActiveWatchlist(activeWatchlistId);
-  const switcher = useGroupSymbolSwitcher();
-  const handleStateChange = useWatchlistChangeCallback(activeWatchlistId);
-  const colDefs = useColumnDefs();
-  const initialState = useGridInitialState(activeWatchlistId);
+function useGridBase(watchlist: WatchlistType) {
+  const initialState = useGridInitialState();
 
   const getRowId = useCallback<GetRowIdFunc>(
     ({ data }: GetRowIdParams<Symbol>) => data.ticker!,
@@ -152,25 +147,7 @@ function WatchlistG({ activeWatchlistId }: { activeWatchlistId?: string }) {
     }),
     [],
   );
-
-  const [gridReady, setaGridReady] = useState(false);
-  // Add a ref to store the grid API
-  const realtimeClient = useRealtimeClient();
-  const datasource = useMemo(
-    () => new RealtimeDatasource(realtimeClient, "wl"),
-    [realtimeClient],
-  );
-
-  const ref = useRef<GridApi<Symbol> | undefined>(undefined);
-  const onGridReady = useCallback(
-    (params: GridReadyEvent) => {
-      ref.current = params.api;
-      setaGridReady(true);
-      datasource.onReady(params.api);
-    },
-    [datasource],
-  );
-
+  const { data: allWatchlist } = useWatchlist();
   const { mutate: updateWatchlist } = useUpdateWatchlist((w) => {
     toast(`${w.name} updated`);
   });
@@ -209,19 +186,121 @@ function WatchlistG({ activeWatchlistId }: { activeWatchlistId?: string }) {
     [allWatchlist, updateWatchlist],
   );
 
-  useEffect(() => {
-    if (isLoading || !gridReady) return;
-    datasource.setUniverse(watchlist?.symbols ?? []);
-    ref.current?.refreshServerSide({ purge: true });
-  }, [watchlist?.symbols, datasource, ref, isLoading, gridReady]);
+  const switcher = useGroupSymbolSwitcher();
+
+  const realtimeClient = useRealtimeClient();
+  const datasource = useMemo(
+    () => new RealtimeDatasource(realtimeClient, "wl"),
+    [realtimeClient],
+  );
+  const onGridReady = useCallback(
+    (p: GridReadyEvent) => {
+      const symbols = watchlist.symbols ?? [];
+      datasource.onReady(p.api, symbols);
+    },
+    [watchlist.symbols, datasource],
+  );
+
+  const onStateUpdated = useWatchlistChangeCallback(watchlist.id);
+
+  const processClipboardPaste = useCallback(
+    (params: ProcessDataFromClipboardParams) => {
+      if (!watchlist) return params.data;
+      const tickers = params.data[0]?.[0]
+        ?.split(/[\\n ,]+/)
+        ?.filter((s) => s)
+        ?.map((s) => s?.trim()?.toUpperCase());
+
+      if (!tickers || tickers.length === 0) return params.data;
+      updateWatchlist({
+        id: watchlist.id,
+        payload: { symbols: [...watchlist.symbols, ...tickers] },
+      });
+
+      return params.data;
+    },
+    [watchlist, updateWatchlist],
+  );
+
+  const onCellFocused = useCallback(
+    (event: CellFocusedEvent) => {
+      // If the cell was focus because of selection change, we will ignore
+      // switching the symbol
+      if ((event.column as AgColumn)?.colId === "ag-Grid-SelectionColumn") {
+        return;
+      }
+
+      const { rowIndex } = event;
+      if (rowIndex === undefined || rowIndex === null) return;
+      const symbol = event.api.getDisplayedRowAtIndex(rowIndex)?.data;
+      if (!symbol) return;
+      if (!symbol) return;
+      const { ticker } = symbol;
+      if (!ticker) return;
+      switcher(ticker);
+    },
+    [switcher],
+  );
+
+  const defaultColDef = useMemo(
+    () => ({
+      wrapHeaderText: true,
+      filter: true,
+      sortable: true,
+      resizable: true,
+      enableRowGroup: true,
+    }),
+    [],
+  );
+
+  const onColumnVisible = useCallback(
+    (event: ColumnVisibleEvent) => event.api.refreshServerSide({ purge: true }),
+    [],
+  );
+  return {
+    initialState: (watchlist.state as GridState) ?? initialState,
+    onCellFocused,
+    getRowId,
+    datasource,
+    statusBar,
+    onGridReady,
+    switcher,
+    getContextMenuItems,
+    updateWatchlist,
+    onStateUpdated,
+    processClipboardPaste,
+    defaultColDef,
+    onColumnVisible,
+  };
+}
+
+function SymbolList({ watchlist }: { watchlist: WatchlistType }) {
+  const colDefs = useColumnDefs();
+  const {
+    defaultColDef,
+    initialState,
+    getRowId,
+    statusBar,
+    getContextMenuItems,
+    onCellFocused,
+    onGridReady,
+    datasource,
+    processClipboardPaste,
+    onStateUpdated,
+    onColumnVisible,
+  } = useGridBase(watchlist);
+
+  const ref = useRef<AgGridReact | null>(null);
 
   return (
     <AgGridReact
-      suppressServerSideFullWidthLoadingRow={true}
-      rowModelType={"serverSide"}
+      ref={ref}
+      key={watchlist.id}
       serverSideDatasource={datasource}
       onGridReady={onGridReady}
-      onColumnVisible={(event) => event.api.refreshServerSide({ purge: true })}
+      suppressServerSideFullWidthLoadingRow={true}
+      rowModelType={"serverSide"}
+      onColumnVisible={onColumnVisible}
       dataTypeDefinitions={extendedColumnType}
       className="ag-terminal-theme"
       selectionColumnDef={{ pinned: "left" }}
@@ -232,55 +311,19 @@ function WatchlistG({ activeWatchlistId }: { activeWatchlistId?: string }) {
       getContextMenuItems={getContextMenuItems}
       animateRows
       maintainColumnOrder={true}
-      autoSizeStrategy={{
-        type: "fitCellContents",
-      }}
+      autoSizeStrategy={{ type: "fitCellContents" }}
       columnDefs={colDefs}
       initialState={initialState}
       getRowId={getRowId}
-      processDataFromClipboard={(params) => {
-        if (!watchlist) return params.data;
-        const tickers = params.data[0]?.[0]
-          ?.split(/[\\n ,]+/)
-          ?.filter((s) => s)
-          ?.map((s) => s?.trim()?.toUpperCase());
-
-        if (!tickers || tickers.length === 0) return params.data;
-        updateWatchlist({
-          id: watchlist.id,
-          payload: { symbols: [...watchlist.symbols, ...tickers] },
-        });
-
-        return params.data;
-      }}
+      processDataFromClipboard={processClipboardPaste}
       statusBar={statusBar}
-      defaultColDef={{
-        wrapHeaderText: true,
-        filter: true,
-        sortable: true,
-        resizable: true,
-        enableRowGroup: true,
-      }}
-      onStateUpdated={handleStateChange}
-      onCellFocused={(event) => {
-        // If the cell was focus because of selection change, we will ignore
-        // switching the symbol
-        if ((event.column as AgColumn)?.colId === "ag-Grid-SelectionColumn") {
-          return;
-        }
-
-        const { rowIndex } = event;
-        if (rowIndex === undefined || rowIndex === null) return;
-        const symbol = event.api.getDisplayedRowAtIndex(rowIndex)?.data;
-        if (!symbol) return;
-        if (!symbol) return;
-        const { ticker } = symbol;
-        if (!ticker) return;
-        switcher(ticker);
-      }}
+      defaultColDef={defaultColDef}
+      onStateUpdated={onStateUpdated}
+      onCellFocused={onCellFocused}
     />
   );
 }
+
 interface WatchlistCreateDialogProps extends HTMLAttributes<HTMLDivElement> {
   setOpen: (open: boolean) => void;
 }

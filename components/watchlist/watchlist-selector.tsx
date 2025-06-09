@@ -106,6 +106,7 @@ export function WatchlistSelector() {
                           ? null
                           : currentValue,
                       );
+                      setOpen(false);
                     }}
                   >
                     <Check

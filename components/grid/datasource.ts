@@ -159,7 +159,6 @@ export function buildDataSource(allowedTickers?: () => string[]) {
 export class RealtimeDatasource implements IServerSideDatasource {
   private mandatoryColumns = ["ticker", "logo", "earnings_release_date"];
   private api?: GridApi;
-  private universe?: string[];
 
   constructor(
     private readonly realtimeClient: RealtimeConnection,
@@ -170,12 +169,12 @@ export class RealtimeDatasource implements IServerSideDatasource {
     ].join("_"),
   ) {}
 
-  onReady(api: GridApi) {
+  onReady(api: GridApi, universe?: string[]) {
     this.api = api;
     this.realtimeClient.sendMessage({
       t: "SCREENER_SUBSCRIBE",
       session_id: this.sessionId,
-      universe: this.universe,
+      universe,
     });
     this.realtimeClient.on("SCREENER_PARTIAL_RESPONSE", this.onPartialUpdate);
   }
@@ -190,12 +189,12 @@ export class RealtimeDatasource implements IServerSideDatasource {
   }
 
   setUniverse(universe: string[]) {
-    this.universe = universe;
     this.realtimeClient.sendMessage({
       t: "SCREENER_SET_UNIVERSE",
       session_id: this.sessionId,
       universe,
     });
+    this.api?.refreshServerSide({ purge: true });
   }
 
   async getRows(params: IServerSideGetRowsParams) {
