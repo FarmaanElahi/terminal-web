@@ -223,7 +223,6 @@ function WatchlistG({ activeWatchlistId }: { activeWatchlistId?: string }) {
       onGridReady={onGridReady}
       onColumnVisible={(event) => event.api.refreshServerSide({ purge: true })}
       dataTypeDefinitions={extendedColumnType}
-      key={activeWatchlistId ?? "default"}
       className="ag-terminal-theme"
       selectionColumnDef={{ pinned: "left" }}
       enableAdvancedFilter={true}

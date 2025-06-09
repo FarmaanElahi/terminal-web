@@ -204,6 +204,7 @@ export function Screener(props: ScreenerProps) {
     <div {...props} className={cn("h-full relative", props.className)}>
       {!isLoading && (
         <AgGridReact
+          onGridPreDestroyed={() => console.log("Pre destroy")}
           serverSideDatasource={datasource}
           suppressServerSideFullWidthLoadingRow={true}
           onGridReady={onGridReady}
@@ -212,7 +213,6 @@ export function Screener(props: ScreenerProps) {
             event.api.refreshServerSide({ purge: true })
           }
           dataTypeDefinitions={extendedColumnType}
-          key={activeScreenId ?? "default"}
           getContextMenuItems={getContextMenuItems}
           className="ag-terminal-theme"
           enableAdvancedFilter={true}
