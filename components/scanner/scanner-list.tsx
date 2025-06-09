@@ -155,8 +155,8 @@ function useGridBase(scanner?: Scanner) {
     }),
     [],
   );
-  const { data: allScanners } = useScanners(types, type);
-  const { mutate: updateWatchlist } = useUpdateScanner(type, (w) => {
+  const { data: allWatchlists } = useScanners(types, "Watchlist");
+  const { mutate: updateScanner } = useUpdateScanner(type, (w) => {
     toast(`${w.name} updated`);
   });
 
@@ -169,7 +169,7 @@ function useGridBase(scanner?: Scanner) {
         // Watchlist menu
         {
           name: `Add ${params.node?.data?.name} to Watchlist`,
-          subMenu: allScanners?.map((w) => {
+          subMenu: allWatchlists?.map((w) => {
             const checked = w.symbols?.includes(symbol.ticker!);
             const updatedSymbols = checked
               ? w.symbols.filter((s) => s !== symbol.ticker)
@@ -179,7 +179,7 @@ function useGridBase(scanner?: Scanner) {
               subMenuRole: "menu",
               checked,
               action: () =>
-                updateWatchlist({
+                updateScanner({
                   id: w.id,
                   payload: { symbols: updatedSymbols },
                 }),
@@ -191,7 +191,7 @@ function useGridBase(scanner?: Scanner) {
         "copy",
       ];
     },
-    [allScanners, updateWatchlist],
+    [allWatchlists, updateScanner],
   );
 
   const switcher = useGroupSymbolSwitcher();
@@ -223,14 +223,14 @@ function useGridBase(scanner?: Scanner) {
         ?.map((s) => s?.trim()?.toUpperCase());
 
       if (!tickers || tickers.length === 0) return params.data;
-      updateWatchlist({
+      updateScanner({
         id: scanner.id,
         payload: { symbols: [...scanner.symbols, ...tickers] },
       });
 
       return params.data;
     },
-    [scanner, updateWatchlist],
+    [scanner, updateScanner],
   );
 
   const onCellFocused = useCallback(
@@ -295,7 +295,7 @@ function useGridBase(scanner?: Scanner) {
     onGridReady,
     switcher,
     getContextMenuItems,
-    updateWatchlist,
+    updateWatchlist: updateScanner,
     onStateUpdated,
     processClipboardPaste,
     defaultColDef,
