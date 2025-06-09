@@ -162,7 +162,7 @@ export class RealtimeDatasource implements IServerSideDatasource {
 
   constructor(
     private readonly realtimeClient: RealtimeConnection,
-    type: "wl" | "scr",
+    type: string,
     private readonly sessionId: string = [
       type,
       Math.random().toString(36).substring(2),

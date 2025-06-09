@@ -48,13 +48,17 @@ function useColumnDefs() {
   return useMemo(() => defaultColumns, []);
 }
 
-function useScanner(types: Scanner["type"][], scannerId: string | null) {
-  const { data: scanners } = useScanners(types);
+function useScanner(
+  types: Scanner["type"][],
+  type: string,
+  scannerId: string | null,
+) {
+  const { data: scanners } = useScanners(types, type);
   return scanners?.find((s) => s.id && s.id === scannerId);
 }
 
-function useScannerChangeCallback(activeScanner?: string | null) {
-  const mutation = useUpdateScanner((watchlist) =>
+function useScannerChangeCallback(type: string, activeScanner?: string | null) {
+  const mutation = useUpdateScanner(type, (watchlist) =>
     toast(`${watchlist.name} updated`),
   );
 
@@ -104,13 +108,13 @@ function useGridInitialState() {
 }
 
 export function ScannerList(props: ScannerListProps) {
-  const { scannerId, types } = useCurrentScanner();
-  const scanner = useScanner(types, scannerId);
+  const { scannerId, types, type } = useCurrentScanner();
+  const scanner = useScanner(types, type, scannerId);
 
   const [openWatchlistSymbol, setOpenWatchlistSymbol] = useState(false);
   const [openWatchlistCreator, setOpenWatchlistCreator] = useState(false);
 
-  const { data } = useScanners(types);
+  const { data } = useScanners(types, type);
   return (
     <div {...props} className={cn("h-full", props.className)}>
       {scanner && (
@@ -127,12 +131,13 @@ export function ScannerList(props: ScannerListProps) {
       {(!scannerId || !data || data.length === 0) && (
         <CreateWatchlist setOpen={setOpenWatchlistCreator} />
       )}
-      {scanner && <SymbolList watchlist={scanner as Scanner} />}
+      {scanner && <SymbolList scanner={scanner as Scanner} />}
     </div>
   );
 }
 
-function useGridBase(watchlist: Scanner, types: Scanner["type"][]) {
+function useGridBase(scanner: Scanner) {
+  const { type, types } = useCurrentScanner();
   const initialState = useGridInitialState();
 
   const getRowId = useCallback<GetRowIdFunc>(
@@ -146,8 +151,8 @@ function useGridBase(watchlist: Scanner, types: Scanner["type"][]) {
     }),
     [],
   );
-  const { data: allScanners } = useScanners(types);
-  const { mutate: updateWatchlist } = useUpdateScanner((w) => {
+  const { data: allScanners } = useScanners(types, type);
+  const { mutate: updateWatchlist } = useUpdateScanner(type, (w) => {
     toast(`${w.name} updated`);
   });
 
@@ -189,22 +194,22 @@ function useGridBase(watchlist: Scanner, types: Scanner["type"][]) {
 
   const realtimeClient = useRealtimeClient();
   const datasource = useMemo(
-    () => new RealtimeDatasource(realtimeClient, "wl"),
-    [realtimeClient],
+    () => new RealtimeDatasource(realtimeClient, type),
+    [realtimeClient, type],
   );
   const onGridReady = useCallback(
     (p: GridReadyEvent) => {
-      const symbols = watchlist.symbols ?? [];
+      const symbols = scanner.symbols ?? [];
       datasource.onReady(p.api, symbols);
     },
-    [watchlist.symbols, datasource],
+    [scanner.symbols, datasource],
   );
 
-  const onStateUpdated = useScannerChangeCallback(watchlist.id);
+  const onStateUpdated = useScannerChangeCallback(type, scanner.id);
 
   const processClipboardPaste = useCallback(
     (params: ProcessDataFromClipboardParams) => {
-      if (!watchlist) return params.data;
+      if (!scanner) return params.data;
       const tickers = params.data[0]?.[0]
         ?.split(/[\\n ,]+/)
         ?.filter((s) => s)
@@ -212,13 +217,13 @@ function useGridBase(watchlist: Scanner, types: Scanner["type"][]) {
 
       if (!tickers || tickers.length === 0) return params.data;
       updateWatchlist({
-        id: watchlist.id,
-        payload: { symbols: [...watchlist.symbols, ...tickers] },
+        id: scanner.id,
+        payload: { symbols: [...scanner.symbols, ...tickers] },
       });
 
       return params.data;
     },
-    [watchlist, updateWatchlist],
+    [scanner, updateWatchlist],
   );
 
   const onCellFocused = useCallback(
@@ -257,7 +262,7 @@ function useGridBase(watchlist: Scanner, types: Scanner["type"][]) {
     [],
   );
   return {
-    initialState: (watchlist.state as GridState) ?? initialState,
+    initialState: (scanner.state as GridState) ?? initialState,
     onCellFocused,
     getRowId,
     datasource,
@@ -273,8 +278,7 @@ function useGridBase(watchlist: Scanner, types: Scanner["type"][]) {
   };
 }
 
-function SymbolList({ watchlist }: { watchlist: Scanner }) {
-  const { types } = useCurrentScanner();
+function SymbolList({ scanner }: { scanner: Scanner }) {
   const colDefs = useColumnDefs();
   const {
     defaultColDef,
@@ -288,14 +292,14 @@ function SymbolList({ watchlist }: { watchlist: Scanner }) {
     processClipboardPaste,
     onStateUpdated,
     onColumnVisible,
-  } = useGridBase(watchlist, types);
+  } = useGridBase(scanner);
 
   const ref = useRef<AgGridReact | null>(null);
 
   return (
     <AgGridReact
       ref={ref}
-      key={watchlist.id}
+      key={scanner.id}
       serverSideDatasource={datasource}
       onGridReady={onGridReady}
       suppressServerSideFullWidthLoadingRow={true}

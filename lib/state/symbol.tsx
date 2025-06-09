@@ -419,11 +419,14 @@ export function useScreens() {
 //##################### WATCHLIST #####################
 
 //##################### SCREENS #####################
-export function useCreateScanner(onComplete?: (scanner: Scanner) => void) {
+export function useCreateScanner(
+  type: string,
+  onComplete?: (scanner: Scanner) => void,
+) {
   const client = useQueryClient();
   return useMutation({
     onSuccess: (list: Scanner) => {
-      void client.invalidateQueries({ queryKey: ["scanner", list.id] });
+      void client.invalidateQueries({ queryKey: ["scanner", type] });
       onComplete?.(list);
     },
     mutationFn: async (scanner: InsertScanner) => {
@@ -442,11 +445,11 @@ export function useCreateScanner(onComplete?: (scanner: Scanner) => void) {
   });
 }
 
-export function useDeleteScanner(onComplete?: () => void) {
+export function useDeleteScanner(type: string, onComplete?: () => void) {
   const client = useQueryClient();
   return useMutation({
-    onSuccess: (o, p) => {
-      void client.invalidateQueries({ queryKey: ["scanner", p] });
+    onSuccess: () => {
+      void client.invalidateQueries({ queryKey: ["scanner", type] });
       onComplete?.();
     },
     mutationFn: async (id: string) => {
@@ -462,11 +465,14 @@ export function useDeleteScanner(onComplete?: () => void) {
   });
 }
 
-export function useUpdateScanner(onComplete?: (scanner: Scanner) => void) {
+export function useUpdateScanner(
+  type: string,
+  onComplete?: (scanner: Scanner) => void,
+) {
   const client = useQueryClient();
   return useMutation({
     onSuccess: async (scanner: Scanner) => {
-      await client.invalidateQueries({ queryKey: ["scanner", scanner.id] });
+      await client.invalidateQueries({ queryKey: ["scanner", type] });
       onComplete?.(scanner);
     },
     mutationFn: async ({
@@ -492,9 +498,9 @@ export function useUpdateScanner(onComplete?: (scanner: Scanner) => void) {
   });
 }
 
-export function useScanners(types: Scanner["type"][]) {
+export function useScanners(types: Scanner["type"][], type: string) {
   return useQuery({
-    queryKey: ["scanner", ...types],
+    queryKey: ["scanner", type],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("scanner")

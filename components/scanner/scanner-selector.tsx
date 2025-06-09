@@ -63,7 +63,7 @@ import { useCurrentScanner } from "@/hooks/use-active-scanner";
 
 export function ScannerSelector() {
   const { scannerId, setScannerId, types, type } = useCurrentScanner();
-  const { data: scanners = [] } = useScanners(types);
+  const { data: scanners = [] } = useScanners(types, type);
   const [open, setOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [openSymbolDialog, setOpenSymbolDialog] = useState(false);
@@ -199,8 +199,8 @@ export function WatchlistCreatorDialog({
   setOpen: (open: boolean) => void;
   default?: { name: string; state: Json; symbols: string[] };
 }) {
-  const { types, setScannerId } = useCurrentScanner();
-  const { data: watchlists = [] } = useScanners(types);
+  const { types, setScannerId, type } = useCurrentScanner();
+  const { data: watchlists = [] } = useScanners(types, type);
 
   const [listType, setListType] = useState<"simple" | "combo">("simple");
   const [selectedWatchlists, setSelectedWatchlists] = useState<string[]>([]);
@@ -211,6 +211,7 @@ export function WatchlistCreatorDialog({
     useSymbolSearch(symbolInput);
 
   const { mutate: createWatchlist, isPending } = useCreateScanner(
+    type,
     (watchlist) => {
       setOpen(false);
       toast(`${watchlist.name} watchlist created!`);
@@ -515,7 +516,7 @@ function DeleteWatchlist({
   children: ReactNode;
 }) {
   const { type } = useCurrentScanner();
-  const { mutate: deleteScanner } = useDeleteScanner(() =>
+  const { mutate: deleteScanner } = useDeleteScanner(type, () =>
     toast(`Deleted ${scanner.name}`),
   );
 
