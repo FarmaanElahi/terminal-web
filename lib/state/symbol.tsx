@@ -419,11 +419,11 @@ export function useScreens() {
 //##################### WATCHLIST #####################
 
 //##################### SCREENS #####################
-export function useCreateWatchlist(onComplete?: (scanner: Scanner) => void) {
+export function useCreateScanner(onComplete?: (scanner: Scanner) => void) {
   const client = useQueryClient();
   return useMutation({
     onSuccess: (list: Scanner) => {
-      void client.invalidateQueries({ queryKey: ["watchlist"] });
+      void client.invalidateQueries({ queryKey: ["scanner", list.id] });
       onComplete?.(list);
     },
     mutationFn: async (scanner: InsertScanner) => {
@@ -442,11 +442,11 @@ export function useCreateWatchlist(onComplete?: (scanner: Scanner) => void) {
   });
 }
 
-export function useDeleteWatchlist(onComplete?: () => void) {
+export function useDeleteScanner(onComplete?: () => void) {
   const client = useQueryClient();
   return useMutation({
-    onSuccess: () => {
-      void client.invalidateQueries({ queryKey: ["watchlist"] });
+    onSuccess: (o, p) => {
+      void client.invalidateQueries({ queryKey: ["scanner", p] });
       onComplete?.();
     },
     mutationFn: async (id: string) => {
@@ -462,12 +462,12 @@ export function useDeleteWatchlist(onComplete?: () => void) {
   });
 }
 
-export function useUpdateWatchlist(onComplete?: (scanner: Scanner) => void) {
+export function useUpdateScanner(onComplete?: (scanner: Scanner) => void) {
   const client = useQueryClient();
   return useMutation({
-    onSuccess: async (list: Scanner) => {
-      await client.invalidateQueries({ queryKey: ["watchlist"] });
-      onComplete?.(list);
+    onSuccess: async (scanner: Scanner) => {
+      await client.invalidateQueries({ queryKey: ["scanner", scanner.id] });
+      onComplete?.(scanner);
     },
     mutationFn: async ({
       id,
@@ -492,14 +492,14 @@ export function useUpdateWatchlist(onComplete?: (scanner: Scanner) => void) {
   });
 }
 
-export function useWatchlist() {
+export function useScanners(types: Scanner["type"][]) {
   return useQuery({
-    queryKey: ["watchlist"],
+    queryKey: ["scanner", ...types],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("scanner")
         .select("*")
-        .in("type", ["simple", "combo"])
+        .in("type", types)
         .order("updated_at", { ascending: false });
 
       if (error) throw error;

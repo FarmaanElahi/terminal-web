@@ -36,11 +36,11 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
-  useCreateWatchlist,
-  useDeleteWatchlist,
+  useCreateScanner,
+  useDeleteScanner,
+  useScanners,
   useScreens,
   useSymbolSearch,
-  useWatchlist,
 } from "@/lib/state/symbol";
 import { toast } from "sonner";
 import { Json, Scanner, Watchlist } from "@/types/supabase";
@@ -55,21 +55,21 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useActiveWatchlistId } from "@/hooks/use-active-watchlist";
-import { WatchlistSymbol } from "@/components/watchlist/watchlist-symbol";
+import { WatchlistSymbol } from "@/components/scanner/watchlist-symbol";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { useCurrentScanner } from "@/hooks/use-active-scanner";
 
-export function WatchlistSelector() {
-  const { activeWatchlistId, setActiveWatchlistId } = useActiveWatchlistId();
-  const { data: watchlist = [] } = useWatchlist();
+export function ScannerSelector() {
+  const { scannerId, setScannerId, types, type } = useCurrentScanner();
+  const { data: scanners = [] } = useScanners(types);
   const [open, setOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [openSymbolDialog, setOpenSymbolDialog] = useState(false);
   const [newWatchlistDefault, setNewWatchlistDefault] =
     useState<Pick<Watchlist, "name" | "state" | "symbols">>();
-  const activeWatchlist = watchlist?.find((s) => s.id === activeWatchlistId);
+  const activeScanner = scanners?.find((s) => s.id === scannerId);
 
   return (
     <div className="flex gap-1">
@@ -82,29 +82,27 @@ export function WatchlistSelector() {
             aria-expanded={open}
             className="w-[200px] justify-between font-bold"
             onClick={() => {
-              if (!activeWatchlist) setOpen(!open);
+              if (!activeScanner) setOpen(!open);
             }}
           >
-            {activeWatchlist?.name || "My Watchlist"}
+            {activeScanner?.name || `Select ${type}...`}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[300px] p-0">
           <Command>
-            <CommandInput placeholder="Search watchlist..." className="h-9" />
+            <CommandInput placeholder={`Search ${type}...`} className="h-9" />
             <CommandList>
               <CommandEmpty>No watchlist found.</CommandEmpty>
               <CommandGroup>
-                {watchlist.map((watchlist) => (
+                {scanners.map((scanner) => (
                   <CommandItem
-                    key={watchlist.id}
+                    key={scanner.id}
                     className="font-bold group relative"
-                    value={watchlist.id}
+                    value={scanner.id}
                     onSelect={(currentValue) => {
-                      setActiveWatchlistId(
-                        currentValue === activeWatchlistId
-                          ? null
-                          : currentValue,
+                      setScannerId(
+                        currentValue === scannerId ? null : currentValue,
                       );
                       setOpen(false);
                     }}
@@ -112,19 +110,17 @@ export function WatchlistSelector() {
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        activeWatchlistId === watchlist.id
-                          ? "opacity-100"
-                          : "opacity-0",
+                        scannerId === scanner.id ? "opacity-100" : "opacity-0",
                       )}
                     />
-                    <span className="flex-1">{watchlist.name}</span>
+                    <span className="flex-1">{scanner.name}</span>
                     <Button
                       className="opacity-0 group-hover:opacity-100 h-7 w-7"
                       variant="ghost"
                       size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setActiveWatchlistId(watchlist.id);
+                        setScannerId(scanner.id);
                         setOpenSymbolDialog(true);
                       }}
                     >
@@ -137,16 +133,16 @@ export function WatchlistSelector() {
                       onClick={(e) => {
                         e.stopPropagation();
                         setNewWatchlistDefault({
-                          name: `${watchlist.name} (Copy)`,
-                          state: watchlist.state,
-                          symbols: watchlist.symbols,
+                          name: `${scanner.name} (Copy)`,
+                          state: scanner.state,
+                          symbols: scanner.symbols,
                         });
                         setOpenDialog(true);
                       }}
                     >
                       <Copy size="3" />
                     </Button>
-                    <DeleteWatchlist watchlist={watchlist}>
+                    <DeleteWatchlist scanner={scanner}>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -175,17 +171,19 @@ export function WatchlistSelector() {
         <Plus className="size-4" />
       </Button>
 
-      <WatchlistCreatorDialog
-        open={openDialog}
-        setOpen={setOpenDialog}
-        default={newWatchlistDefault}
-      />
+      {type === "Watchlist" && (
+        <WatchlistCreatorDialog
+          open={openDialog}
+          setOpen={setOpenDialog}
+          default={newWatchlistDefault}
+        />
+      )}
 
-      {activeWatchlist && (
+      {type === "Watchlist" && activeScanner && (
         <WatchlistSymbol
           open={openSymbolDialog}
           setOpen={setOpenSymbolDialog}
-          watchlist={activeWatchlist}
+          watchlist={activeScanner}
         />
       )}
     </div>
@@ -201,8 +199,8 @@ export function WatchlistCreatorDialog({
   setOpen: (open: boolean) => void;
   default?: { name: string; state: Json; symbols: string[] };
 }) {
-  const { setActiveWatchlistId } = useActiveWatchlistId();
-  const { data: watchlists = [] } = useWatchlist();
+  const { types, setScannerId } = useCurrentScanner();
+  const { data: watchlists = [] } = useScanners(types);
 
   const [listType, setListType] = useState<"simple" | "combo">("simple");
   const [selectedWatchlists, setSelectedWatchlists] = useState<string[]>([]);
@@ -212,11 +210,11 @@ export function WatchlistCreatorDialog({
   const { data: symbolResults = [], isLoading: isSearching } =
     useSymbolSearch(symbolInput);
 
-  const { mutate: createWatchlist, isPending } = useCreateWatchlist(
+  const { mutate: createWatchlist, isPending } = useCreateScanner(
     (watchlist) => {
       setOpen(false);
       toast(`${watchlist.name} watchlist created!`);
-      setActiveWatchlistId(watchlist.id);
+      setScannerId(watchlist.id);
     },
   );
 
@@ -510,14 +508,15 @@ export function WatchlistCreatorDialog({
 }
 
 function DeleteWatchlist({
-  watchlist,
+  scanner,
   children,
 }: {
-  watchlist: Scanner;
+  scanner: Scanner;
   children: ReactNode;
 }) {
-  const { mutate: deleteWatchlist } = useDeleteWatchlist(() =>
-    toast(`Deleted ${watchlist.name}`),
+  const { type } = useCurrentScanner();
+  const { mutate: deleteScanner } = useDeleteScanner(() =>
+    toast(`Deleted ${scanner.name}`),
   );
 
   return (
@@ -525,12 +524,12 @@ function DeleteWatchlist({
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete Watchlist</AlertDialogTitle>
+          <AlertDialogTitle>Delete {type}</AlertDialogTitle>
           <AlertDialogDescription>
             This action cannot be undone. This will permanently delete
             <span className="font-bold text-destructive">
               {" "}
-              {watchlist.name}
+              {scanner.name}
             </span>{" "}
             watchlist
           </AlertDialogDescription>
@@ -539,7 +538,7 @@ function DeleteWatchlist({
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             className={buttonVariants({ variant: "destructive" })}
-            onClick={() => deleteWatchlist(watchlist.id)}
+            onClick={() => deleteScanner(scanner.id)}
           >
             Continue
           </AlertDialogAction>
@@ -548,3 +547,202 @@ function DeleteWatchlist({
     </AlertDialog>
   );
 }
+
+//
+// export function ScreenSelector() {
+//   const { activeScreenId, setActiveScreenId } = useActiveScreenerId();
+//   const { data: screens = [] } = useScreens();
+//   const [open, setOpen] = useState(false);
+//   const [openDialog, setOpenDialog] = useState(false);
+//   const [newScreenDefault, setNewScreenDefault] =
+//     useState<Pick<Screen, "name" | "state">>();
+//   const activeScreen = screens?.find((s) => s.id === activeScreenId);
+//
+//   return (
+//     <div className="flex gap-1">
+//       <Popover open={open} onOpenChange={setOpen}>
+//         <PopoverTrigger asChild>
+//           <Button
+//             variant="outline"
+//             role="combobox"
+//             size="sm"
+//             aria-expanded={open}
+//             className="w-[200px] justify-between font-bold"
+//             onClick={() => {
+//               if (!activeScreen) setOpen(!open);
+//             }}
+//           >
+//             {activeScreen?.name || "My Screens"}
+//             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+//           </Button>
+//         </PopoverTrigger>
+//         <PopoverContent className="w-[300px] p-0">
+//           <Command>
+//             <CommandInput placeholder="Search screens..." className="h-9" />
+//             <CommandList>
+//               <CommandEmpty>No screen found.</CommandEmpty>
+//               <CommandGroup>
+//                 {screens.map((screen) => (
+//                   <CommandItem
+//                     key={screen.id}
+//                     className="font-bold group relative"
+//                     value={screen.id}
+//                     onSelect={(currentValue) => {
+//                       setActiveScreenId(
+//                         currentValue === activeScreenId ? null : currentValue,
+//                       );
+//                     }}
+//                   >
+//                     <Check
+//                       className={cn(
+//                         "mr-2 h-4 w-4",
+//                         activeScreenId === screen.id
+//                           ? "opacity-100"
+//                           : "opacity-0",
+//                       )}
+//                     />
+//                     <span className="flex-1">{screen.name}</span>
+//                     <Button
+//                       className="opacity-0 group-hover:opacity-100 h-7 w-7"
+//                       variant="ghost"
+//                       size="icon"
+//                       onClick={() => {
+//                         setNewScreenDefault({
+//                           name: `${screen.name} (Copy)`,
+//                           state: screen.state,
+//                         });
+//                         setOpenDialog(true);
+//                       }}
+//                     >
+//                       <Copy size="3" />
+//                     </Button>
+//                     <DeleteScreen screen={screen}>
+//                       <Button
+//                         variant="ghost"
+//                         size="icon"
+//                         className="opacity-0 group-hover:opacity-100 h-7 w-7"
+//                       >
+//                         <Trash size="3" />
+//                       </Button>
+//                     </DeleteScreen>
+//                   </CommandItem>
+//                 ))}
+//               </CommandGroup>
+//             </CommandList>
+//           </Command>
+//         </PopoverContent>
+//       </Popover>
+//
+//       <Button
+//         variant="outline"
+//         size="sm"
+//         onClick={() => {
+//           setNewScreenDefault(undefined);
+//           setOpenDialog(true);
+//         }}
+//       >
+//         <Plus className="size-4" />
+//       </Button>
+//
+//       <ScreenCreatorDialog
+//         open={openDialog}
+//         setOpen={setOpenDialog}
+//         default={newScreenDefault}
+//       />
+//     </div>
+//   );
+// }
+//
+// function ScreenCreatorDialog({
+//                                open,
+//                                setOpen,
+//                                default: defaultState,
+//                              }: {
+//   open: boolean;
+//   setOpen: (open: boolean) => void;
+//   default?: { name: string; state: Json };
+//   cloneFromId?: string;
+// }) {
+//   const { mutate: createScreen, isPending } = useCreateScreen((screen) => {
+//     setOpen(false);
+//     toast(`${screen.name} screen created!`);
+//   });
+//   const [screenName, setNewScreenName] = useState<string>();
+//   useEffect(() => setNewScreenName(defaultState?.name), [defaultState]);
+//
+//   return (
+//     <Dialog open={open} onOpenChange={setOpen}>
+//       <DialogContent>
+//         <DialogHeader>
+//           <DialogTitle>
+//             {defaultState?.name ? "Clone Screen" : "Create New Screen"}
+//           </DialogTitle>
+//         </DialogHeader>
+//         <div className="grid gap-4 py-4">
+//           <div className="grid gap-2">
+//             <Label htmlFor="name">Screen Name</Label>
+//             <Input
+//               id="name"
+//               value={screenName}
+//               onChange={(e) => setNewScreenName(e.target.value)}
+//               placeholder="Enter screen name"
+//             />
+//           </div>
+//         </div>
+//         <DialogFooter>
+//           <Button
+//             disabled={!screenName}
+//             onClick={(e) => {
+//               e.stopPropagation();
+//               createScreen({ name: screenName!, state: defaultState?.state });
+//               setOpen(false);
+//             }}
+//           >
+//             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+//             {defaultState?.name ? "Clone" : "Create"}
+//           </Button>
+//         </DialogFooter>
+//       </DialogContent>
+//     </Dialog>
+//   );
+// }
+//
+// function DeleteScreen({
+//                         screen,
+//                         children,
+//                       }: {
+//   screen: Screen;
+//   children: ReactNode;
+// }) {
+//   const { mutate: deleteScreen } = useDeleteScreen(() =>
+//     toast(`Deleted ${screen.name}`),
+//   );
+//
+//   return (
+//     <AlertDialog>
+//       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+//       <AlertDialogContent>
+//         <AlertDialogHeader>
+//           <AlertDialogTitle>Delete Screener</AlertDialogTitle>
+//           <AlertDialogDescription>
+//             This action cannot be undone. This will permanently delete
+//             <span className="font-bold text-destructive">
+//               {" "}
+//               {screen.name}
+//             </span>{" "}
+//             screener
+//           </AlertDialogDescription>
+//         </AlertDialogHeader>
+//         <AlertDialogFooter>
+//           <AlertDialogCancel>Cancel</AlertDialogCancel>
+//           <AlertDialogAction
+//             className={buttonVariants({ variant: "destructive" })}
+//             onClick={() => deleteScreen(screen.id)}
+//           >
+//             Continue
+//           </AlertDialogAction>
+//         </AlertDialogFooter>
+//       </AlertDialogContent>
+//     </AlertDialog>
+//   );
+// }

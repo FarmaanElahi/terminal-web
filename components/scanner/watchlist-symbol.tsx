@@ -1,5 +1,5 @@
 import React, { useMemo, useRef } from "react";
-import { useSymbolSearch, useUpdateWatchlist } from "@/lib/state/symbol";
+import { useSymbolSearch, useUpdateScanner } from "@/lib/state/symbol";
 import {
   CommandDialog,
   CommandEmpty,
@@ -29,7 +29,7 @@ export function WatchlistSymbol({
     [watchlist.symbols],
   );
 
-  const { mutate: updateWatchlist } = useUpdateWatchlist();
+  const { mutate: updateWatchlist } = useUpdateScanner();
 
   const items = data?.map((s) => (
     <CommandItem key={s.name} value={s.ticker!} className="m-2">

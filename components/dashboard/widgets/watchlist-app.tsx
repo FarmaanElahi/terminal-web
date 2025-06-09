@@ -1,10 +1,10 @@
 import React, { useCallback } from "react";
-import { WatchlistProvider } from "@/hooks/use-active-watchlist";
 import type { WidgetProps } from "@/components/dashboard/widgets/widget-props";
-import { WatchlistSelector } from "@/components/watchlist/watchlist-selector";
-import { Watchlist } from "@/components/watchlist/watchlist";
+import { ScannerSelector } from "@/components/scanner/scanner-selector";
+import { ScannerList } from "@/components/scanner/scanner-list";
 import { Group, GrouperProvider } from "@/lib/state/grouper";
 import { WidgetControl } from "@/components/dashboard/widget-control";
+import { ScannerProvider } from "@/hooks/use-active-scanner";
 
 export function WatchlistApp({
   layout,
@@ -34,9 +34,11 @@ export function WatchlistApp({
       group={(layout.settings?.group ?? 0) as Group}
       onChange={groupChanged}
     >
-      <WatchlistProvider
-        defaultActiveWatchlistId={defaultActiveWatchlistId}
-        onActiveWatchlistIdChange={watchlistChanged}
+      <ScannerProvider
+        defaultScannerId={defaultActiveWatchlistId}
+        onScannerIdChange={watchlistChanged}
+        types={["combo", "simple"]}
+        type={"Watchlist"}
       >
         <div className={"h-full flex flex-col"}>
           <WidgetControl
@@ -44,11 +46,11 @@ export function WatchlistApp({
             onRemove={onRemoveWidget}
             className={"m-2"}
           >
-            <WatchlistSelector />
+            <ScannerSelector />
           </WidgetControl>
-          <Watchlist className="flex-1" />
+          <ScannerList className="flex-1" />
         </div>
-      </WatchlistProvider>
+      </ScannerProvider>
     </GrouperProvider>
   );
 }

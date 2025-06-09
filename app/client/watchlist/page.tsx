@@ -14,18 +14,18 @@ import { Chart } from "@/components/chart/chart";
 import { Stats } from "@/components/symbols/stats";
 import "@/components/grid/grid_init";
 import { ImperativePanelHandle } from "react-resizable-panels";
-import { WatchlistProvider } from "@/hooks/use-active-watchlist";
-import { WatchlistSelector } from "@/components/watchlist/watchlist-selector";
-import { Watchlist } from "@/components/watchlist/watchlist";
+import { ScannerSelector } from "@/components/scanner/scanner-selector";
+import { ScannerList } from "@/components/scanner/scanner-list";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { ScannerProvider } from "@/hooks/use-active-scanner";
 
 export default function Page() {
   return (
     <GroupSymbolProvider>
       <GrouperProvider group={1}>
-        <WatchlistProvider>
+        <ScannerProvider type={"Watchlist"} types={["simple", "combo"]}>
           <WatchlistContent />
-        </WatchlistProvider>
+        </ScannerProvider>
       </GrouperProvider>
     </GroupSymbolProvider>
   );
@@ -41,7 +41,7 @@ function WatchlistContent() {
         <div className="flex items-center justify-between gap-2 w-full">
           <div className="flex gap-2">
             <SidebarTrigger className="my-auto" />
-            <WatchlistSelector />
+            <ScannerSelector />
           </div>
           <div className="flex space-x-4 pr-1">
             <div className="space-x-2">
@@ -97,7 +97,7 @@ function WatchlistContent() {
             minSize={5}
             className={"transition"}
           >
-            <Watchlist />
+            <ScannerList />
           </ResizablePanel>
           <ResizableHandle />
           <ResizablePanel collapsible id={"watchlist-center"} defaultSize={80}>

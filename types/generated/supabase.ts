@@ -216,7 +216,7 @@ export type Database = {
           shared: boolean
           state: Json | null
           symbols: string[]
-          type: Database["public"]["Enums"]["list_type"] | null
+          type: Database["public"]["Enums"]["list_type"]
           updated_at: string | null
           user_id: string | null
         }
@@ -231,7 +231,7 @@ export type Database = {
           shared?: boolean
           state?: Json | null
           symbols?: string[]
-          type?: Database["public"]["Enums"]["list_type"] | null
+          type: Database["public"]["Enums"]["list_type"]
           updated_at?: string | null
           user_id?: string | null
         }
@@ -246,7 +246,7 @@ export type Database = {
           shared?: boolean
           state?: Json | null
           symbols?: string[]
-          type?: Database["public"]["Enums"]["list_type"] | null
+          type?: Database["public"]["Enums"]["list_type"]
           updated_at?: string | null
           user_id?: string | null
         }

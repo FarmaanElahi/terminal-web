@@ -1,11 +1,11 @@
-import { ScreenerProvider } from "@/hooks/use-active-screener";
-import { Screener } from "@/components/screener/screener";
-import { ScreenSelector } from "@/components/screener/screen-selector";
 import type { WidgetProps } from "@/components/dashboard/widgets/widget-props";
 import { Group, GrouperProvider, useGroupFilter } from "@/lib/state/grouper";
 import { useCallback } from "react";
 import { WidgetControl } from "@/components/dashboard/widget-control";
 import { GroupInfo } from "@/components/symbols/group";
+import { ScannerProvider } from "@/hooks/use-active-scanner";
+import { ScannerSelector } from "@/components/scanner/scanner-selector";
+import { ScannerList } from "@/components/scanner/scanner-list";
 
 export function ScreenerApp({
   updateSettings,
@@ -58,9 +58,11 @@ function AppChild({
   const filter = useGroupFilter();
 
   return (
-    <ScreenerProvider
-      defaultActiveScreenId={filter ? undefined : defaultActiveScreenId}
-      onActiveScreenIdChange={screenChanged}
+    <ScannerProvider
+      defaultScannerId={filter ? undefined : defaultActiveScreenId}
+      onScannerIdChange={screenChanged}
+      types={["screener"]}
+      type={"Screener"}
     >
       <div className={"h-full flex flex-col"}>
         <WidgetControl
@@ -70,11 +72,11 @@ function AppChild({
         >
           <div className="flex gap-2">
             {filter && <GroupInfo />}
-            {!filter && <ScreenSelector />}
+            {!filter && <ScannerSelector />}
           </div>
         </WidgetControl>
-        <Screener className="flex-1" />
+        <ScannerList className="flex-1" />
       </div>
-    </ScreenerProvider>
+    </ScannerProvider>
   );
 }

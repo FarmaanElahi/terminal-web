@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useUpdateWatchlist, useWatchlist } from "@/lib/state/symbol";
+import { useScanners, useUpdateScanner } from "@/lib/state/symbol";
 import {
   AgColumn,
   CellFocusedEvent,
@@ -31,35 +31,35 @@ import debounce from "debounce";
 import { toast } from "sonner";
 import { Json } from "@/types/generated/supabase";
 import type { Symbol } from "@/types/symbol";
-import { useActiveWatchlistId } from "@/hooks/use-active-watchlist";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { WatchlistCreatorDialog } from "./watchlist-selector";
-import { WatchlistSymbol } from "@/components/watchlist/watchlist-symbol";
+import { WatchlistCreatorDialog } from "./scanner-selector";
+import { WatchlistSymbol } from "@/components/scanner/watchlist-symbol";
 import { cn } from "@/lib/utils";
 import { RowCountStatusBarComponent } from "@/components/grid/row-count";
 import { useRealtimeClient } from "@/hooks/use-realtime";
 import { Scanner } from "@/types/supabase";
 import { RealtimeDatasource } from "@/components/grid/datasource";
+import { useCurrentScanner } from "@/hooks/use-active-scanner";
 
-type WatchlistProps = HTMLAttributes<HTMLDivElement>;
+type ScannerListProps = HTMLAttributes<HTMLDivElement>;
 
 function useColumnDefs() {
   return useMemo(() => defaultColumns, []);
 }
 
-function useActiveWatchlist(activeWatchlistId?: string | null) {
-  const { data: watchlist } = useWatchlist();
-  return watchlist?.find((s) => s.id && s.id === activeWatchlistId);
+function useScanner(types: Scanner["type"][], scannerId: string | null) {
+  const { data: scanners } = useScanners(types);
+  return scanners?.find((s) => s.id && s.id === scannerId);
 }
 
-function useWatchlistChangeCallback(activeWatchlist?: string | null) {
-  const mutation = useUpdateWatchlist((watchlist) =>
-    toast(`${watchlist.name} Watchlist updated`),
+function useScannerChangeCallback(activeScanner?: string | null) {
+  const mutation = useUpdateScanner((watchlist) =>
+    toast(`${watchlist.name} updated`),
   );
 
   // Debounced update function
-  const updateWatchlist = useMemo(
+  const updateScanner = useMemo(
     () => debounce(mutation.mutate, 1000),
     [mutation.mutate],
   );
@@ -71,13 +71,13 @@ function useWatchlistChangeCallback(activeWatchlist?: string | null) {
       if (params.sources?.[0] === "gridInitializing") return;
 
       // Doesn't have active screener
-      const id = activeWatchlist;
+      const id = activeScanner;
       if (!id) return;
 
       const currentState = params.api.getState() as Json;
-      updateWatchlist({ id, payload: { state: currentState } });
+      updateScanner({ id, payload: { state: currentState } });
     },
-    [activeWatchlist, updateWatchlist],
+    [activeScanner, updateScanner],
   );
 }
 
@@ -103,36 +103,36 @@ function useGridInitialState() {
   return defaultState as GridState;
 }
 
-export function Watchlist(props: WatchlistProps) {
-  const { activeWatchlistId } = useActiveWatchlistId();
-  const watchlist = useActiveWatchlist(activeWatchlistId);
+export function ScannerList(props: ScannerListProps) {
+  const { scannerId, types } = useCurrentScanner();
+  const scanner = useScanner(types, scannerId);
 
   const [openWatchlistSymbol, setOpenWatchlistSymbol] = useState(false);
   const [openWatchlistCreator, setOpenWatchlistCreator] = useState(false);
 
-  const { data: allWatchlist } = useWatchlist();
+  const { data } = useScanners(types);
   return (
     <div {...props} className={cn("h-full", props.className)}>
-      {watchlist && (
+      {scanner && (
         <WatchlistSymbol
           open={openWatchlistSymbol}
           setOpen={setOpenWatchlistSymbol}
-          watchlist={watchlist}
+          watchlist={scanner}
         />
       )}
       <WatchlistCreatorDialog
         open={openWatchlistCreator}
         setOpen={setOpenWatchlistCreator}
       />
-      {(!activeWatchlistId || !allWatchlist || allWatchlist.length === 0) && (
+      {(!scannerId || !data || data.length === 0) && (
         <CreateWatchlist setOpen={setOpenWatchlistCreator} />
       )}
-      {watchlist && <SymbolList watchlist={watchlist as Scanner} />}
+      {scanner && <SymbolList watchlist={scanner as Scanner} />}
     </div>
   );
 }
 
-function useGridBase(watchlist: Scanner) {
+function useGridBase(watchlist: Scanner, types: Scanner["type"][]) {
   const initialState = useGridInitialState();
 
   const getRowId = useCallback<GetRowIdFunc>(
@@ -146,8 +146,8 @@ function useGridBase(watchlist: Scanner) {
     }),
     [],
   );
-  const { data: allWatchlist } = useWatchlist();
-  const { mutate: updateWatchlist } = useUpdateWatchlist((w) => {
+  const { data: allScanners } = useScanners(types);
+  const { mutate: updateWatchlist } = useUpdateScanner((w) => {
     toast(`${w.name} updated`);
   });
 
@@ -160,7 +160,7 @@ function useGridBase(watchlist: Scanner) {
         // Watchlist menu
         {
           name: `Add ${params.node?.data?.name} to Watchlist`,
-          subMenu: allWatchlist?.map((w) => {
+          subMenu: allScanners?.map((w) => {
             const checked = w.symbols?.includes(symbol.ticker!);
             const updatedSymbols = checked
               ? w.symbols.filter((s) => s !== symbol.ticker)
@@ -182,7 +182,7 @@ function useGridBase(watchlist: Scanner) {
         "copy",
       ];
     },
-    [allWatchlist, updateWatchlist],
+    [allScanners, updateWatchlist],
   );
 
   const switcher = useGroupSymbolSwitcher();
@@ -200,7 +200,7 @@ function useGridBase(watchlist: Scanner) {
     [watchlist.symbols, datasource],
   );
 
-  const onStateUpdated = useWatchlistChangeCallback(watchlist.id);
+  const onStateUpdated = useScannerChangeCallback(watchlist.id);
 
   const processClipboardPaste = useCallback(
     (params: ProcessDataFromClipboardParams) => {
@@ -274,6 +274,7 @@ function useGridBase(watchlist: Scanner) {
 }
 
 function SymbolList({ watchlist }: { watchlist: Scanner }) {
+  const { types } = useCurrentScanner();
   const colDefs = useColumnDefs();
   const {
     defaultColDef,
@@ -287,7 +288,7 @@ function SymbolList({ watchlist }: { watchlist: Scanner }) {
     processClipboardPaste,
     onStateUpdated,
     onColumnVisible,
-  } = useGridBase(watchlist);
+  } = useGridBase(watchlist, types);
 
   const ref = useRef<AgGridReact | null>(null);
 
