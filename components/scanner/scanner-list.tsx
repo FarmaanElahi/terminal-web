@@ -141,7 +141,7 @@ export function ScannerList(props: ScannerListProps) {
 }
 
 function useGridBase(scanner?: Scanner) {
-  const { type, types } = useCurrentScanner();
+  const { type } = useCurrentScanner();
   const initialState = useGridInitialState();
 
   const getRowId = useCallback<GetRowIdFunc>(
@@ -155,8 +155,8 @@ function useGridBase(scanner?: Scanner) {
     }),
     [],
   );
-  const { data: allWatchlists } = useScanners(types, "Watchlist");
-  const { mutate: updateScanner } = useUpdateScanner(type, (w) => {
+  const { data: allWatchlists } = useScanners(["simple"], "Watchlist");
+  const { mutate: updateScanner } = useUpdateScanner("Watchlist", (w) => {
     toast(`${w.name} updated`);
   });
 
