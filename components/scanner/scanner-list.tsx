@@ -35,7 +35,7 @@ import { Json } from "@/types/generated/supabase";
 import type { Symbol } from "@/types/symbol";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { WatchlistCreatorDialog } from "./scanner-selector";
+import { CreateScanner } from "./scanner-selector";
 import { WatchlistSymbol } from "@/components/scanner/watchlist-symbol";
 import { cn } from "@/lib/utils";
 import { RowCountStatusBarComponent } from "@/components/grid/row-count";
@@ -114,7 +114,7 @@ export function ScannerList(props: ScannerListProps) {
   const scanner = useScanner(types, type, scannerId);
 
   const [openWatchlistSymbol, setOpenWatchlistSymbol] = useState(false);
-  const [openWatchlistCreator, setOpenWatchlistCreator] = useState(false);
+  const [openScannerCreator, setOpenScannerCreator] = useState(false);
 
   const { data } = useScanners(types, type);
   return (
@@ -126,16 +126,17 @@ export function ScannerList(props: ScannerListProps) {
           watchlist={scanner}
         />
       )}
-      {scanner && type === "Watchlist" && (
-        <WatchlistCreatorDialog
-          open={openWatchlistCreator}
-          setOpen={setOpenWatchlistCreator}
+      {
+        <CreateScanner
+          open={openScannerCreator}
+          setOpen={setOpenScannerCreator}
         />
+      }
+      {((type === "Watchlist" && !scannerId) || !data || data.length === 0) && (
+        <CreateNewWatchlistOnEmpty setOpen={setOpenScannerCreator} />
       )}
-      {type === "Watchlist" && (!scannerId || !data || data.length === 0) && (
-        <CreateWatchlist setOpen={setOpenWatchlistCreator} />
-      )}
-      <SymbolList scanner={scanner} />
+      {type === "Watchlist" && scannerId && <SymbolList scanner={scanner} />}
+      {type === "Screener" && <SymbolList scanner={scanner} />}
     </div>
   );
 }
@@ -354,7 +355,10 @@ interface WatchlistCreateDialogProps extends HTMLAttributes<HTMLDivElement> {
   setOpen: (open: boolean) => void;
 }
 
-function CreateWatchlist({ setOpen, ...props }: WatchlistCreateDialogProps) {
+function CreateNewWatchlistOnEmpty({
+  setOpen,
+  ...props
+}: WatchlistCreateDialogProps) {
   return (
     <div
       {...props}
