@@ -498,14 +498,21 @@ export function useUpdateScanner(
   });
 }
 
-export function useScanners(types: Scanner["type"][], type: string) {
+export function useScanners(types: Scanner["type"][]) {
+  const scannerResult = useAllScanner();
+  return {
+    ...scannerResult,
+    data: scannerResult.data?.filter((f) => types.includes(f.type)),
+  };
+}
+
+export function useAllScanner() {
   return useQuery({
-    queryKey: ["scanner", type],
+    queryKey: ["scanner"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("scanner")
         .select("*")
-        .in("type", types)
         .order("updated_at", { ascending: false });
 
       if (error) throw error;

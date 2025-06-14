@@ -8,7 +8,11 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { useScanners, useUpdateScanner } from "@/lib/state/symbol";
+import {
+  useAllScanner,
+  useScanners,
+  useUpdateScanner,
+} from "@/lib/state/symbol";
 import {
   AgColumn,
   CellFocusedEvent,
@@ -36,7 +40,6 @@ import type { Symbol } from "@/types/symbol";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CreateScanner } from "./scanner-selector";
-import { WatchlistSymbol } from "@/components/scanner/watchlist-symbol";
 import { cn } from "@/lib/utils";
 import { RowCountStatusBarComponent } from "@/components/grid/row-count";
 import { useRealtimeClient } from "@/hooks/use-realtime";
@@ -55,7 +58,7 @@ function useScanner(
   type: string,
   scannerId: string | null,
 ) {
-  const { data: scanners } = useScanners(types, type);
+  const { data: scanners } = useScanners(types);
   return scanners?.find((s) => s.id && s.id === scannerId);
 }
 
@@ -111,21 +114,16 @@ function useGridInitialState() {
 
 export function ScannerList(props: ScannerListProps) {
   const { scannerId, types, type } = useCurrentScanner();
+  const { isLoading } = useScanners(types);
+  const { data: scanners } = useAllScanner();
   const scanner = useScanner(types, type, scannerId);
 
-  const [openWatchlistSymbol, setOpenWatchlistSymbol] = useState(false);
   const [openScannerCreator, setOpenScannerCreator] = useState(false);
+  const { data } = useScanners(types);
+  if (isLoading) return <></>;
 
-  const { data } = useScanners(types, type);
   return (
     <div {...props} className={cn("h-full", props.className)}>
-      {scanner && type === "Watchlist" && (
-        <WatchlistSymbol
-          open={openWatchlistSymbol}
-          setOpen={setOpenWatchlistSymbol}
-          watchlist={scanner}
-        />
-      )}
       {
         <CreateScanner
           open={openScannerCreator}
@@ -135,13 +133,17 @@ export function ScannerList(props: ScannerListProps) {
       {((type === "Watchlist" && !scannerId) || !data || data.length === 0) && (
         <CreateNewWatchlistOnEmpty setOpen={setOpenScannerCreator} />
       )}
-      {type === "Watchlist" && scannerId && <SymbolList scanner={scanner} />}
-      {type === "Screener" && <SymbolList scanner={scanner} />}
+      {type === "Watchlist" && scannerId && (
+        <SymbolList scanner={scanner} scanners={scanners ?? []} />
+      )}
+      {type === "Screener" && (
+        <SymbolList scanner={scanner} scanners={scanners ?? []} />
+      )}
     </div>
   );
 }
 
-function useGridBase(scanner?: Scanner) {
+function useGridBase(scanner?: Scanner, scanners?: Scanner[]) {
   const { type } = useCurrentScanner();
   const initialState = useGridInitialState();
 
@@ -156,7 +158,7 @@ function useGridBase(scanner?: Scanner) {
     }),
     [],
   );
-  const { data: allWatchlists } = useScanners(["simple"], "Watchlist");
+  const { data: allWatchlists } = useScanners(["simple"]);
   const { mutate: updateScanner } = useUpdateScanner("Watchlist", (w) => {
     toast(`${w.name} updated`);
   });
@@ -204,13 +206,9 @@ function useGridBase(scanner?: Scanner) {
   const onGridReady = useCallback(
     (p: GridReadyEvent) => {
       ref.current = p.api;
-      const symbols = scanner?.symbols;
-      datasource.onReady(
-        p.api,
-        type === "Watchlist" ? (symbols ?? []) : undefined,
-      );
+      datasource.onReady(p.api, scanner, scanners);
     },
-    [scanner?.symbols, datasource, type],
+    [scanner, scanners, datasource],
   );
 
   const onStateUpdated = useScannerChangeCallback(type, scanner?.id);
@@ -304,7 +302,13 @@ function useGridBase(scanner?: Scanner) {
   };
 }
 
-function SymbolList({ scanner }: { scanner?: Scanner }) {
+function SymbolList({
+  scanner,
+  scanners,
+}: {
+  scanner?: Scanner;
+  scanners: Scanner[];
+}) {
   const colDefs = useColumnDefs();
   const {
     defaultColDef,
@@ -318,7 +322,7 @@ function SymbolList({ scanner }: { scanner?: Scanner }) {
     processClipboardPaste,
     onStateUpdated,
     onColumnVisible,
-  } = useGridBase(scanner);
+  } = useGridBase(scanner, scanners);
 
   return (
     <AgGridReact

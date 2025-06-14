@@ -2,6 +2,7 @@ import {
   type AdvancedFilterModel,
   ColumnAdvancedFilterModel,
   GridApi,
+  GridState,
   IServerSideDatasource,
   IServerSideGetRowsParams,
   IServerSideGetRowsRequest,
@@ -9,6 +10,7 @@ import {
 } from "ag-grid-community";
 import { runRawSymbolCount, runRawSymbolQuery } from "@/utils/duckdb";
 import { EventTypeMap, RealtimeConnection } from "@/utils/realtime-client";
+import { Scanner } from "@/types/supabase";
 
 export function buildDataSource(allowedTickers?: () => string[]) {
   const mandatoryColumn = ["ticker", "logo", "earnings_release_date"];
@@ -159,6 +161,11 @@ export function buildDataSource(allowedTickers?: () => string[]) {
 export class RealtimeDatasource implements IServerSideDatasource {
   private mandatoryColumns = ["ticker", "logo", "earnings_release_date"];
   private api?: GridApi;
+  private scanner?: Scanner;
+  private scanners?: Scanner[];
+  private universe?: string[];
+  private comboFilter?: AdvancedFilterModel;
+  private filterMerge?: "OR" | "AND";
 
   constructor(
     private readonly realtimeClient: RealtimeConnection,
@@ -169,14 +176,55 @@ export class RealtimeDatasource implements IServerSideDatasource {
     ].join("_"),
   ) {}
 
-  onReady(api: GridApi, universe?: string[]) {
+  onReady(api: GridApi, scanner?: Scanner, scanners?: Scanner[]) {
     this.api = api;
+    this.scanner = scanner;
+    this.scanners = scanners;
+    this.resetScannerSetting();
     this.realtimeClient.sendMessage({
       t: "SCREENER_SUBSCRIBE",
       session_id: this.sessionId,
-      universe,
+      universe: this.universe,
+      filters: this.comboFilter ? [this.comboFilter] : [],
+      filter_merge: this.filterMerge,
     });
     this.realtimeClient.on("SCREENER_PARTIAL_RESPONSE", this.onPartialUpdate);
+  }
+
+  resetScannerSetting() {
+    this.filterMerge = "AND";
+    const scanner = this.scanner;
+
+    if (this.scanner?.type === "simple") {
+      this.universe = scanner?.symbols ?? [];
+      this.filterMerge = "AND";
+    }
+
+    if (scanner?.type === "combo") {
+      this.filterMerge = "OR";
+      const comboSymbols =
+        scanner.combo_lists
+          ?.map((l) =>
+            this.scanners?.find((s) => s.id === l && s.type === "simple"),
+          )
+          .flatMap((s) => s?.symbols ?? []) ?? [];
+      this.universe =
+        comboSymbols.length !== 0 ? [...new Set([...comboSymbols])] : undefined;
+
+      const comboFilter =
+        scanner.combo_lists
+          ?.map((l) => this.scanners?.find((s) => s.id === l))
+          .map((s) => (s?.state as GridState)?.filter?.advancedFilterModel)
+          .filter((s) => s)
+          .map((s) => s!) ?? [];
+      if (comboFilter.length > 0) {
+        this.comboFilter = {
+          filterType: "join",
+          conditions: comboFilter,
+          type: "OR",
+        };
+      }
+    }
   }
 
   destroy(): void {
@@ -186,15 +234,6 @@ export class RealtimeDatasource implements IServerSideDatasource {
     });
     this.realtimeClient.off("SCREENER_PARTIAL_RESPONSE", this.onPartialUpdate);
     delete this.api;
-  }
-
-  setUniverse(universe: string[]) {
-    this.realtimeClient.sendMessage({
-      t: "SCREENER_SET_UNIVERSE",
-      session_id: this.sessionId,
-      universe,
-    });
-    this.api?.refreshServerSide({ purge: true });
   }
 
   async getRows(params: IServerSideGetRowsParams) {
@@ -216,7 +255,12 @@ export class RealtimeDatasource implements IServerSideDatasource {
         session_id: this.sessionId,
         columns: visibleCols,
         sort: params.request.sortModel,
-        filters: params.request.filterModel ? [params.request.filterModel] : [],
+        filter_merge: this.filterMerge,
+        filters: this.comboFilter
+          ? [this.comboFilter]
+          : params.request.filterModel
+            ? [params.request.filterModel]
+            : [],
         range: [params.request.startRow ?? 0, params.request.endRow ?? 0],
       });
 

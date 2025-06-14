@@ -9,12 +9,15 @@ interface ScreenerSubscribeRequest {
   t: "SCREENER_SUBSCRIBE";
   session_id: string;
   universe?: string[];
+  filters?: Array<unknown>;
+  filter_merge?: "AND" | "OR";
 }
 
 interface ScreenerPatchRequest {
   t: "SCREENER_PATCH";
   session_id: string;
   filters?: Array<unknown>;
+  filter_merge?: "AND" | "OR";
   sort?: Array<unknown>;
   columns?: string[];
   range?: [number, number];
@@ -95,9 +98,7 @@ export class RealtimeConnection {
   private readonly maxReconnectAttempts: number = 5;
   private readonly reconnectDelay: number = 1000;
 
-  constructor(private readonly url: string) {
-
-  }
+  constructor(private readonly url: string) {}
 
   connect() {
     if (

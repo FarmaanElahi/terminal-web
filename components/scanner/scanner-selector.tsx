@@ -63,7 +63,7 @@ import { useCurrentScanner } from "@/hooks/use-active-scanner";
 
 export function ScannerSelector() {
   const { scannerId, setScannerId, types, type } = useCurrentScanner();
-  const { data: scanners = [] } = useScanners(types, type);
+  const { data: scanners = [] } = useScanners(types);
   const [open, setOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [openSymbolDialog, setOpenSymbolDialog] = useState(false);
@@ -200,7 +200,7 @@ export function CreateScanner({
   default?: { name: string; state: Json; symbols: string[] };
 }) {
   const { types, setScannerId, type } = useCurrentScanner();
-  const { data: watchlists = [] } = useScanners(types, type);
+  const { data: watchlists = [] } = useScanners(types);
 
   const [listType, setListType] = useState<"simple" | "combo">("simple");
   const [selectedWatchlists, setSelectedWatchlists] = useState<string[]>([]);
