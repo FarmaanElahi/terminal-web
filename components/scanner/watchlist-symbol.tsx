@@ -11,7 +11,6 @@ import Image from "next/image";
 import { Scanner } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash } from "lucide-react";
-import { useCurrentScanner } from "@/hooks/use-active-scanner";
 
 export function WatchlistSymbol({
   watchlist,
@@ -22,7 +21,6 @@ export function WatchlistSymbol({
   setOpen: (v: boolean) => void;
   watchlist: Scanner;
 }) {
-  const { type } = useCurrentScanner();
   const [q, setQ] = React.useState("");
   const commandInputRef = useRef<HTMLInputElement>(null);
   const { data, isLoading } = useSymbolSearch(q);
@@ -31,7 +29,7 @@ export function WatchlistSymbol({
     [watchlist.symbols],
   );
 
-  const { mutate: updateWatchlist } = useUpdateScanner(type);
+  const { mutate: updateWatchlist } = useUpdateScanner();
 
   const items = data?.map((s) => (
     <CommandItem key={s.name} value={s.ticker!} className="m-2">

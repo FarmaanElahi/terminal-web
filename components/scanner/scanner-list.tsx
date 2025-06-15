@@ -63,7 +63,7 @@ function useScanner(
 }
 
 function useScannerChangeCallback(type: string, activeScanner?: string | null) {
-  const mutation = useUpdateScanner(type, (watchlist) =>
+  const mutation = useUpdateScanner((watchlist) =>
     toast(`${watchlist.name} updated`),
   );
 
@@ -159,7 +159,7 @@ function useGridBase(scanner?: Scanner, scanners?: Scanner[]) {
     [],
   );
   const { data: allWatchlists } = useScanners(["simple"]);
-  const { mutate: updateScanner } = useUpdateScanner("Watchlist", (w) => {
+  const { mutate: updateScanner } = useUpdateScanner((w) => {
     toast(`${w.name} updated`);
   });
 

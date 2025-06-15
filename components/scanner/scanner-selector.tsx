@@ -206,7 +206,6 @@ export function CreateScanner({
     useSymbolSearch(symbolInput);
 
   const { mutate: create, isPending: isCreatePending } = useCreateScanner(
-    type,
     (scanner) => {
       setOpen(false);
       toast(`${scanner.name} created!`);
@@ -215,7 +214,6 @@ export function CreateScanner({
   );
 
   const { mutate: update, isPending: isUpdatedPending } = useUpdateScanner(
-    type,
     (scanner) => {
       setOpen(false);
       toast(`${scanner.name} updated!`);
@@ -585,7 +583,7 @@ function DeleteScanner({
   children: ReactNode;
 }) {
   const { type } = useCurrentScanner();
-  const { mutate: deleteScanner } = useDeleteScanner(type, () =>
+  const { mutate: deleteScanner } = useDeleteScanner(() =>
     toast(`Deleted ${scanner.name}`),
   );
 

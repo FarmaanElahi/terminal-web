@@ -419,14 +419,11 @@ export function useScreens() {
 //##################### WATCHLIST #####################
 
 //##################### SCREENS #####################
-export function useCreateScanner(
-  type: string,
-  onComplete?: (scanner: Scanner) => void,
-) {
+export function useCreateScanner(onComplete?: (scanner: Scanner) => void) {
   const client = useQueryClient();
   return useMutation({
     onSuccess: (list: Scanner) => {
-      void client.invalidateQueries({ queryKey: ["scanner", type] });
+      void client.invalidateQueries({ queryKey: ["scanner"] });
       onComplete?.(list);
     },
     mutationFn: async (scanner: InsertScanner) => {
@@ -445,11 +442,11 @@ export function useCreateScanner(
   });
 }
 
-export function useDeleteScanner(type: string, onComplete?: () => void) {
+export function useDeleteScanner(onComplete?: () => void) {
   const client = useQueryClient();
   return useMutation({
     onSuccess: () => {
-      void client.invalidateQueries({ queryKey: ["scanner", type] });
+      void client.invalidateQueries({ queryKey: ["scanner"] });
       onComplete?.();
     },
     mutationFn: async (id: string) => {
@@ -465,14 +462,11 @@ export function useDeleteScanner(type: string, onComplete?: () => void) {
   });
 }
 
-export function useUpdateScanner(
-  type: string,
-  onComplete?: (scanner: Scanner) => void,
-) {
+export function useUpdateScanner(onComplete?: (scanner: Scanner) => void) {
   const client = useQueryClient();
   return useMutation({
     onSuccess: async (scanner: Scanner) => {
-      await client.invalidateQueries({ queryKey: ["scanner", type] });
+      await client.invalidateQueries({ queryKey: ["scanner"] });
       onComplete?.(scanner);
     },
     mutationFn: async ({
