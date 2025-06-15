@@ -36,14 +36,16 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
+  useAllScanner,
   useCreateScanner,
   useDeleteScanner,
   useScanners,
   useScreens,
   useSymbolSearch,
+  useUpdateScanner,
 } from "@/lib/state/symbol";
 import { toast } from "sonner";
-import { Json, Scanner, Watchlist } from "@/types/supabase";
+import { Scanner } from "@/types/supabase";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,7 +57,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { WatchlistSymbol } from "@/components/scanner/watchlist-symbol";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -66,10 +67,9 @@ export function ScannerSelector() {
   const { data: scanners = [] } = useScanners(types);
   const [open, setOpen] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [openSymbolDialog, setOpenSymbolDialog] = useState(false);
-  const [newWatchlistDefault, setNewWatchlistDefault] =
-    useState<Pick<Watchlist, "name" | "state" | "symbols">>();
+  const [newScanner, setNewScanner] = useState<Scanner>();
   const activeScanner = scanners?.find((s) => s.id === scannerId);
+  const [editMode, setEditMode] = useState<"clone" | "update">();
 
   return (
     <div className="flex gap-1">
@@ -121,7 +121,9 @@ export function ScannerSelector() {
                       onClick={(e) => {
                         e.stopPropagation();
                         setScannerId(scanner.id);
-                        setOpenSymbolDialog(true);
+                        setEditMode("update");
+                        setNewScanner(scanner);
+                        setOpenDialog(true);
                       }}
                     >
                       <Edit size="3" />
@@ -132,11 +134,8 @@ export function ScannerSelector() {
                       size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setNewWatchlistDefault({
-                          name: `${scanner.name} (Copy)`,
-                          state: scanner.state,
-                          symbols: scanner.symbols,
-                        });
+                        setNewScanner(scanner);
+                        setEditMode("clone");
                         setOpenDialog(true);
                       }}
                     >
@@ -164,7 +163,7 @@ export function ScannerSelector() {
         variant="outline"
         size="sm"
         onClick={() => {
-          setNewWatchlistDefault(undefined);
+          setNewScanner(undefined);
           setOpenDialog(true);
         }}
       >
@@ -175,17 +174,10 @@ export function ScannerSelector() {
         <CreateScanner
           open={openDialog}
           setOpen={setOpenDialog}
-          default={newWatchlistDefault}
+          default={newScanner}
+          newMode={editMode}
         />
       }
-
-      {type === "Watchlist" && activeScanner && (
-        <WatchlistSymbol
-          open={openSymbolDialog}
-          setOpen={setOpenSymbolDialog}
-          watchlist={activeScanner}
-        />
-      )}
     </div>
   );
 }
@@ -194,15 +186,18 @@ export function CreateScanner({
   open,
   setOpen,
   default: defaultState,
+  newMode,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
-  default?: { name: string; state: Json; symbols: string[] };
+  default?: Scanner;
+  newMode?: "clone" | "update";
 }) {
   const { types, setScannerId, type } = useCurrentScanner();
+  const { data: all } = useAllScanner();
   const { data: watchlists = [] } = useScanners(types);
 
-  const [listType, setListType] = useState<"simple" | "combo">("simple");
+  const [listType, setListType] = useState<Scanner["type"]>("simple");
   const [selectedWatchlists, setSelectedWatchlists] = useState<string[]>([]);
   const [selectedScreeners, setSelectedScreeners] = useState<string[]>([]);
   const [symbolInput, setSymbolInput] = useState("");
@@ -210,28 +205,76 @@ export function CreateScanner({
   const { data: symbolResults = [], isLoading: isSearching } =
     useSymbolSearch(symbolInput);
 
-  const { mutate: create, isPending } = useCreateScanner(type, (scanner) => {
-    setOpen(false);
-    toast(`${scanner.name} created!`);
-    setScannerId(scanner.id);
-  });
+  const { mutate: create, isPending: isCreatePending } = useCreateScanner(
+    type,
+    (scanner) => {
+      setOpen(false);
+      toast(`${scanner.name} created!`);
+      setScannerId(scanner.id);
+    },
+  );
+
+  const { mutate: update, isPending: isUpdatedPending } = useUpdateScanner(
+    type,
+    (scanner) => {
+      setOpen(false);
+      toast(`${scanner.name} updated!`);
+      setScannerId(scanner.id);
+    },
+  );
 
   const [scannerName, setNewScannerName] = useState<string>("");
 
   useEffect(() => {
     if (open) {
+      const watchlist =
+        all
+          ?.filter(
+            (a) =>
+              a.type === "simple" && defaultState?.combo_lists?.includes(a.id),
+          )
+          .map((s) => s.id) ?? [];
+
+      const screener =
+        all
+          ?.filter(
+            (a) =>
+              a.type === "screener" &&
+              defaultState?.combo_lists?.includes(a.id),
+          )
+          .map((s) => s.id) ?? [];
       setNewScannerName(defaultState?.name || "");
-      setListType("simple");
-      setSelectedWatchlists([]);
-      setSelectedScreeners([]);
+      setListType(defaultState?.type ?? "simple");
+      setSelectedWatchlists(watchlist);
+      setSelectedScreeners(screener);
       setSelectedSymbols(defaultState?.symbols || []);
       setSymbolInput("");
     }
-  }, [defaultState, open]);
+  }, [defaultState, open, all]);
 
   const { data: screeners = [] } = useScreens();
 
-  const handleCreateWatchlist = () => {
+  const handleSubmit = () => {
+    if (defaultState?.id && newMode === "update") {
+      return handleUpdate();
+    }
+    handleCreate();
+  };
+  const handleUpdate = () => {
+    if (defaultState?.id) {
+      update({
+        id: defaultState.id,
+        payload: {
+          type: listType,
+          name: scannerName,
+          state: defaultState?.state,
+          combo_lists: [...selectedWatchlists, ...selectedScreeners],
+          symbols: selectedSymbols,
+        },
+      });
+    }
+  };
+  const handleCreate = () => {
     if (type === "Screener") {
       create({
         type: "screener",
@@ -310,6 +353,7 @@ export function CreateScanner({
     scannerName,
   ]);
 
+  const isPending = defaultState ? isUpdatedPending : isCreatePending;
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="sm:max-w-[500px]">
@@ -519,9 +563,13 @@ export function CreateScanner({
         </div>
 
         <DialogFooter>
-          <Button disabled={disabled} onClick={handleCreateWatchlist}>
+          <Button disabled={disabled} onClick={handleSubmit}>
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {defaultState?.name ? "Clone" : "Create"}
+            {defaultState?.name && newMode === "update"
+              ? "Update"
+              : defaultState?.name && newMode === "clone"
+                ? "Clone"
+                : "Create"}
           </Button>
         </DialogFooter>
       </DialogContent>
