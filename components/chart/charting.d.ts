@@ -257,16 +257,24 @@ declare namespace TradingView {
 
   interface IWatchListApi {
     createList: (listName: string, symbolList: string[]) => void;
+    deleteList: (listId: string) => void;
     saveList: (option: {
       id: string;
       symbols: string[];
       title: string;
     }) => void;
-    onListAdded: () => ISubscription<{ listId: string; symbols: string[] }>;
 
-    onListChanged: () => ISubscription<{ listId: string }>;
+    getAllLists: () => Record<
+      string,
+      { listId: string; symbols: string[]; title: string }
+    >;
+    onListAdded: () => ISubscription<[string, string[]]>;
 
-    onListRemoved: () => ISubscription<{ listId: string }>;
+    onListChanged: () => ISubscription<string>;
+
+    onListRemoved: () => ISubscription<string>;
+
+    onListRenamed: () => ISubscription<string>;
   }
 
   class widget {

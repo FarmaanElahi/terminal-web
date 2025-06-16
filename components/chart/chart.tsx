@@ -22,12 +22,16 @@ import { ChartManager } from "./chart_manager";
 import {
   chartLayout,
   useAlerts,
+  useCreateScanner,
   useDeleteAlert,
+  useDeleteScanner,
   useScanners,
   useUpdateAlert,
+  useUpdateScanner,
 } from "@/lib/state/symbol";
 import { Alert } from "@/types/supabase";
 import { toast } from "sonner";
+import IWatchListApi = TradingView.IWatchListApi;
 
 interface ChartProps extends HTMLAttributes<HTMLDivElement> {
   layoutId?: string;
@@ -125,30 +129,95 @@ function useTVChart({
 }: TVChartOptions) {
   const widgetRef = useRef<TradingView.widget | null>(null);
   const [widget, setWidget] = useState<TradingView.widget | null>(null);
+  const [watchlistAPI, setWatchlistAPI] = useState<IWatchListApi | null>(null);
   const chartManager = useChartManager();
   const { setSymbol, changeTheme, onReady } = useTVInit(widget);
   const { data } = useScanners(["simple"]);
+  const { mutate: updateWatchlist } = useUpdateScanner();
+  const { mutate: createWatchlist } = useCreateScanner();
+  const { mutate: deleteWatchlist } = useDeleteScanner();
   const watchlistInit = useRef(false);
 
+  // Update the watchlist from external changes
   useEffect(() => {
-    const process = async () => {
-      if (!widget || !features?.enableWatchlist || !data) {
-        return;
-      }
-      watchlistInit.current = true;
-      const watchlistAPI = await widget.watchList();
-      data?.forEach((value) => {
-        watchlistAPI.saveList({
-          id: value.id,
-          symbols: value.symbols,
-          title: value.name,
+    console.log("EFF 1");
+    if (!watchlistAPI || !data || watchlistInit.current) return;
+    watchlistInit.current = true;
+
+    // Update the current list either updated externally or within the chart
+    data.forEach((value) => {
+      watchlistAPI.saveList({
+        id: value.id,
+        symbols: value.symbols,
+        title: value.name,
+      });
+    });
+
+    // Update the list and remove item externally.
+    const localListId = Object.values(watchlistAPI.getAllLists()).map(
+      (l) => l.listId,
+    );
+    const remoteListId = data.map((d) => d.id);
+    const removed = new Set(localListId).difference(new Set(remoteListId));
+    removed.forEach((l) => watchlistAPI.deleteList(l));
+  }, [watchlistAPI, data]);
+
+  useEffect(() => {
+    console.log("EFF 2");
+    if (!watchlistAPI) return;
+
+    // List changed
+    const listChanged = watchlistAPI.onListChanged();
+    const listChangedCb = (id: string) => {
+      const localList = watchlistAPI.getAllLists()[id];
+      updateWatchlist({
+        id,
+        payload: { symbols: localList.symbols },
+      });
+    };
+    listChanged.subscribe(null, listChangedCb);
+
+    // List Created
+    const listAdded = watchlistAPI.onListAdded();
+    const listAddedCb = (id: string) => {
+      setTimeout(() => {
+        const local = watchlistAPI.getAllLists()[id];
+        createWatchlist({
+          id,
+          type: "simple",
+          name: local.title,
+          symbols: local.symbols,
         });
       });
     };
-    void process();
-    return () => {};
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [widget, data]);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    listAdded.subscribe(null, listAddedCb);
+
+    // List Removed
+    const listRemoved = watchlistAPI.onListRemoved();
+    const listRemovedCb = (id: string) => deleteWatchlist(id);
+    listRemoved.subscribe(null, listRemovedCb);
+
+    // List Renamed
+    const listRenamed = watchlistAPI.onListRenamed();
+    const listRenamedCb = (id: string, old: string, name: string) =>
+      updateWatchlist({ id, payload: { name } });
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    listRenamed.subscribe(null, listRenamedCb);
+
+    return () => {
+      listChanged.unsubscribe(null, listChangedCb);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      listAdded.unsubscribe(null, listAddedCb);
+      listRemoved.unsubscribe(null, listRemovedCb);
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      listRenamed.unsubscribe(null, listRenamedCb);
+    };
+  }, [watchlistAPI, updateWatchlist, createWatchlist, deleteWatchlist]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -208,8 +277,9 @@ function useTVChart({
 
     async function create() {
       widget = await (layoutId ? withLayout(layoutId as string) : withSymbol());
-      widget.onChartReady(() => {
+      widget.onChartReady(async () => {
         widgetRef.current = widget;
+        setWatchlistAPI(await widget!.watchList());
         onReady(widget!, onLayoutChange);
         setWidget(widget);
         console.log("Set widget ready");
@@ -450,7 +520,7 @@ function useTVAlertOnChart(
   widget: TradingView.widget | null,
   showAlert: (a: Alert) => void,
 ) {
-  const activeOrderLines = useRef<IOrderLine[]>([]);
+  const activeOrderLines = useRef<Record<string, IOrderLine>>({});
   const { data: alerts } = useAlerts();
   const { mutate: updateAlert } = useUpdateAlert(() => toast("Alert Updated"));
   const { mutate: deleteAlert } = useDeleteAlert(() => toast("Alert deleted"));
@@ -498,13 +568,28 @@ function useTVAlertOnChart(
       // Add the new oder line
       const chart = widget.chart(index);
       chart.dataReady(async () => {
+        if (activeOrderLines.current[alert.id]) {
+          activeOrderLines.current[alert.id].remove();
+        }
+
         const orderline = await chart.createOrderLine();
         orderline
           .setText(alert.notes ?? `Alert: ${price}`)
           .setPrice(price)
+          .setLineColor("#F2C55C")
+          .setBodyBackgroundColor("#F2C55C")
+          .setBodyBorderColor("#494949")
+          .setBodyTextColor("#494949")
+          .setQuantityBackgroundColor("#F2C55C")
+          .setQuantityTextColor("#494949")
+          .setCancelButtonBackgroundColor("#F2C55C")
+          .setCancelButtonBorderColor("#494949")
+          .setCancelButtonIconColor("#494949")
+          .setCancelButtonBorderColor("#494949")
+          .setQuantityBorderColor("#494949")
           .setLineStyle(2)
           .setExtendLeft(true)
-          .setCancelTooltip("Remove Alert")
+          .setCancelTooltip("Cancel Alert")
           .onCancel(() => deleteAlert(alert.id))
           .onModify(() => showAlert(alert))
           .onMove(() => {
@@ -515,13 +600,13 @@ function useTVAlertOnChart(
               },
             });
           });
-        activeOrderLines.current.push(orderline);
+        activeOrderLines.current[alert.id] = orderline;
       });
     }
 
     // Reset the order
-    activeOrderLines.current.forEach((o) => o.remove());
-    activeOrderLines.current = [];
+    Object.values(activeOrderLines.current).forEach((o) => o.remove());
+    activeOrderLines.current = {};
 
     activeSymbols.forEach((value, index) => {
       alerts
