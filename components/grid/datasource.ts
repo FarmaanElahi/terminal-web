@@ -196,7 +196,8 @@ export class RealtimeDatasource implements IServerSideDatasource {
     const scanner = this.scanner;
 
     if (this.scanner?.type === "simple") {
-      this.universe = scanner?.symbols ?? [];
+      this.universe =
+        scanner?.symbols?.filter((v) => !v.startsWith("###")) ?? [];
       this.filterMerge = "AND";
     }
 
@@ -207,7 +208,8 @@ export class RealtimeDatasource implements IServerSideDatasource {
           ?.map((l) =>
             this.scanners?.find((s) => s.id === l && s.type === "simple"),
           )
-          .flatMap((s) => s?.symbols ?? []) ?? [];
+          .flatMap((s) => s?.symbols ?? [])
+          .filter((value) => !value.startsWith("###")) ?? [];
       this.universe =
         comboSymbols.length !== 0 ? [...new Set([...comboSymbols])] : undefined;
 

@@ -23,6 +23,7 @@ import {
   chartLayout,
   useAlerts,
   useDeleteAlert,
+  useScanners,
   useUpdateAlert,
 } from "@/lib/state/symbol";
 import { Alert } from "@/types/supabase";
@@ -31,6 +32,18 @@ import { toast } from "sonner";
 interface ChartProps extends HTMLAttributes<HTMLDivElement> {
   layoutId?: string;
   onLayoutChange?: (id: string) => void;
+}
+
+interface TVChartOptions {
+  containerRef: RefObject<HTMLDivElement>;
+  symbol: string;
+  theme: "light" | "dark";
+  showAlertBuilder?: (p: AlertParams) => void;
+  layoutId?: string;
+  onLayoutChange?: (layout: string) => void;
+  features?: {
+    enableWatchlist?: boolean;
+  };
 }
 
 export function Chart({ layoutId, onLayoutChange, ...props }: ChartProps) {
@@ -108,18 +121,34 @@ function useTVChart({
   showAlertBuilder,
   layoutId,
   onLayoutChange,
-}: {
-  containerRef: RefObject<HTMLDivElement>;
-  symbol: string;
-  theme: "light" | "dark";
-  showAlertBuilder?: (p: AlertParams) => void;
-  layoutId?: string;
-  onLayoutChange?: (layout: string) => void;
-}) {
+  features = { enableWatchlist: true },
+}: TVChartOptions) {
   const widgetRef = useRef<TradingView.widget | null>(null);
   const [widget, setWidget] = useState<TradingView.widget | null>(null);
   const chartManager = useChartManager();
   const { setSymbol, changeTheme, onReady } = useTVInit(widget);
+  const { data } = useScanners(["simple"]);
+  const watchlistInit = useRef(false);
+
+  useEffect(() => {
+    const process = async () => {
+      if (!widget || !features?.enableWatchlist || !data) {
+        return;
+      }
+      watchlistInit.current = true;
+      const watchlistAPI = await widget.watchList();
+      data?.forEach((value) => {
+        watchlistAPI.saveList({
+          id: value.id,
+          symbols: value.symbols,
+          title: value.name,
+        });
+      });
+    };
+    void process();
+    return () => {};
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [widget, data]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -128,7 +157,9 @@ function useTVChart({
     const config = getTVChartConfig({
       container: containerRef.current,
       chartManager,
+      features,
     });
+
     let widget: TradingView.widget | null = null;
 
     async function withLayout(layoutId: string) {
@@ -338,11 +369,13 @@ function createContextMenuProcessor(
 function getTVChartConfig({
   container,
   chartManager,
+  features,
 }: {
   container: HTMLElement;
   chartManager: ChartManager;
+  features: TVChartOptions["features"];
 }) {
-  return {
+  const option = {
     container: container,
     datafeed: chartManager.datafeed,
     autosize: true,
@@ -388,7 +421,7 @@ function getTVChartConfig({
     enabled_features: [
       "custom_resolutions",
       "show_dom_first_time",
-      "hide_right_toolbar",
+      features?.enableWatchlist ? undefined : "hide_right_toolbar",
       "hide_left_toolbar_by_default",
       "border_around_the_chart",
       "create_volume_indicator_by_default",
@@ -403,8 +436,14 @@ function getTVChartConfig({
       "pre_post_market_sessions",
       "studies_extend_time_scale",
       "hide_image_invalid_symbol",
-    ],
-  } satisfies TradingViewWidgetOptions;
+    ].filter((f) => f),
+  } as TradingViewWidgetOptions;
+
+  if (features?.enableWatchlist) {
+    option.widgetbar = { watchlist: true };
+  }
+
+  return option;
 }
 
 function useTVAlertOnChart(

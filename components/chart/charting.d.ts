@@ -255,6 +255,20 @@ declare namespace TradingView {
     text: string;
   }
 
+  interface IWatchListApi {
+    createList: (listName: string, symbolList: string[]) => void;
+    saveList: (option: {
+      id: string;
+      symbols: string[];
+      title: string;
+    }) => void;
+    onListAdded: () => ISubscription<{ listId: string; symbols: string[] }>;
+
+    onListChanged: () => ISubscription<{ listId: string }>;
+
+    onListRemoved: () => ISubscription<{ listId: string }>;
+  }
+
   class widget {
     constructor(options: TradingViewWidgetOptions);
 
@@ -281,7 +295,7 @@ declare namespace TradingView {
     createButton: () => HTMLButtonElement;
     takeClientScreenshot: () => void;
     widgetbar: () => Promise<WidgetbarOptions>;
-    watchList: () => unknown;
+    watchList: () => Promise<IWatchListApi>;
     getActiveListId: () => unknown;
     getList: (listId: string) => unknown;
     news: () => Promise<void>;
