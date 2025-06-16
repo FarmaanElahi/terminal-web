@@ -10,7 +10,11 @@ import React, {
 import { useChartManager } from "@/lib/state/charts";
 import { useGroupSymbol } from "@/lib/state/grouper";
 import { useTheme } from "next-themes";
-import { IOrderLine, TradingView } from "@/components/chart/charting";
+import {
+  CrossHairMovedEventParams,
+  IOrderLine,
+  TradingView,
+} from "@/components/chart/charting";
 import {
   ContextMenuItemsProcessor,
   TradingViewWidgetOptions,
@@ -131,7 +135,8 @@ function useTVChart({
   const [widget, setWidget] = useState<TradingView.widget | null>(null);
   const [watchlistAPI, setWatchlistAPI] = useState<IWatchListApi | null>(null);
   const chartManager = useChartManager();
-  const { setSymbol, changeTheme, onReady } = useTVInit(widget);
+  const { setSymbol, changeTheme, onReady, onDestroy, crosshairRef } =
+    useTVInit(widget);
   const { data } = useScanners(["simple"]);
   const { mutate: updateWatchlist } = useUpdateScanner();
   const { mutate: createWatchlist } = useCreateScanner();
@@ -254,6 +259,7 @@ function useTVChart({
         context_menu: {
           items_processor: createContextMenuProcessor(
             widgetRef,
+            crosshairRef,
             showAlertBuilder,
           ),
         },
@@ -269,6 +275,7 @@ function useTVChart({
         context_menu: {
           items_processor: createContextMenuProcessor(
             widgetRef,
+            crosshairRef,
             showAlertBuilder,
           ),
         },
@@ -284,6 +291,7 @@ function useTVChart({
         setWidget(widget);
         console.log("Set widget ready");
       });
+      widget.onDestroy(() => onDestroy(widget!));
     }
 
     void create();
@@ -306,6 +314,12 @@ function useTVChart({
 }
 
 function useTVInit(widget: TradingView.widget | null) {
+  const crosshairRef = useRef<CrossHairMovedEventParams>(undefined);
+  const onCrossHairdMoved = useCallback(
+    (ev: CrossHairMovedEventParams) => (crosshairRef.current = ev),
+    [],
+  );
+
   const setSymbol = useCallback(
     (newSymbol: string) => {
       if (!widget) return;
@@ -337,37 +351,29 @@ function useTVInit(widget: TradingView.widget | null) {
           onLayoutChange((e as { id: string }).id),
         );
       }
+      widget.activeChart().crossHairMoved().subscribe(null, onCrossHairdMoved);
     },
-    [],
+    [onCrossHairdMoved],
   );
 
-  return { onReady, changeTheme, setSymbol };
+  const onDestroy = useCallback(
+    (widget: TradingView.widget) => {
+      widget
+        .activeChart()
+        .crossHairMoved()
+        .unsubscribe(null, onCrossHairdMoved);
+    },
+    [onCrossHairdMoved],
+  );
+
+  return { onReady, changeTheme, setSymbol, crosshairRef, onDestroy };
 }
 
 function createContextMenuProcessor(
   widgetReadyRef: RefObject<TradingView.widget | null>,
+  crosshairRef: RefObject<CrossHairMovedEventParams | undefined>,
   showAlertBuilder?: (al: AlertParams) => void,
 ) {
-  // const crossHairRef = useRef<CrossHairMovedEventParams | undefined>(undefined);
-  // const crossHairSubRef = useRef<
-  //   ISubscription<CrossHairMovedEventParams> | undefined
-  // >(undefined);
-
-  // const widget = widgetReadyRef.current;
-
-  // useEffect(() => {
-  //   if (!widget) return;
-  //
-  //   const crossHairSub = widget.activeChart().crossHairMoved();
-  //   const cb = (v: CrossHairMovedEventParams) => (crossHairRef.current = v);
-  //   crossHairSub.subscribe("crosshair", cb);
-  //   crossHairSubRef.current = crossHairSub;
-  //
-  //   return () => {
-  //     crossHairSub.unsubscribe("crosshair", cb);
-  //   };
-  // }, [widget]);
-
   const processor: ContextMenuItemsProcessor = async (
     items,
     actionsFactory,
@@ -416,7 +422,10 @@ function createContextMenuProcessor(
 
     // Called for chart context menu
     if (widgetReadyRef.current) {
-      const price = 1000;
+      const price = crosshairRef.current
+        ? +crosshairRef.current.price.toFixed(2)
+        : 1000;
+
       const symbol = widgetReadyRef.current.activeChart().symbol();
       const newItem = actionsFactory.createAction({
         actionId: "Terminal.AddAlert",

@@ -281,6 +281,7 @@ declare namespace TradingView {
     constructor(options: TradingViewWidgetOptions);
 
     onChartReady: (cb: () => void) => void;
+    onDestroy: (cb: () => void) => void;
     onContextMenu: (
       cb: (unixtime: number, price: number) => ContextMenuItem[],
     ) => void;
