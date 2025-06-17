@@ -8,6 +8,7 @@ import { RMV } from "@/components/chart/indicators/rmv";
 import { RSLine } from "@/components/chart/indicators/rs_line";
 import { PriceVolume } from "@/components/chart/indicators/price_volume";
 import { RME } from "@/components/chart/indicators/rme";
+import { MSwing } from "@/components/chart/indicators/mswing";
 
 export function getIndicators(PineJS: PineJS): Promise<CustomIndicator[]> {
   // eslint-disable-next-line
@@ -22,5 +23,6 @@ export function getIndicators(PineJS: PineJS): Promise<CustomIndicator[]> {
     RME(PineJS),
     RSLine(PineJS),
     PriceVolume(PineJS),
+    MSwing(PineJS),
   ]);
 }
