@@ -3048,6 +3048,36 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     cellDataType: "number",
     context: { category: "Technicals" },
   },
+  {
+    field: "momentum_acc_5D_rating",
+    headerName: "Mom Acc Rating 5D",
+    cellDataType: "number",
+    context: { category: "Technicals" },
+  },
+  {
+    field: "momentum_acc_10D_rating",
+    headerName: "Mom Acc Rating 10D",
+    cellDataType: "number",
+    context: { category: "Technicals" },
+  },
+  {
+    field: "momentum_acc_15D_rating",
+    headerName: "Mom Acc Rating 15D",
+    cellDataType: "number",
+    context: { category: "Technicals" },
+  },
+  {
+    field: "momentum_acc_20D_rating",
+    headerName: "Mom Acc Rating 20D",
+    cellDataType: "number",
+    context: { category: "Technicals" },
+  },
+  {
+    field: "momentum_acc_21D_rating",
+    headerName: "Mom Acc Rating 21D",
+    cellDataType: "number",
+    context: { category: "Technicals" },
+  },
 
   // ##########################  Technical  ##########################
 
