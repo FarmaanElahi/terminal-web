@@ -11,7 +11,7 @@ export default function Page() {
   return (
     <GroupSymbolProvider def={{ 0: q.get("symbol") ?? "NSE:NIFTY" }}>
       <GrouperProvider group={0}>
-        <Chart features={{ enableSearch: true, enableWatchlist: true }} />
+        <Chart />
       </GrouperProvider>
     </GroupSymbolProvider>
   );
