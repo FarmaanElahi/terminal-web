@@ -40,6 +40,7 @@ import IWatchListApi = TradingView.IWatchListApi;
 interface ChartProps extends HTMLAttributes<HTMLDivElement> {
   layoutId?: string;
   onLayoutChange?: (id: string) => void;
+  features?: TVChartOptions["features"];
 }
 
 interface TVChartOptions {
@@ -51,10 +52,16 @@ interface TVChartOptions {
   onLayoutChange?: (layout: string) => void;
   features?: {
     enableWatchlist?: boolean;
+    enableSearch?: boolean;
   };
 }
 
-export function Chart({ layoutId, onLayoutChange, ...props }: ChartProps) {
+export function Chart({
+  layoutId,
+  onLayoutChange,
+  features,
+  ...props
+}: ChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(
     null,
   ) as RefObject<HTMLDivElement>;
@@ -83,6 +90,7 @@ export function Chart({ layoutId, onLayoutChange, ...props }: ChartProps) {
     symbol,
     theme: chartTheme,
     showAlertBuilder: (p) => setShowAlert(p),
+    features,
   });
 
   useTVAlertOnChart(widget, (a) => {
@@ -129,7 +137,7 @@ function useTVChart({
   showAlertBuilder,
   layoutId,
   onLayoutChange,
-  features = { enableWatchlist: true },
+  features,
 }: TVChartOptions) {
   const widgetRef = useRef<TradingView.widget | null>(null);
   const [widget, setWidget] = useState<TradingView.widget | null>(null);
@@ -520,6 +528,12 @@ function getTVChartConfig({
 
   if (features?.enableWatchlist) {
     option.widgetbar = { watchlist: true };
+  }
+  if (features?.enableSearch) {
+    option.disabled_features =
+      option.disabled_features?.filter(
+        (f) => !["symbol_search_hot_key", "header_symbol_search"].includes(f),
+      ) ?? [];
   }
 
   return option;
