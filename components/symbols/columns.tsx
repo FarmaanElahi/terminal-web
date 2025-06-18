@@ -3036,6 +3036,18 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     cellDataType: "number",
     context: { category: "Technicals" },
   },
+  {
+    field: "momentum",
+    headerName: "Momentum",
+    cellDataType: "number",
+    context: { category: "Technicals" },
+  },
+  {
+    field: "momentum_rating",
+    headerName: "Momentum Rating",
+    cellDataType: "number",
+    context: { category: "Technicals" },
+  },
 
   // ##########################  Technical  ##########################
 
