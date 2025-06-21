@@ -76,6 +76,7 @@ const INDEX_MAPPINGS: Record<string, string> = {
   "NSE:CNXPSUBANK": "NSE_INDEX|Nifty PSU Bank",
   "NSE:CNXPHARMA": "NSE_INDEX|Nifty Pharma",
   "NSE:NIFTYJR": "NSE_INDEX|Nifty Next 50",
+  "NSE:NIFTY_IND_DEFENCE": "NSE_INDEX|Nifty Ind Defence",
 };
 
 export function upstoxProfile(access_token: string) {
