@@ -40,7 +40,6 @@ import {
   useCreateScanner,
   useDeleteScanner,
   useScanners,
-  useScreens,
   useSymbolSearch,
   useUpdateScanner,
 } from "@/lib/state/symbol";
@@ -250,7 +249,7 @@ export function CreateScanner({
     }
   }, [defaultState, open, all]);
 
-  const { data: screeners = [] } = useScreens();
+  const { data: screeners = [] } = useScanners(["screener"]);
 
   const handleSubmit = () => {
     if (defaultState?.id && newMode === "update") {
