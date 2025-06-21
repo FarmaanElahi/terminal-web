@@ -145,6 +145,12 @@ export const defaultColumns: Array<ColDef<Symbol>> = [
     cellRenderer: SymbolCell,
   },
   {
+    field: "shariah_compliant",
+    headerName: "Shariah Compliant",
+    context: { category: "General" },
+    cellDataType: "text",
+  },
+  {
     field: "isin",
     headerName: "ISIN",
     context: { category: "General" },
